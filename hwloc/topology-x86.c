@@ -39,6 +39,10 @@ struct hwloc_x86_backend_data_s {
   char *src_cpuiddump_path;
   int is_knl;
   int is_hybrid;
+  int found_die_ids;
+  int found_unit_ids;
+  int found_module_ids;
+  int found_tile_ids;
 };
 
 /************************************
@@ -481,7 +485,7 @@ static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_
 }
 
 /* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
-static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, struct cpuiddump *src_cpuiddump)
+static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags, struct cpuiddump *src_cpuiddump)
 {
   unsigned apic_id, nodes_per_proc = 0;
   unsigned eax, ebx, ecx, edx;
@@ -511,6 +515,7 @@ static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, 
     unsigned cores_per_unit;
     /* coreid was obtained from read_amd_cores_legacy() earlier */
     infos->ids[UNIT] = ebx & 0xff;
+    data->found_unit_ids = 1;
     cores_per_unit = ((ebx >> 8) & 0xff) + 1;
     hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
     /* coreid and unitid are package-wide (core 0-15 and unit 0-7 on 16-core 2-NUMAnode processor).
@@ -526,7 +531,7 @@ static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, 
 }
 
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration) */
-static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
+static void read_intel_cores_exttopoenum(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
@@ -573,12 +578,15 @@ static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, 
 	  infos->ids[CORE] = id;
 	  break;
 	case 3:
+          data->found_module_ids = 1;
 	  infos->ids[MODULE] = id;
 	  break;
 	case 4:
+          data->found_tile_ids = 1;
 	  infos->ids[TILE] = id;
 	  break;
 	case 5:
+          data->found_die_ids = 1;
 	  infos->ids[DIE] = id;
 	  break;
         case 6:
@@ -736,21 +744,21 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      *
      * Only needed when x2apic supported if NUMA nodes are needed.
      */
-    read_amd_cores_topoext(infos, flags, src_cpuiddump);
+    read_amd_cores_topoext(data, infos, flags, src_cpuiddump);
   }
 
   if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
-    read_intel_cores_exttopoenum(infos, 0x1f, src_cpuiddump);
+    read_intel_cores_exttopoenum(data, infos, 0x1f, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == zhaoxin)
 	     && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
-    read_intel_cores_exttopoenum(infos, 0x0b, src_cpuiddump);
+    read_intel_cores_exttopoenum(data, infos, 0x0b, src_cpuiddump);
   }
 
   /**************************************
@@ -1051,21 +1059,27 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
     if (fulldiscovery) {
-      /* Look for AMD Compute units inside packages */
-      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
-			   UNIT, "Compute Unit",
-			   HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT, 0);
-      /* Look for Intel Modules inside packages */
-      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
-			   MODULE, "Module",
-			   HWLOC_GROUP_KIND_INTEL_MODULE, 0);
-      /* Look for Intel Tiles inside packages */
-      hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-      hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
-			   TILE, "Tile",
-			   HWLOC_GROUP_KIND_INTEL_TILE, 0);
+      if (data->found_unit_ids) {
+        /* Look for AMD Compute units inside packages */
+        hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+        hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+                             UNIT, "Compute Unit",
+                             HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT, 0);
+      }
+      if (data->found_module_ids) {
+        /* Look for Intel Modules inside packages */
+        hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+        hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+                             MODULE, "Module",
+                             HWLOC_GROUP_KIND_INTEL_MODULE, 0);
+      }
+      if (data->found_tile_ids) {
+        /* Look for Intel Tiles inside packages */
+        hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+        hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+                             TILE, "Tile",
+                             HWLOC_GROUP_KIND_INTEL_TILE, 0);
+      }
 
       /* Look for unknown objects */
       if (infos[one].otherids) {
@@ -1099,7 +1113,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
     }
   }
 
-  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
+  if (data->found_die_ids
+      && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_DIE)) {
     /* Look for Intel Dies inside packages */
     if (fulldiscovery) {
       hwloc_bitmap_t die_cpuset;
@@ -1838,6 +1853,10 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   data->apicid_set = hwloc_bitmap_alloc();
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
+  data->found_die_ids = 0;
+  data->found_unit_ids = 0;
+  data->found_module_ids = 0;
+  data->found_tile_ids = 0;
 
   src_cpuiddump_path = getenv("HWLOC_CPUID_PATH");
   if (src_cpuiddump_path) {
