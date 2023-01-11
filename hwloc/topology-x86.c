@@ -542,7 +542,11 @@ static void read_intel_cores_exttopoenum(struct hwloc_x86_backend_data_s *data, 
     ecx = level;
     eax = leaf;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-    if (!eax && !ebx)
+    /* Intel specifies that 0x0b/0x1f return 0 in ecx[8:15] and 0 in eax/ebx for invalid subleaves
+     * however AMD only says that 0x0b returns 0 in ebx[0:15].
+     * So use the common condition: 0 in ebx[0:15].
+     */
+    if (!(ebx & 0xffff))
       break;
     apic_packageshift = eax & 0x1f;
   }
@@ -555,7 +559,7 @@ static void read_intel_cores_exttopoenum(struct hwloc_x86_backend_data_s *data, 
 	ecx = level;
 	eax = leaf;
 	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-	if (!eax && !ebx)
+	if (!(ebx & 0xffff))
 	  break;
 	apic_nextshift = eax & 0x1f;
 	apic_type = (ecx & 0xff00) >> 8;
