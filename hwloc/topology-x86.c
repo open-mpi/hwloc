@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2022 Inria.  All rights reserved.
+ * Copyright © 2010-2023 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -314,7 +314,7 @@ static void read_amd_caches_topoext(struct procinfo *infos, struct cpuiddump *sr
   /* the code below doesn't want any other cache yet */
   assert(!infos->numcaches);
 
-  for (cachenum = 0; ; cachenum++) {
+  for (cachenum = 0; cachenum<16 /* guard */; cachenum++) {
     eax = 0x8000001d;
     ecx = cachenum;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
@@ -325,7 +325,7 @@ static void read_amd_caches_topoext(struct procinfo *infos, struct cpuiddump *sr
 
   cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
   if (cache) {
-    for (cachenum = 0; ; cachenum++) {
+    for (cachenum = 0; cachenum<16 /* guard */; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
       eax = 0x8000001d;
       ecx = cachenum;
@@ -378,7 +378,7 @@ static void read_intel_caches(struct hwloc_x86_backend_data_s *data, struct proc
   unsigned cachenum;
   struct cacheinfo *cache;
 
-  for (cachenum = 0; ; cachenum++) {
+  for (cachenum = 0; cachenum<16 /* guard */; cachenum++) {
     eax = 0x04;
     ecx = cachenum;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
@@ -400,7 +400,7 @@ static void read_intel_caches(struct hwloc_x86_backend_data_s *data, struct proc
     infos->cache = tmpcaches;
     cache = &infos->cache[oldnumcaches];
 
-    for (cachenum = 0; ; cachenum++) {
+    for (cachenum = 0; cachenum<16 /* guard */; cachenum++) {
       unsigned long linesize, linepart, ways, sets;
       eax = 0x04;
       ecx = cachenum;
@@ -532,7 +532,7 @@ static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, 
   unsigned eax, ebx, ecx = 0, edx;
   int apic_packageshift = 0;
 
-  for (level = 0; ; level++) {
+  for (level = 0; level<32 /* guard */; level++) {
     ecx = level;
     eax = leaf;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
@@ -545,7 +545,7 @@ static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, 
     infos->otherids = malloc(level * sizeof(*infos->otherids));
     if (infos->otherids) {
       infos->levels = level;
-      for (level = 0; ; level++) {
+      for (level = 0; level<32 /* guard */; level++) {
 	ecx = level;
 	eax = leaf;
 	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
