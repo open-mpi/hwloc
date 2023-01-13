@@ -113,13 +113,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0x4 = Caches on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x4) {
-    for(i=0; ; i++) {
+    for(i=0; i<256; i++) {
       regs[0] = 0x4; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0x1f))
 	/* invalid, no more caches */
 	break;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256\n");
   }
 
   /* 0x5 = Monitor/mwait */
@@ -144,10 +146,12 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     if (regs[1] & (1<<2))
       has_intel_sgx = 1;
     max = regs[0];
-    for(i=1; i<=max; i++) {
+    for(i=1; i<=max && i<256; i++) {
       regs[0] = 0x7; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256 even if max=%u\n", max);
   }
 
   /* 0x9 = DCA on Intel ; Reserved on AMD */
@@ -164,13 +168,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0xb = Extended Topology Enumeration */
   if (has_intel_x2apic && highest_cpuid >= 0xb) {
-    for(i=0; ; i++) {
+    for(i=0; i<256; i++) {
       regs[0] = 0xb; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[2] & 0xff00))
 	/* invalid, no more levels */
 	break;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256\n");
   }
 
   /* 0xd = Extended state enumeration */
@@ -229,13 +235,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
     regs[0] = 0x12; regs[2] = 1;
     dump_one_cpuid(output, regs, 0x5);
-    for(i=2; ; i++) {
+    for(i=2; i<256; i++) {
       regs[0] = 0x12; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0xf))
 	/* invalid, no more subleaves */
 	break;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256\n");
   }
 
   /* 0x14 = Processor trace enumeration on Intel ; Reserved on AMD */
@@ -265,10 +273,12 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
     maxsocid = regs[0];
     if (maxsocid >= 3) {
-      for(i=1; i<=maxsocid; i++) {
+      for(i=1; i<=maxsocid && i<256; i++) {
 	regs[0] = 0x17; regs[2] = i;
 	dump_one_cpuid(output, regs, 0x5);
       }
+      if (i == 256)
+        fprintf(output, "# stopped at ecx=256 even if maxsocid=%u\n", maxsocid);
     }
   }
 
@@ -278,7 +288,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     regs[0] = 0x18; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
     max = regs[0];
-    for(i=1; i<=max; i++) {
+    for(i=1; i<=max && i<256; i++) {
       regs[0] = 0x18; regs[2] = i;
       regs[3] = 0; /* mark as invalid in case the cpuid call doesn't do anything */
       dump_one_cpuid(output, regs, 0x5);
@@ -286,6 +296,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 	/* invalid, but it doesn't mean the next subleaf will be invalid */
         continue;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256 even if max=%u\n", max);
   }
 
   /* 0x19 = Key Locker Leaf on Intel ; Reserved on AMD */
@@ -302,12 +314,14 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0x1b = PCONFIG Information on Intel ; Reserved on AMD */
   if (has_intel_pconfig && highest_cpuid >= 0x1b) {
-    for(i=0; ; i++) {
+    for(i=0; i<256; i++) {
       regs[0] = 0x1b; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0xfff))
 	break;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256\n");
   }
 
   /* 0x1c = Last Branch Records Information on Intel ; Reserved on AMD */
@@ -332,13 +346,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0x1f = V2 Extended Topology Enumeration on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x1f) {
-    for(i=0; ; i++) {
+    for(i=0; i<256; i++) {
       regs[0] = 0x1f; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[2] & 0xff00))
 	/* invalid, no more levels */
 	break;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256\n");
   }
 
   /* 0x20 = Processor History Reset on Intel ; Reserved on AMD */
@@ -439,13 +455,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0x8000001d = Cache properties on AMD ; Reserved on Intel */
   if (highest_ext_cpuid >= 0x8000001d) {
-    for(i=0; ; i++) {
+    for(i=0; i<256; i++) {
       regs[0] = 0x8000001d; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
       if (!(regs[0] & 0x1f))
 	/* no such cache, no more cache */
 	break;
     }
+    if (i == 256)
+      fprintf(output, "# stopped at ecx=256\n");
   }
 
   /* 0x8000001e = Topoext on AMD ; Reserved on Intel */
