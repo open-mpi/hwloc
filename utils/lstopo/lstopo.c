@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -1433,7 +1433,8 @@ main (int argc, char *argv[])
         opt = 1;
       } else {
 	if (filename) {
-	  fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
+	  fprintf (stderr, "Unrecognized option `%s', cannot be used as output filename (`%s' already given).\n",
+                   argv[0], filename);
 	  goto out_usagefailure;
 	} else
 	  filename = argv[0];
