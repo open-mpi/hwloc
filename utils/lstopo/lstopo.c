@@ -1530,22 +1530,26 @@ main (int argc, char *argv[])
 #endif
     if (getenv("DISPLAY") && !want_console) {
       output_func = output_x11;
+      output_format = LSTOPO_OUTPUT_WINDOW;
     } else
 #endif /* LSTOPO_HAVE_X11 */
 #ifdef HWLOC_WIN_SYS
     {
       output_func = output_windows;
+      output_format = LSTOPO_OUTPUT_WINDOW;
     }
 #endif
 #endif /* !LSTOPO_HAVE_GRAPHICS */
 #if !defined HWLOC_WIN_SYS || !defined LSTOPO_HAVE_GRAPHICS
     {
       output_func = output_console;
+      output_format = LSTOPO_OUTPUT_CONSOLE;
     }
 #endif
 #ifdef ANDROID
     setJNIEnv();
     output_func = output_android;
+    output_format = LSTOPO_OUTPUT_WINDOW;
 #endif
     }
     break;
@@ -1601,6 +1605,7 @@ main (int argc, char *argv[])
   case LSTOPO_OUTPUT_SVG:
   case LSTOPO_OUTPUT_CAIROSVG:
     output_func = output_cairosvg;
+    output_format = LSTOPO_OUTPUT_CAIROSVG;
     break;
 # endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
@@ -1609,6 +1614,7 @@ main (int argc, char *argv[])
 #endif
   case LSTOPO_OUTPUT_NATIVESVG:
     output_func = output_nativesvg;
+    output_format = LSTOPO_OUTPUT_NATIVESVG;
     break;
   case LSTOPO_OUTPUT_XML:
     output_func = output_xml;
