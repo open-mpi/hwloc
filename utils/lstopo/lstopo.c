@@ -707,6 +707,30 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
     return LSTOPO_OUTPUT_ERROR;
 }
 
+static const char *
+output_format_name(enum output_format format)
+{
+  switch (format) {
+  case LSTOPO_OUTPUT_DEFAULT: return "default";
+  case LSTOPO_OUTPUT_WINDOW: return "window";
+  case LSTOPO_OUTPUT_CONSOLE: return "console";
+  case LSTOPO_OUTPUT_SYNTHETIC: return "synthetic";
+  case LSTOPO_OUTPUT_ASCII: return "ascii";
+  case LSTOPO_OUTPUT_TIKZ: return "tikz";
+  case LSTOPO_OUTPUT_FIG: return "fig";
+  case LSTOPO_OUTPUT_PNG: return "png";
+  case LSTOPO_OUTPUT_PDF: return "pdf";
+  case LSTOPO_OUTPUT_PS: return "ps";
+  case LSTOPO_OUTPUT_SVG: return "svg";
+  case LSTOPO_OUTPUT_CAIROSVG: return "cairosvg";
+  case LSTOPO_OUTPUT_NATIVESVG: return "nativesvg";
+  case LSTOPO_OUTPUT_XML: return "xml";
+  case LSTOPO_OUTPUT_SHMEM: return "shmem";
+  case LSTOPO_OUTPUT_ERROR: return "error";
+  }
+  abort();
+}
+
 /****************************************************
  * Store filters during parsing and apply them later
  */
@@ -1451,8 +1475,8 @@ main (int argc, char *argv[])
   /* if output is -.format but --of was given, ignore .format */
   if (output_format != LSTOPO_OUTPUT_DEFAULT
       && filename && filename[0] == '-' && filename[1] == '.') {
-    fprintf(stderr, "Ignoring extension in stdout output `%s' since --of was also given.\n",
-            filename);
+    fprintf(stderr, "Ignoring extension in stdout output `%s' since --of was also given format `%s'.\n",
+            filename, output_format_name(output_format));
     filename = "-"; /* to simplify things later */
   }
 
