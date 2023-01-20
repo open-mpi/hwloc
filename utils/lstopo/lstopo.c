@@ -64,14 +64,9 @@ extern void setJNIEnv();
 
 FILE *open_output(const char *filename, int overwrite)
 {
-  const char *extn;
   struct stat st;
 
   if (!filename || !strcmp(filename, "-"))
-    return stdout;
-
-  extn = strrchr(filename, '.');
-  if (filename[0] == '-' && extn == filename + 1)
     return stdout;
 
   if (!stat(filename, &st) && !overwrite) {
@@ -1453,16 +1448,27 @@ main (int argc, char *argv[])
    * Configure the output
    */
 
+  /* if output is -.format but --of was given, ignore .format */
+  if (output_format != LSTOPO_OUTPUT_DEFAULT
+      && filename && filename[0] == '-' && filename[1] == '.') {
+    fprintf(stderr, "Ignoring extension in stdout output `%s' since --of was also given.\n",
+            filename);
+    filename = "-"; /* to simplify things later */
+  }
+
   /* if the output format wasn't enforced, look at the filename */
   if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
     if (!strcmp(filename, "-")
 	|| !strcmp(filename, "/dev/stdout")) {
       output_format = LSTOPO_OUTPUT_CONSOLE;
+      filename = "-"; /* to simplify things later */
     } else {
       char *dot = strrchr(filename, '.');
-      if (dot)
+      if (dot) {
         output_format = parse_output_format(dot+1, callname);
-      else {
+        if (dot == filename+1 && filename[0] == '-' && output_format != LSTOPO_OUTPUT_ERROR)
+          filename = "-"; /* to simplify things later */
+      } else {
 	fprintf(stderr, "Cannot infer output type for file `%s' without any extension, using default output.\n", filename);
 	filename = NULL;
       }
