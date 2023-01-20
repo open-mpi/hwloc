@@ -1808,6 +1808,11 @@ main (int argc, char *argv[])
   loutput.depth = hwloc_topology_get_depth(topology);
   loutput.file = NULL;
 
+  if (filename && output_format == LSTOPO_OUTPUT_WINDOW) {
+    fprintf(stderr, "Output filename `%s' ignored when using graphical window output.\n",
+            filename);
+  }
+
   if (output_format != LSTOPO_OUTPUT_XML) {
     /* there might be some xml-imported userdata in objects, add lstopo-specific userdata in front of them */
     lstopo_populate_userdata(hwloc_get_root_obj(topology));
