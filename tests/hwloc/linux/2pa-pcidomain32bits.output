@@ -8,7 +8,7 @@ Machine (P#0 total=2004MiB DMIProductName="CloudStack KVM Hypervisor" DMIProduct
             PU L#0 (P#0)
     HostBridge L#0 (buses=0000:[00-00])
       PCI L#0 (busid=0000:00:01.1 id=8086:7010 class=0101(IDE) PCISlot=1)
-        Block(Removable Media Device) L#0 (Size=1048575 SectorSize=512 LinuxDeviceID=11:0 Model=QEMU_DVD-ROM Revision=1.5.3 SerialNumber=QM00003) "sr0"
+        Storage(Removable Media Device) L#0 (Size=1048575 SectorSize=512 LinuxDeviceID=11:0 Model=QEMU_DVD-ROM Revision=1.5.3 SerialNumber=QM00003) "sr0"
       PCI L#1 (busid=0000:00:02.0 id=1013:00b8 class=0300(VGA) PCISlot=2)
       PCI L#2 (busid=0000:00:03.0 id=1af4:1000 class=0200(Ethernet) PCISlot=3)
         Network L#1 (Address=06:7a:4c:00:00:22) "ens3"
@@ -20,7 +20,7 @@ Machine (P#0 total=2004MiB DMIProductName="CloudStack KVM Hypervisor" DMIProduct
             PU L#1 (P#1)
     HostBridge L#1 (buses=10000:[00-00])
       PCI L#3 (busid=10000:00:04.0 id=1af4:1001 class=0100(SCSI))
-        Block L#2 (Size=20971520 SectorSize=512 LinuxDeviceID=254:0) "vda"
+        Storage L#2 (Size=20971520 SectorSize=512 LinuxDeviceID=254:0) "vda"
 depth 0:           1 Machine (type #0)
  depth 1:          2 Package (type #1)
   depth 2:         2 L2Cache (type #5)

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -337,7 +337,8 @@ typedef enum hwloc_obj_bridge_type_e {
 
 /** \brief Type of a OS device. */
 typedef enum hwloc_obj_osdev_type_e {
-  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device, or non-volatile memory device.
+  HWLOC_OBJ_OSDEV_STORAGE,	/**< \brief Operating system storage device (e.g. block),
+                                  * or non-volatile memory device.
 				  * For instance "sda" or "dax2.0" on Linux. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
 				  * For instance ":0.0" for a GL display,

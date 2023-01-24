@@ -30,6 +30,7 @@ Version 3.0.0
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
+  + "Block" OS devices are now "Storage".
 * Tools
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.

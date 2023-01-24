@@ -1524,7 +1524,7 @@ Here is a list of OS device objects commonly created by hwloc
 components when I/O discovery is enabled and supported.
 
 <ul>
-<li>Hard disks or non-volatile memory devices (::HWLOC_OBJ_OSDEV_BLOCK)
+<li>Hard disks or non-volatile memory devices (::HWLOC_OBJ_OSDEV_STORAGE)
  <ul>
  <li><em>sda</em> or <em>dax2.0</em> (Linux component)</li>
  </ul>
@@ -1686,7 +1686,7 @@ Machine (24GB total)
           Net "eth1"
       PCIBridge
         PCI 03:00.0 (RAID)
-          Block "sda"
+          Storage "sda"
       PCIBridge
         PCI 04:03.0 (VGA)
       PCI 00:1f.2 (IDE)
@@ -1808,7 +1808,7 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 <li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
 <li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
 <li>OpenFabrics: subtype <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
-<li>Block: subtype <tt>Disk</tt>, <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory), <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
+<li>Storage: subtype <tt>Disk</tt>, <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory), <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
 </ul>
 </li>
 <li>L3 Caches:
@@ -1982,14 +1982,14 @@ A Solaris-specific general processor type name, such as "i86pc".
 These info attributes are attached to OS device objects specified in parentheses.
 
 <dl>
-<dt>Vendor, Model, Revision, SerialNumber, Size, SectorSize (Block OS devices)</dt>
+<dt>Vendor, Model, Revision, SerialNumber, Size, SectorSize (Storage OS devices)</dt>
 <dd>The vendor and model names, revision, serial number, size (in KiB = 1024 bytes)
 and SectorSize (in bytes).
 </dd>
-<dt>LinuxDeviceID (Block OS devices)</dt>
+<dt>LinuxDeviceID (Storage OS devices)</dt>
 <dd>The major/minor device number such as 8:0 of Linux device.
 </dd>
-<dt>CXLRAMSize, CXLPMEMSize (CXL Memory Block OS devices)</dt>
+<dt>CXLRAMSize, CXLPMEMSize (CXL Memory Storage OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
  in a CXL Type-3 device	     .
  Sizes are in KiB (1024 bytes).
