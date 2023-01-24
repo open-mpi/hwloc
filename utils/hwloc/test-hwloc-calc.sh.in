@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -161,14 +161,14 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --single
   echo
   echo "# Singlified PU list"
-  $calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --single --pulist
+  $calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --single -I pu
   echo
 
   echo "# PU list with physical output"
-  $calc --if synthetic --input "node:4 core:4 pu:4" pu:33-37 --pulist --po
+  $calc --if synthetic --input "node:4 core:4 pu:4" pu:33-37 -I pu --po
   echo
   echo "# NUMA Node list of physical output and different separator"
-  $calc --if synthetic --input "node:4 core:4 pu:4" pu:30-37 --nodelist --po --sep foo
+  $calc --if synthetic --input "node:4 core:4 pu:4" pu:30-37 -I node --po --sep foo
   echo
 
   echo "# Manipulating NUMA Nodes with nodesets"
@@ -178,7 +178,7 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" --no pu:63
   echo
   echo "# Converting NUMA Nodes from logical to physical"
-  $calc --if synthetic --input "node:4 core:4 pu:4" --ni 0x5 --nodelist --po
+  $calc --if synthetic --input "node:4 core:4 pu:4" --ni 0x5 -I node --po
   echo
 
   echo "# Physical output of NUMA Nodes when out-of-order in the topology"

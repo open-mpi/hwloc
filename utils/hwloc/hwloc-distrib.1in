@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2022 Inria.  All rights reserved.
+.\" Copyright © 2010-2023 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-DISTRIB "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -172,7 +172,7 @@ Each output line may be converted independently with hwloc-calc:
 To convert the output into a list of processors that may be passed to
 dplace -c inside a mpirun command line:
 
-    $ hwloc-distrib 4 --single | xargs hwloc-calc --pulist
+    $ hwloc-distrib 4 --single | xargs hwloc-calc -I list
     0,8,4,16
 .
 .

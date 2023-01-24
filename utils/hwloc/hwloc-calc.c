@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -543,17 +543,7 @@ int main(int argc, char *argv[])
         opt = 1;
         goto next;
       }
-      if (!strcasecmp(argv[0], "--pulist") || !strcmp(argv[0], "--proclist")) {
-	/* backward compat with 1.0 */
-	intersecttype = "pu";
-        goto next;
-      }
-      if (!strcmp(argv[0], "--nodelist")) {
-	/* backward compat with 1.0 */
-	intersecttype = "numa";
-        goto next;
-      }
-      if (!strcmp(argv[0], "--largest")  || !strcmp(argv[0], "--objects") /* backward compat with 1.0 */) {
+      if (!strcmp(argv[0], "--largest")) {
 	showobjs = 1;
         goto next;
       }
