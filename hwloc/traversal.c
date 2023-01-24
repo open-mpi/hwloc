@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -376,7 +376,7 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 	     || hwloc__type_match(string, "memory-side cache", 8)) {
     type = HWLOC_OBJ_MEMCACHE;
   } else if (hwloc__type_match(string, "package", 2)
-	     || hwloc__type_match(string, "socket", 2)) { /* backward compat with v1.10 */
+	     || hwloc__type_match(string, "socket", 2)) { /* for convenience (and backward compat with v1.10) */
     type = HWLOC_OBJ_PACKAGE;
   } else if (hwloc__type_match(string, "die", 2)) {
     type = HWLOC_OBJ_DIE;
