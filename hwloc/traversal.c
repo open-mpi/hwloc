@@ -351,6 +351,9 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
              || hwloc__type_match(string, "block", 4)) { /* backward compat with v2.x */
     type = HWLOC_OBJ_OS_DEVICE;
     ostype = HWLOC_OBJ_OSDEV_STORAGE;
+  } else if (hwloc__type_match(string, "memory", 3)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+    ostype = HWLOC_OBJ_OSDEV_MEMORY;
   } else if (hwloc__type_match(string, "network", 3)) {
     type = HWLOC_OBJ_OS_DEVICE;
     ostype = HWLOC_OBJ_OSDEV_NETWORK;
@@ -558,6 +561,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_OS_DEVICE:
     switch (obj->attr->osdev.type) {
     case HWLOC_OBJ_OSDEV_STORAGE: return hwloc_snprintf(string, size, "Storage");
+    case HWLOC_OBJ_OSDEV_MEMORY: return hwloc_snprintf(string, size, longnames ? "Memory" : "Mem");
     case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, longnames ? "Network" : "Net");
     case HWLOC_OBJ_OSDEV_OPENFABRICS: return hwloc_snprintf(string, size, "OpenFabrics");
     case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");

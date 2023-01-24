@@ -338,8 +338,7 @@ typedef enum hwloc_obj_bridge_type_e {
 /** \brief Type of a OS device. */
 typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_STORAGE,	/**< \brief Operating system storage device (e.g. block),
-                                  * or non-volatile memory device.
-				  * For instance "sda" or "dax2.0" on Linux. */
+				  * For instance "sda" on Linux. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
 				  * For instance ":0.0" for a GL display,
 				  * "card0" for a Linux DRM device. */
@@ -351,9 +350,12 @@ typedef enum hwloc_obj_osdev_type_e {
 				  * or "bxi0" Atos/Bull BXI HCA on Linux. */
   HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
 				  * For instance the "dma0chan0" DMA channel on Linux. */
-  HWLOC_OBJ_OSDEV_COPROC	/**< \brief Operating system co-processor device.
+  HWLOC_OBJ_OSDEV_COPROC,	/**< \brief Operating system co-processor device.
 				  * For instance "opencl0d0" for a OpenCL device,
 				  * "cuda0" for a CUDA device. */
+  HWLOC_OBJ_OSDEV_MEMORY	/**< \brief Operating system memory device
+                                 * (e.g. DAX file for non-volatile or high-bandwidth memory),
+				  * For instance "dax2.0" on Linux. */
 } hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types

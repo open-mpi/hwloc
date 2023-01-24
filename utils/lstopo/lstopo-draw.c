@@ -1344,6 +1344,15 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
 	  hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
 	}
+
+      } else if (HWLOC_OBJ_OSDEV_MEMORY == obj->attr->osdev.type) {
+	/* Memory */
+	const char *value;
+	value = hwloc_obj_get_info_by_name(obj, "Size");
+	if (value) {
+	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+	  hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
+	}
 	value = hwloc_obj_get_info_by_name(obj, "CXLRAMSize");
 	if (value) {
 	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;

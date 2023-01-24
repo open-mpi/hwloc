@@ -6131,7 +6131,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
       if (!parent)
 	continue;
 
-      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_STORAGE, dirent->d_name);
+      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_MEMORY, dirent->d_name);
 
       annotate_dax_parent(obj, dirent->d_name, root_fd);
 
@@ -6642,7 +6642,7 @@ hwloc_linuxfs_lookup_cxlmem(struct hwloc_backend *backend, unsigned osdev_flags)
       if (!parent)
 	continue;
 
-      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_STORAGE, dirent->d_name);
+      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_MEMORY, dirent->d_name);
 
       hwloc_linuxfs_cxlmem_fillinfos(root_fd, obj, path);
     }

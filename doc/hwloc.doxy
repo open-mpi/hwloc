@@ -1524,11 +1524,15 @@ Here is a list of OS device objects commonly created by hwloc
 components when I/O discovery is enabled and supported.
 
 <ul>
-<li>Hard disks or non-volatile memory devices (::HWLOC_OBJ_OSDEV_STORAGE)
+<li>Hard disks, NVMe drives, etc. (::HWLOC_OBJ_OSDEV_STORAGE)
  <ul>
- <li><em>sda</em> or <em>dax2.0</em> (Linux component)</li>
+ <li><em>sda</em> or <em>nvme0n1</em> (Linux component)</li>
  </ul>
 </li>
+<li>Non-volatile, special-purpose or CXL memory devices (::HWLOC_OBJ_OSDEV_MEMORY)
+ <ul>
+ <li><em>dax2.0</em> or <em>mem0</em> (Linux component)</li>
+ </ul>
 <li>Network interfaces (::HWLOC_OBJ_OSDEV_NETWORK)
  <ul>
  <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
@@ -1808,7 +1812,8 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 <li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
 <li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
 <li>OpenFabrics: subtype <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
-<li>Storage: subtype <tt>Disk</tt>, <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory), <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
+<li>Storage: subtype <tt>Disk</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
+<li>Memory: <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory).</li>
 </ul>
 </li>
 <li>L3 Caches:
@@ -1989,7 +1994,7 @@ and SectorSize (in bytes).
 <dt>LinuxDeviceID (Storage OS devices)</dt>
 <dd>The major/minor device number such as 8:0 of Linux device.
 </dd>
-<dt>CXLRAMSize, CXLPMEMSize (CXL Memory Storage OS devices)</dt>
+<dt>CXLRAMSize, CXLPMEMSize (CXL Memory OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
  in a CXL Type-3 device	     .
  Sizes are in KiB (1024 bytes).
@@ -2122,11 +2127,11 @@ These info attributes are attached to objects specified in parentheses.
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
 memory region as a volatile NUMA node.
 </dd>
-<dt>DAXType (NUMA Nodes or DAX OS devices)</dt>
+<dt>DAXType (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The type of memory exposed in a Linux DAX device or in the corresponding NUMA node,
 either "NVM" (non-volatile memory) or "SPM" (specific-purpose memory).
 </dd>
-<dt>DAXParent (NUMA Nodes or DAX OS devices)</dt>
+<dt>DAXParent (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>
 A string describing the Linux sysfs hierarchy that exposes the DAX device,
 for instance containing "hmem1" for specific-purpose memory or "ndbus0" for NVDIMMs.
