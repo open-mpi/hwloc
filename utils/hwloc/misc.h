@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -138,36 +138,6 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
       exit(EXIT_FAILURE);
     }
     *input_formatp = hwloc_utils_parse_input_format (argv[1], callname);
-    *consumed_opts = 1;
-    return 1;
-  }
-
-  /* backward compat with 1.0 */
-  else if (!strcmp (argv[0], "--synthetic")) {
-    if (argc <= 1) {
-      usage (callname, stderr);
-      exit(EXIT_FAILURE);
-    }
-    *inputp = argv[1];
-    *input_formatp = HWLOC_UTILS_INPUT_SYNTHETIC;
-    *consumed_opts = 1;
-    return 1;
-  } else if (!strcmp (argv[0], "--xml")) {
-    if (argc <= 1) {
-      usage (callname, stderr);
-      exit(EXIT_FAILURE);
-    }
-    *inputp = argv[1];
-    *input_formatp = HWLOC_UTILS_INPUT_XML;
-    *consumed_opts = 1;
-    return 1;
-  } else if (!strcmp (argv[0], "--fsys-root")) {
-    if (argc <= 1) {
-      usage (callname, stderr);
-      exit(EXIT_FAILURE);
-    }
-    *inputp = argv[1];
-    *input_formatp = HWLOC_UTILS_INPUT_FSROOT;
     *consumed_opts = 1;
     return 1;
   }
