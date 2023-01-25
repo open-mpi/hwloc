@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
-<topology version="2.0">
-  <object type="Machine" os_index="0" cpuset="0x0000905b" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000905b" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" gp_index="1">
-    <object type="NUMANode" os_index="0" cpuset="0x0000905b" complete_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2"/>
-    <object type="Package" os_index="0" cpuset="0x00001011" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3">
-      <object type="L3Cache" cpuset="0x00001011" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
-        <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
-          <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
-            <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7">
-              <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="8"/>
+<topology version="3.0">
+  <object type="Machine" os_index="0" cpuset="0x0000905b" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000905b" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" gp_index="1" id="obj1">
+    <object type="NUMANode" os_index="0" cpuset="0x0000905b" complete_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2"/>
+    <object type="Package" os_index="0" cpuset="0x00001011" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3" id="obj3">
+      <object type="L3Cache" cpuset="0x00001011" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
+        <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
+          <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" id="obj6" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
+            <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7" id="obj7">
+              <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="8" id="obj8"/>
             </object>
           </object>
         </object>
-        <object type="L2Cache" cpuset="0x00001010" complete_cpuset="0x00001010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="9" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
-          <object type="L1Cache" cpuset="0x00001010" complete_cpuset="0x00001010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="10" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
-            <object type="Core" os_index="1" cpuset="0x00001010" complete_cpuset="0x00001010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="11">
-              <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="12"/>
-              <object type="PU" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="13"/>
-            </object>
-          </object>
-        </object>
-      </object>
-    </object>
-    <object type="Package" os_index="1" cpuset="0x00000002" complete_cpuset="0x00002222" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="14">
-      <object type="L3Cache" cpuset="0x00000002" complete_cpuset="0x00002222" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="15" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
-        <object type="L2Cache" cpuset="0x00000002" complete_cpuset="0x00000202" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="16" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
-          <object type="L1Cache" cpuset="0x00000002" complete_cpuset="0x00000202" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="17" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
-            <object type="Core" os_index="0" cpuset="0x00000002" complete_cpuset="0x00000202" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="18">
-              <object type="PU" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="19"/>
+        <object type="L2Cache" cpuset="0x00001010" complete_cpuset="0x00001010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="9" id="obj9" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
+          <object type="L1Cache" cpuset="0x00001010" complete_cpuset="0x00001010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="10" id="obj10" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
+            <object type="Core" os_index="1" cpuset="0x00001010" complete_cpuset="0x00001010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="11" id="obj11">
+              <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="12" id="obj12"/>
+              <object type="PU" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="13" id="obj13"/>
             </object>
           </object>
         </object>
       </object>
     </object>
-    <object type="Package" os_index="2" cpuset="0x00000040" complete_cpuset="0x00004444" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="30">
-      <object type="L3Cache" cpuset="0x00000040" complete_cpuset="0x00004444" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="31" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
-        <object type="L2Cache" cpuset="0x00000040" complete_cpuset="0x00004040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="32" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
-          <object type="L1Cache" cpuset="0x00000040" complete_cpuset="0x00004040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="33" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
-            <object type="Core" os_index="1" cpuset="0x00000040" complete_cpuset="0x00004040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="34">
-              <object type="PU" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="35"/>
+    <object type="Package" os_index="1" cpuset="0x00000002" complete_cpuset="0x00002222" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="14" id="obj14">
+      <object type="L3Cache" cpuset="0x00000002" complete_cpuset="0x00002222" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="15" id="obj15" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
+        <object type="L2Cache" cpuset="0x00000002" complete_cpuset="0x00000202" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="16" id="obj16" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
+          <object type="L1Cache" cpuset="0x00000002" complete_cpuset="0x00000202" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="17" id="obj17" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
+            <object type="Core" os_index="0" cpuset="0x00000002" complete_cpuset="0x00000202" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="18" id="obj18">
+              <object type="PU" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="19" id="obj19"/>
             </object>
           </object>
         </object>
       </object>
     </object>
-    <object type="Package" os_index="3" cpuset="0x00008008" complete_cpuset="0x00008888" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="20">
-      <object type="L3Cache" cpuset="0x00008008" complete_cpuset="0x00008888" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="21" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
-        <object type="L2Cache" cpuset="0x00000008" complete_cpuset="0x00000808" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="22" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
-          <object type="L1Cache" cpuset="0x00000008" complete_cpuset="0x00000808" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="23" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
-            <object type="Core" os_index="0" cpuset="0x00000008" complete_cpuset="0x00000808" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="24">
-              <object type="PU" os_index="3" cpuset="0x00000008" complete_cpuset="0x00000008" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="25"/>
+    <object type="Package" os_index="2" cpuset="0x00000040" complete_cpuset="0x00004444" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="30" id="obj30">
+      <object type="L3Cache" cpuset="0x00000040" complete_cpuset="0x00004444" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="31" id="obj31" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
+        <object type="L2Cache" cpuset="0x00000040" complete_cpuset="0x00004040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="32" id="obj32" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
+          <object type="L1Cache" cpuset="0x00000040" complete_cpuset="0x00004040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="33" id="obj33" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
+            <object type="Core" os_index="1" cpuset="0x00000040" complete_cpuset="0x00004040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="34" id="obj34">
+              <object type="PU" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="35" id="obj35"/>
             </object>
           </object>
         </object>
-        <object type="L2Cache" cpuset="0x00008000" complete_cpuset="0x00008080" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="26" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
-          <object type="L1Cache" cpuset="0x00008000" complete_cpuset="0x00008080" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="27" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
-            <object type="Core" os_index="1" cpuset="0x00008000" complete_cpuset="0x00008080" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="28">
-              <object type="PU" os_index="15" cpuset="0x00008000" complete_cpuset="0x00008000" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="29"/>
+      </object>
+    </object>
+    <object type="Package" os_index="3" cpuset="0x00008008" complete_cpuset="0x00008888" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="20" id="obj20">
+      <object type="L3Cache" cpuset="0x00008008" complete_cpuset="0x00008888" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="21" id="obj21" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
+        <object type="L2Cache" cpuset="0x00000008" complete_cpuset="0x00000808" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="22" id="obj22" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
+          <object type="L1Cache" cpuset="0x00000008" complete_cpuset="0x00000808" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="23" id="obj23" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
+            <object type="Core" os_index="0" cpuset="0x00000008" complete_cpuset="0x00000808" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="24" id="obj24">
+              <object type="PU" os_index="3" cpuset="0x00000008" complete_cpuset="0x00000008" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="25" id="obj25"/>
+            </object>
+          </object>
+        </object>
+        <object type="L2Cache" cpuset="0x00008000" complete_cpuset="0x00008080" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="26" id="obj26" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">
+          <object type="L1Cache" cpuset="0x00008000" complete_cpuset="0x00008080" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="27" id="obj27" cache_size="16384" depth="1" cache_linesize="0" cache_associativity="0" cache_type="1">
+            <object type="Core" os_index="1" cpuset="0x00008000" complete_cpuset="0x00008080" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="28" id="obj28">
+              <object type="PU" os_index="15" cpuset="0x00008000" complete_cpuset="0x00008000" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="29" id="obj29"/>
             </object>
           </object>
         </object>

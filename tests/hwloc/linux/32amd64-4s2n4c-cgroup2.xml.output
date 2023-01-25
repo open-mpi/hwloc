@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
-<topology version="2.0">
+<topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x0000003f" complete_cpuset="0xffffffff" allowed_cpuset="0x0000003f" nodeset="0x0000003f" complete_nodeset="0x000000ff" allowed_nodeset="0x0000003f">
     <info name="DMIProductName" value="H8QG6"/>
     <info name="DMIProductVersion" value="1234567890"/>

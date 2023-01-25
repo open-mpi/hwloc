@@ -1,1 +1,1 @@
---ignore group
+--ignore group --export-xml-flags 2
