@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -438,6 +438,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, struct hwloc__xml_expor
   struct hwloc__xml_export_state_s state;
   hwloc__libxml_export_state_data_t data = (void *) state.data;
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
+  int v2export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
 
@@ -449,8 +450,12 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology, struct hwloc__xml_expor
   /* Creates a new document, a node and set it as a root node. */
   doc = xmlNewDoc(BAD_CAST "1.0");
   root_node = xmlNewNode(NULL, BAD_CAST "topology");
-  if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
-    xmlNewProp(root_node, BAD_CAST "version", BAD_CAST "2.0");
+  if (!v1export) {
+    if (v2export)
+      xmlNewProp(root_node, BAD_CAST "version", BAD_CAST "2.0");
+    else
+      xmlNewProp(root_node, BAD_CAST "version", BAD_CAST "3.0");
+  }
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */

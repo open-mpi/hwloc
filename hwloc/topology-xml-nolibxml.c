@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -676,6 +676,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, struct hwloc__xml_exp
   struct hwloc__xml_export_state_s state, childstate;
   hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
   int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
+  int v2export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
   int res;
 
   HWLOC_BUILD_ASSERT(sizeof(*ndata) <= sizeof(state.data));
@@ -699,8 +700,12 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, struct hwloc__xml_exp
 		 "<!DOCTYPE topology SYSTEM \"%s\">\n", v1export ? "hwloc.dtd" : "hwloc2.dtd");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
-  if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1))
-    hwloc__nolibxml_export_new_prop(&childstate, "version", "2.0");
+  if (!v1export) {
+    if (v2export)
+      hwloc__nolibxml_export_new_prop(&childstate, "version", "2.0");
+    else
+      hwloc__nolibxml_export_new_prop(&childstate, "version", "3.0");
+  }
   hwloc__xml_export_topology (&childstate, topology, flags);
   hwloc__nolibxml_export_end_object(&childstate, "topology");
 

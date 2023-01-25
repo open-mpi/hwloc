@@ -912,7 +912,8 @@ hwloc_utils_parse_export_synthetic_flags(char * str) {
 static __hwloc_inline unsigned long
 hwloc_utils_parse_export_xml_flags(char * str) {
   struct hwloc_utils_parsing_flag possible_flags[] = {
-    HWLOC_UTILS_PARSING_FLAG(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1)
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1),
+    HWLOC_UTILS_PARSING_FLAG(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)
   };
 
   return hwloc_utils_parse_flags(str, possible_flags, (int) sizeof(possible_flags) / sizeof(possible_flags[0]), "xml");

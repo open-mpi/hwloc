@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -68,9 +68,10 @@ test_topology ()
     export HWLOC_DUMPED_HWDATA_DIR
 
     if ! "$lstopo" $opts \
+	| sed	-e 's/ id="obj[0-9]\+"//' \
 	| sed	-e 's/ gp_index="[0-9]\+"//' \
 	> "$output"
-	# filtered gp_index because it depends on the insertiong order, which may depend on pciaccess version, etc
+	# filtered id/gp_index because it depends on the insertiong order, which may depend on pciaccess version, etc
     then
 	result=1
     else

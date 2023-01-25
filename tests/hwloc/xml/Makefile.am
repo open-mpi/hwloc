@@ -1,4 +1,4 @@
-# Copyright © 2009-2021 Inria.  All rights reserved.
+# Copyright © 2009-2022 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -89,9 +89,16 @@ xml_options = \
         32em64t-2n8c2t-pci-wholeio.options \
         64intel64-3g2n+2n-irregulargroups+pci.options \
         64intel64-3g2n+2n-irregulargroups+pci.console.options \
+        8em64t-2p2ca2co-nonodesets.v1tov2.options \
+        8ia64-2n2s2c+1n.v1tov2.options \
+        16amd64-4distances.v1tov2.options \
         16amd64-4distances.v2tov1.options \
+        2intel64-1n2c-numaroot.v1tov2.options \
         28intel64-2p2g7c-CoD.nogroups.v1tov2.options \
+        28intel64-2p2g7c-CoDgroups.v1tov2.options \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v1tov2.options \
         8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.options \
+        64intel64-fakeKNL-SNC4-hybrid.v1tov2.options \
         64intel64-fakeKNL-SNC4-hybrid.v2tov1.options
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
