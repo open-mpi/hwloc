@@ -812,6 +812,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
   }
 
+  if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
+    if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_STORAGE
+        && ((obj->name && !strncmp(obj->name, "dax", 3))
+            || (obj->subtype && !strcmp(obj->subtype, "CXLMem"))))
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
+  }
+
   /* process object subnodes, if we found one win the above loop */
   while (tag) {
     int ret;
@@ -2083,7 +2090,10 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     state->new_prop(state, "pci_link_speed", tmp);
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    sprintf(tmp, "%d", (int) obj->attr->osdev.type);
+    if (v2export && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_MEMORY)
+      sprintf(tmp, "%d", (int) HWLOC_OBJ_OSDEV_STORAGE);
+    else
+      sprintf(tmp, "%d", (int) obj->attr->osdev.type);
     state->new_prop(state, "osdev_type", tmp);
     break;
   default:
