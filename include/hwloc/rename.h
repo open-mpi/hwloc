@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2022 Inria.  All rights reserved.
+ * Copyright © 2010-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -436,7 +436,6 @@ extern "C" {
 /* export.h */
 
 #define hwloc_topology_export_xml_flags_e HWLOC_NAME(topology_export_xml_flags_e)
-#define HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1 HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_XML_FLAG_V1)
 #define HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2 HWLOC_NAME_CAPS(TOPOLOGY_EXPORT_XML_FLAG_V2)
 #define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
 #define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
@@ -742,8 +741,6 @@ extern "C" {
 #define hwloc_xml_component HWLOC_NAME(xml_component)
 #define hwloc_xml_callbacks_register HWLOC_NAME(xml_callbacks_register)
 #define hwloc_xml_callbacks_reset HWLOC_NAME(xml_callbacks_reset)
-
-#define hwloc__xml_imported_v1distances_s HWLOC_NAME(_xml_imported_v1distances_s)
 
 /* private/components.h */
 

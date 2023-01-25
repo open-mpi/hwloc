@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2017 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -28,13 +28,6 @@ typedef struct hwloc__xml_import_state_s {
   char data[32];
 } * hwloc__xml_import_state_t;
 
-struct hwloc__xml_imported_v1distances_s {
-  unsigned long kind;
-  unsigned nbobjs;
-  float *floats;
-  struct hwloc__xml_imported_v1distances_s *prev, *next;
-};
-
 HWLOC_DECLSPEC int hwloc__xml_import_diff(hwloc__xml_import_state_t state, hwloc_topology_diff_t *firstdiffp);
 
 struct hwloc_xml_backend_data_s {
@@ -52,8 +45,6 @@ struct hwloc_xml_backend_data_s {
   void *data; /* libxml2 doc, or nolibxml buffer */
   unsigned version_major, version_minor;
   unsigned nbnumanodes;
-  hwloc_obj_t first_numanode, last_numanode; /* temporary cousin-list for handling v1distances */
-  struct hwloc__xml_imported_v1distances_s *first_v1dist, *last_v1dist;
 };
 
 /**************
@@ -69,7 +60,7 @@ typedef struct hwloc__xml_export_state_s {
   void (*end_object)(struct hwloc__xml_export_state_s *state, const char *name);
 
   struct hwloc__xml_export_data_s {
-    hwloc_obj_t v1_memory_group; /* if we need to insert intermediate group above memory children when exporting to v1 */
+    int dummy;
   } *global;
 
   /* opaque data used to store backend-specific data.

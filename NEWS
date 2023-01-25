@@ -34,6 +34,7 @@ Version 3.0.0
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.
 * Removed features
+  + Importing and exporting from/to hwloc 1.x XML.
   + BlueGene/Q support.
   + Functions that were deprecated since 2.0:
     - hwloc_topology_insert_misc_object_by_parent()
