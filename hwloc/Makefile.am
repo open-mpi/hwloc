@@ -1,4 +1,4 @@
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -229,9 +229,9 @@ libhwloc_embedded_la_SOURCES = $(sources)
 # XML data (only install if we're building in standalone mode)
 
 if HWLOC_BUILD_STANDALONE
-xml_DATA = $(srcdir)/hwloc.dtd $(srcdir)/hwloc2.dtd $(srcdir)/hwloc2-diff.dtd
+xml_DATA = $(srcdir)/hwloc2.dtd $(srcdir)/hwloc2-diff.dtd
 xmldir = $(pkgdatadir)
-EXTRA_DIST += hwloc.dtd hwloc2.dtd hwloc2-diff.dtd
+EXTRA_DIST += hwloc2.dtd hwloc2-diff.dtd
 endif
 
 DISTCLEANFILES = static-components.h

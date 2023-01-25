@@ -187,11 +187,10 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topology without DTD\n",
 	      state->global->msgprefix);
-  } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")
-	     && strcmp((char *) dtd->SystemID, "hwloc2.dtd")) {
+  } else if (strcmp((char *) dtd->SystemID, "hwloc2.dtd")) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd or hwloc2.dtd");
+	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc2.dtd");
   }
 
   root_node = xmlDocGetRootElement((xmlDocPtr) bdata->data);
