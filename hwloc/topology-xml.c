@@ -1954,20 +1954,12 @@ hwloc__xml_export_safestrdup(const char *old)
 static void
 hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
-  char *setstring = NULL, *setstring2 = NULL;
+  char *setstring = NULL;
   char tmp[255];
-  int v1export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1;
   int v2export = flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
-  unsigned i,j;
+  unsigned i;
 
-  if (v1export && obj->type == HWLOC_OBJ_PACKAGE)
-    state->new_prop(state, "type", "Socket");
-  else if (v1export && obj->type == HWLOC_OBJ_DIE)
-    state->new_prop(state, "type", "Group");
-  else if (v1export && hwloc__obj_type_is_cache(obj->type))
-    state->new_prop(state, "type", "Cache");
-  else
-    state->new_prop(state, "type", hwloc_obj_type_string(obj->type));
+  state->new_prop(state, "type", hwloc_obj_type_string(obj->type));
 
   if (obj->os_index != HWLOC_UNKNOWN_INDEX) {
     sprintf(tmp, "%u", obj->os_index);
@@ -1975,58 +1967,20 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   }
 
   if (obj->cpuset) {
-    int empty_cpusets = 0;
+    hwloc_bitmap_asprintf(&setstring, obj->cpuset);
+    state->new_prop(state, "cpuset", setstring);
+    free(setstring);
 
-    if (v1export && obj->type == HWLOC_OBJ_NUMANODE) {
-      /* walk up this memory hierarchy to find-out if we are the first numa node.
-       * v1 non-first NUMA nodes have empty cpusets.
-       */
-      hwloc_obj_t parent = obj;
-      while (!hwloc_obj_type_is_normal(parent->type)) {
-	if (parent->sibling_rank > 0) {
-	  empty_cpusets = 1;
-	  break;
-	}
-	parent = parent->parent;
-      }
-    }
+    hwloc_bitmap_asprintf(&setstring, obj->complete_cpuset);
+    state->new_prop(state, "complete_cpuset", setstring);
+    free(setstring);
 
-    if (empty_cpusets) {
-      state->new_prop(state, "cpuset", "0x0");
-      state->new_prop(state, "online_cpuset", "0x0");
-      state->new_prop(state, "complete_cpuset", "0x0");
-      state->new_prop(state, "allowed_cpuset", "0x0");
-
-    } else {
-      /* normal case */
-      hwloc_bitmap_asprintf(&setstring, obj->cpuset);
-      state->new_prop(state, "cpuset", setstring);
-
-      hwloc_bitmap_asprintf(&setstring2, obj->complete_cpuset);
-      state->new_prop(state, "complete_cpuset", setstring2);
-      free(setstring2);
-
-      if (v1export)
-	state->new_prop(state, "online_cpuset", setstring);
+    if (!obj->parent) {
+      hwloc_bitmap_asprintf(&setstring, topology->allowed_cpuset);
+      state->new_prop(state, "allowed_cpuset", setstring);
       free(setstring);
-
-      if (v1export) {
-	hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
-	hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, topology->allowed_cpuset);
-	hwloc_bitmap_asprintf(&setstring, allowed_cpuset);
-	state->new_prop(state, "allowed_cpuset", setstring);
-	free(setstring);
-	hwloc_bitmap_free(allowed_cpuset);
-      } else if (!obj->parent) {
-	hwloc_bitmap_asprintf(&setstring, topology->allowed_cpuset);
-	state->new_prop(state, "allowed_cpuset", setstring);
-	free(setstring);
-      }
     }
 
-    /* If exporting v1, we should clear second local NUMA bits from nodeset,
-     * but the importer will clear them anyway.
-     */
     hwloc_bitmap_asprintf(&setstring, obj->nodeset);
     state->new_prop(state, "nodeset", setstring);
     free(setstring);
@@ -2035,27 +1989,18 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     state->new_prop(state, "complete_nodeset", setstring);
     free(setstring);
 
-    if (v1export) {
-      hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
-      hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, topology->allowed_nodeset);
-      hwloc_bitmap_asprintf(&setstring, allowed_nodeset);
-      state->new_prop(state, "allowed_nodeset", setstring);
-      free(setstring);
-      hwloc_bitmap_free(allowed_nodeset);
-    } else if (!obj->parent) {
+    if (!obj->parent) {
       hwloc_bitmap_asprintf(&setstring, topology->allowed_nodeset);
       state->new_prop(state, "allowed_nodeset", setstring);
       free(setstring);
     }
   }
 
-  if (!v1export) {
-    sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
-    state->new_prop(state, "gp_index", tmp);
-    if (!v2export) {
-      sprintf(tmp, "obj%llu", (unsigned long long) obj->gp_index);
-      state->new_prop(state, "id", tmp);
-    }
+  sprintf(tmp, "%llu", (unsigned long long) obj->gp_index);
+  state->new_prop(state, "gp_index", tmp);
+  if (!v2export) {
+    sprintf(tmp, "obj%llu", (unsigned long long) obj->gp_index);
+    state->new_prop(state, "id", tmp);
   }
 
   if (obj->name) {
@@ -2065,7 +2010,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
       free(name);
     }
   }
-  if (!v1export && obj->subtype) {
+  if (obj->subtype) {
     char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
     if (subtype) {
       state->new_prop(state, "subtype", subtype);
@@ -2110,19 +2055,12 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     state->new_prop(state, "cache_type", tmp);
     break;
   case HWLOC_OBJ_GROUP:
-    if (v1export) {
-      sprintf(tmp, "%u", obj->attr->group.depth);
-      state->new_prop(state, "depth", tmp);
-      if (obj->attr->group.dont_merge)
-        state->new_prop(state, "dont_merge", "1");
-    } else {
       sprintf(tmp, "%u", obj->attr->group.kind);
       state->new_prop(state, "kind", tmp);
       sprintf(tmp, "%u", obj->attr->group.subkind);
       state->new_prop(state, "subkind", tmp);
       if (obj->attr->group.dont_merge)
         state->new_prop(state, "dont_merge", "1");
-    }
     break;
   case HWLOC_OBJ_BRIDGE:
     sprintf(tmp, "%d-%d", (int) obj->attr->bridge.upstream_type, (int) obj->attr->bridge.downstream_type);
@@ -2176,105 +2114,6 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     free(name);
     free(value);
   }
-  if (v1export && obj->subtype) {
-    char *subtype = hwloc__xml_export_safestrdup(obj->subtype);
-    if (subtype) {
-      struct hwloc__xml_export_state_s childstate;
-      int is_coproctype = (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
-      state->new_child(state, &childstate, "info");
-      childstate.new_prop(&childstate, "name", is_coproctype ? "CoProcType" : "Type");
-      childstate.new_prop(&childstate, "value", subtype);
-      childstate.end_object(&childstate, "info");
-      free(subtype);
-    }
-  }
-  if (v1export && obj->type == HWLOC_OBJ_DIE) {
-    struct hwloc__xml_export_state_s childstate;
-    state->new_child(state, &childstate, "info");
-    childstate.new_prop(&childstate, "name", "Type");
-    childstate.new_prop(&childstate, "value", "Die");
-    childstate.end_object(&childstate, "info");
-  }
-
-  if (v1export && !obj->parent) {
-    /* only latency matrices covering the entire machine can be exported to v1 */
-    struct hwloc_internal_distances_s *dist;
-    /* refresh distances since we need objects below */
-    hwloc_internal_distances_refresh(topology);
-    for(dist = topology->first_dist; dist; dist = dist->next) {
-      struct hwloc__xml_export_state_s childstate;
-      unsigned nbobjs = dist->nbobjs;
-      unsigned *logical_to_v2array;
-      int depth;
-
-      if (nbobjs != (unsigned) hwloc_get_nbobjs_by_type(topology, dist->unique_type))
-	continue;
-      if (!(dist->kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY))
-	continue;
-      if (dist->kind & HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES)
-	continue;
-
-      logical_to_v2array = malloc(nbobjs * sizeof(*logical_to_v2array));
-      if (!logical_to_v2array) {
-        if (HWLOC_SHOW_ALL_ERRORS())
-          fprintf(stderr, "hwloc/xml/export/v1: failed to allocated logical_to_v2array\n");
-	continue;
-      }
-
-      for(i=0; i<nbobjs; i++)
-	logical_to_v2array[dist->objs[i]->logical_index] = i;
-
-      /* compute the relative depth */
-      if (dist->unique_type == HWLOC_OBJ_NUMANODE) {
-	/* for NUMA nodes, use the highest normal-parent depth + 1 */
-	depth = -1;
-	for(i=0; i<nbobjs; i++) {
-	  hwloc_obj_t parent = dist->objs[i]->parent;
-	  while (hwloc__obj_type_is_memory(parent->type))
-	    parent = parent->parent;
-	  if (parent->depth+1 > depth)
-	    depth = parent->depth+1;
-	}
-      } else {
-	/* for non-NUMA nodes, increase the object depth if any of them has memory above */
-	int parent_with_memory = 0;
-	for(i=0; i<nbobjs; i++) {
-	  hwloc_obj_t parent = dist->objs[i]->parent;
-	  while (parent) {
-	    if (parent->memory_first_child) {
-	      parent_with_memory = 1;
-	      goto done;
-	    }
-	    parent = parent->parent;
-	  }
-	}
-      done:
-	depth = hwloc_get_type_depth(topology, dist->unique_type) + parent_with_memory;
-      }
-
-      state->new_child(state, &childstate, "distances");
-      sprintf(tmp, "%u", nbobjs);
-      childstate.new_prop(&childstate, "nbobjs", tmp);
-      sprintf(tmp, "%d", depth);
-      childstate.new_prop(&childstate, "relative_depth", tmp);
-      sprintf(tmp, "%f", 1.f);
-      childstate.new_prop(&childstate, "latency_base", tmp);
-      for(i=0; i<nbobjs; i++) {
-        for(j=0; j<nbobjs; j++) {
-	  /* we should export i*nbobjs+j, we translate using logical_to_v2array[] */
-	  unsigned k = logical_to_v2array[i]*nbobjs+logical_to_v2array[j];
-	  struct hwloc__xml_export_state_s greatchildstate;
-	  childstate.new_child(&childstate, &greatchildstate, "latency");
-	  sprintf(tmp, "%f", (float) dist->values[k]);
-	  greatchildstate.new_prop(&greatchildstate, "value", tmp);
-	  greatchildstate.end_object(&greatchildstate, "latency");
-	}
-      }
-      childstate.end_object(&childstate, "distances");
-      free(logical_to_v2array);
-    }
-  }
-
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) state, topology, obj);
 }
@@ -2297,168 +2136,6 @@ hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
     hwloc__xml_v2export_object (&state, topology, child, flags);
   for_each_misc_child(child, obj)
     hwloc__xml_v2export_object (&state, topology, child, flags);
-
-  state.end_object(&state, "object");
-}
-
-static void
-hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags);
-
-static hwloc_obj_t
-hwloc__xml_v1export_object_next_numanode(hwloc_obj_t obj, hwloc_obj_t cur)
-{
-  hwloc_obj_t parent;
-
-  if (!cur) {
-    /* first numa node is on the very bottom left */
-    cur = obj->memory_first_child;
-    goto find_first;
-  }
-
-  /* walk-up until there's a next sibling */
-  parent = cur;
-  while (1) {
-    if (parent->next_sibling) {
-      /* found a next sibling, we'll walk down-left from there */
-      cur = parent->next_sibling;
-      break;
-    }
-    parent = parent->parent;
-    if (parent == obj)
-      return NULL;
-  }
-
- find_first:
-  while (cur->type != HWLOC_OBJ_NUMANODE)
-    cur = cur->memory_first_child;
-  assert(cur);
-  return cur;
-}
-
-static unsigned
-hwloc__xml_v1export_object_list_numanodes(hwloc_obj_t obj, hwloc_obj_t *first_p, hwloc_obj_t **nodes_p)
-{
-  hwloc_obj_t *nodes, cur;
-  int nr;
-
-  if (!obj->memory_first_child) {
-    *first_p = NULL;
-    *nodes_p = NULL;
-    return 0;
-  }
-  /* we're sure there's at least one numa node */
-
-  nr = hwloc_bitmap_weight(obj->nodeset);
-  assert(nr > 0);
-  /* these are local nodes, but some of them may be attached above instead of here */
-
-  nodes = calloc(nr, sizeof(*nodes));
-  if (!nodes) {
-    /* only return the first node */
-    cur = hwloc__xml_v1export_object_next_numanode(obj, NULL);
-    assert(cur);
-    *first_p = cur;
-    *nodes_p = NULL;
-    return 1;
-  }
-
-  nr = 0;
-  cur = NULL;
-  while (1) {
-    cur = hwloc__xml_v1export_object_next_numanode(obj, cur);
-    if (!cur)
-      break;
-    nodes[nr++] = cur;
-  }
-
-  *first_p = nodes[0];
-  *nodes_p = nodes;
-  return nr;
-}
-
-static void
-hwloc__xml_v1export_object_with_memory(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
-{
-  struct hwloc__xml_export_state_s gstate, mstate, ostate, *state = parentstate;
-  hwloc_obj_t child;
-  unsigned nr_numanodes;
-  hwloc_obj_t *numanodes, first_numanode;
-  unsigned i;
-
-  nr_numanodes = hwloc__xml_v1export_object_list_numanodes(obj, &first_numanode, &numanodes);
-
-  if (obj->parent->arity > 1 && nr_numanodes > 1 && parentstate->global->v1_memory_group) {
-    /* child has sibling, we must add a Group around those memory children */
-    hwloc_obj_t group = parentstate->global->v1_memory_group;
-    parentstate->new_child(parentstate, &gstate, "object");
-    group->parent = obj->parent;
-    group->cpuset = obj->cpuset;
-    group->complete_cpuset = obj->complete_cpuset;
-    group->nodeset = obj->nodeset;
-    group->complete_nodeset = obj->complete_nodeset;
-    hwloc__xml_export_object_contents (&gstate, topology, group, flags);
-    group->cpuset = NULL;
-    group->complete_cpuset = NULL;
-    group->nodeset = NULL;
-    group->complete_nodeset = NULL;
-    state = &gstate;
-  }
-
-  /* export first memory child */
-  state->new_child(state, &mstate, "object");
-  hwloc__xml_export_object_contents (&mstate, topology, first_numanode, flags);
-
-  /* then the actual object */
-  mstate.new_child(&mstate, &ostate, "object");
-  hwloc__xml_export_object_contents (&ostate, topology, obj, flags);
-
-  /* then its normal/io/misc children */
-  for_each_child(child, obj)
-    hwloc__xml_v1export_object (&ostate, topology, child, flags);
-  for_each_io_child(child, obj)
-    hwloc__xml_v1export_object (&ostate, topology, child, flags);
-  for_each_misc_child(child, obj)
-    hwloc__xml_v1export_object (&ostate, topology, child, flags);
-
-  /* close object and first memory child */
-  ostate.end_object(&ostate, "object");
-  mstate.end_object(&mstate, "object");
-
-  /* now other memory children */
-  for(i=1; i<nr_numanodes; i++)
-    hwloc__xml_v1export_object (state, topology, numanodes[i], flags);
-
-  free(numanodes);
-
-  if (state == &gstate) {
-    /* close group if any */
-    gstate.end_object(&gstate, "object");
-  }
-}
-
-static void
-hwloc__xml_v1export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
-{
-  struct hwloc__xml_export_state_s state;
-  hwloc_obj_t child;
-
-  parentstate->new_child(parentstate, &state, "object");
-
-  hwloc__xml_export_object_contents(&state, topology, obj, flags);
-
-  for_each_child(child, obj) {
-    if (!child->memory_arity) {
-      /* no memory child, just export normally */
-      hwloc__xml_v1export_object (&state, topology, child, flags);
-    } else {
-      hwloc__xml_v1export_object_with_memory(&state, topology, child, flags);
-    }
-  }
-
-  for_each_io_child(child, obj)
-    hwloc__xml_v1export_object (&state, topology, child, flags);
-  for_each_misc_child(child, obj)
-    hwloc__xml_v1export_object (&state, topology, child, flags);
 
   state.end_object(&state, "object");
 }
@@ -2751,44 +2428,6 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
   char *env;
   hwloc_obj_t root = hwloc_get_root_obj(topology);
 
-  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1) {
-    hwloc_obj_t *numanodes, first_numanode;
-    unsigned nr_numanodes;
-
-    nr_numanodes = hwloc__xml_v1export_object_list_numanodes(root, &first_numanode, &numanodes);
-
-    if (nr_numanodes) {
-      /* we don't use hwloc__xml_v1export_object_with_memory() because we want/can keep root above the numa node */
-      struct hwloc__xml_export_state_s rstate, mstate;
-      hwloc_obj_t child;
-      unsigned i;
-      /* export the root */
-      state->new_child(state, &rstate, "object");
-      hwloc__xml_export_object_contents (&rstate, topology, root, flags);
-      /* export first memory child */
-      rstate.new_child(&rstate, &mstate, "object");
-      hwloc__xml_export_object_contents (&mstate, topology, first_numanode, flags);
-      /* then its normal/io/misc children */
-      for_each_child(child, root)
-	hwloc__xml_v1export_object (&mstate, topology, child, flags);
-      for_each_io_child(child, root)
-	hwloc__xml_v1export_object (&mstate, topology, child, flags);
-      for_each_misc_child(child, root)
-	hwloc__xml_v1export_object (&mstate, topology, child, flags);
-      /* close first memory child */
-      mstate.end_object(&mstate, "object");
-      /* now other memory children */
-      for(i=1; i<nr_numanodes; i++)
-	hwloc__xml_v1export_object (&rstate, topology, numanodes[i], flags);
-      /* close the root */
-      rstate.end_object(&rstate, "object");
-    } else {
-      hwloc__xml_v1export_object(state, topology, root, flags);
-    }
-
-    free(numanodes);
-
-  } else {
     hwloc__xml_v2export_object (state, topology, root, flags);
     hwloc__xml_v2export_distances (state, topology);
     env = getenv("HWLOC_XML_EXPORT_SUPPORT");
@@ -2796,7 +2435,6 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
       hwloc__xml_v2export_support(state, topology);
     hwloc__xml_export_memattrs(state, topology);
     hwloc__xml_export_cpukinds(state, topology);
-  }
 }
 
 void
@@ -2868,7 +2506,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
-  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1|HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
+  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
     errno = EINVAL;
     return -1;
   }
@@ -2876,11 +2514,6 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename, u
   hwloc_internal_distances_refresh(topology);
 
   hwloc_localeswitch_init();
-
-  edata.v1_memory_group = NULL;
-  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1)
-    /* temporary group to be used during v1 export of memory children */
-    edata.v1_memory_group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 
   force_nolibxml = hwloc_nolibxml_export();
 retry:
@@ -2893,9 +2526,6 @@ retry:
       goto retry;
     }
   }
-
-  if (edata.v1_memory_group)
-    hwloc_free_unlinked_object(edata.v1_memory_group);
 
   hwloc_localeswitch_fini();
   return ret;
@@ -2916,7 +2546,7 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
   assert(hwloc_nolibxml_callbacks); /* the core called components_init() for the topology */
 
-  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1|HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
+  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
     errno = EINVAL;
     return -1;
   }
@@ -2924,11 +2554,6 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
   hwloc_internal_distances_refresh(topology);
 
   hwloc_localeswitch_init();
-
-  edata.v1_memory_group = NULL;
-  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1)
-    /* temporary group to be used during v1 export of memory children */
-    edata.v1_memory_group = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 
   force_nolibxml = hwloc_nolibxml_export();
 retry:
@@ -2941,9 +2566,6 @@ retry:
       goto retry;
     }
   }
-
-  if (edata.v1_memory_group)
-    hwloc_free_unlinked_object(edata.v1_memory_group);
 
   hwloc_localeswitch_fini();
   return ret;

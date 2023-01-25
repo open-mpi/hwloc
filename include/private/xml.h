@@ -60,7 +60,7 @@ typedef struct hwloc__xml_export_state_s {
   void (*end_object)(struct hwloc__xml_export_state_s *state, const char *name);
 
   struct hwloc__xml_export_data_s {
-    hwloc_obj_t v1_memory_group; /* if we need to insert intermediate group above memory children when exporting to v1 */
+    int dummy;
   } *global;
 
   /* opaque data used to store backend-specific data.
