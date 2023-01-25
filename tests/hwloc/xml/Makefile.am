@@ -34,10 +34,7 @@ xml_outputs = \
         192em64t-24n8c2t.xml \
         power8gpudistances.xml \
         fakeheterodistances.xml \
-        fakecpukinds.xml \
-        16amd64-4distances.v2tov1.xml \
-        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.xml \
-        64intel64-fakeKNL-SNC4-hybrid.v2tov1.xml
+        fakecpukinds.xml
 
 # Each output `xyz.xml' may have a corresponding `xyz.source' file specifying
 # its source file.
@@ -51,10 +48,7 @@ xml_source = \
         16intel64-manyVFs.console.nocollapse.source \
         32em64t-2n8c2t-pci-noio.source \
         32em64t-2n8c2t-pci-normalio.source \
-        64intel64-3g2n+2n-irregulargroups+pci.console.source \
-        16amd64-4distances.v2tov1.source \
-        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.source \
-        64intel64-fakeKNL-SNC4-hybrid.v2tov1.source
+        64intel64-3g2n+2n-irregulargroups+pci.console.source
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
@@ -67,14 +61,7 @@ xml_options = \
         32em64t-2n8c2t-pci-noio.options \
         32em64t-2n8c2t-pci-wholeio.options \
         64intel64-3g2n+2n-irregulargroups+pci.options \
-        64intel64-3g2n+2n-irregulargroups+pci.console.options \
-        8em64t-2p2ca2co-nonodesets.v1tov2.options \
-        8ia64-2n2s2c+1n.v1tov2.options \
-        16amd64-4distances.v1tov2.options \
-        16amd64-4distances.v2tov1.options \
-        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.options \
-        64intel64-fakeKNL-SNC4-hybrid.v1tov2.options \
-        64intel64-fakeKNL-SNC4-hybrid.v2tov1.options
+        64intel64-3g2n+2n-irregulargroups+pci.console.options
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
