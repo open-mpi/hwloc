@@ -8,5 +8,5 @@ for f in dudley emmett hagrid devel09-pci; do
 done
 
 for f in ppc64-without-smt ppc64-with-smt ppc64-full-with-smt ; do
-  LANG=C lstopo -i ${f}.xml --horiz --no-legend --logical --no-index --index=pu --index=numa --index=core --index=pack -f ${f}.png ;
+  LANG=C lstopo -i ${f}.xml --horiz --no-legend --logical --no-index --index=pu --index=numa --index=core --index=pack --no-factorize -f ${f}.png ;
 done
