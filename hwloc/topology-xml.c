@@ -619,7 +619,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 {
   int ignored = 0;
   int childrengotignored = 0;
-  int numa_was_root = 0;
   char *tag;
   struct hwloc__xml_import_state_s childstate;
 
@@ -849,16 +848,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
     if (!ret)
       break;
-  }
-
-  if (numa_was_root) {
-    /* duplicate NUMA infos to root, most of them are likely root-specific */
-    unsigned i;
-    for(i=0; i<obj->infos_count; i++) {
-      struct hwloc_info_s *info = &obj->infos[i];
-      hwloc_obj_add_info(parent, info->name, info->value);
-    }
-    /* TODO some infos are root-only (hwlocVersion, ProcessName, etc), remove them from obj? */
   }
 
   if (ignored) {
