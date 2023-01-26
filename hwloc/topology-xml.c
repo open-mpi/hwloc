@@ -1167,7 +1167,11 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
 
   /* 3.0 forward compatibility */
-
+  if (data->version_major >= 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
+    /* block replaced by storage+memory in 3.0 */
+    if (obj->attr->osdev.type == 6 /* MEMORY */)
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_BLOCK;
+  }
 
   if (!hwloc_filter_check_keep_object(topology, obj)) {
     /* Ignore this object instead of inserting it.
