@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1160,6 +1160,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     data->last_numanode = obj;
   }
 
+  /* 3.0 forward compatibility */
+
+
   if (!hwloc_filter_check_keep_object(topology, obj)) {
     /* Ignore this object instead of inserting it.
      *
@@ -2094,9 +2097,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   if (ret < 0)
     goto failed;
 
-  if (data->version_major > 2) {
+  if (data->version_major > 3
+      || (data->version_major == 3 && data->version_minor > 0)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: cannot import XML version %u.%u > 2\n",
+      fprintf(stderr, "%s: cannot import XML version %u.%u > 3.0\n",
 	      data->msgprefix, data->version_major, data->version_minor);
     goto err;
   }

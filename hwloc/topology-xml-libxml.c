@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -188,10 +188,11 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
       fprintf(stderr, "%s: Loading XML topology without DTD\n",
 	      state->global->msgprefix);
   } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")
-	     && strcmp((char *) dtd->SystemID, "hwloc2.dtd")) {
+	     && strcmp((char *) dtd->SystemID, "hwloc2.dtd")
+	     && strcmp((char *) dtd->SystemID, "hwloc3.dtd")) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "%s: Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd or hwloc2.dtd");
+	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc.dtd, hwloc2.dtd or hwloc3.dtd");
   }
 
   root_node = xmlDocGetRootElement((xmlDocPtr) bdata->data);
