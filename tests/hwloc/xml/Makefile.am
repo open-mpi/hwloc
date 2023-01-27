@@ -34,7 +34,9 @@ xml_outputs = \
         192em64t-24n8c2t.xml \
         power8gpudistances.xml \
         fakeheterodistances.xml \
-        fakecpukinds.xml
+        fakecpukinds.xml \
+        cxlmem+dax.v2tov3.xml \
+        cxlmem+dax.v3tov2.xml
 
 # Each output `xyz.xml' may have a corresponding `xyz.source' file specifying
 # its source file.
@@ -48,7 +50,9 @@ xml_source = \
         16intel64-manyVFs.console.nocollapse.source \
         32em64t-2n8c2t-pci-noio.source \
         32em64t-2n8c2t-pci-normalio.source \
-        64intel64-3g2n+2n-irregulargroups+pci.console.source
+        64intel64-3g2n+2n-irregulargroups+pci.console.source \
+        cxlmem+dax.v2tov3.source \
+        cxlmem+dax.v3tov2.source
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
@@ -61,7 +65,8 @@ xml_options = \
         32em64t-2n8c2t-pci-noio.options \
         32em64t-2n8c2t-pci-wholeio.options \
         64intel64-3g2n+2n-irregulargroups+pci.options \
-        64intel64-3g2n+2n-irregulargroups+pci.console.options
+        64intel64-3g2n+2n-irregulargroups+pci.console.options \
+        cxlmem+dax.v3tov2.options
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
