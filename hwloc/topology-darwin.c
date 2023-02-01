@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -456,7 +456,8 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
   int64_t size;
 
   snprintf(name, sizeof(name), "hw.perflevel%u.l1icachesize", level);
-  if (!hwloc_get_sysctlbyname(name, &size)) {
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1ICACHE)
+      && !hwloc_get_sysctlbyname(name, &size)) {
     /* hw.perflevel%u.cpusperl1i missing, assume it's per PU */
     hwloc_debug("found perflevel %u l1icachesize %ld, assuming width 1\n", level, (long) size);
     hwloc__darwin_build_perflevel_cache_level(topology, cpuset, 1, HWLOC_OBJ_L1ICACHE, 1, size, linesize);
@@ -464,7 +465,8 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
   }
 
   snprintf(name, sizeof(name), "hw.perflevel%u.l1dcachesize", level);
-  if (!hwloc_get_sysctlbyname(name, &size)) {
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L1CACHE)
+      && !hwloc_get_sysctlbyname(name, &size)) {
     /* hw.perflevel%u.cpusperl1d missing, assume it's per PU */
     hwloc_debug("found perflevel %u l1dcachesize %ld, assuming width 1\n", level, (long) size);
     hwloc__darwin_build_perflevel_cache_level(topology, cpuset, 1, HWLOC_OBJ_L1CACHE, 1, size, linesize);
@@ -472,7 +474,8 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
   }
 
   snprintf(name, sizeof(name), "hw.perflevel%u.l2cachesize", level);
-  if (!hwloc_get_sysctlbyname(name, &size)) {
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L2CACHE)
+      && !hwloc_get_sysctlbyname(name, &size)) {
     int64_t cpus;
 
     hwloc_debug("found perflevel %u l2cachesize %ld\n", level, (long) size);
@@ -499,10 +502,11 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
     /* assume PUs are contigous for now. */
     hwloc__darwin_build_perflevel_cache_level(topology, cpuset, cpus, HWLOC_OBJ_L2CACHE, 2, size, linesize);
     gothybrid->l2++;
-}
+  }
 
   snprintf(name, sizeof(name), "hw.perflevel%u.l3cachesize", level);
-  if (!hwloc_get_sysctlbyname(name, &size)) {
+  if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_L3CACHE)
+      && !hwloc_get_sysctlbyname(name, &size)) {
     int64_t cpus;
 
     hwloc_debug("found perflevel %u l3cachesize %ld\n", level, (long) size);
