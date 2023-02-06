@@ -6106,6 +6106,39 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
   return 0;
 }
 
+static void
+hwloc_linuxfs_dax_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused, int root_fd,
+                                  struct hwloc_obj *obj, const char *osdevpath)
+{
+  char path[320]; /* osdevpath <= 256 */
+  char line[128];
+  unsigned major_id, minor_id;
+  const char *daxtype;
+  char *tmp;
+
+  snprintf(path, sizeof(path), "%s/size", osdevpath);
+  if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
+    unsigned long long value = strtoull(line, NULL, 10);
+    /* linux always reports size in bytes for dax, we want kB */
+    snprintf(line, sizeof(line), "%llu", value >> 10);
+    hwloc_obj_add_info(obj, "Size", line);
+  }
+
+  snprintf(path, sizeof(path), "%s/dev", osdevpath);
+  if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
+    if (sscanf(line, "%u:%u", &major_id, &minor_id) == 2) {
+      tmp = strchr(line, '\n');
+      if (tmp)
+        *tmp = '\0';
+      hwloc_obj_add_info(obj, "LinuxDeviceID", line);
+    }
+  }
+
+  daxtype = hwloc_obj_get_info_by_name(obj, "DAXType");
+  if (daxtype)
+    obj->subtype = strdup(daxtype); /* SPM or NVM */
+}
+
 static int
 hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
@@ -6139,7 +6172,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 
       annotate_dax_parent(obj, dirent->d_name, root_fd);
 
-      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
+      hwloc_linuxfs_dax_class_fillinfos(backend, root_fd, obj, path);
     }
     closedir(dir);
   }
