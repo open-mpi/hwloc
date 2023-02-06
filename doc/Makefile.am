@@ -1,4 +1,4 @@
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2013, 2021 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -298,7 +298,7 @@ man3_object_types_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE_PCI.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_t.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_BLOCK.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_STORAGE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_DMA.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_GPU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_NETWORK.3 \

@@ -21,6 +21,8 @@
 extern "C" {
 #endif
 
+/* backward compat with v2.x before BLOCK renaming */
+#define HWLOC_OBJ_OSDEV_BLOCK HWLOC_OBJ_OSDEV_STORAGE
 /* backward compat with v2.0 before WHOLE_SYSTEM renaming */
 #define HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
 

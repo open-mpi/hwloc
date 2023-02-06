@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1336,8 +1336,17 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
           }
         }
 
-      } else if (HWLOC_OBJ_OSDEV_BLOCK == obj->attr->osdev.type) {
-	/* Block */
+      } else if (HWLOC_OBJ_OSDEV_STORAGE == obj->attr->osdev.type) {
+	/* Storage */
+	const char *value;
+	value = hwloc_obj_get_info_by_name(obj, "Size");
+	if (value) {
+	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+	  hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
+	}
+
+      } else if (HWLOC_OBJ_OSDEV_MEMORY == obj->attr->osdev.type) {
+	/* Memory */
 	const char *value;
 	value = hwloc_obj_get_info_by_name(obj, "Size");
 	if (value) {
