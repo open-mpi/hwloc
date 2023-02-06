@@ -5723,7 +5723,6 @@ hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
 
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL (1U<<0)
 #define HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB (1U<<1)
-#define HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS (1U<<2)
 #define HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS (1U<<30) /* DAX devices have some attributes in their parent */
 #define HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS (1U<<31) /* bus devices are actual hardware devices, while class devices point to hardware devices through the "device" symlink */
 
@@ -5871,7 +5870,7 @@ hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcide
 
 static void
 hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused, int root_fd,
-				    struct hwloc_obj *obj, const char *osdevpath, unsigned osdev_flags)
+				    struct hwloc_obj *obj, const char *osdevpath)
 {
 #ifdef HWLOC_HAVE_LIBUDEV
   struct hwloc_linux_backend_data_s *data = backend->private_data;
@@ -5887,15 +5886,13 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   unsigned sectorsize = 0;
   unsigned major_id, minor_id;
   int is_nvm = 0;
-  const char *daxtype;
   char *tmp;
 
   snprintf(path, sizeof(path), "%s/size", osdevpath);
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
     unsigned long long value = strtoull(line, NULL, 10);
-    /* linux always reports size in 512-byte units for blocks, and bytes for dax, we want kB */
-    snprintf(line, sizeof(line), "%llu",
-	     (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS) ? value / 2 : value >> 10);
+    /* linux always reports size in 512-byte units for blocks, we want kB */
+    snprintf(line, sizeof(line), "%llu", value / 2);
     hwloc_obj_add_info(obj, "Size", line);
   }
 
@@ -5908,18 +5905,8 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
     hwloc_obj_add_info(obj, "SectorSize", line);
   }
 
-  if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS) {
-    /* "bus" devices are the actual hardware devices. */
-    if (osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS)
-      /* some bus devices (DAX) only have devtype in the parent. */
-      snprintf(path, sizeof(path), "%s/../devtype", osdevpath);
-    else
-      /* currently unused since DAX is the only "bus" we look at */
-      snprintf(path, sizeof(path), "%s/devtype", osdevpath);
-  } else {
-    /* "class" devices are not the actual hardware device, we need to follow their "device" symlibk first. */
-    snprintf(path, sizeof(path), "%s/device/devtype", osdevpath);
-  }
+  /* "class" devices are not the actual hardware device, we need to follow their "device" symlink first. */
+  snprintf(path, sizeof(path), "%s/device/devtype", osdevpath);
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
     /* non-volatile devices use the following subtypes:
      * nd_namespace_pmem for pmem/raw (/dev/pmemX)
@@ -6040,10 +6027,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   if (*serial)
     hwloc_obj_add_info(obj, "SerialNumber", serial);
 
-  daxtype = hwloc_obj_get_info_by_name(obj, "DAXType");
-  if (daxtype)
-    obj->subtype = strdup(daxtype); /* SPM or NVM */
-  else if (is_nvm)
+  if (is_nvm)
     obj->subtype = strdup("NVM");
   else if (!strcmp(blocktype, "disk") || !strncmp(obj->name, "nvme", 4))
     obj->subtype = strdup("Disk");
@@ -6067,8 +6051,6 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
   dir = hwloc_opendir("/sys/class/block", root_fd);
   if (!dir)
     return 0;
-
-  osdev_flags |= HWLOC_LINUXFS_OSDEV_FLAG_BLOCK_WITH_SECTORS; /* uses 512B sectors */
 
   while ((dirent = readdir(dir)) != NULL) {
     char path[256];
@@ -6098,7 +6080,7 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
 
     obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_STORAGE, dirent->d_name);
 
-    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
+    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path);
   }
 
   closedir(dir);
