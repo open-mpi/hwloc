@@ -3972,10 +3972,16 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned failednodes = 0;
   unsigned i;
   DIR *dir;
-  int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
+  char *env;
+  int allow_overlapping_node_cpusets = 0;
   int need_memcaches = hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_MEMCACHE);
 
   hwloc_debug("\n\n * Topology extraction from /sys/devices/system/node *\n\n");
+
+  env = getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS");
+  if (env) {
+    allow_overlapping_node_cpusets = atoi(env); /* 0 drop non-first overlapping nodes, 1 allows with warning, 2 allows without warning */
+  }
 
   /* NUMA nodes cannot be filtered out */
   indexes = list_sysfsnode(topology, data, &nbnodes);
@@ -4024,7 +4030,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	failednodes++;
 	continue;
       }
-      if (HWLOC_SHOW_CRITICAL_ERRORS())
+      if (allow_overlapping_node_cpusets < 2 && HWLOC_SHOW_CRITICAL_ERRORS())
         fprintf(stderr, "hwloc/linux: node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
     }
     hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
@@ -4044,8 +4050,9 @@ look_sysfsnode(struct hwloc_topology *topology,
       dir = hwloc_opendir("/proc/driver/nvidia/gpus", data->root_fd);
       if (dir) {
 	struct dirent *dirent;
-	char *env = getenv("HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES");
-	int keep = env && atoi(env);
+	int keep;
+	env = getenv("HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES");
+        keep = env && atoi(env);
 	while ((dirent = readdir(dir)) != NULL) {
 	  char nvgpunumapath[300], line[256];
           int err;
@@ -4116,8 +4123,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       if (data->is_knl) {
 	/* apply KNL quirks */
-	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
-	int noquirk = (env && !atoi(env));
+	int noquirk;
+	env = getenv("HWLOC_KNL_NUMA_QUIRK");
+        noquirk = (env && !atoi(env));
 	if (!noquirk) {
 	  hwloc_linux_knl_numa_quirk(topology, data, nodes, nbnodes, distances, &failednodes);
 	  free(distances);

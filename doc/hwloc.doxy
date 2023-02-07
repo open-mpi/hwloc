@@ -1293,7 +1293,9 @@ following environment variables.
   if 1, ignore KNL info from hwloc-dump-hwdata and fallback to heuristic
   if 0, never fallback to the hardwired heuristic, useful if the heuristic is wrong
  HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS
-  don't ignore linux numa nodes with overlapping cpusets
+  if 0 (default), non-first nodes with overlapping cpusets are ignored
+  if 1, don't ignore linux numa nodes with overlapping cpusets
+  if 2, don't ignore either and don't even warn about it
  HWLOC_DEBUG_SORT_CHILDREN
   sort osdev I/O children by name to make sure the topology doesn't depend
   on the ordering of dentries in the local filesystem (for Linux fsroot tests)
