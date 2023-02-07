@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -112,6 +112,7 @@ struct lstopo_output {
   unsigned int gridsize, fontsize, linespacing, thickness;
   float text_xscale;
   enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX]; /* orientation of children within an object of the given type */
+  enum lstopo_orient_e above_force_orient;
   enum lstopo_orient_e right_force_orient;
   enum lstopo_orient_e below_force_orient;
   int show_indexes[HWLOC_OBJ_TYPE_MAX]; /* enabled by global toggle index_type */

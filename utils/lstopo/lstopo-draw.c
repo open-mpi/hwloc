@@ -626,7 +626,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 	       unsigned xrel, unsigned yrel /* position of children within parent */)
 {
   struct lstopo_obj_userdata *plud = parent->userdata;
-  enum lstopo_orient_e main_orient, right_orient, below_orient;
+  enum lstopo_orient_e main_orient, right_orient, below_orient, above_orient;
   unsigned border = loutput->gridsize;
   unsigned separator = loutput->gridsize;
   unsigned separator_below_cache = loutput->gridsize;
@@ -674,6 +674,10 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
   below_orient = loutput->below_force_orient;
   if (below_orient == LSTOPO_ORIENT_NONE)
     below_orient = loutput->force_orient[parent->type];
+  /* place above children in rectangle by default */
+  above_orient = loutput->above_force_orient;
+  if (above_orient == LSTOPO_ORIENT_NONE)
+    above_orient = LSTOPO_ORIENT_RECT;
 
   /* defaults */
   plud->children.box = 0;
@@ -790,7 +794,6 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
 
   /* compute the size of the above children section (Memory), if any */
   if (plud->above_children.kinds) {
-    enum lstopo_orient_e morient = LSTOPO_ORIENT_HORIZ;
     int need_box;
 
     assert(plud->above_children.kinds == LSTOPO_CHILD_KIND_MEMORY);
@@ -801,7 +804,7 @@ place_children(struct lstopo_output *loutput, hwloc_obj_t parent,
     need_box = !hwloc_obj_type_is_memory(parent->type)
       && (parent->memory_arity + parent->memory_first_child->memory_arity > 1);
 
-    place__children(loutput, parent, plud->above_children.kinds, &morient, need_box ? border : 0, separator, &above_children_width, &above_children_height);
+    place__children(loutput, parent, plud->above_children.kinds, &above_orient, need_box ? border : 0, separator, &above_children_width, &above_children_height);
     if (parent->type == HWLOC_OBJ_MEMCACHE)
       above_children_height -= separator;
 
