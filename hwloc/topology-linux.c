@@ -3975,8 +3975,17 @@ look_sysfsnode(struct hwloc_topology *topology,
   char *env;
   int allow_overlapping_node_cpusets = 0;
   int need_memcaches = hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_MEMCACHE);
+  int need_memattrs = !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS);
 
   hwloc_debug("\n\n * Topology extraction from /sys/devices/system/node *\n\n");
+
+  if (data->is_fake_numa_uniform) {
+    hwloc_debug("Disabling memory-side caches, memory attributes and HMAT initiators because of fake numa\n");
+    need_memcaches = 0;
+    need_memattrs = 0;
+    data->use_numa_initiators = 0;
+    allow_overlapping_node_cpusets = 2; /* accept without warning */
+  }
 
   env = getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS");
   if (env) {
@@ -4183,7 +4192,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  trees[nr_trees++] = tree;
 	}
         /* By the way, get their memattrs now that cpuset is fixed */
-        if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+        if (need_memattrs)
           read_node_local_memattrs(topology, data, node);
       }
 
