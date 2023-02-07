@@ -371,9 +371,6 @@ static float pci_link_speed(hwloc_obj_t obj)
  * Placing children in rectangle
  */
 
-/* preferred width/height compromise */
-#define RATIO (4.f/3.f)
-
 /* returns a score <= 1. close to 1 is better */
 static __hwloc_inline
 float rectangle_score(unsigned width, unsigned height, float ratio)
@@ -553,10 +550,13 @@ place_children_rect(struct lstopo_output *loutput, hwloc_obj_t parent,
   float ratio;
   int i;
 
-  if (parent->type == HWLOC_OBJ_CORE)
-    ratio = 1/RATIO;
+  /* preferred width/height compromise */
+  if (kind == LSTOPO_CHILD_KIND_MEMORY)
+    ratio = 8.f; /* very large for memory above objects since the parent is usually very large */
+  else if (parent->type == HWLOC_OBJ_CORE)
+    ratio = 3.f/4.f; /* rather high Core objects since they often contain 2 PUs that we don't want horizontal */
   else
-    ratio = RATIO;
+    ratio = 4.f/3.f; /* rather largeother objects */
   find_children_rectangle(loutput, parent, kind, separator, &rows, &columns, ratio);
 
   rowwidth = 0;
