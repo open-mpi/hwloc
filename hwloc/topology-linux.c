@@ -56,6 +56,7 @@ struct hwloc_linux_backend_data_s {
   } arch;
   int is_knl;
   int is_amd_with_CU;
+  int is_fake_numa_uniform; /* 0 if not fake, -1 if fake non-uniform, N if fake=<N>U */
   int use_numa_distances;
   int use_numa_distances_for_cpuless;
   int use_numa_initiators;
@@ -5531,6 +5532,40 @@ static int check_sysfs_cpu_path(int root_fd, int *old_filenames)
   return -1;
 }
 
+static void
+hwloc_linuxfs_check_kernel_cmdline(struct hwloc_linux_backend_data_s *data)
+{
+  FILE *file;
+  char cmdline[4096];
+  char *fakenuma;
+
+  file = hwloc_fopen("/proc/cmdline", "r", data->root_fd);
+  if (!file)
+    return;
+
+  cmdline[0] = 0;
+  fgets(cmdline, sizeof(cmdline), file);
+
+  fakenuma = strstr(cmdline, "numa=fake=");
+  if (fakenuma) {
+    /* in fake numa emulation, SLIT is updated but HMAT isn't, hence we need to disable/fix things later */
+    unsigned width = 0;
+    char type = 0;
+    if (sscanf(fakenuma+10, "%u%c", &width, &type) == 2 && type == 'U') {
+      /* if <N>U, each node is split in 8 nodes, we can still do things in this case */
+      data->is_fake_numa_uniform = width;
+    } else {
+      /* otherwise fake nodes are created by just dividing the entire RAM,
+       * without respecting locality at all
+       */
+      data->is_fake_numa_uniform = -1;
+    }
+    hwloc_debug("Found fake numa %d\n", data->is_fake_numa_uniform);
+  }
+
+  fclose(file);
+}
+
 static int
 hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -5582,6 +5617,11 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
    * Platform information for later
    */
   hwloc_gather_system_info(topology, data);
+
+  /**********************************
+   * Detect things in /proc/cmdline
+   */
+  hwloc_linuxfs_check_kernel_cmdline(data);
 
   /**********************
    * /proc/cpuinfo
@@ -7215,6 +7255,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
   data->is_amd_with_CU = 0;
+  data->is_fake_numa_uniform = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
