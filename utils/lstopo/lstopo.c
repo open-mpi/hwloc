@@ -303,11 +303,13 @@ lstopo_check_pci_domains(hwloc_topology_t topology)
 
 static void
 lstopo_parse_children_order(char *s, unsigned *children_order_p,
+                            enum lstopo_orient_e *above_force_orient_p,
                             enum lstopo_orient_e *right_force_orient_p,
                             enum lstopo_orient_e *below_force_orient_p)
 {
   char *tmp, *next;
   unsigned children_order;
+  enum lstopo_orient_e above_force_orient = LSTOPO_ORIENT_NONE;
   enum lstopo_orient_e right_force_orient = LSTOPO_ORIENT_NONE;
   enum lstopo_orient_e below_force_orient= LSTOPO_ORIENT_NONE;
 
@@ -327,6 +329,15 @@ lstopo_parse_children_order(char *s, unsigned *children_order_p,
 
     if (!strcmp(tmp, "memory:above") || !strcmp(tmp, "memoryabove") /* backward compat with 2.5 */) {
       children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
+    } else if (!strcmp(tmp, "memory:above:horiz")) {
+      children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
+      above_force_orient = LSTOPO_ORIENT_HORIZ;
+    } else if (!strcmp(tmp, "memory:above:vert")) {
+      children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
+      above_force_orient = LSTOPO_ORIENT_VERT;
+    } else if (!strcmp(tmp, "memory:above:rect")) {
+      children_order |= LSTOPO_ORDER_MEMORY_ABOVE;
+      above_force_orient = LSTOPO_ORIENT_RECT;
 
     } else if (!strcmp(tmp, "io:right")) {
       children_order |= LSTOPO_ORDER_IO_RIGHT;
@@ -384,6 +395,7 @@ lstopo_parse_children_order(char *s, unsigned *children_order_p,
   }
 
   *children_order_p = children_order;
+  *above_force_orient_p = above_force_orient;
   *right_force_orient_p = right_force_orient;
   *below_force_orient_p = below_force_orient;
 }
@@ -892,6 +904,7 @@ main (int argc, char *argv[])
     loutput.force_orient[i] = LSTOPO_ORIENT_HORIZ;
   loutput.force_orient[HWLOC_OBJ_NUMANODE] = LSTOPO_ORIENT_HORIZ;
   loutput.force_orient[HWLOC_OBJ_MEMCACHE] = LSTOPO_ORIENT_HORIZ;
+  loutput.above_force_orient = LSTOPO_ORIENT_NONE;
   loutput.right_force_orient = LSTOPO_ORIENT_NONE;
   loutput.below_force_orient = LSTOPO_ORIENT_NONE;
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++) {
@@ -1373,7 +1386,7 @@ main (int argc, char *argv[])
 	if (argc < 2)
 	  goto out_usagefailure;
         lstopo_parse_children_order(argv[1], &loutput.children_order,
-                                    &loutput.right_force_orient, &loutput.below_force_orient);
+                                    &loutput.above_force_orient, &loutput.right_force_orient, &loutput.below_force_orient);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-cpukinds")) {
