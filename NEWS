@@ -21,6 +21,8 @@ Version 2.10.0
 --------------
 * Add support for new AMD CPUID leaf 0x80000026 for better detection
   of Core Complex and Die on Zen4 processors in the x86 backend.
+* Add CXLDevice attributes to CXL DAX objects and NUMA nodes to show
+  which PCI device implements which window.
 * Ignore buggy memory-side caches and memory attributes when fake NUMA
   emulation is enabled on the Linux kernel command-line.
 * Fix installation failures when configuring with --target,
