@@ -3691,6 +3691,69 @@ read_node_mscaches(struct hwloc_topology *topology,
 }
 
 static int
+annotate_cxl_dax(hwloc_obj_t obj, unsigned region, int root_fd)
+{
+  char path[300];
+  unsigned i;
+
+  for(i=0; ; i++) {
+    char decoder[20]; /* "decoderX.Y" */
+    char decoderpath[256], *endpoint;
+    char uportpath[256], *pcirootbus, *pcibdf;
+    unsigned pcidomain, pcibus, pcidevice, pcifunc;
+    char *slash, *end;
+    int err;
+
+    /* read the i-th decoder name from file target<i> */
+    snprintf(path, sizeof(path), "/sys/bus/cxl/devices/region%u/target%u", region, i);
+    if (hwloc_read_path_by_length(path, decoder, sizeof(decoder), root_fd) < 0)
+      break;
+    end = strchr(decoder, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_debug("hwloc/dax/cxl: found decoder `%s' for region#%u target#%u\n", decoder, region, i);
+
+    /* get the endpoint symlink which ends with "/portT/endpointX/decoderY.X/" */
+    snprintf(path, sizeof(path), "/sys/bus/cxl/devices/%s", decoder);
+    err = hwloc_readlink(path, decoderpath, sizeof(decoderpath), root_fd);
+    if (err < 0)
+      break;
+    endpoint = strstr(decoderpath, "endpoint");
+    if (!endpoint)
+      break;
+    slash = strchr(endpoint, '/');
+    if (!slash)
+      break;
+    *slash = '\0';
+    hwloc_debug("hwloc/dax/cxl: found endpoint `%s'\n", endpoint);
+
+    /* get the PCI in the endpointX/uport symlink "../../../pci<busid>/<BDFs>../memX" */
+    snprintf(path, sizeof(path), "/sys/bus/cxl/devices/%s/uport", endpoint);
+    err = hwloc_readlink(path, uportpath, sizeof(uportpath), root_fd);
+    if (err < 0)
+      break;
+    hwloc_debug("hwloc/dax/cxl: lookind for BDF at the end of uport `%s'\n", uportpath);
+    pcirootbus = strstr(uportpath, "/pci");
+    if (!pcirootbus)
+      break;
+    slash = pcirootbus + 11; /* "/pciXXXX:YY/" */
+    if (*slash != '/')
+      break;
+    pcibdf = NULL;
+    while (sscanf(slash, "/%x:%x:%x.%x/", &pcidomain, &pcibus, &pcidevice, &pcifunc) == 4) {
+      pcibdf = slash+1;
+      slash += 13;
+    }
+    *slash = '\0';
+    if (pcibdf) {
+      hwloc_obj_add_info(obj, "CXLDevice", pcibdf);
+    }
+  }
+
+  return 0;
+}
+
+static int
 dax_is_kmem(const char *name, int fsroot_fd)
 {
   char path[300];
@@ -3705,7 +3768,7 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
 {
   char daxpath[300];
   char link[PATH_MAX];
-  char *begin, *end;
+  char *begin, *end, *region;
   const char *type;
   int err;
 
@@ -3744,6 +3807,14 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
   /* we'll convert SPM (specific-purpose memory) into a HBM subtype later by looking at memattrs */
   type = strstr(begin, "ndbus") ? "NVM" : "SPM";
   hwloc_obj_add_info(obj, "DAXType", type);
+
+  /* try to get some CXL info from the region */
+  region = strstr(begin, "/region");
+  if (region) {
+    unsigned i = strtoul(region+7, &end, 10);
+    if (end != region+7)
+      annotate_cxl_dax(obj, i, fsroot_fd);
+  }
 
   /* insert DAXParent last because it's likely less useful than others */
   hwloc_obj_add_info(obj, "DAXParent", begin);
