@@ -500,11 +500,16 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 static __hwloc_inline int
 hwloc_readlink(const char *p, char *l, size_t ll, int d __hwloc_attribute_unused)
 {
+  ssize_t err;
+  /* readlink doesn't put the ending \0. read ll-1 and add it. */
 #ifdef HAVE_OPENAT
-  return hwloc_readlinkat(p, l, ll, d);
+  err = hwloc_readlinkat(p, l, ll-1, d);
 #else
-  return readlink(p, l, ll);
+  err = readlink(p, l, ll-1);
 #endif
+  if (err >= 0)
+    l[err] = '\0';
+  return err;
 }
 
 
@@ -5777,7 +5782,6 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
     if (err < 0)
       return NULL;
   }
-  path[err] = '\0';
 
   if (!(osdev_flags & HWLOC_LINUXFS_OSDEV_FLAG_FIND_VIRTUAL)) {
     if (strstr(path, "/virtual/"))
