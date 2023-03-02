@@ -3719,7 +3719,11 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
    * ../../../devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region2/dax2.0/dax2.0/ for NVDIMMs
    * ../../../devices/platform/e820_pmem/ndbus0/region0/dax0.0/dax0.0/ for fake NVM (memmap=size!start kernel parameter)
    * ../../../devices/platform/hmem.0/dax0.0/ for "soft-reserved" specific-purpose memory
+   * ../../../devices/platform/ACPI0017:00/root0/decoder0.0/region0/dax_region0/dax0.0/ for CXL RAM
+   * ../../../devices/platform/ACPI0017:00/root0/nvdimm-bridge0/ndbus0/region0/dax0.0/dax0.0/ for CXL PMEM
    */
+
+  /* remove beginning and end of link to populate DAXParent */
   begin = link;
   /* remove the starting ".." (likely multiple) */
   while (!strncmp(begin, "../", 3))
@@ -3729,9 +3733,9 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
     begin += 8;
   if (!strncmp(begin, "platform/", 9))
     begin += 9;
-  /* remove the ending "daxX.Y" (either one or two) */
+  /* stop at the ending "/daxX.Y" */
   end = strstr(begin, name);
-  if (end) {
+  if (end && end != begin && end[-1] == '/') {
     *end = '\0';
     if (end != begin && end[-1] == '/')
       end[-1] = '\0';
@@ -3741,6 +3745,7 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
   type = strstr(begin, "ndbus") ? "NVM" : "SPM";
   hwloc_obj_add_info(obj, "DAXType", type);
 
+  /* insert DAXParent last because it's likely less useful than others */
   hwloc_obj_add_info(obj, "DAXParent", begin);
 
   /*
