@@ -498,7 +498,13 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x1);
   }
 
-  if (highest_ext_cpuid > 0x80000022) {
+  /* 0x80000023 = Secure Multi-Key Encryption on AMD ; Reserved on Intel */
+  if (highest_ext_cpuid >= 0x80000023) {
+    regs[0] = 0x80000023;
+    dump_one_cpuid(output, regs, 0x1);
+  }
+
+  if (highest_ext_cpuid > 0x80000023) {
     static int reported = 0;
     if (!reported)
       fprintf(stderr, "WARNING: Processor supports new extended CPUID leaves upto 0x%x\n", highest_ext_cpuid);
