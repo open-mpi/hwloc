@@ -27,10 +27,10 @@
 If your issue consists in a wrong topology detection, we also need the following for debugging remotely:
 
 * On Linux, run `hwloc-gather-topology myhost` and post the `myhost.*` files that it will generate. Note that this tool may be slow on large nodes or when I/O is enabled.
-* On Solaris, `kstat -C cpu_info`, `lgrpinfo -a` and `psrinfo`
-* On MacOS and BSD, `sysctl hw` and `sysctl machdep`
-* On BSD x86 platforms, if using hwloc >= 2.0, also run `hwloc-gather-cpuid` and post an archive of the `cpuid` that was generated.
-* On Windows, `coreinfo -cgnlsm`
+* On Solaris, the output of `kstat -C cpu_info`, `kstat -C pg_hw_perf`, `prtpicl -v`, `lgrpinfo -a` and `psrinfo -v`.
+* On MacOS and BSD, the output of `sysctl hw` and `sysctl machdep`.
+* On Windows, the output of `coreinfo -cgnlsm`.
+* On x86 non-Linux platforms, also run `hwloc-gather-cpuid` and post an archive of the `cpuid` directory that was generated.
 
 :warning: **Do not post this information on Github or on public mailing list if your machine is a top-secret prototype!** :warning:
 
