@@ -7,27 +7,52 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-# Add your output files here.
-xml_outputs = \
+# Add your test files here.
+xml_tests = \
+        8intel64-4n2t-memattrs.test \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.test \
+        16em64t-4s2c2t.test \
+        16em64t-4s2c2t.console.test \
+        16-2gr2gr2n2c+misc.test \
+        16-2gr2gr2n2c+misc.console.test \
+        16amd64-4distances.test \
+        16amd64-4distances.console.test \
+        16amd64-8n2c-cpusets.test \
+        16em64t-4s2c2t-offlines.test \
+        16intel64-manyVFs.test \
+        16intel64-manyVFs.console.test \
+        16intel64-manyVFs.nocollapse.console.test \
+        24em64t-2n6c2t-pci.test \
+        32em64t-2n8c2t-pci-noio.test \
+        32em64t-2n8c2t-pci-normalio.test \
+        32em64t-2n8c2t-pci-wholeio.test \
+        64intel64-3g2n+2n-irregulargroups+pci.disallowed.test \
+        64intel64-3g2n+2n-irregulargroups+pci.disallowed.console.test \
+        64intel64-fakeKNL-SNC4-hybrid.test \
+        96em64t-4n4d3ca2co-pci.test \
+        192em64t-12gr2n8c2t.test \
+        192em64t-24n8c2t.test \
+        power8gpudistances.test \
+        fakeheterodistances.test \
+        fakecpukinds.test \
+        cxlmem+dax.v2tov3.test \
+        cxlmem+dax.v3tov2.test
+
+# Add your XML files here.
+xml_xml_outputs = \
         8intel64-4n2t-memattrs.xml \
-        16amd64-8n2c-cpusets.xml \
-        16amd64-4distances.xml \
-        16amd64-4distances.console.output \
+        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.xml \
         16em64t-4s2c2t.xml \
-        16em64t-4s2c2t-offlines.xml \
-        16em64t-4s2c2t.console.output \
         16-2gr2gr2n2c+misc.xml \
-        16-2gr2gr2n2c+misc.console.output \
+        16amd64-4distances.xml \
+        16amd64-8n2c-cpusets.xml \
+        16em64t-4s2c2t-offlines.xml \
         16intel64-manyVFs.xml \
-        16intel64-manyVFs.console.output \
-        16intel64-manyVFs.console.nocollapse.output \
         24em64t-2n6c2t-pci.xml \
         32em64t-2n8c2t-pci-noio.xml \
         32em64t-2n8c2t-pci-normalio.xml \
         32em64t-2n8c2t-pci-wholeio.xml \
         64intel64-3g2n+2n-irregulargroups+pci.xml \
-        64intel64-3g2n+2n-irregulargroups+pci.console.output \
-        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.xml \
         64intel64-fakeKNL-SNC4-hybrid.xml \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
@@ -35,49 +60,24 @@ xml_outputs = \
         power8gpudistances.xml \
         fakeheterodistances.xml \
         fakecpukinds.xml \
-        cxlmem+dax.v2tov3.xml \
-        cxlmem+dax.v3tov2.xml
+        cxlmem+dax.v2.xml \
+        cxlmem+dax.v3.xml
 
-# Each output `xyz.xml' may have a corresponding `xyz.source' file specifying
-# its source file.
-# Each output `xyz.output' must have a corresponding `xyz.xml' source file,
-# or a `xyz.source' file specifying its source file.
-xml_source = \
-        16amd64-4distances.console.source \
-        16em64t-4s2c2t.console.source \
-        16-2gr2gr2n2c+misc.console.source \
-        16intel64-manyVFs.console.source \
-        16intel64-manyVFs.console.nocollapse.source \
-        32em64t-2n8c2t-pci-noio.source \
-        32em64t-2n8c2t-pci-normalio.source \
-        64intel64-3g2n+2n-irregulargroups+pci.console.source \
-        cxlmem+dax.v2tov3.source \
-        cxlmem+dax.v3tov2.source
-
-# Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
-# file modifying the behavior of lstopo
-xml_options = \
-        16amd64-4distances.console.options \
-        16em64t-4s2c2t.console.options \
-        16intel64-manyVFs.console.options \
-        16intel64-manyVFs.console.nocollapse.options \
-        16-2gr2gr2n2c+misc.console.options \
-        32em64t-2n8c2t-pci-noio.options \
-        32em64t-2n8c2t-pci-wholeio.options \
-        64intel64-3g2n+2n-irregulargroups+pci.options \
-        64intel64-3g2n+2n-irregulargroups+pci.console.options \
-        cxlmem+dax.v3tov2.options
-
-# Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.env'
-# modifying the environment of lstopo
-xml_envs = \
-        16amd64-4distances.console.env \
-        64intel64-3g2n+2n-irregulargroups+pci.console.env
+# Add your console outputs here.
+xml_console_outputs = \
+        16em64t-4s2c2t.console \
+        16-2gr2gr2n2c+misc.console \
+        16amd64-4distances.console \
+        16intel64-manyVFs.console \
+        16intel64-manyVFs.nocollapse.console \
+        64intel64-3g2n+2n-irregulargroups+pci.console
 
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
-TESTS = $(xml_outputs)
+TESTS = $(xml_tests)
 
-EXTRA_DIST = $(xml_outputs) $(xml_source) $(xml_options) $(xml_envs)
+EXTRA_DIST = $(xml_tests) $(xml_xml_outputs) $(xml_console_outputs)
 
-LOG_COMPILER = $(HWLOC_top_builddir)/tests/hwloc/xml/test-topology.sh
+# .test is in TEXT_EXTENSIONS by default, hence it uses its own test configuration
+# variables prefixed with TEST_
+TEST_LOG_COMPILER = $(HWLOC_top_builddir)/tests/hwloc/xml/test-topology.sh

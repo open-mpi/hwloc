@@ -1,3 +1,6 @@
+16amd64-4distances.xml
+16amd64-4distances.console
+-v
 # make sure we use default numeric formats (only XML outputs are dis-localized when supported)
 # we really want to check the distance matrix here (in case it gets truncated or so)
 LANG=C

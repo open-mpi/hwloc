@@ -1,0 +1,3 @@
+cxlmem+dax.v3.xml
+cxlmem+dax.v2.xml
+--export-xml-flags 2 --of xml

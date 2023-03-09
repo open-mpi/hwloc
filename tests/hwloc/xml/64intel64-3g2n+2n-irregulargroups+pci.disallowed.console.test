@@ -1,3 +1,6 @@
+64intel64-3g2n+2n-irregulargroups+pci.xml
+64intel64-3g2n+2n-irregulargroups+pci.console
+--disallowed -v
 # make sure we use default numeric formats (only XML outputs are dis-localized when supported)
 # we really want to check the distance matrix here (in case it gets truncated or so)
 LANG=C

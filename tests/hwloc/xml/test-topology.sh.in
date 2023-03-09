@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -54,96 +54,85 @@ fi
   tmp=$TMPDIR/foo$$-$RANDOM
   (umask 077 && mkdir "$tmp")
 } || exit $?
-file="$tmp/lstopo_xml.output"
+output="$tmp/lstopo_xml.output"
 
 set -e
 
-output="$1"
+testname="$1"
 dirname=`dirname $1`
-filename=`basename $1`
-basename=`basename $1 .xml`
-basename=`basename $basename .output`
+basename=`basename $1 .test`
 
-source="${dirname}/${basename}.xml"
-source_file="${dirname}/${basename}.source"
-
-if test \! -f "$source" && test \! -f "$source_file"; then
-  echo "Missing both ${basename}.xml and ${basename}.source"
+if test \! -f "$testname"; then
+  echo "Cannot find test file $testname"
   exit 1
 fi
-test -f "$source_file" && source="${dirname}/"`cat $source_file`
 
-options_file="${dirname}/${basename}.options"
-test -f "$options_file" && opts=`cat $options_file`
+####################################
+# foo.test should contain:
+# - source filename on 1st line (must be in same directory as foo.test)
+# - target filename on 2nd line (must be in same directory as foo.test)
+# - options on 3rd line, if any
+# - environment variables to be sourced on next lines, if any
 
-test -f "${dirname}/${basename}.env" && . "${dirname}/${basename}.env"
+source=`sed -n 1p "$testname"`
+target=`sed -n 2p "$testname"`
+opts=`sed -n 3p "$testname"`
+sed -n '4,$p' "$testname" > "$tmp/env"
+
+if test \! -f "$dirname/$source"; then
+  echo "Cannot find source file $source from test $testname"
+  exit 1
+fi
+if test \! -f "$dirname/$target"; then
+  echo "Cannot find target file $target from test $testname"
+  exit 1
+fi
+
+if test "$target" = `basename $target .xml`".xml"; then
+  is_xml_target=1
+  opts="--of xml $opts"
+else
+  is_xml_target=0
+  opts="--of console $opts"
+fi
+
+. "$tmp/env"
 
 do_run()
 {
-  echo $lstopo --if xml --input "$source" --of xml "$file" $opts
-  $lstopo --if xml --input "$source" --of xml "$file" $opts
+  echo $lstopo --if xml --input "$dirname/$source" "$output" $opts
+  $lstopo --if xml --input "$dirname/$source" "$output" $opts
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
-    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$dirname/$target" "$output"
   else
-    if ! @DIFF@ "$output" "$file" >/dev/null
+    if ! @DIFF@ "$dirname/$target" "$output" >/dev/null
     then
-	cp -f "$file" "$output"
-	echo "Updated $filename"
+	cp -f "$output" "$dirname/$target"
+	echo "Updated $target"
     fi
   fi
 
-  if [ -n "@XMLLINT@" ]
+  if [ -n "@XMLLINT@" -a $is_xml_target -eq 1 ]
   then
     cp -f "$HWLOC_top_srcdir"/hwloc/hwloc*.dtd "$tmp/"
-    ( cd $tmp ; @XMLLINT@ --valid $file ) > /dev/null
+    ( cd $tmp ; @XMLLINT@ --valid $output ) > /dev/null
   fi
 
-  rm "$file"
-}
-
-do_run_with_output()
-{
-  echo $lstopo --if xml --input "$source" "$file" $opts
-  $lstopo --if xml --input "$source" "$file" $opts
-
-  if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
-  then
-    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$output" "$file"
-  else
-    if ! @DIFF@ "$output" "$file" >/dev/null
-    then
-        cp -f "$file" "$output"
-        echo "Updated ${basename}.xml"
-    fi
-  fi
-
-  rm $file
+  rm "$output"
 }
 
 export HWLOC_LIBXML_IMPORT
 export HWLOC_LIBXML_EXPORT
 
-if test "$filename" = "${basename}.xml"; then
-  echo "Importing with default parser and reexporting with minimalistic implementation..."
-  HWLOC_LIBXML_IMPORT=1
-  HWLOC_LIBXML_EXPORT=0
-  do_run "$dirname" "$basename"
-  echo "Importing with minimalistic parser and reexporting with default implementation..."
-  HWLOC_LIBXML_IMPORT=0
-  HWLOC_LIBXML_EXPORT=1
-  do_run "$dirname" "$basename"
-else if test "$filename" = "${basename}.output"; then
-  echo "Importing with default parser"
-  HWLOC_LIBXML_IMPORT=1
-  do_run_with_output "$dirname" "$basename"
-  echo "Importing with minimalistic parser"
-  HWLOC_LIBXML_IMPORT=0
-  do_run_with_output "$dirname" "$basename"
-else
-  echo "Filename must end with either .xml or .output"
-  exit 1
-fi fi
+echo "Importing with default parser and reexporting with minimalistic implementation..."
+HWLOC_LIBXML_IMPORT=1
+HWLOC_LIBXML_EXPORT=0
+do_run
+echo "Importing with minimalistic parser and reexporting with default implementation..."
+HWLOC_LIBXML_IMPORT=0
+HWLOC_LIBXML_EXPORT=1
+do_run
 
 rm -rf "$tmp"
