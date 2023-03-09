@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2022 Inria.  All rights reserved.
+dnl Copyright © 2009-2023 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -1266,8 +1266,14 @@ char nvmlInit ();
         AC_MSG_NOTICE([assuming ROCm is installed in standard directories ...])
       fi fi fi
       if test "x$rocm_dir" != x; then
-         HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/rocm_smi/include/"
-         HWLOC_RSMI_LDFLAGS="-L$rocm_dir/rocm_smi/lib/"
+         if test -d "$rocm_dir/include/rocm_smi"; then
+           HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/include/"
+           HWLOC_RSMI_LDFLAGS="-L$rocm_dir/lib/"
+         else
+           # ROCm <5.2 only used its own rocm_smi/{include,lib} directories
+           HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/rocm_smi/include/"
+           HWLOC_RSMI_LDFLAGS="-L$rocm_dir/rocm_smi/lib/"
+	 fi
       fi
 
       hwloc_rsmi_happy=yes
@@ -1353,8 +1359,14 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         HWLOC_OPENCL_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
         HWLOC_OPENCL_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
         if test "x$rocm_dir" != x; then
-           HWLOC_OPENCL_CPPFLAGS="$HWLOC_OPENCL_CPPFLAGS -I$rocm_dir/opencl/include/"
-           HWLOC_OPENCL_LDFLAGS="$HWLOC_OPENCL_LDFLAGS -L$rocm_dir/opencl/lib/"
+	   if test -d "$rocm_dir/include/CL"; then
+             HWLOC_OPENCL_CPPFLAGS="$HWLOC_OPENCL_CPPFLAGS -I$rocm_dir/include/"
+             HWLOC_OPENCL_LDFLAGS="$HWLOC_OPENCL_LDFLAGS -L$rocm_dir/lib/"
+	   else
+             # ROCm <5.2 only used its own opencl/{include,lib} directories
+	     HWLOC_OPENCL_CPPFLAGS="$HWLOC_OPENCL_CPPFLAGS -I$rocm_dir/opencl/include/"
+             HWLOC_OPENCL_LDFLAGS="$HWLOC_OPENCL_LDFLAGS -L$rocm_dir/opencl/lib/"
+	   fi
         fi
         tmp_save_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$CPPFLAGS $HWLOC_OPENCL_CPPFLAGS"
