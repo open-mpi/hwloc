@@ -6177,6 +6177,15 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
       }
     }
   }
+  if (!strncmp(obj->name, "hsn", 3)) {
+    /* Cray Cassini HSN for Slingshot networks are Ethernet-based,
+     * named hsnX with a "cxi" (and "cxi_user") class.
+     */
+    snprintf(path, sizeof(path), "%s/device/cxi", osdevpath);
+    if (!hwloc_access(path, R_OK|X_OK, root_fd)) {
+      obj->subtype = strdup("Slingshot");
+    }
+  }
 }
 
 static int
