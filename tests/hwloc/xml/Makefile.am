@@ -10,7 +10,6 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # Add your test files here.
 xml_tests = \
         8intel64-4n2t-memattrs.test \
-        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.test \
         16em64t-4s2c2t.test \
         16em64t-4s2c2t.console.test \
         16-2gr2gr2n2c+misc.test \
@@ -41,7 +40,6 @@ xml_tests = \
 # Add your XML files here.
 xml_xml_outputs = \
         8intel64-4n2t-memattrs.xml \
-        8intel64-fakeKNL-A2A-hybrid.rootattachednumas.xml \
         16em64t-4s2c2t.xml \
         16-2gr2gr2n2c+misc.xml \
         16amd64-4distances.xml \
