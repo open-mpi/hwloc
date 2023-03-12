@@ -171,4 +171,7 @@ EXTRA_DIST = $(sysfs_tests) $(sysfs_tarballs) $(sysfs_console_outputs) $(sysfs_x
 # variables prefixed with TEST_
 TEST_LOG_COMPILER = $(abs_builddir)/test-topology.sh
 
+check-local:
+	if test -x extra/extra-tests.sh; then extra/extra-tests.sh "$(TEST_LOG_COMPILER)"; fi
+
 SUBDIRS = . allowed gather

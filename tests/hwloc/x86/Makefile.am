@@ -105,3 +105,6 @@ EXTRA_DIST = $(cpuid_tests) $(cpuid_xml_outputs) $(cpuid_tarballs)
 # .test is in TEXT_EXTENSIONS by default, hence it uses its own test configuration
 # variables prefixed with TEST_
 TEST_LOG_COMPILER = $(abs_builddir)/test-topology.sh
+
+check-local:
+	if test -x extra/extra-tests.sh; then extra/extra-tests.sh "$(TEST_LOG_COMPILER)"; fi
