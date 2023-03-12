@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -119,7 +119,7 @@ actual_input="$topology".synthetic
 
 # if there's a .source file, use the tarball name it contains instead of $topology
 if [ -f "$topology".source ] ; then
-    actual_fsroot="$HWLOC_top_srcdir"/tests/hwloc/linux/allowed/`cat "$topology".fsroot.source`
+    actual_fsroot=`dirname $topology`/`cat "$topology".fsroot.source`
 else
     actual_fsroot="$topology".fsroot.tar.bz2
 fi

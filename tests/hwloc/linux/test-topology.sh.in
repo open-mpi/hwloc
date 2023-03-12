@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -123,7 +123,7 @@ actual_options="$topology".options
 
 # if there's a .source file, use the tarball name it contains instead of $topology
 if [ -f "$topology".source ] ; then
-    actual_source="$HWLOC_top_srcdir"/tests/hwloc/linux/`cat "$topology".source`
+    actual_source=`dirname $topology`/`cat "$topology".source`
 else
     actual_source="$topology".tar.bz2
 fi
@@ -134,7 +134,7 @@ if [ -f "$topology".env ] ; then
 fi
 
 # use an absolute path for tar options because tar is invoked from the temp directory
-actual_exclude="$HWLOC_top_srcdir/tests/hwloc/linux/`basename $topology`".exclude
+actual_exclude=`dirname $topology`/`basename $topology`.exclude
 [ -f "$actual_exclude" ] && tar_options="--exclude-from=$actual_exclude"
 
 result=1
