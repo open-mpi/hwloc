@@ -1,4 +1,4 @@
-# Copyright © 2009-2017 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -27,4 +27,4 @@ endif HWLOC_HAVE_OPENAT
 
 EXTRA_DIST = $(tests_outputs) $(tests_synthetics) $(tests_fsroots) $(tests_options) $(tests_envs)
 
-LOG_COMPILER = $(builddir)/test-topology.sh
+LOG_COMPILER = $(abs_builddir)/test-topology.sh

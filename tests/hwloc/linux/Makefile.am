@@ -1,4 +1,4 @@
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -170,6 +170,6 @@ endif HWLOC_HAVE_OPENAT
 
 EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
 
-LOG_COMPILER = $(builddir)/test-topology.sh
+LOG_COMPILER = $(abs_builddir)/test-topology.sh
 
 SUBDIRS = . allowed gather

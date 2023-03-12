@@ -78,4 +78,4 @@ EXTRA_DIST = $(xml_tests) $(xml_xml_outputs) $(xml_console_outputs)
 
 # .test is in TEXT_EXTENSIONS by default, hence it uses its own test configuration
 # variables prefixed with TEST_
-TEST_LOG_COMPILER = $(HWLOC_top_builddir)/tests/hwloc/xml/test-topology.sh
+TEST_LOG_COMPILER = $(abs_builddir)/test-topology.sh

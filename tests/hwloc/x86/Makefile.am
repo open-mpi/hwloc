@@ -1,4 +1,4 @@
-# Copyright © 2015-2022 Inria.  All rights reserved.
+# Copyright © 2015-2023 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -82,4 +82,4 @@ endif HWLOC_HAVE_BUNZIPP
 
 EXTRA_DIST = $(cpuid_outputs) $(cpuid_tarballs) $(cpuid_options) $(cpuid_envs)
 
-LOG_COMPILER = $(builddir)/test-topology.sh
+LOG_COMPILER = $(abs_builddir)/test-topology.sh
