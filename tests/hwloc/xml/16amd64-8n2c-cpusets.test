@@ -1,2 +1,3 @@
-16amd64-8n2c-cpusets.xml
-16amd64-8n2c-cpusets.xml
+# Disallowed CPUs already removed from input, exposing asymmetric topology
+source:  16amd64-8n2c-cpusets.xml
+target:  16amd64-8n2c-cpusets.xml

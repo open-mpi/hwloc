@@ -1,3 +1,4 @@
-16intel64-manyVFs.xml
-16intel64-manyVFs.console
--v
+# Many Virtual Functions, collapsed
+source:  16intel64-manyVFs.xml
+target:  16intel64-manyVFs.console
+options: -v

@@ -1,2 +1,4 @@
-96em64t-4n4d3ca2co-pci.xml
-96em64t-4n4d3ca2co-pci.xml
+# Old IBM x3950M2 assembling 4 nodes into a custom NUMA arch
+# Also used in test-hwloc-calc
+source:  96em64t-4n4d3ca2co-pci.xml
+target:  96em64t-4n4d3ca2co-pci.xml

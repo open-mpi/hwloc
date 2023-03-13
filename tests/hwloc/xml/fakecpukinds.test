@@ -1,2 +1,3 @@
-fakecpukinds.xml
-fakecpukinds.xml
+# Fake cpukinds info
+source:  fakecpukinds.xml
+target:  fakecpukinds.xml

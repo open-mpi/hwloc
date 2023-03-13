@@ -1,2 +1,3 @@
-24em64t-2n6c2t-pci.xml
-24em64t-2n6c2t-pci.xml
+# PCI with link speeds
+source:  24em64t-2n6c2t-pci.xml
+target:  24em64t-2n6c2t-pci.xml

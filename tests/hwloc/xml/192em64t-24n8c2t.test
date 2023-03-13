@@ -1,2 +1,3 @@
-192em64t-24n8c2t.xml
-192em64t-24n8c2t.xml
+# SGI Altix without distance groups
+source:  192em64t-24n8c2t.xml
+target:  192em64t-24n8c2t.xml

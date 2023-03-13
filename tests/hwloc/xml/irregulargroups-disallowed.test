@@ -1,3 +1,4 @@
-irregulargroups-disallowed.xml
-irregulargroups-disallowed.xml
---disallowed
+# Irregular topologies with disallowed cores and NUMA kept
+source:  irregulargroups-disallowed.xml
+target:  irregulargroups-disallowed.xml
+options: --disallowed

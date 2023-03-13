@@ -1,2 +1,3 @@
-fakeheterodistances.xml
-fakeheterodistances.xml
+# Fake heterogeneous distances structures
+source:  fakeheterodistances.xml
+target:  fakeheterodistances.xml

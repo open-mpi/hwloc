@@ -1,2 +1,3 @@
-16amd64-4distances.xml
-16amd64-4distances.xml
+# Multiple distances matrices
+source:  16amd64-4distances.xml
+target:  16amd64-4distances.xml

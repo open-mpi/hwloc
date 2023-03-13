@@ -1,2 +1,3 @@
-16em64t-4s2c2t-offlines.xml
-16em64t-4s2c2t-offlines.xml
+# Some offline CPUs
+source:  16em64t-4s2c2t-offlines.xml
+target:  16em64t-4s2c2t-offlines.xml

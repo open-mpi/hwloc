@@ -69,15 +69,15 @@ fi
 
 ####################################
 # foo.test should contain:
-# - source filename on 1st line (must be in same directory as foo.test)
-# - target filename on 2nd line (must be in same directory as foo.test)
-# - options on 3rd line, if any
-# - environment variables to be sourced on next lines, if any
+# - source: input XML filename (must be in same directory as foo.test)
+# - target: expected output filename (must be in same directory as foo.test, ends with either .console or .xml)
+# - options: lstopo options, if any
+# - env: environment variable lines to be sourced, if any
 
-source=`sed -n 1p "$testname"`
-target=`sed -n 2p "$testname"`
-opts=`sed -n 3p "$testname"`
-sed -n '4,$p' "$testname" > "$tmp/env"
+source=`sed -n 's/^source: *//p' "$testname"`
+target=`sed -n 's/^target: *//p' "$testname"`
+opts=`sed -n 's/^options: *//p' "$testname"`
+sed -n 's/^env: *//p' "$testname" > "$tmp/env"
 
 if test \! -f "$dirname/$source"; then
   echo "Cannot find source file $source from test $testname"

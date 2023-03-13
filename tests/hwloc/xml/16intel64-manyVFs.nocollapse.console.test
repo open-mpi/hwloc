@@ -1,4 +1,5 @@
-16intel64-manyVFs.xml
-16intel64-manyVFs.nocollapse.console
--v --no-collapse
+# Many Virtual Functions, not collapsed
+source:  16intel64-manyVFs.xml
+target:  16intel64-manyVFs.nocollapse.console
+options: -v --no-collapse
 

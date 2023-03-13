@@ -1,2 +1,3 @@
-power8gpudistances.xml
-power8gpudistances.xml
+# POWER8 with GPUs and NVLink/CAPI bandwidths
+source:  power8gpudistances.xml
+target:  power8gpudistances.xml

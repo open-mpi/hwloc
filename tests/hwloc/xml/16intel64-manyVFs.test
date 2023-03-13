@@ -1,2 +1,3 @@
-16intel64-manyVFs.xml
-16intel64-manyVFs.xml
+# Many Virtual Functions, collapsed
+source:  16intel64-manyVFs.xml
+target:  16intel64-manyVFs.xml
