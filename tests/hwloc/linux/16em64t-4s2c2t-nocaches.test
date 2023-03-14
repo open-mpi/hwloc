@@ -1,0 +1,4 @@
+# Removing caches
+source:  16em64t-4s2c2t.tar.bz2
+target:  16em64t-4s2c2t-nocaches.console
+options: - -v --no-caches

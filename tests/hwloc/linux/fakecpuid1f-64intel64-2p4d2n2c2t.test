@@ -1,0 +1,3 @@
+# fake (Qemu-generated) case with CPUID.1f Dies
+source:  fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2
+target:  fakecpuid1f-64intel64-2p4d2n2c2t.console

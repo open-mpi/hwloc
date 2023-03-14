@@ -202,13 +202,13 @@ set -e
   echo
 
   echo "# CPU kind by index"
-  $calc --if xml --input $linuxdir/fakeheterocpunuma.output --cpukind 1 all
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml --cpukind 1 all
   echo
   echo "# CPU kind by wrong index"
-  $calc --if xml --input $linuxdir/fakeheterocpunuma.output --cpukind 3 all
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml --cpukind 3 all
   echo
   echo "# CPU kind by info attr"
-  $calc --if xml --input $linuxdir/fakeheterocpunuma.output --cpukind FrequencyMaxMHz=3000 all
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml --cpukind FrequencyMaxMHz=3000 all
   echo
 
   echo "# Caches with attributes"

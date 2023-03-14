@@ -1,0 +1,8 @@
+# 48-core AMD Magny-Cours, initially interesting because:
+# - 2 NUMA nodes inside each socket
+# - non-multiple of 32 kernel cpumaps (NR_CPUS=48)
+# Later modified to simulate sparse numa node OS indexes.
+# The distances matrix was also modified to become asymmetric (to verify we don't mix rows/columns)
+# but this change was lost somewhere in the history.
+source:  48amd64-4pa2n6c-sparse.tar.bz2
+target:  48amd64-4pa2n6c-sparse.console

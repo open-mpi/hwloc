@@ -1,0 +1,4 @@
+# Old Tyan S4881+M4881 big NUMA machine
+# Also used in test-lstopo
+source:  16amd64-8n2c.tar.bz2
+target:  16amd64-8n2c.console

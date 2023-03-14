@@ -1,0 +1,3 @@
+# Objects are reordered because some CPUs are missing
+source:  16em64t-4s2ca2c-cpusetreorder.tar.bz2
+target:  16em64t-4s2ca2c-cpusetreorder.console

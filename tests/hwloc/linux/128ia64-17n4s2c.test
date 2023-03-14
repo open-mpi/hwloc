@@ -1,0 +1,6 @@
+# HP Integrity Superdome sx2000
+# Strange IA64 machine with 16 sockets and an additional CPU-less 17th NUMA node.
+# Distance-based grouping had to be modified for this NUMA topology
+# (see commit SVN r2232 / GIT bb0655f572d503b78aaad60f47c7c148d0eaf41c)
+source:  128ia64-17n4s2c.tar.bz2
+target:  128ia64-17n4s2c.console

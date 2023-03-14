@@ -1,0 +1,4 @@
+# Old UMA platform
+source:  16em64t-4s2c2t.tar.bz2
+target:  16em64t-4s2c2t-xml.xml
+options: --no-icaches

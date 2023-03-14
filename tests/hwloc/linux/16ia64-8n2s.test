@@ -1,0 +1,3 @@
+# IA64 NUMA
+source:  16ia64-8n2s.tar.bz2
+target:  16ia64-8n2s.console

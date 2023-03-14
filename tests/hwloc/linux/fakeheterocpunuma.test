@@ -1,0 +1,13 @@
+# fake linux example
+# heterogeneous NUMA locations:
+# - NUMA nodes at different levels and even some above others.
+# - Intented to regression test the inserting/management of nodes and nodesets in the core
+#   even if real machines didn't expose such things yet.
+# and heterogenous frequencies for cpukinds.
+# Also used in test-hwloc-calc and test-hwloc-info.
+source:  fakeheterocpunuma.tar.bz2
+target:  fakeheterocpunuma.xml
+env:     HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS=1
+env:     export HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS
+env:     HWLOC_CPUKINDS_MAXFREQ=1
+env:     export HWLOC_CPUKINDS_MAXFREQ

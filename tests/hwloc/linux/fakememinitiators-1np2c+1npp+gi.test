@@ -1,0 +1,10 @@
+# complex initiators/targets
+# one node per pair of core and one per 4-core package.
+# All nodes are either cpu-only (0-3) or memory-only (5-10)
+# Hence we have to hide CPU-only nodes and find the locality of memory nodes
+# using sysfs target/initiator files.
+# There's also a generic initiator (node4) that has faster access
+# to memory node5/6/7 than its local CPU.
+# It doesn't appear in our topology but forces us to use access1 instead of access0.
+source:  fakememinitiators-1np2c+1npp+gi.tar.bz2
+target:  fakememinitiators-1np2c+1npp+gi.console

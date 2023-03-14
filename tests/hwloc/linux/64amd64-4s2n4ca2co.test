@@ -1,0 +1,4 @@
+# 64-core AMD bulldozer
+# L1i isn't equal to L1d, its cpuset is larger (and equal to L2).
+source:  64amd64-4s2n4ca2co.tar.bz2
+target:  64amd64-4s2n4ca2co.console

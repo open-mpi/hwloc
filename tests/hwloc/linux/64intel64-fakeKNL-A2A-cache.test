@@ -1,0 +1,3 @@
+# Fake KNL with only 16 cores, configured in All2all and Cache modes
+source:  64intel64-fakeKNL-A2A-cache.tar.bz2
+target:  64intel64-fakeKNL-A2A-cache.console

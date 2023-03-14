@@ -1,0 +1,4 @@
+# Buggy NUMA info
+# Linux reports 8 NUMA nodes containing the (same) entire list of all cores, hence all of them get merged.
+source:  8em64t-2s2ca2c-buggynuma.tar.bz2
+target:  8em64t-2s2ca2c-buggynuma.console

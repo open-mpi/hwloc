@@ -1,0 +1,3 @@
+# Offline CPUs
+source:  16em64t-4s2c2t-offlines.tar.bz2
+target:  16em64t-4s2c2t-offlines.console

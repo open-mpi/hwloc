@@ -1,0 +1,4 @@
+# Objects get reordered because some PUs are missing
+source:  16em64t-4s2ca2c-cpusetreorder.tar.bz2
+target:  16em64t-4s2ca2c-cpusetreorder-merge.console
+options: - -v --filter all:structure

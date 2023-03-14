@@ -1,0 +1,5 @@
+# Cgroups disable some CPU and NUMA, and filtering causes
+# things to disappear, hence restricting the distances matrix.
+source:  16amd64-4n4c-cgroup-distance-merge.tar.bz2
+target:  16amd64-4n4c-cgroup-distance-merge.console
+options: - -v --filter all:structure --no-icaches

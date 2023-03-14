@@ -1,0 +1,3 @@
+# Fake KNL with only 16 cores, configured in SNC-4 an Hybrid modes
+source:  64intel64-fakeKNL-SNC4-hybrid.tar.bz2
+target:  64intel64-fakeKNL-SNC4-hybrid.console

@@ -1,0 +1,10 @@
+# conflicting cpusets to check insert errors (hidden)
+# 4th socket conflicts, ignored
+# 3rd L3 conflicts, ignored
+# core distance matrix conflicts, distance-core-groups ignored
+# I/O affinity conflicts, cannot insert I/O group for hostbridge, attach to root
+# NUMA distance matrix works fine.
+source:  40intel64-4n10c+pci-conflicts.tar.bz2
+target:  40intel64-4n10c+pci-conflicts.console
+env:     HWLOC_HIDE_ERRORS=1
+env:     export HWLOC_HIDE_ERRORS

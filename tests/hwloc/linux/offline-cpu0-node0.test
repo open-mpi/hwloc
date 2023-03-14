@@ -1,0 +1,6 @@
+# CPU#0 and NUMA node#0 offline
+# Generated from a dual-12-core haswell platform,
+# after marking cores 0-4,21-23 offline and NUMA node 0 offline,
+# and updating sysfs cpu/cache/node bitmap accordingly.
+source:  offline-cpu0-node0.tar.bz2
+target:  offline-cpu0-node0.console

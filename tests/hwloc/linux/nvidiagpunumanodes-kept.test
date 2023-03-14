@@ -1,0 +1,6 @@
+# P9 with V100 NUMA nodes, kept
+# Some cpus were removed from /sys/devices/system/cpu to reduce the size of the topology
+source:  nvidiagpunumanodes.tar.bz2
+target:  nvidiagpunumanodes-kept.console
+env:     HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=1
+env:     export HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES

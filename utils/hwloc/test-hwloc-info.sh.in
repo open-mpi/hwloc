@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2020 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -109,10 +109,10 @@ set -e
 
   echo
   echo "# cpukinds for the entire machine"
-  $info --if xml --input $linuxdir/fakeheterocpunuma.output all
+  $info --if xml --input $linuxdir/fakeheterocpunuma.xml all
   echo
   echo "# cpukind for a single PU"
-  $info --if xml --input $linuxdir/fakeheterocpunuma.output pu:15
+  $info --if xml --input $linuxdir/fakeheterocpunuma.xml pu:15
   echo
 
 ) > "$file"

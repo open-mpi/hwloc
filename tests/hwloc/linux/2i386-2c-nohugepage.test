@@ -1,0 +1,4 @@
+# 32bits kernel without hugepage support
+source:  2i386-2c-nohugepage.tar.bz2
+target:  2i386-2c-nohugepage.xml
+options: --no-icaches

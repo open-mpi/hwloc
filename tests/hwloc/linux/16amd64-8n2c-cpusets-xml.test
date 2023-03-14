@@ -1,0 +1,4 @@
+# Cpusets disabling things
+source:  16amd64-8n2c-cpusets.tar.bz2
+target:  16amd64-8n2c-cpusets-xml.xml
+options: --no-icaches

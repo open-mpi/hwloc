@@ -1,0 +1,7 @@
+# lots of heterogeneous memories:
+# Package0 has DRAM+HBM+NVM but HBM is exposed as DAX (SPM instead of HBM since DAX have no BW info).
+# Package1 has DRAM+2xHBM+NVM but one HBM is as DAX (SPM instead of HBM).
+# Package2 has HBM+2xNVM but one NVM is as DAX (NVM).
+# See commit 526cdf1b7fc87f1f4a3b1e14d675139d65342681 for Qemu configuration and later tweaks.
+source:  fakeheteromemtiers.tar.bz2
+target:  fakeheteromemtiers.console

@@ -1,0 +1,4 @@
+# Fake test with 1 NUMA per PU, and some disallowed stuff
+# To makes sure NUMA doesn't end-up below PU.
+source:  4fake-4gr1nu1pu.tar.bz2
+target:  4fake-4gr1nu1pu.console

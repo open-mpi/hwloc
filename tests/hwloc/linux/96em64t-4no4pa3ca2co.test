@@ -1,0 +1,4 @@
+# Old IBM x3950M2 assembling 4 nodes into a custom NUMA arch
+source:  96em64t-4no4pa3ca2co.tar.bz2
+target:  96em64t-4no4pa3ca2co.console
+

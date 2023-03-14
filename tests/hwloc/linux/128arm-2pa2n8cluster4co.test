@@ -1,0 +1,3 @@
+# ARM ARM kunpeng 920 CPUs with cluster info in sysfs
+source:  128arm-2pa2n8cluster4co.tar.bz2
+target:  128arm-2pa2n8cluster4co.console

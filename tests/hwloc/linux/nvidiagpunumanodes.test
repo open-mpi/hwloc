@@ -1,0 +1,4 @@
+# P9 with V100 NUMA nodes, ignored
+# Some cpus were removed from /sys/devices/system/cpu to reduce the size of the topology
+source:  nvidiagpunumanodes.tar.bz2
+target:  nvidiagpunumanodes.console

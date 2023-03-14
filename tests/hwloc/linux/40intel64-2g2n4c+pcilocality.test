@@ -1,0 +1,6 @@
+# Forced PCI locality
+source:  40intel64-2g2n4c+pcilocality.tar.bz2
+target:  40intel64-2g2n4c+pcilocality.xml
+options: --whole-io
+env:     HWLOC_PCI_LOCALITY="# near 1st package;0000:00-09 0x00000055,0x55555555;# near 2nd package;0000:40-46 0x000000aa,0xaaaaaaaa"
+env:     export HWLOC_PCI_LOCALITY

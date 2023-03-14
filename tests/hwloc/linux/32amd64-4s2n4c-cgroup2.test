@@ -1,0 +1,4 @@
+# Cgroup v2
+source:  32amd64-4s2n4c-cgroup2.tar.bz2
+target:  32amd64-4s2n4c-cgroup2.xml
+options: --no-icaches

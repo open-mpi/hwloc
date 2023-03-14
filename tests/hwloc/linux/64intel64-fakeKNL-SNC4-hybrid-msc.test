@@ -1,0 +1,6 @@
+# Fake KNL with only 16 cores, configured in SNC-4 an Hybrid modes
+# MCDRAM cache is forced as memory-side cache
+source:  64intel64-fakeKNL-SNC4-hybrid.tar.bz2
+target:  64intel64-fakeKNL-SNC4-hybrid-msc.console
+env:     HWLOC_KNL_MSCACHE_L3=0
+env:     export HWLOC_KNL_MSCACHE_L3

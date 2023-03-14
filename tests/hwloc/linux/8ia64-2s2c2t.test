@@ -1,0 +1,3 @@
+# old IA64 with 2 dual-core SMT sockets
+source:  8ia64-2s2c2t.tar.bz2
+target:  8ia64-2s2c2t.console

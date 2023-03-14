@@ -1,0 +1,5 @@
+# Machine originally a Xeon Phi MIC accelerator (now ignored by hwloc)
+# later extended with PCI slot numbers, memory modules, nvme, and some DAX devices.
+source:  32em64t-2n8c+dax+nvme+mic+dimms.tar.bz2
+target:  32em64t-2n8c+dax+nvme+mic+dimms.xml
+options: --whole-io

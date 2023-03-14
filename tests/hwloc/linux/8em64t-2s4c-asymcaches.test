@@ -1,0 +1,3 @@
+# Manually removed caches in the hierarchy to make things asymmetric
+source:  8em64t-2s4c-asymcaches.tar.bz2
+target:  8em64t-2s4c-asymcaches.console

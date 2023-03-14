@@ -7,153 +7,168 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-# Add your expected output file here.
-# By default, it shows the output of `lstopo - -v'.
-sysfs_outputs = \
-		2i386-2t-hugepagesizecount.xml.output \
-		2i386-2c-nohugepage.xml.output \
-		2ps3-2t.output \
-		4fake-4gr1nu1pu.output \
-		256ppc-8n8s4t.output \
-		32amd64-4s2n4c-cgroup2.xml.output \
-		8em64t-2s2ca2c.output \
-		8em64t-2s2ca2c-buggynuma.output \
-		8em64t-2s4c-heterogeneous.output \
-		8ia64-2n2s2c.output \
-		8ia64-2s2c2t.output \
-		16amd64-4n4c-cgroup-distance-merge.output \
-		16amd64-8n2c.output \
-		16amd64-8n2c-cpusets.output \
-		16amd64-8n2c-cpusets.xml.output \
-		16amd64-8n2c-cpusets_noadmin.output \
-		16em64t-4s2ca2c-cpusetreorder.output \
-		16em64t-4s2ca2c-cpusetreorder-merge.output \
-		16em64t-4s2c2t.output \
-		16em64t-4s2c2t-offlines.output \
-		16em64t-4s2c2t-offlines.xml.output \
-		16em64t-4s2c2t_ncaches.output \
-		16em64t-4s2c2t_merge.output \
-		16em64t-4s2c2t.xml.output \
-		16ia64-8n2s.output \
-		32em64t-2n8c+1mic.output \
-		32intel64-2p8co2t+8ve.output \
-		40intel64-2g2n4c+pci.output \
-		40intel64-4n10c+pci-conflicts.output \
-		48amd64-4d2n6c-sparse.output \
-		64amd64-4s2n4ca2co.output \
-		64fake-4n2s2ca2c2t.output \
-		64intel64-fakeKNL-A2A-cache.output \
-		64intel64-fakeKNL-SNC4-hybrid.output \
-		64intel64-fakeKNL-SNC4-hybrid-msc.output \
-		96em64t-4n4d3ca2co.output \
-		128ia64-17n4s2c.output \
-		128arm-2pa2n8cluster4co.output \
-		256ia64-64n2s2c.output \
-		20s390-2g6s4c.output \
-		2pa-pcidomain32bits.output \
-		2arm-2c.output \
-		nvidiagpunumanodes.output \
-		nvidiagpunumanodes.kept.output \
-		fakememinitiators-1np2c+1npp+gi.output \
-		fakecpuid1f-64intel64-2p4d2n2c2t.output \
-		fakeheterocpunuma.output \
-		fakeheteromemtiers.output \
-		offline-cpu0-node0.output
+# Add your tests here
+sysfs_tests = \
+	2arm-2c.test \
+	2i386-2c-nohugepage.test \
+	2i386-2t-hugepagesizecount.test \
+	2pa-pcidomain32bits.test \
+	2ps3-2t.test \
+	4fake-4gr1nu1pu.test \
+	8em64t-2s2ca2c-buggynuma.test \
+	8em64t-2s2ca2c.test \
+	8em64t-2s4c-asymcaches.test \
+	8ia64-2n2s2c.test \
+	8ia64-2s2c2t.test \
+	16amd64-4n4c-cgroup-distance-merge.test \
+	16amd64-8n2c-cpusets-disallowed.test \
+	16amd64-8n2c-cpusets-xml.test \
+	16amd64-8n2c-cpusets.test \
+	16amd64-8n2c.test \
+	16em64t-4s2c2t-merge.test \
+	16em64t-4s2c2t-nocaches.test \
+	16em64t-4s2c2t-offlines-xml.test \
+	16em64t-4s2c2t-offlines.test \
+	16em64t-4s2c2t-xml.test \
+	16em64t-4s2c2t.test \
+	16em64t-4s2ca2c-cpusetreorder-merge.test \
+	16em64t-4s2ca2c-cpusetreorder.test \
+	16ia64-8n2s.test \
+	20s390-2g6s4c.test \
+	32amd64-4s2n4c-cgroup2.test \
+	32em64t-2n8c+dax+nvme+mic+dimms.test \
+	32intel64-2p8co2t+8ve.test \
+	40intel64-2g2n4c+pcilocality.test \
+	40intel64-4n10c+pci-conflicts.test \
+	48amd64-4pa2n6c-sparse.test \
+	64amd64-4s2n4ca2co.test \
+	64fake-4n2s2ca2c2t.test \
+	64intel64-fakeKNL-A2A-cache.test \
+	64intel64-fakeKNL-SNC4-hybrid-msc.test \
+	64intel64-fakeKNL-SNC4-hybrid.test \
+	96em64t-4no4pa3ca2co.test \
+	128arm-2pa2n8cluster4co.test \
+	128ia64-17n4s2c.test \
+	256ia64-64n2s2c.test \
+	256ppc-8n8s4t.test \
+	fakecpuid1f-64intel64-2p4d2n2c2t.test \
+	fakeheterocpunuma.test \
+	fakeheteromemtiers.test \
+	fakememinitiators-1np2c+1npp+gi.test \
+	nvidiagpunumanodes.test \
+	nvidiagpunumanodes-kept.test \
+	offline-cpu0-node0.test
 
-# Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
-# or a corresponding `xyz.source' specifying which tarball to use
+# Add your tests' input tarballs here
 sysfs_tarballs = \
-		2i386-2t-hugepagesizecount.tar.bz2 \
-		2i386-2t-hugepagesizecount.xml.source \
-		2i386-2c-nohugepage.tar.bz2 \
-		2i386-2c-nohugepage.xml.source \
-		2ps3-2t.tar.bz2 \
-		4fake-4gr1nu1pu.tar.bz2 \
-		256ppc-8n8s4t.tar.bz2 \
-		32amd64-4s2n4c-cgroup2.tar.bz2 \
-		32amd64-4s2n4c-cgroup2.xml.source \
-		8em64t-2s2ca2c.tar.bz2 \
-		8em64t-2s2ca2c-buggynuma.tar.bz2 \
-		8em64t-2s4c-heterogeneous.tar.bz2 \
-		8ia64-2n2s2c.tar.bz2 \
-		8ia64-2s2c2t.tar.bz2 \
-		16amd64-4n4c-cgroup-distance-merge.tar.bz2 \
-		16amd64-8n2c.tar.bz2 \
-		16amd64-8n2c-cpusets.tar.bz2 \
-		16amd64-8n2c-cpusets.xml.source \
-		16amd64-8n2c-cpusets_noadmin.source \
-		16em64t-4s2ca2c-cpusetreorder.tar.bz2 \
-		16em64t-4s2ca2c-cpusetreorder-merge.source \
-		16em64t-4s2c2t.tar.bz2 \
-		16em64t-4s2c2t-offlines.tar.bz2 \
-		16em64t-4s2c2t-offlines.xml.source \
-		16em64t-4s2c2t_merge.source \
-		16em64t-4s2c2t_ncaches.source \
-		16em64t-4s2c2t.xml.source \
-		16ia64-8n2s.tar.bz2 \
-		32em64t-2n8c+1mic.tar.bz2 \
-		32intel64-2p8co2t+8ve.tar.bz2 \
-		40intel64-2g2n4c+pci.tar.bz2 \
-		40intel64-4n10c+pci-conflicts.tar.bz2 \
-		48amd64-4d2n6c-sparse.tar.bz2 \
-		64amd64-4s2n4ca2co.tar.bz2 \
-		64fake-4n2s2ca2c2t.tar.bz2 \
-		64intel64-fakeKNL-A2A-cache.tar.bz2 \
-		64intel64-fakeKNL-SNC4-hybrid.tar.bz2 \
-		64intel64-fakeKNL-SNC4-hybrid-msc.source \
-		96em64t-4n4d3ca2co.tar.bz2 \
-		128ia64-17n4s2c.tar.bz2 \
-		128arm-2pa2n8cluster4co.tar.bz2 \
-		256ia64-64n2s2c.tar.bz2 \
-		20s390-2g6s4c.tar.bz2 \
-		2arm-2c.tar.bz2 \
-		2pa-pcidomain32bits.tar.bz2 \
-		nvidiagpunumanodes.tar.bz2 \
-		nvidiagpunumanodes.kept.source \
-		fakememinitiators-1np2c+1npp+gi.tar.bz2 \
-		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
-		fakeheterocpunuma.tar.bz2 \
-		fakeheteromemtiers.tar.bz2 \
-		offline-cpu0-node0.tar.bz2
+	2arm-2c.tar.bz2 \
+	2i386-2c-nohugepage.tar.bz2 \
+	2i386-2t-hugepagesizecount.tar.bz2 \
+	2pa-pcidomain32bits.tar.bz2 \
+	2ps3-2t.tar.bz2 \
+	4fake-4gr1nu1pu.tar.bz2 \
+	8em64t-2s2ca2c-buggynuma.tar.bz2 \
+	8em64t-2s2ca2c.tar.bz2 \
+	8em64t-2s4c-asymcaches.tar.bz2 \
+	8ia64-2n2s2c.tar.bz2 \
+	8ia64-2s2c2t.tar.bz2 \
+	16amd64-4n4c-cgroup-distance-merge.tar.bz2 \
+	16amd64-8n2c-cpusets.tar.bz2 \
+	16amd64-8n2c.tar.bz2 \
+	16em64t-4s2c2t.tar.bz2 \
+	16em64t-4s2c2t-offlines.tar.bz2 \
+	16em64t-4s2c2t-offlines.tar.bz2 \
+	16em64t-4s2c2t.tar.bz2 \
+	16em64t-4s2ca2c-cpusetreorder.tar.bz2 \
+	16ia64-8n2s.tar.bz2 \
+	20s390-2g6s4c.tar.bz2 \
+	32amd64-4s2n4c-cgroup2.tar.bz2 \
+	32em64t-2n8c+dax+nvme+mic+dimms.tar.bz2 \
+	32intel64-2p8co2t+8ve.tar.bz2 \
+	40intel64-2g2n4c+pcilocality.tar.bz2 \
+	40intel64-4n10c+pci-conflicts.tar.bz2 \
+	48amd64-4pa2n6c-sparse.tar.bz2 \
+	64amd64-4s2n4ca2co.tar.bz2 \
+	64fake-4n2s2ca2c2t.tar.bz2 \
+	64intel64-fakeKNL-A2A-cache.tar.bz2 \
+	64intel64-fakeKNL-SNC4-hybrid.tar.bz2 \
+	96em64t-4no4pa3ca2co.tar.bz2 \
+	128arm-2pa2n8cluster4co.tar.bz2 \
+	128ia64-17n4s2c.tar.bz2 \
+	256ia64-64n2s2c.tar.bz2 \
+	256ppc-8n8s4t.tar.bz2 \
+	fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
+	fakeheterocpunuma.tar.bz2 \
+	fakeheteromemtiers.tar.bz2 \
+	fakememinitiators-1np2c+1npp+gi.tar.bz2 \
+	nvidiagpunumanodes.tar.bz2 \
+	offline-cpu0-node0.tar.bz2
 
-# Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
-sysfs_excludes = 
+# Add your expected console outputs here.
+sysfs_console_outputs = \
+	2arm-2c.console \
+	2pa-pcidomain32bits.console \
+	2ps3-2t.console \
+	4fake-4gr1nu1pu.console \
+	8em64t-2s2ca2c-buggynuma.console \
+	8em64t-2s2ca2c.console \
+	8em64t-2s4c-asymcaches.console \
+	8ia64-2n2s2c.console \
+	8ia64-2s2c2t.console \
+	16amd64-4n4c-cgroup-distance-merge.console \
+	16amd64-8n2c-cpusets-disallowed.console \
+	16amd64-8n2c-cpusets.console \
+	16amd64-8n2c.console \
+	16em64t-4s2c2t-merge.console \
+	16em64t-4s2c2t-nocaches.console \
+	16em64t-4s2c2t-offlines.console \
+	16em64t-4s2c2t.console \
+	16em64t-4s2ca2c-cpusetreorder.console \
+	16em64t-4s2ca2c-cpusetreorder-merge.console \
+	16ia64-8n2s.console \
+	20s390-2g6s4c.console \
+	32intel64-2p8co2t+8ve.console \
+	40intel64-4n10c+pci-conflicts.console \
+	48amd64-4pa2n6c-sparse.console \
+	64amd64-4s2n4ca2co.console \
+	64fake-4n2s2ca2c2t.console \
+	64intel64-fakeKNL-A2A-cache.console \
+	64intel64-fakeKNL-SNC4-hybrid-msc.console \
+	64intel64-fakeKNL-SNC4-hybrid.console \
+	96em64t-4no4pa3ca2co.console \
+	128arm-2pa2n8cluster4co.console \
+	128ia64-17n4s2c.console \
+	256ia64-64n2s2c.console \
+	256ppc-8n8s4t.console \
+	fakecpuid1f-64intel64-2p4d2n2c2t.console \
+	fakeheteromemtiers.console \
+	fakememinitiators-1np2c+1npp+gi.console \
+	nvidiagpunumanodes.console \
+	nvidiagpunumanodes-kept.console \
+	offline-cpu0-node0.console
 
-# Each output `xyz.output' may have a corresponding `xyz.options'
-# file modifying the behavior of lstopo
-sysfs_options = \
-		2i386-2t-hugepagesizecount.xml.options \
-		2i386-2c-nohugepage.xml.options \
-		16amd64-4n4c-cgroup-distance-merge.options \
-		16amd64-8n2c-cpusets.xml.options \
-		16amd64-8n2c-cpusets_noadmin.options \
-		16em64t-4s2ca2c-cpusetreorder-merge.options \
-		16em64t-4s2c2t-offlines.xml.options \
-		16em64t-4s2c2t_ncaches.options \
-		16em64t-4s2c2t_merge.options \
-		16em64t-4s2c2t.xml.options \
-		32amd64-4s2n4c-cgroup2.xml.options \
-		32em64t-2n8c+1mic.options \
-		40intel64-2g2n4c+pci.options \
-		fakeheterocpunuma.options
-
-# Each output `xyz.output' may have a corresponding `xyz.env'
-# modifying the environment of lstopo
-sysfs_envs = \
-		40intel64-2g2n4c+pci.env \
-		40intel64-4n10c+pci-conflicts.env \
-		64intel64-fakeKNL-SNC4-hybrid-msc.env \
-		nvidiagpunumanodes.kept.env \
-		fakeheterocpunuma.env
+# Add your expected console outputs here.
+sysfs_xml_outputs = \
+	2i386-2c-nohugepage.xml \
+	2i386-2t-hugepagesizecount.xml \
+	16amd64-8n2c-cpusets-xml.xml \
+	16em64t-4s2c2t-offlines-xml.xml \
+	16em64t-4s2c2t-xml.xml \
+	32amd64-4s2n4c-cgroup2.xml \
+	32em64t-2n8c+dax+nvme+mic+dimms.xml \
+	40intel64-2g2n4c+pcilocality.xml \
+	fakeheterocpunuma.xml
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
-TESTS = $(sysfs_outputs)
+TESTS = $(sysfs_tests)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
 
-EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
+EXTRA_DIST = $(sysfs_tests) $(sysfs_tarballs) $(sysfs_console_outputs) $(sysfs_xml_outputs)
 
-LOG_COMPILER = $(abs_builddir)/test-topology.sh
+# .test is in TEXT_EXTENSIONS by default, hence it uses its own test configuration
+# variables prefixed with TEST_
+TEST_LOG_COMPILER = $(abs_builddir)/test-topology.sh
 
 SUBDIRS = . allowed gather

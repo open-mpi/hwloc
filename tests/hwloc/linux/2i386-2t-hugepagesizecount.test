@@ -1,0 +1,4 @@
+# 32bits kernel with hugepage support
+source:  2i386-2t-hugepagesizecount.tar.bz2
+target:  2i386-2t-hugepagesizecount.xml
+options: --no-icaches

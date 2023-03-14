@@ -1,0 +1,3 @@
+# Big IA64 NUMA
+source:  256ia64-64n2s2c.tar.bz2
+target:  256ia64-64n2s2c.console

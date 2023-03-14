@@ -1,0 +1,3 @@
+# 32bits PCI domains
+source:  2pa-pcidomain32bits.tar.bz2
+target:  2pa-pcidomain32bits.console
