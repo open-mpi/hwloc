@@ -1,0 +1,4 @@
+synthetic: numa:4 core:2 pu:2
+fsroot:    test1.fsroot.tar.bz2
+target:    test1.xml
+options:   -v -.xml
