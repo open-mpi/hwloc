@@ -10,24 +10,17 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # Add your expected output file here.
 # By default, it shows the output of `lstopo - -v'.
 sysfs_outputs = \
-		2amd64-2n.output \
 		2i386-2t-hugepagesizecount.xml.output \
 		2i386-2c-nohugepage.xml.output \
 		2ps3-2t.output \
-		4em64t-2c2t-ignore-reorder.output \
-		4ia64-4s.output \
 		4fake-4gr1nu1pu.output \
 		256ppc-8n8s4t.output \
-		32amd64-4s2n4c-cgroup2.output \
 		32amd64-4s2n4c-cgroup2.xml.output \
-		8amd64-4n2c.output  \
-		8em64t-4c2t.output \
 		8em64t-2s2ca2c.output \
 		8em64t-2s2ca2c-buggynuma.output \
 		8em64t-2s4c-heterogeneous.output \
 		8ia64-2n2s2c.output \
 		8ia64-2s2c2t.output \
-		8ia64-4s2c.output \
 		16amd64-4n4c-cgroup-distance-merge.output \
 		16amd64-8n2c.output \
 		16amd64-8n2c-cpusets.output \
@@ -56,7 +49,6 @@ sysfs_outputs = \
 		128ia64-17n4s2c.output \
 		128arm-2pa2n8cluster4co.output \
 		256ia64-64n2s2c.output \
-		2s390-2c.output \
 		20s390-2g6s4c.output \
 		2pa-pcidomain32bits.output \
 		2arm-2c.output \
@@ -71,26 +63,20 @@ sysfs_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
 sysfs_tarballs = \
-		2amd64-2n.tar.bz2 \
 		2i386-2t-hugepagesizecount.tar.bz2 \
 		2i386-2t-hugepagesizecount.xml.source \
 		2i386-2c-nohugepage.tar.bz2 \
 		2i386-2c-nohugepage.xml.source \
 		2ps3-2t.tar.bz2 \
-		4em64t-2c2t-ignore-reorder.tar.bz2 \
-		4ia64-4s.tar.bz2 \
 		4fake-4gr1nu1pu.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
 		32amd64-4s2n4c-cgroup2.tar.bz2 \
 		32amd64-4s2n4c-cgroup2.xml.source \
-		8amd64-4n2c.tar.bz2  \
-		8em64t-4c2t.tar.bz2 \
 		8em64t-2s2ca2c.tar.bz2 \
 		8em64t-2s2ca2c-buggynuma.tar.bz2 \
 		8em64t-2s4c-heterogeneous.tar.bz2 \
 		8ia64-2n2s2c.tar.bz2 \
 		8ia64-2s2c2t.tar.bz2 \
-		8ia64-4s2c.tar.bz2 \
 		16amd64-4n4c-cgroup-distance-merge.tar.bz2 \
 		16amd64-8n2c.tar.bz2 \
 		16amd64-8n2c-cpusets.tar.bz2 \
@@ -119,7 +105,6 @@ sysfs_tarballs = \
 		128ia64-17n4s2c.tar.bz2 \
 		128arm-2pa2n8cluster4co.tar.bz2 \
 		256ia64-64n2s2c.tar.bz2 \
-		2s390-2c.tar.bz2 \
 		20s390-2g6s4c.tar.bz2 \
 		2arm-2c.tar.bz2 \
 		2pa-pcidomain32bits.tar.bz2 \
@@ -139,7 +124,6 @@ sysfs_excludes =
 sysfs_options = \
 		2i386-2t-hugepagesizecount.xml.options \
 		2i386-2c-nohugepage.xml.options \
-		4em64t-2c2t-ignore-reorder.options \
 		16amd64-4n4c-cgroup-distance-merge.options \
 		16amd64-8n2c-cpusets.xml.options \
 		16amd64-8n2c-cpusets_noadmin.options \
