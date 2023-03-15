@@ -23,6 +23,8 @@ Version 2.10.0
   of Core Complex and Die on Zen4 processors in the x86 backend.
 * Ignore buggy memory-side caches and memory attributes when fake NUMA
   emulation is enabled on the Linux kernel command-line.
+* Fix installation failures when configuring with --target,
+  thanks to Clement Foyer for the patch.
 
 
 Version 2.9.1
