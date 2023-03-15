@@ -2,6 +2,7 @@
 # Copyright © 2013      University of Wisconsin-La Crosse.
 #                         All rights reserved.
 # Copyright © 2015-2018 Inria.  All rights reserved.
+# Copyright © 2023      Université de Reims Champagne-Ardenne.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -11,9 +12,11 @@ bin_SCRIPTS = \
         netloc_ib_gather_raw
 CLEANFILES = $(bin_SCRIPTS)
 
+netloc_ib_gather_raw_name=`echo "netloc_ib_gather_raw" | $(SED) -e "$(transform)"`
+
 install-exec-hook:
-	$(SED) -e 's/HWLOC_top_builddir\/utils\/lstopo/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/netloc_ib_gather_raw > $(DESTDIR)$(bindir)/netloc_ib_gather_raw.tmp && mv -f $(DESTDIR)$(bindir)/netloc_ib_gather_raw.tmp $(DESTDIR)$(bindir)/netloc_ib_gather_raw
-	chmod +x $(DESTDIR)$(bindir)/netloc_ib_gather_raw
+	$(SED) -e 's/HWLOC_top_builddir\/utils\/lstopo/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/$(netloc_ib_gather_raw_name) > $(DESTDIR)$(bindir)/$(netloc_ib_gather_raw_name).tmp && mv -f $(DESTDIR)$(bindir)/$(netloc_ib_gather_raw_name).tmp $(DESTDIR)$(bindir)/$(netloc_ib_gather_raw_name)
+	chmod +x $(DESTDIR)$(bindir)/$(netloc_ib_gather_raw_name)
 
 AM_CPPFLAGS = \
         -I$(top_builddir)/include \
