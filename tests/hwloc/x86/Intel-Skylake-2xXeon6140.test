@@ -1,0 +1,3 @@
+# Also used in test-lstopo
+source:  Intel-Skylake-2xXeon6140.tar.bz2
+target:  Intel-Skylake-2xXeon6140.xml

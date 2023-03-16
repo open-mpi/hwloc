@@ -142,7 +142,7 @@ if test x@ARCHIVEMOUNT@ != x; then
     HWLOC_XML_EXPORT_SUPPORT=0
     export HWLOC_XML_EXPORT_SUPPORT
     $ls -i $HWLOC_top_srcdir/tests/hwloc/x86/Intel-Skylake-2xXeon6140.tar.bz2 --of xml - | sed   -e 's/ gp_index="[0-9]*"//' | sed   -e 's/ id="obj[0-9]*"//'| egrep -v "^assuming " > "$file"
-    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $HWLOC_top_srcdir/tests/hwloc/x86/Intel-Skylake-2xXeon6140.output "$file"
+    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $HWLOC_top_srcdir/tests/hwloc/x86/Intel-Skylake-2xXeon6140.xml "$file"
   fi
 fi
 

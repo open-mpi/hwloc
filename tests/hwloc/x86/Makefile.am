@@ -5,37 +5,65 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
+# Add your tests files here.
+cpuid_tests = \
+	Intel-CPUID.1A-1p2co2t.test \
+	Intel-CPUID.1F-Qemu-2p3d3c2t.test \
+	Intel-CascadeLake-2xXeon6230.test \
+	Intel-Skylake-2xXeon6140.test \
+	Intel-Broadwell-2xXeon-E5-2650Lv4.test \
+	Intel-Haswell-2xXeon-E5-2680v3.test \
+	Intel-IvyBridge-12xXeon-E5-4620v2.test \
+	Intel-SandyBridge-2xXeon-E5-2650.test \
+	Intel-Westmere-2xXeon-X5650.test \
+	Intel-Nehalem-2xXeon-X5550.test \
+	Intel-Penryn-4xXeon-X7460.test \
+	Intel-Core-2xXeon-E5345.test \
+	Intel-KnightsLanding-XeonPhi-7210.test \
+	Intel-KnightsCorner-XeonPhi-SE10P.test \
+	AMD-19h-Zen3-2xEpyc-7763.test \
+	AMD-17h-Zen-2xEpyc-7451.test \
+	AMD-15h-Piledriver-4xOpteron-6348.test \
+	AMD-15h-Bulldozer-4xOpteron-6272.test \
+	AMD-K10-MagnyCours-2xOpteron-6164HE.test \
+	AMD-K10-Istanbul-8xOpteron-8439SE.test \
+	AMD-K8-SantaRosa-2xOpteron-2218.test \
+	AMD-K8-SledgeHammer-2xOpteron-250.test \
+	Hygon-Dhyana-32cores.test \
+	Zhaoxin-CentaurHauls-ZXD-4600.test \
+	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.test
+
 # Add your expected output file here.
 # By default, it shows the output of `lstopo --of xml -'.
 #
 # XML outputs shouldn't have gp_index attributes to avoid spurious errors.
 # Remove them with: sed -r -e 's/ gp_index=\"[0-9]+\"//' -i foo.outpu
-cpuid_outputs = \
-	Intel-CPUID.1A-1p2co2t.output \
-	Intel-CPUID.1F-Qemu-2p3d3c2t.output \
-	Intel-CascadeLake-2xXeon6230.output \
-	Intel-Skylake-2xXeon6140.output \
-	Intel-Broadwell-2xXeon-E5-2650Lv4.output \
-	Intel-Haswell-2xXeon-E5-2680v3.output \
-	Intel-IvyBridge-12xXeon-E5-4620v2.output \
-	Intel-SandyBridge-2xXeon-E5-2650.output \
-	Intel-Westmere-2xXeon-X5650.output \
-	Intel-Nehalem-2xXeon-X5550.output \
-	Intel-Penryn-4xXeon-X7460.output \
-	Intel-Core-2xXeon-E5345.output \
-	Intel-KnightsLanding-XeonPhi-7210.output \
-	Intel-KnightsCorner-XeonPhi-SE10P.output \
-	AMD-19h-Zen3-2xEpyc-7763.output \
-	AMD-17h-Zen-2xEpyc-7451.output \
-	AMD-15h-Piledriver-4xOpteron-6348.output \
-	AMD-15h-Bulldozer-4xOpteron-6272.output \
-	AMD-K10-MagnyCours-2xOpteron-6164HE.output \
-	AMD-K10-Istanbul-8xOpteron-8439SE.output \
-	AMD-K8-SantaRosa-2xOpteron-2218.output \
-	AMD-K8-SledgeHammer-2xOpteron-250.output \
-	Hygon-Dhyana-32cores.output \
-	Zhaoxin-CentaurHauls-ZXD-4600.output \
-	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.output
+cpuid_xml_outputs = \
+	Intel-CPUID.1A-1p2co2t.xml \
+	Intel-CPUID.1F-Qemu-2p3d3c2t.xml \
+	Intel-CascadeLake-2xXeon6230.xml \
+	Intel-Skylake-2xXeon6140.xml \
+	Intel-Broadwell-2xXeon-E5-2650Lv4.xml \
+	Intel-Haswell-2xXeon-E5-2680v3.xml \
+	Intel-IvyBridge-12xXeon-E5-4620v2.xml \
+	Intel-SandyBridge-2xXeon-E5-2650.xml \
+	Intel-Westmere-2xXeon-X5650.xml \
+	Intel-Nehalem-2xXeon-X5550.xml \
+	Intel-Penryn-4xXeon-X7460.xml \
+	Intel-Core-2xXeon-E5345.xml \
+	Intel-KnightsLanding-XeonPhi-7210.xml \
+	Intel-KnightsCorner-XeonPhi-SE10P.xml \
+	AMD-19h-Zen3-2xEpyc-7763.xml \
+	AMD-17h-Zen-2xEpyc-7451.xml \
+	AMD-15h-Piledriver-4xOpteron-6348.xml \
+	AMD-15h-Bulldozer-4xOpteron-6272.xml \
+	AMD-K10-MagnyCours-2xOpteron-6164HE.xml \
+	AMD-K10-Istanbul-8xOpteron-8439SE.xml \
+	AMD-K8-SantaRosa-2xOpteron-2218.xml \
+	AMD-K8-SledgeHammer-2xOpteron-250.xml \
+	Hygon-Dhyana-32cores.xml \
+	Zhaoxin-CentaurHauls-ZXD-4600.xml \
+	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.xml
 
 # FIXME add AMD-K10-Shanghai/Barcelona-[248]3xx
 
@@ -68,18 +96,12 @@ cpuid_tarballs = \
 	Zhaoxin-CentaurHauls-ZXD-4600.tar.bz2 \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.tar.bz2
 
-# Each output `xyz.output' may have a corresponding `xyz.options'
-# file modifying the behavior of lstopo
-cpuid_options =
-
-# Each output `xyz.output' may have a corresponding `xyz.env'
-# modifying the environment of lstopo
-cpuid_envs = Intel-CPUID.1A-1p2co2t.env
-
 if HWLOC_HAVE_BUNZIPP
-TESTS = $(cpuid_outputs)
+TESTS = $(cpuid_tests)
 endif HWLOC_HAVE_BUNZIPP
 
-EXTRA_DIST = $(cpuid_outputs) $(cpuid_tarballs) $(cpuid_options) $(cpuid_envs)
+EXTRA_DIST = $(cpuid_tests) $(cpuid_xml_outputs) $(cpuid_tarballs)
 
-LOG_COMPILER = $(abs_builddir)/test-topology.sh
+# .test is in TEXT_EXTENSIONS by default, hence it uses its own test configuration
+# variables prefixed with TEST_
+TEST_LOG_COMPILER = $(abs_builddir)/test-topology.sh
