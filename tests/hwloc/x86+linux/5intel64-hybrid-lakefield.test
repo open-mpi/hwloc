@@ -1,0 +1,6 @@
+# Intel Hybrid Lakefield, with Linux discovery first then annotations about cpukinds from x86
+source:  5intel64-hybrid-lakefield.tar.bz2
+target:  5intel64-hybrid-lakefield.console
+options: -v
+env:     HWLOC_COMPONENTS=linux,x86,stop
+env:     export HWLOC_COMPONENTS

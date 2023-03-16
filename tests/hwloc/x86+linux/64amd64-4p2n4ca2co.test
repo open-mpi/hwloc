@@ -1,0 +1,3 @@
+# AMD CPUID discovery before Linux adds NUMA nodes
+source: 64amd64-4p2n4ca2co.tar.bz2
+target: 64amd64-4p2n4ca2co.xml
