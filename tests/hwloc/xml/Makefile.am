@@ -25,8 +25,8 @@ xml_tests = \
         32em64t-2n8c2t-pci-noio.test \
         32em64t-2n8c2t-pci-normalio.test \
         32em64t-2n8c2t-pci-wholeio.test \
-        64intel64-3g2n+2n-irregulargroups+pci.disallowed.test \
-        64intel64-3g2n+2n-irregulargroups+pci.disallowed.console.test \
+        irregulargroups-disallowed.test \
+        irregulargroups-disallowed.console.test \
         64intel64-fakeKNL-SNC4-hybrid.test \
         96em64t-4n4d3ca2co-pci.test \
         192em64t-12gr2n8c2t.test \
@@ -50,7 +50,7 @@ xml_xml_outputs = \
         32em64t-2n8c2t-pci-noio.xml \
         32em64t-2n8c2t-pci-normalio.xml \
         32em64t-2n8c2t-pci-wholeio.xml \
-        64intel64-3g2n+2n-irregulargroups+pci.xml \
+        irregulargroups-disallowed.xml \
         64intel64-fakeKNL-SNC4-hybrid.xml \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
@@ -68,7 +68,7 @@ xml_console_outputs = \
         16amd64-4distances.console \
         16intel64-manyVFs.console \
         16intel64-manyVFs.nocollapse.console \
-        64intel64-3g2n+2n-irregulargroups+pci.console
+        irregulargroups-disallowed.console
 
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
