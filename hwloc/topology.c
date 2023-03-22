@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2022 IBM Corporation.  All rights reserved.
@@ -4186,20 +4186,11 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
     hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
     hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
     modified = 1;
-  } else {
-    if ((flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS)
-	&& hwloc_bitmap_iszero(obj->complete_cpuset)) {
-      /* we're empty, there's a NUMAnode below us, it'll be removed this time */
-      modified = 1;
-    }
-    /* nodeset cannot intersect unless cpuset intersects or is empty */
-    if (droppednodeset)
-      assert(!hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset)
-	     || hwloc_bitmap_iszero(obj->complete_cpuset));
   }
-  if (droppednodeset) {
+  if (droppednodeset && hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset)) {
     hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
     hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
+    modified = 1;
   }
 
   if (modified) {
@@ -4252,20 +4243,11 @@ restrict_object_by_nodeset(hwloc_topology_t topology, unsigned long flags, hwloc
     hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
     hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
     modified = 1;
-  } else {
-    if ((flags & HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS)
-	&& hwloc_bitmap_iszero(obj->complete_nodeset)) {
-      /* we're empty, there's a PU below us, it'll be removed this time */
-      modified = 1;
-    }
-    /* cpuset cannot intersect unless nodeset intersects or is empty */
-    if (droppedcpuset)
-      assert(!hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset)
-	     || hwloc_bitmap_iszero(obj->complete_nodeset));
   }
-  if (droppedcpuset) {
+  if (droppedcpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset)) {
     hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
     hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
+    modified = 1;
   }
 
   if (modified) {
