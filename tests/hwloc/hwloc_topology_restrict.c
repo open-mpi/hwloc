@@ -199,6 +199,10 @@ int main(void)
   check(topology, 3, 3, 3, 11);
   check_distances(topology, 3, 3);
 
+  /* duplicate/checkpoint to the current topology for additional testing */
+  err = hwloc_topology_dup(&topology2, topology);
+  assert(!err);
+
   /* only keep three PUs (first and last of first core, and last of last core of second node) */
   printf("restricting to 3 PUs in 2 cores in 2 nodes, and remove the CPU-less node, and auto-merge groups\n");
   hwloc_bitmap_zero(cpuset);
@@ -209,6 +213,26 @@ int main(void)
   assert(!err);
   check(topology, 0, 2, 2, 3);
   check_distances(topology, 2, 2);
+
+  /* only keep three PUs (first and last of first core, and last of last core of second node) */
+  printf("do the same on the duplicated topology, with multiple intermediate restricts\n");
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set(cpuset, 0);
+  hwloc_bitmap_set(cpuset, 3);
+  hwloc_bitmap_set(cpuset, 15);
+  err = hwloc_topology_restrict(topology2, cpuset, 0);
+  assert(!err);
+  check(topology2, 3, 3, 2, 3);
+  check_distances(topology2, 3, 2);
+  err = hwloc_topology_restrict(topology2, cpuset, 0);
+  assert(!err);
+  check(topology2, 3, 3, 2, 3);
+  check_distances(topology2, 3, 2);
+  err = hwloc_topology_restrict(topology2, cpuset, HWLOC_RESTRICT_FLAG_REMOVE_CPULESS);
+  assert(!err);
+  check(topology2, 0, 2, 2, 3);
+  check_distances(topology2, 2, 2);
+  hwloc_topology_destroy(topology2);
 
   /* restrict to the third node, impossible */
   printf("restricting to only some already removed node, must fail\n");
@@ -247,6 +271,11 @@ int main(void)
   assert(!err);
   hwloc_topology_check(topology);
   check(topology, 3, 2, 6, 24);
+  printf("applying exact same restriction again\n");
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET);
+  assert(!err);
+  hwloc_topology_check(topology);
+  check(topology, 3, 2, 6, 24);
   printf("further restricting bynodeset to a single numa node\n");
   hwloc_bitmap_only(cpuset, 1);
   err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
@@ -281,6 +310,19 @@ int main(void)
   hwloc_topology_load(topology);
   hwloc_bitmap_zero(cpuset);
   hwloc_bitmap_set_range(cpuset, 1, 2);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
+  assert(!err);
+  hwloc_topology_destroy(topology);
+
+  /* again with intermediate restricts */
+  printf("do the same on the duplicated topology, with multiple intermediate restricts\n");
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "pack:2 l3:2 numa:1 pu:1(indexes=0,2,1,3)");
+  hwloc_topology_load(topology);
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set_range(cpuset, 1, 2);
+  err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET);
+  assert(!err);
   err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_BYNODESET|HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS);
   assert(!err);
   hwloc_topology_destroy(topology);
