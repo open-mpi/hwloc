@@ -51,6 +51,16 @@ Version 3.0.0
     possible with the new V2 XML export flag.
 
 
+Version 2.9.1
+-------------
+* Don't forget to apply object type filters to "perflevel" caches detected
+  on recent Mac OS X releases, thanks to Michel Lesoinne for the report.
+* Fix a failed assertion in hwloc_topology_restrict() when some NUMA nodes
+  are removed because of HWLOC_RESTRICT_FLAG_REMOVE_CPULESS but no PUs are.
+  Thanks to Mark Grondona for reporting the issue.
+* Mark HPE Cray Slingshot NICs with subtype "Slingshot".
+
+
 Version 2.9.0
 -------------
 * Backends
