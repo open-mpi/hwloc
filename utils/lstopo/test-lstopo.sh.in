@@ -129,7 +129,7 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-lstopo.output "$file"
 
-if test x@ARCHIVEMOUNT@ != x; then
+if which archivemount >/dev/null 2>/dev/null; then
   if test x@HWLOC_HAVE_LINUX@ = x1; then
     echo "**** Archivemount'ing a Linux fsroot archive ..."
     file="$tmp/test-lstopo.archivemount.fsroot.output"
