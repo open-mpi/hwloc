@@ -277,7 +277,6 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
   }
 
   case HWLOC_UTILS_INPUT_ARCHIVE: {
-#ifdef HWLOC_ARCHIVEMOUNT_PATH
     char mntpath[] = "/tmp/tmpdir.hwloc.archivemount.XXXXXX";
     char mntcmd[512];
     char umntcmd[512];
@@ -291,7 +290,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
       perror("Creating archivemount directory");
       return EXIT_FAILURE;
     }
-    snprintf(mntcmd, sizeof(mntcmd), "%s -o ro %s %s", HWLOC_ARCHIVEMOUNT_PATH, input, mntpath);
+    snprintf(mntcmd, sizeof(mntcmd), "archivemount -o ro %s %s", input, mntpath);
     err = system(mntcmd);
     if (err) {
       perror("Archivemount'ing the archive");
@@ -326,10 +325,6 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
     if (!err)
       *input_format = sub_input_format;
     break;
-#else
-    fprintf(stderr, "This installation of hwloc does not support loading from an archive, sorry.\n");
-    exit(EXIT_FAILURE);
-#endif
   }
 
   case HWLOC_UTILS_INPUT_SYNTHETIC:
