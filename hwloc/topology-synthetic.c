@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1374,11 +1374,22 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
      * better attaching of things to describe the hierarchy.
      */
     hwloc_obj_t numanode = mchild;
-    /* only export the first NUMA node leaf of each memory child
-     * FIXME: This assumes mscache aren't shared between nodes, that's true in current platforms
+    /* only export the first NUMA node leaf of each memory child.
+     * memcache are ignored. non-first child of memcaches are also ignored.
      */
     while (numanode && numanode->type != HWLOC_OBJ_NUMANODE) {
-      assert(numanode->arity == 1);
+      if (verbose) {
+        static int warned = 0;
+        if (!warned)
+          fprintf(stderr, "Ignoring memory objects that are not NUMA nodes.\n");
+        warned = 1;
+      }
+      if (verbose && numanode->memory_arity > 1) {
+        static int warned = 0;
+        if (!warned)
+          fprintf(stderr, "Ignoring non-first memory children at non-first level of memory hierarchy.\n");
+        warned = 1;
+      }
       numanode = numanode->memory_first_child;
     }
     assert(numanode); /* there's always a numanode at the bottom of the memory tree */
