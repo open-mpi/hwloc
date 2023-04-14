@@ -291,7 +291,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
       perror("Creating archivemount directory");
       return EXIT_FAILURE;
     }
-    snprintf(mntcmd, sizeof(mntcmd), "%s %s %s", HWLOC_ARCHIVEMOUNT_PATH, input, mntpath);
+    snprintf(mntcmd, sizeof(mntcmd), "%s -o ro %s %s", HWLOC_ARCHIVEMOUNT_PATH, input, mntpath);
     err = system(mntcmd);
     if (err) {
       perror("Archivemount'ing the archive");
