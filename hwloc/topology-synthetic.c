@@ -601,7 +601,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     }
     if (!item) {
       if (verbose)
-	fprintf(stderr,"Synthetic string with disallow 0 number of objects at '%s'\n", pos);
+	fprintf(stderr,"Synthetic string with disallowed 0 number of objects at '%s'\n", pos);
       errno = EINVAL;
       goto error;
     }
