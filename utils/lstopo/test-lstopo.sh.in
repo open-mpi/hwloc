@@ -129,13 +129,11 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-lstopo.output "$file"
 
-if which archivemount >/dev/null 2>/dev/null; then
-  if test x@HWLOC_HAVE_LINUX@ = x1; then
-    echo "**** Archivemount'ing a Linux fsroot archive ..."
-    file="$tmp/test-lstopo.archivemount.fsroot.output"
-    $ls -i $HWLOC_top_srcdir/tests/hwloc/linux/16amd64-8n2c.tar.bz2 -v - | egrep -v "^assuming " > "$file"
-    @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $HWLOC_top_srcdir/tests/hwloc/linux/16amd64-8n2c.console "$file"
-  fi
+if which archivemount >/dev/null 2>/dev/null && test x@HWLOC_HAVE_LINUX@ = x1; then
+  echo "**** Archivemount'ing a Linux fsroot archive ..."
+  file="$tmp/test-lstopo.archivemount.fsroot.output"
+  $ls -i $HWLOC_top_srcdir/tests/hwloc/linux/16amd64-8n2c.tar.bz2 -v - | egrep -v "^assuming " > "$file"
+  @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $HWLOC_top_srcdir/tests/hwloc/linux/16amd64-8n2c.console "$file"
   if test x@HWLOC_HAVE_X86_CPUID@ = x1; then
     echo "**** Archivemount'ing a x86 CPUID archive ..."
     file="$tmp/test-lstopo.archivemount.cpuid.output"
