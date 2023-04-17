@@ -1068,6 +1068,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 		&& procInfo->Cache.Type != CacheInstruction)
 	  continue;
 
+        printf("got relation %u length %u\n", (unsigned) procInfo->Relationship, (unsigned)procInfo->Size);
 	id = HWLOC_UNKNOWN_INDEX;
 	switch (procInfo->Relationship) {
           case RelationNumaNodeEx: /* only used on input anyway */
