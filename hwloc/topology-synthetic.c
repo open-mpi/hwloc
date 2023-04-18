@@ -1256,6 +1256,7 @@ hwloc__export_synthetic_indexes(hwloc_obj_t *level, unsigned total,
 
 static int
 hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
+                                 unsigned long flags,
 				 hwloc_obj_t obj,
 				 char *buffer, size_t buflen)
 {
@@ -1263,6 +1264,7 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
   const char * prefix = "(";
   char cachesize[64] = "";
   char memsize[64] = "";
+  char memorysidecachesize[64] = "";
   int needindexes = 0;
 
   if (hwloc__obj_type_is_cache(obj->type) && obj->attr->cache.size) {
@@ -1275,6 +1277,19 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
 	     prefix, (unsigned long long) obj->attr->numanode.local_memory);
     prefix = separator;
   }
+  if (obj->type == HWLOC_OBJ_NUMANODE && !(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1)) {
+    hwloc_obj_t memorysidecache = obj->parent;
+    hwloc_uint64_t size = 0;
+    while (memorysidecache && memorysidecache->type == HWLOC_OBJ_MEMCACHE) {
+      size += memorysidecache->attr->cache.size;
+      memorysidecache = memorysidecache->parent;
+    }
+    if (size) {
+      snprintf(memorysidecachesize, sizeof(memorysidecachesize), "%smemorysidecachesize=%llu",
+               prefix, (unsigned long long) size);
+      prefix = separator;
+    }
+  }
   if (!obj->logical_index /* only display indexes once per level (not for non-first NUMA children, etc.) */
       && (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NUMANODE)) {
     hwloc_obj_t cur = obj;
@@ -1286,12 +1301,12 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
       cur = cur->next_cousin;
     }
   }
-  if (*cachesize || *memsize || needindexes) {
+  if (*cachesize || *memsize || *memorysidecachesize || needindexes) {
     ssize_t tmplen = buflen;
     char *tmp = buffer;
     int res, ret = 0;
 
-    res = hwloc_snprintf(tmp, tmplen, "%s%s%s", cachesize, memsize, needindexes ? "" : ")");
+    res = hwloc_snprintf(tmp, tmplen, "%s%s%s%s", cachesize, memsize, memorysidecachesize, needindexes ? "" : ")");
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
 
@@ -1365,7 +1380,7 @@ hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flag
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
-    res = hwloc__export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+    res = hwloc__export_synthetic_obj_attr(topology, flags, obj, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
   }
@@ -1411,21 +1426,19 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
   }
 
   while (mchild) {
-    /* FIXME: really recurse to export memcaches and numanode,
+    /* The core doesn't support shared memcache for now (because ACPI and Linux don't).
+     * So, for each mchild here, recurse only in the first children at each level.
+     *
+     * FIXME: whenever supported by the core, really recurse to export memcaches and numanode,
      * but it requires clever parsing of [ memcache [numa] [numa] ] during import,
      * better attaching of things to describe the hierarchy.
      */
     hwloc_obj_t numanode = mchild;
-    /* only export the first NUMA node leaf of each memory child.
-     * memcache are ignored. non-first child of memcaches are also ignored.
+    /* Only export the first NUMA node leaf of each memory child.
+     * Memcaches are ignored here, they will be summed and exported as a single attribute
+     * of the NUMA node in hwloc__export_synthetic_obj().
      */
     while (numanode && numanode->type != HWLOC_OBJ_NUMANODE) {
-      if (verbose) {
-        static int warned = 0;
-        if (!warned)
-          fprintf(stderr, "Ignoring memory objects that are not NUMA nodes.\n");
-        warned = 1;
-      }
       if (verbose && numanode->memory_arity > 1) {
         static int warned = 0;
         if (!warned)
@@ -1591,7 +1604,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
     /* obj attributes */
-    res = hwloc__export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+    res = hwloc__export_synthetic_obj_attr(topology, flags, obj, tmp, tmplen);
     if (res > 0)
       needprefix = 1;
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
