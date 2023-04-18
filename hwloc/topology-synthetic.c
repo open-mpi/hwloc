@@ -416,6 +416,32 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
   return 0;
 }
 
+static void
+hwloc_synthetic_set_default_attrs(struct hwloc_synthetic_attr_s *sattr,
+                                  int *type_count)
+{
+  hwloc_obj_type_t type = sattr->type;
+
+  if (type == HWLOC_OBJ_GROUP) {
+    if (sattr->depth == (unsigned)-1)
+      sattr->depth = type_count[HWLOC_OBJ_GROUP]--;
+
+  } else if (hwloc__obj_type_is_cache(type)) {
+    if (!sattr->memorysize) {
+      if (1 == sattr->depth)
+        /* 32KiB in L1 */
+        sattr->memorysize = 32*1024;
+      else
+        /* *4 at each level, starting from 1MiB for L2, unified */
+        sattr->memorysize = 256ULL*1024 << (2*sattr->depth);
+    }
+
+  } else if (type == HWLOC_OBJ_NUMANODE && !sattr->memorysize) {
+    /* 1GiB in memory nodes. */
+    sattr->memorysize = 1024*1024*1024;
+  }
+}
+
 /* frees level until arity = 0 */
 static void
 hwloc_synthetic_free_levels(struct hwloc_synthetic_backend_data_s *data)
@@ -803,30 +829,14 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     count++;
   }
 
+  /* set default attributes that depend on the depth/hierarchy of levels */
   for (i=0; i<count; i++) {
+    struct hwloc_synthetic_attached_s *attached;
     struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
-    hwloc_obj_type_t type = curlevel->attr.type;
-
-    if (type == HWLOC_OBJ_GROUP) {
-      if (curlevel->attr.depth == (unsigned)-1)
-	curlevel->attr.depth = type_count[HWLOC_OBJ_GROUP]--;
-
-    } else if (hwloc__obj_type_is_cache(type)) {
-      if (!curlevel->attr.memorysize) {
-	if (1 == curlevel->attr.depth)
-	  /* 32KiB in L1 */
-	  curlevel->attr.memorysize = 32*1024;
-	else
-	  /* *4 at each level, starting from 1MiB for L2, unified */
-	  curlevel->attr.memorysize = 256ULL*1024 << (2*curlevel->attr.depth);
-      }
-
-    } else if (type == HWLOC_OBJ_NUMANODE && !curlevel->attr.memorysize) {
-      /* 1GiB in memory nodes. */
-      curlevel->attr.memorysize = 1024*1024*1024;
-    }
-
-    hwloc_synthetic_process_indexes(data, &data->level[i].indexes, data->level[i].totalwidth, verbose);
+    hwloc_synthetic_set_default_attrs(&curlevel->attr, type_count);
+    for(attached = curlevel->attached; attached != NULL; attached = attached->next)
+      hwloc_synthetic_set_default_attrs(&attached->attr, type_count);
+    hwloc_synthetic_process_indexes(data, &curlevel->indexes, curlevel->totalwidth, verbose);
   }
 
   hwloc_synthetic_process_indexes(data, &data->numa_attached_indexes, data->numa_attached_nr, verbose);
