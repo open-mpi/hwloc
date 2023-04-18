@@ -646,6 +646,7 @@ hwloc_replace_linked_object(hwloc_obj_t old, hwloc_obj_t new)
   new->memory_first_child = old->memory_first_child;
   new->io_first_child = old->io_first_child;
   new->misc_first_child = old->misc_first_child;
+  new->total_memory = old->total_memory;
   /* copy new contents to old now that tree pointers are OK */
   memcpy(old, new, sizeof(*old));
   /* clear new to that we may free it */
@@ -1934,7 +1935,7 @@ static int hwloc_connect_special_levels(hwloc_topology_t topology);
 hwloc_obj_t
 hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  hwloc_obj_t res, root;
+  hwloc_obj_t res, root, child;
   int cmp;
 
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
@@ -2022,6 +2023,13 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
   hwloc_obj_add_children_sets(res);
   if (hwloc_topology_reconnect(topology, 0) < 0)
     return NULL;
+
+  /* Compute group total_memory. */
+  obj->total_memory = 0;
+  for_each_child(child, obj)
+    obj->total_memory += child->total_memory;
+  for_each_memory_child(child, obj)
+    obj->total_memory += child->total_memory;
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   hwloc_set_group_depth(topology);
