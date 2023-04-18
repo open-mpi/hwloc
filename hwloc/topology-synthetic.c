@@ -23,6 +23,7 @@ struct hwloc_synthetic_attr_s {
   unsigned depth; /* For caches/groups */
   hwloc_obj_cache_type_t cachetype; /* For caches */
   hwloc_uint64_t memorysize; /* For caches/memory */
+  hwloc_uint64_t memorysidecachesize; /* Single level of memory-side-cache in-front of a NUMA node */
 };
 
 struct hwloc_synthetic_indexes_s {
@@ -380,6 +381,9 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
     } else if (!iscache && !strncmp("memory=", attrs, 7)) {
       memorysize = hwloc_synthetic_parse_memory_attr(attrs+7, &attrs);
 
+    } else if (!strncmp("memorysidecachesize=", attrs, 20)) {
+      sattr->memorysidecachesize = hwloc_synthetic_parse_memory_attr(attrs+20, &attrs);
+
     } else if (!strncmp("indexes=", attrs, 8)) {
       index_string = attrs+8;
       attrs += 8;
@@ -490,6 +494,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   data->level[0].indexes.string = NULL;
   data->level[0].indexes.array = NULL;
   data->level[0].attr.memorysize = 0;
+  data->level[0].attr.memorysidecachesize = 0;
   data->level[0].attached = NULL;
   type_count[HWLOC_OBJ_MACHINE] = 1;
   if (*description == '(') {
@@ -539,6 +544,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       if (attached) {
 	attached->attr.type = type;
 	attached->attr.memorysize = 0;
+	attached->attr.memorysidecachesize = 0;
 	/* attached->attr.depth and .cachetype unused */
 	attached->next = NULL;
 	pprev = &data->level[count-1].attached;
@@ -636,6 +642,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     data->level[count].indexes.string = NULL;
     data->level[count].indexes.array = NULL;
     data->level[count].attr.memorysize = 0;
+    data->level[count].attr.memorysidecachesize = 0;
     if (*next_pos == '(') {
       err = hwloc_synthetic_parse_attrs(next_pos+1, &next_pos, &data->level[count].attr, &data->level[count].indexes, verbose);
       if (err < 0)
@@ -821,6 +828,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     data->level[1].indexes.string = NULL;
     data->level[1].indexes.array = NULL;
     data->level[1].attr.memorysize = 0;
+    data->level[1].attr.memorysidecachesize = 0;
     data->level[1].totalwidth = data->level[0].totalwidth;
     /* update arity to insert a single NUMA node per parent */
     data->level[1].arity = data->level[0].arity;
@@ -867,6 +875,12 @@ hwloc_synthetic_set_attr(struct hwloc_synthetic_attr_s *sattr,
     memset(obj->attr->numanode.page_types, 0, sizeof(*obj->attr->numanode.page_types));
     obj->attr->numanode.page_types[0].size = 4096;
     obj->attr->numanode.page_types[0].count = sattr->memorysize / 4096;
+    break;
+  case HWLOC_OBJ_MEMCACHE:
+    obj->attr->cache.depth = 1;
+    obj->attr->cache.linesize = 64;
+    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+    obj->attr->cache.size = sattr->memorysidecachesize;
     break;
   case HWLOC_OBJ_PACKAGE:
   case HWLOC_OBJ_DIE:
@@ -935,6 +949,14 @@ hwloc_synthetic_insert_attached(struct hwloc_topology *topology,
 
   hwloc__insert_object_by_cpuset(topology, NULL, child, "synthetic:attached");
 
+  if (attached->attr.memorysidecachesize) {
+    hwloc_obj_t mscachechild = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MEMCACHE, HWLOC_UNKNOWN_INDEX);
+    mscachechild->cpuset = hwloc_bitmap_dup(set);
+    mscachechild->nodeset = hwloc_bitmap_dup(child->nodeset);
+    hwloc_synthetic_set_attr(&attached->attr, mscachechild);
+    hwloc__insert_object_by_cpuset(topology, NULL, mscachechild, "synthetic:attached:mscache");
+  }
+
   hwloc_synthetic_insert_attached(topology, data, attached->next, set);
 }
 
@@ -986,6 +1008,14 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     hwloc_synthetic_set_attr(&curlevel->attr, obj);
 
     hwloc__insert_object_by_cpuset(topology, NULL, obj, "synthetic");
+
+    if (type == HWLOC_OBJ_NUMANODE && curlevel->attr.memorysidecachesize) {
+      hwloc_obj_t mscachechild = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MEMCACHE, HWLOC_UNKNOWN_INDEX);
+      mscachechild->cpuset = hwloc_bitmap_dup(set);
+      mscachechild->nodeset = hwloc_bitmap_dup(obj->nodeset);
+      hwloc_synthetic_set_attr(&curlevel->attr, mscachechild);
+      hwloc__insert_object_by_cpuset(topology, NULL, mscachechild, "synthetic:mscache");
+    }
   }
 
   hwloc_synthetic_insert_attached(topology, data, curlevel->attached, set);
