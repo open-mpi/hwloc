@@ -1360,7 +1360,7 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
 
   if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1) {
     /* v1: export a single NUMA child */
-    if (parent->memory_arity > 1 || mchild->type != HWLOC_OBJ_NUMANODE) {
+    if (parent->memory_arity > 1) {
       /* not supported */
       if (verbose)
 	fprintf(stderr, "Cannot export to synthetic v1 if multiple memory children are attached to the same location.\n");
@@ -1371,6 +1371,9 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
     if (needprefix)
       hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, ' ');
 
+    /* ignore memcaches and export the NUMA node */
+    while (mchild->type != HWLOC_OBJ_NUMANODE)
+      mchild = mchild->memory_first_child;
     res = hwloc__export_synthetic_obj(topology, flags, mchild, 1, tmp, tmplen);
     if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
       return -1;
@@ -1531,17 +1534,21 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 
   if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1) {
     /* v1 requires all NUMA at the same level */
-    hwloc_obj_t node;
+    hwloc_obj_t node, parent;
     signed pdepth;
 
     node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
     assert(node);
-    assert(hwloc__obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
-    pdepth = node->parent->depth;
+    parent = node->parent;
+    while (!hwloc__obj_type_is_normal(parent->type))
+      parent = parent->parent;
+    pdepth = parent->depth;
 
     while ((node = node->next_cousin) != NULL) {
-      assert(hwloc__obj_type_is_normal(node->parent->type)); /* only depth-1 memory children for now */
-      if (node->parent->depth != pdepth) {
+      parent = node->parent;
+      while (!hwloc__obj_type_is_normal(parent->type))
+        parent = parent->parent;
+      if (parent->depth != pdepth) {
 	if (verbose)
 	  fprintf(stderr, "Cannot export to synthetic v1 if memory is attached to parents at different depths.\n");
 	errno = EINVAL;
