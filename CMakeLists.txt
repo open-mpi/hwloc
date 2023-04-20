@@ -159,9 +159,9 @@ if (APPLE)
 endif ()
 
 if (STANDALONE)
-    #if(HWLOC_ENABLE_TESTING)
-    #add_subdirectory(${TOPDIR}/tests/hwloc ${CMAKE_CURRENT_BINARY_DIR}/tests/hwloc)
-    #endif()
+    if(HWLOC_ENABLE_TESTING)
+    add_subdirectory(${TOPDIR}/tests/hwloc ${CMAKE_CURRENT_BINARY_DIR}/tests/hwloc)
+    endif()
     # Tools under utils/hwloc
 
     if (NOT HWLOC_SKIP_TOOLS)

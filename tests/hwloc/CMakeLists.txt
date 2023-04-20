@@ -13,7 +13,11 @@ foreach(t api_version backends bind
   set_tests_properties(${t} PROPERTIES TIMEOUT 10)
 endforeach()
 
-foreach(t cpuset_nodeset memattrs cpukinds gl windows_processor_groups)
+if(WIN32)
+  list(APPEND os_specific_tests windows_processor_groups)
+endif()
+
+foreach(t cpuset_nodeset memattrs cpukinds gl ${os_specific_tests})
   add_executable(${t} ${t}.c)
   target_link_libraries(${t} PRIVATE hwloc)
 
