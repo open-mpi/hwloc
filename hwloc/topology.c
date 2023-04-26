@@ -2260,11 +2260,13 @@ fixup_sets(hwloc_obj_t obj)
 int
 hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src)
 {
-#define ADD_OTHER_OBJ_SET(_dst, _src, _set)			\
-  if ((_src)->_set) {						\
-    if (!(_dst)->_set)						\
-      (_dst)->_set = hwloc_bitmap_alloc();			\
-    hwloc_bitmap_or((_dst)->_set, (_dst)->_set, (_src)->_set);	\
+#define ADD_OTHER_OBJ_SET(_dst, _src, _set)					\
+  if ((_src)->_set) {								\
+    if (!(_dst)->_set)								\
+      (_dst)->_set = hwloc_bitmap_alloc();					\
+    if (!(_dst)->_set								\
+        || hwloc_bitmap_or((_dst)->_set, (_dst)->_set, (_src)->_set) < 0)	\
+      return -1;								\
   }
   ADD_OTHER_OBJ_SET(dst, src, cpuset);
   ADD_OTHER_OBJ_SET(dst, src, complete_cpuset);
