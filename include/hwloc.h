@@ -2565,6 +2565,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_group_object(hwloc_topology_t t
  * This function is convenient between hwloc_topology_alloc_group_object()
  * and hwloc_topology_insert_group_object(). It builds the sets of the new Group
  * that will be inserted as a new intermediate parent of several objects.
+ *
+ * \return 0 on success.
+ * \return -1 with errno set to \c ENOMEM if some internal reallocation failed.
  */
 HWLOC_DECLSPEC int hwloc_obj_add_other_obj_sets(hwloc_obj_t dst, hwloc_obj_t src);
 
