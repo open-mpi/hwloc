@@ -796,23 +796,26 @@ HWLOC_DECLSPEC int hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict to
 
 /** \brief Returns the depth of objects of type \p type.
  *
- * If no object of this type is present on the underlying architecture, or if
- * the OS doesn't provide this kind of information, the function returns
- * ::HWLOC_TYPE_DEPTH_UNKNOWN.
+ * \return The depth of objects of type \p type.
  *
- * If type is absent but a similar type is acceptable, see also
- * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
- *
- * If ::HWLOC_OBJ_GROUP is given, the function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
- * if multiple levels of Groups exist.
- *
- * If a NUMA node, I/O or Misc object type is given, the function returns a virtual
- * value because these objects are stored in special levels that are not CPU-related.
+ * \return A negative virtual depth if a NUMA node, I/O or Misc object type is given.
+ * These objects are stored in special levels that are not CPU-related.
  * This virtual depth may be passed to other hwloc functions such as
  * hwloc_get_obj_by_depth() but it should not be considered as an actual
  * depth by the application. In particular, it should not be compared with
  * any other object depth or with the entire topology depth.
- * \sa hwloc_get_memory_parents_depth().
+ *
+ * \return ::HWLOC_TYPE_DEPTH_UNKNOWN
+ * if no object of this type is present on the underlying architecture,
+ * or if the OS doesn't provide this kind of information.
+ *
+ * \return ::HWLOC_TYPE_DEPTH_MULTIPLE if type ::HWLOC_OBJ_GROUP is given
+ * and multiple levels of Groups exist.
+ *
+ * \note If the type is absent but a similar type is acceptable, see also
+ * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
+ *
+ * \sa hwloc_get_memory_parents_depth() for managing the depth of memory objects.
  *
  * \sa hwloc_get_type_depth_with_attr() for disambiguating cases where
  * ::HWLOC_TYPE_DEPTH_MULTIPLE is returned.
