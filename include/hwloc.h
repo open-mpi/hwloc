@@ -98,6 +98,8 @@ extern "C" {
 /** \brief Indicate at runtime which hwloc API version was used at build time.
  *
  * Should be ::HWLOC_API_VERSION if running on the same version.
+ *
+ * \return the build-time version number.
  */
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
@@ -792,6 +794,8 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 /** \brief Get the depth of the hierarchical tree of objects.
  *
  * This is the depth of ::HWLOC_OBJ_PU objects plus one.
+ *
+ * \return the depth of the object tree.
  *
  * \note NUMA nodes, I/O and Misc objects are ignored when computing
  * the depth of the tree (they are placed on special levels).
