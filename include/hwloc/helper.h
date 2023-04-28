@@ -423,7 +423,7 @@ hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unu
  * \return the ancestor if any.
  * \return \c NULL if no such ancestor exists.
  *
- * \note if multiple matching ancestors exist (e.g. multiple levels of ::HwLOC_OBJ_GROUP)
+ * \note if multiple matching ancestors exist (e.g. multiple levels of ::HWLOC_OBJ_GROUP)
  * the lowest one is returned.
  *
  * \note \p type should not be ::HWLOC_OBJ_PU or ::HWLOC_OBJ_NUMANODE
