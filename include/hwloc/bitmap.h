@@ -50,9 +50,10 @@ extern "C" {
  * hwloc_bitmap_free(set);
  * \endcode
  *
- * \note Most functions below return an int that may be negative in case of
- * error. The usual error case would be an internal failure to realloc/extend
+ * \note Most functions below return 0 on success and -1 on error.
+ * The usual error case would be an internal failure to realloc/extend
  * the storage of the bitmap (\p errno would be set to \c ENOMEM).
+ * See also \ref hwlocality_api_error_reporting.
  *
  * \note Several examples of using the bitmap API are available under the
  * doc/examples/ directory in the source tree.

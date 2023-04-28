@@ -253,6 +253,7 @@ pdf_DATA = $(DOX_A4PDF) $(DOX_LETTERPDF)
 # list of dependencies too.
 
 man3_MANS = \
+        $(DOX_MAN_DIR)/man3/hwlocality_api_error_reporting.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_api_version.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_API_VERSION.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_api_version.3

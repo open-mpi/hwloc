@@ -77,6 +77,25 @@ extern "C" {
 #endif
 
 
+/** \defgroup hwlocality_api_error_reporting Error reporting in the API
+ * @{
+ * Most functions in the hwloc API return an integer value.
+ * Unless documentated differently, they return 0 on success
+ * and -1 on error.
+ * Functions that return a pointer type return \c NULL on error.
+ *
+ * \p errno will be set to a meaningful value whenever possible.
+ * This includes the usual \c EINVAL when invalid function parameters are passed
+ * or \c ENOMEM when an internal allocation fails.
+ * Some specific \c errno value are also used, for instance for binding
+ * errors as documented in \ref hwlocality_cpubinding.
+ *
+ * Some modules describe return values of their functions
+ * in their introduction, for instance in \ref hwlocality_bitmap.
+ * @}
+ */
+
+
 /** \defgroup hwlocality_api_version API version
  * @{
  */
