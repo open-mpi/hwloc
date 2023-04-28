@@ -4790,7 +4790,7 @@ to force a hwloc-1.x-compatible XML export.
  If both always support 2.0, don't pass any flag.
 </li>
 <li>
- When the importer uses hwloc 1.x, export with ::HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1.
+ When the importer uses hwloc 1.x, export with HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1.
  Otherwise the importer will fail to import.
 </li>
 <li>
