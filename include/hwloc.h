@@ -372,8 +372,8 @@ typedef enum hwloc_obj_osdev_type_e {
  * (because neither is usually contained in the other).
  *
  * \note Object types containing CPUs can always be compared
- * (usually, a system contains machines, which contain packages, which
- * contain caches, which contain cores, which contain processors).
+ * (usually, a machine contains packages, which contain caches,
+ *  which contain cores, which contain PUs).
  *
  * \note ::HWLOC_OBJ_PU will always be the deepest,
  * while ::HWLOC_OBJ_MACHINE is always the highest.
