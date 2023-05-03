@@ -4,6 +4,7 @@
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
+ * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -816,7 +817,7 @@ main (int argc, char *argv[])
   hwloc_bitmap_t allow_cpuset = NULL, allow_nodeset = NULL;
   char * callname;
   char * input = NULL;
-  enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   struct lstopo_type_filter type_filter[HWLOC_OBJ_TYPE_MAX];
   char *restrictstring = NULL;
@@ -1684,7 +1685,7 @@ main (int argc, char *argv[])
     if (err)
       goto out_with_topology;
 
-    if (input_format != HWLOC_UTILS_INPUT_DEFAULT) {
+    if (input_format.format != HWLOC_UTILS_INPUT_DEFAULT) {
       /* add the input path to the window title */
       snprintf(loutput.title, sizeof(loutput.title), "lstopo - %s", input);
 
@@ -1717,7 +1718,7 @@ main (int argc, char *argv[])
     }
   }
 
-  if (input_format == HWLOC_UTILS_INPUT_XML
+  if (input_format.format == HWLOC_UTILS_INPUT_XML
       && output_format == LSTOPO_OUTPUT_XML) {
     /* must be after parsing output format and before loading the topology */
     putenv((char *) "HWLOC_XML_USERDATA_NOT_DECODED=1");
@@ -1736,7 +1737,7 @@ main (int argc, char *argv[])
     clock_gettime(CLOCK_MONOTONIC, &ts1);
 #endif
 
-  if (input_format == HWLOC_UTILS_INPUT_SHMEM) {
+  if (input_format.format == HWLOC_UTILS_INPUT_SHMEM) {
 #ifdef HWLOC_WIN_SYS
     fprintf(stderr, "shmem topology not supported\n"); /* this line must match the grep line in test-lstopo-shmem */
     goto out_with_topology;
@@ -1765,6 +1766,14 @@ main (int argc, char *argv[])
     printf("hwloc_topology_load() took %lu ms\n", ms);
   }
 #endif
+
+  /********************************
+   * Clean input format's internal variables
+   */
+
+  if (input) {
+    hwloc_utils_disable_input_format(&input_format);
+  }
 
   /********************************
    * Tweak the topology and output
@@ -1880,6 +1889,7 @@ main (int argc, char *argv[])
   lstopo_destroy_userdata(hwloc_get_root_obj(topology));
   hwloc_topology_destroy(topology);
  out:
+  if (input) hwloc_utils_disable_input_format(&input_format);
   hwloc_bitmap_free(allow_cpuset);
   hwloc_bitmap_free(allow_nodeset);
   hwloc_bitmap_free(loutput.cpubind_set);
