@@ -3,6 +3,7 @@
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -26,6 +27,7 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+#include <fcntl.h>
 #include <assert.h>
 
 extern void usage(const char *name, FILE *where);
@@ -80,15 +82,19 @@ hwloc_utils_input_format_usage(FILE *where, int addspaces)
 	   addspaces, " ");
 }
 
-enum hwloc_utils_input_format {
-  HWLOC_UTILS_INPUT_DEFAULT,
-  HWLOC_UTILS_INPUT_XML,
-  HWLOC_UTILS_INPUT_FSROOT,
-  HWLOC_UTILS_INPUT_SYNTHETIC,
-  HWLOC_UTILS_INPUT_CPUID,
-  HWLOC_UTILS_INPUT_SHMEM,
-  HWLOC_UTILS_INPUT_ARCHIVE
+struct hwloc_utils_input_format_s {
+  enum hwloc_utils_input_format {
+    HWLOC_UTILS_INPUT_DEFAULT,
+    HWLOC_UTILS_INPUT_XML,
+    HWLOC_UTILS_INPUT_FSROOT,
+    HWLOC_UTILS_INPUT_SYNTHETIC,
+    HWLOC_UTILS_INPUT_CPUID,
+    HWLOC_UTILS_INPUT_SHMEM,
+    HWLOC_UTILS_INPUT_ARCHIVE
+  } format;
+  int oldworkdir;
 };
+#define HWLOC_UTILS_INPUT_FORMAT_DEFAULT (struct hwloc_utils_input_format_s) { HWLOC_UTILS_INPUT_DEFAULT, -1 }
 
 static __hwloc_inline enum hwloc_utils_input_format
 hwloc_utils_parse_input_format(const char *name, const char *callname)
@@ -115,7 +121,7 @@ hwloc_utils_parse_input_format(const char *name, const char *callname)
 
 static __hwloc_inline int
 hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
-				char **inputp, enum hwloc_utils_input_format *input_formatp,
+				char **inputp, struct hwloc_utils_input_format_s *input_formatp,
 				const char *callname)
 {
   if (!strcmp (argv[0], "--input")
@@ -137,7 +143,8 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
       usage (callname, stderr);
       exit(EXIT_FAILURE);
     }
-    *input_formatp = hwloc_utils_parse_input_format (argv[1], callname);
+    *input_formatp = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
+    input_formatp->format = hwloc_utils_parse_input_format (argv[1], callname);
     *consumed_opts = 1;
     return 1;
   }
@@ -149,7 +156,8 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
       exit(EXIT_FAILURE);
     }
     *inputp = argv[1];
-    *input_formatp = HWLOC_UTILS_INPUT_SYNTHETIC;
+    *input_formatp = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
+    input_formatp->format = HWLOC_UTILS_INPUT_SYNTHETIC;
     *consumed_opts = 1;
     return 1;
   } else if (!strcmp (argv[0], "--xml")) {
@@ -158,7 +166,8 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
       exit(EXIT_FAILURE);
     }
     *inputp = argv[1];
-    *input_formatp = HWLOC_UTILS_INPUT_XML;
+    *input_formatp = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
+    input_formatp->format = HWLOC_UTILS_INPUT_XML;
     *consumed_opts = 1;
     return 1;
   } else if (!strcmp (argv[0], "--fsys-root")) {
@@ -167,7 +176,8 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
       exit(EXIT_FAILURE);
     }
     *inputp = argv[1];
-    *input_formatp = HWLOC_UTILS_INPUT_FSROOT;
+    *input_formatp = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
+    input_formatp->format = HWLOC_UTILS_INPUT_FSROOT;
     *consumed_opts = 1;
     return 1;
   }
@@ -232,9 +242,10 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
 static __hwloc_inline int
 hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long flags,
 				const char *input,
-				enum hwloc_utils_input_format *input_format,
+				struct hwloc_utils_input_format_s *input_formatp,
 				int verbose, const char *callname)
 {
+  enum hwloc_utils_input_format *input_format = &input_formatp->format;
   if (*input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
     *input_format = HWLOC_UTILS_INPUT_XML;
     input = "-";
@@ -313,12 +324,23 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
     char umntcmd[512];
     DIR *dir;
     struct dirent *dirent;
-    enum hwloc_utils_input_format sub_input_format;
+    /* oldworkdir == -1 -> close would fail if !defined(O_PATH), but we don't care */
+    struct hwloc_utils_input_format_s sub_input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
     char *subdir = NULL;
     int err;
 
+#ifdef O_PATH
+    if (-1 == input_formatp->oldworkdir) { /* if archivemount'ed recursively, only keep the first oldworkdir */
+        sub_input_format.oldworkdir = open(".", O_DIRECTORY|O_PATH); /* more efficient than getcwd(3) */
+        if (sub_input_format.oldworkdir < 0) {
+            perror("Saving current working directory");
+            return EXIT_FAILURE;
+        }
+    }
+#endif
     if (!mkdtemp(mntpath)) {
       perror("Creating archivemount directory");
+      close(sub_input_format.oldworkdir);
       return EXIT_FAILURE;
     }
     snprintf(mntcmd, sizeof(mntcmd), "archivemount -o ro %s %s", input, mntpath);
@@ -326,6 +348,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
     if (err) {
       perror("Archivemount'ing the archive");
       rmdir(mntpath);
+      close(sub_input_format.oldworkdir);
       return EXIT_FAILURE;
     }
     snprintf(umntcmd, sizeof(umntcmd), "umount -l %s", mntpath);
@@ -347,16 +370,18 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
 
     if (!subdir) {
       perror("No subdirectory in archivemount directory");
+      close(sub_input_format.oldworkdir);
       return EXIT_FAILURE;
     }
 
     /* call ourself recursively on subdir, it should be either a fsroot or a cpuid directory */
-    sub_input_format = HWLOC_UTILS_INPUT_DEFAULT;
     err = hwloc_utils_enable_input_format(topology, flags, subdir, &sub_input_format, verbose, callname);
     if (!err)
-      *input_format = sub_input_format;
-    else
+      *input_formatp = sub_input_format;
+    else {
+      close(sub_input_format.oldworkdir);
       return err;
+    }
 #else
     fprintf(stderr, "This installation of hwloc does not support loading from an archive, sorry.\n");
     exit(EXIT_FAILURE);
@@ -379,6 +404,28 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
   }
 
   return 0;
+}
+
+static __hwloc_inline void
+hwloc_utils_disable_input_format(struct hwloc_utils_input_format_s *input_format)
+{
+  if (-1 < input_format->oldworkdir) {
+#ifdef HWLOC_LINUX_SYS
+#ifdef O_PATH
+    int err = fchdir(input_format->oldworkdir);
+    if (err) {
+      perror("Restoring current working directory");
+    }
+#else
+    fprintf(stderr, "Couldn't restore working directory. Errors may arise.\n");
+#endif
+    close(input_format->oldworkdir);
+    input_format->oldworkdir = -1;
+#else
+    fprintf(stderr, "oldworkdir should not have been changed. You should not have reached this execution branch.\n");
+    exit(EXIT_FAILURE);
+#endif
+  }
 }
 
 static __hwloc_inline void
