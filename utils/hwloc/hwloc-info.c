@@ -3,6 +3,7 @@
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -495,7 +496,7 @@ main (int argc, char *argv[])
   unsigned long restrict_flags = 0;
   char * callname;
   char * input = NULL;
-  enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   const char *show_ancestor_type = NULL;
   const char *show_descendants_type = NULL;
   const char *best_memattr_str = NULL;
@@ -721,6 +722,7 @@ main (int argc, char *argv[])
     if (hwloc_pid_from_number(&pid, pid_number, 0, 1 /* verbose */) < 0
 	|| hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
+      if (input) hwloc_utils_disable_input_format(&input_format);
       return EXIT_FAILURE;
     }
   }
@@ -728,7 +730,12 @@ main (int argc, char *argv[])
   err = hwloc_topology_load (topology);
   if (err) {
     perror("hwloc_topology_load");
+    if (input) hwloc_utils_disable_input_format(&input_format);
     return EXIT_FAILURE;
+  }
+
+  if (input) {
+    hwloc_utils_disable_input_format(&input_format);
   }
 
   topodepth = hwloc_topology_get_depth(topology);

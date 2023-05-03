@@ -3,6 +3,7 @@
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
   long n = -1;
   char *callname;
   char *input = NULL;
-  enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   int taskset = 0;
   int singlify = 0;
   int verbose = 0;
@@ -229,7 +230,11 @@ int main(int argc, char *argv[])
     err = hwloc_topology_load(topology);
     if (err < 0) {
       free(cpuset);
+      if (input) hwloc_utils_disable_input_format(&input_format);
       return EXIT_FAILURE;
+    }
+    if (input) {
+      hwloc_utils_disable_input_format(&input_format);
     }
 
     if (restrictstring) {
