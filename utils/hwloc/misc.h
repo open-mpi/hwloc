@@ -355,6 +355,8 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
     err = hwloc_utils_enable_input_format(topology, flags, subdir, &sub_input_format, verbose, callname);
     if (!err)
       *input_format = sub_input_format;
+    else
+      return err;
 #else
     fprintf(stderr, "This installation of hwloc does not support loading from an archive, sorry.\n");
     exit(EXIT_FAILURE);
