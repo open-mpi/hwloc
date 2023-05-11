@@ -1459,7 +1459,15 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
   unsigned i;
   unsigned highest_cpuid;
   unsigned highest_ext_cpuid;
-  /* This stores cpuid features with the same indexing as Linux */
+  /* This stores cpuid features with the same indexing as Linux:
+   * [0] = 0x1 edx
+   * [1] = 0x80000001 edx
+   * [4] = 0x1 ecx
+   * [6] = 0x80000001 ecx
+   * [9] = 0x7/0 ebx
+   * [16] = 0x7/0 ecx
+   * [18] = 0x7/0 edx
+   */
   unsigned features[19] = { 0 };
   struct procinfo *infos = NULL;
   enum cpuid_type cpuid_type = unknown;
@@ -1579,6 +1587,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
     ecx = 0;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     features[9] = ebx;
+    features[16] = ecx;
     features[18] = edx;
   }
 
