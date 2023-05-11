@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -477,6 +477,7 @@ extern char * hwloc_progname(struct hwloc_topology *topology);
 #define HWLOC_GROUP_KIND_INTEL_DIE			104	/* no subkind */
 #define HWLOC_GROUP_KIND_S390_BOOK			110	/* subkind 0 is book, subkind 1 is drawer (group of books) */
 #define HWLOC_GROUP_KIND_AMD_COMPUTE_UNIT		120	/* no subkind */
+#define HWLOC_GROUP_KIND_AMD_COMPLEX                    121     /* no subkind */
 /* then, OS-specific groups */
 #define HWLOC_GROUP_KIND_SOLARIS_PG_HW_PERF		200	/* subkind is group width */
 #define HWLOC_GROUP_KIND_AIX_SDL_UNKNOWN		210	/* subkind is SDL level */

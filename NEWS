@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.10.0
+--------------
+* Add support for new AMD CPUID leaf 0x80000026 for better detection
+  of Core Complex and Die on Zen4 processors in the x86 backend.
+
+
 Version 2.9.1
 -------------
 * Don't forget to apply object type filters to "perflevel" caches detected
