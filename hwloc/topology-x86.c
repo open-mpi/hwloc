@@ -528,7 +528,7 @@ static void read_amd_cores_topoext(struct procinfo *infos, unsigned long flags, 
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration) */
 static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
 {
-  unsigned level, apic_nextshift, apic_number, apic_type, apic_id = 0, apic_shift = 0, id;
+  unsigned level, apic_nextshift, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
   unsigned eax, ebx, ecx = 0, edx;
   int apic_packageshift = 0;
@@ -553,33 +553,33 @@ static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, 
 	if (!eax && !ebx)
 	  break;
 	apic_nextshift = eax & 0x1f;
-	apic_number = ebx & 0xffff;
 	apic_type = (ecx & 0xff00) >> 8;
 	apic_id = edx;
 	id = (apic_id >> apic_shift) & ((1 << (apic_packageshift - apic_shift)) - 1);
-	hwloc_debug("x2APIC %08x %u: nextshift %u num %2u type %u id %2u\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
+	hwloc_debug("x2APIC %08x %u: nextshift %u nextnumber %2u type %u id %2u\n",
+                    apic_id,
+                    level,
+                    apic_nextshift,
+                    ebx & 0xffff /* number of threads in next level */,
+                    apic_type,
+                    id);
 	infos->apicid = apic_id;
 	infos->otherids[level] = UINT_MAX;
 	switch (apic_type) {
 	case 1:
 	  threadid = id;
-	  /* apic_number is the actual number of threads per core */
 	  break;
 	case 2:
 	  infos->ids[CORE] = id;
-	  /* apic_number is the actual number of threads per die */
 	  break;
 	case 3:
 	  infos->ids[MODULE] = id;
-	  /* apic_number is the actual number of threads per tile */
 	  break;
 	case 4:
 	  infos->ids[TILE] = id;
-	  /* apic_number is the actual number of threads per die */
 	  break;
 	case 5:
 	  infos->ids[DIE] = id;
-	  /* apic_number is the actual number of threads per package */
 	  break;
 	default:
 	  hwloc_debug("x2APIC %u: unknown type %u\n", level, apic_type);
