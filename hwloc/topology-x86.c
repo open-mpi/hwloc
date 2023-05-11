@@ -40,6 +40,7 @@ struct hwloc_x86_backend_data_s {
   char *src_cpuiddump_path;
   int is_knl;
   int is_hybrid;
+  int has_power_efficiency_ranking;
   int found_die_ids;
   int found_complex_ids;
   int found_unit_ids;
@@ -232,6 +233,7 @@ struct procinfo {
 
   unsigned hybridcoretype;
   unsigned hybridnativemodel;
+  unsigned power_efficiency_ranking;
 };
 
 enum cpuid_type {
@@ -586,6 +588,32 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
         switch (apic_type) {
         case 1:
           threadid = id;
+          if (leaf == 0x80000026) {
+            /* AMD 0x80000026 also reports more info about cores.
+             * bit eax[31] = "AsymmetricCores" = set if cores are asymmetric (different numbers of threads per core)
+             * => doesn't seem needed in hwloc.
+             */
+
+            if (eax & 0x40000000) {
+              /* HeterogeneousCoreTopology:
+               * When set, not all instances at the current hierarchy
+               * level have the same Core Type topology
+               */
+              data->is_hybrid = 1;
+            }
+
+            if (eax & 0x20000000) {
+              /* EfficiencyRankingAvailable */
+              data->has_power_efficiency_ranking = 1;
+              /* "a core with a lower value has intrinsically better power,
+               *  but potentially lower performance potential vs cores with a higher value."
+               */
+              infos->power_efficiency_ranking = (ebx >> 16) & 0xff;
+            }
+
+            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E */
+            infos->hybridnativemodel = (ebx >> 24) & 0xf; /* 0 = Zen4 */
+          }
           break;
         case 2:
           infos->ids[CORE] = id;
@@ -1413,10 +1441,8 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
   if (data->apicid_unique) {
     summarize(backend, infos, flags);
 
-    if (data->is_hybrid
-        && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
-      /* use hybrid info for cpukinds */
-      if (cpuid_type == intel) {
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
+      if (data->is_hybrid && cpuid_type == intel) {
         /* Hybrid Intel */
         hwloc_bitmap_t atomset = hwloc_bitmap_alloc();
         hwloc_bitmap_t coreset = hwloc_bitmap_alloc();
@@ -1453,6 +1479,75 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
           /* the cpuset is given to the callee */
         } else {
           hwloc_bitmap_free(coreset);
+        }
+
+      } else if (data->is_hybrid && cpuid_type == amd) {
+        /* Hybrid AMD */
+        hwloc_bitmap_t Pset = hwloc_bitmap_alloc();
+        hwloc_bitmap_t Eset = hwloc_bitmap_alloc();
+        for(i=0; i<nbprocs; i++) {
+          if (infos[i].hybridcoretype == 0x0)
+            hwloc_bitmap_set(Pset, i);
+          else if (infos[i].hybridcoretype == 0x1)
+            hwloc_bitmap_set(Eset, i);
+        }
+        /* register AMD-ECore set if any */
+        if (!hwloc_bitmap_iszero(Eset)) {
+          struct hwloc_infos_s _infos;
+          struct hwloc_info_s infoattr;
+          infoattr.name = (char *) "CoreType";
+          infoattr.value = (char *) "AMD-ECore";
+          _infos.array = &infoattr;
+          _infos.count = 1;
+          _infos.allocated = 0;
+          hwloc_internal_cpukinds_register(topology, Eset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &_infos, 0);
+          /* the cpuset is given to the callee */
+        } else {
+          hwloc_bitmap_free(Eset);
+        }
+        /* register AMD-PCore set if any */
+        if (!hwloc_bitmap_iszero(Pset)) {
+          struct hwloc_infos_s _infos;
+          struct hwloc_info_s infoattr;
+          infoattr.name = (char *) "CoreType";
+          infoattr.value = (char *) "AMD-PCore";
+          _infos.array = &infoattr;
+          _infos.count = 1;
+          _infos.allocated = 0;
+          hwloc_internal_cpukinds_register(topology, Pset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &_infos, 0);
+          /* the cpuset is given to the callee */
+        } else {
+          hwloc_bitmap_free(Pset);
+        }
+      }
+
+      if (data->has_power_efficiency_ranking && cpuid_type == amd) {
+        /* AMD Power Efficiency Ranking */
+        hwloc_bitmap_t rankings = hwloc_bitmap_alloc();
+        if (!rankings) {
+          fprintf(stderr, "[hwloc/x86/cpukinds] failed to allocated rankings bitmap.\n");
+        } else {
+          /* list existing rankings */
+          for(i=0; i<nbprocs; i++)
+            hwloc_bitmap_set(rankings, infos[i].power_efficiency_ranking);
+          if (hwloc_bitmap_weight(rankings) > 1) {
+            while (!hwloc_bitmap_iszero(rankings)) {
+              unsigned ranking = hwloc_bitmap_first(rankings);
+              hwloc_bitmap_t rankset = hwloc_bitmap_alloc();
+              if (!rankset) {
+                fprintf(stderr, "[hwloc/x86/cpukinds] failed to allocated rankset bitmap.\n");
+                break;
+              } else {
+                for(i=0; i<nbprocs; i++)
+                  if (infos[i].power_efficiency_ranking == (unsigned) ranking)
+                    hwloc_bitmap_set(rankset, i);
+                hwloc_internal_cpukinds_register(topology, rankset, ranking, NULL, 0);
+                /* the cpuset is given to the callee */
+              }
+              hwloc_bitmap_clr(rankings, ranking);
+            }
+          }
+          hwloc_bitmap_free(rankings);
         }
       }
     }
@@ -1896,6 +1991,7 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   data->is_knl = 0;
   data->is_hybrid = 0;
+  data->has_power_efficiency_ranking = 0;
   data->apicid_set = hwloc_bitmap_alloc();
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
