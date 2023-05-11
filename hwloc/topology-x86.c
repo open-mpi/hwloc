@@ -581,6 +581,9 @@ static void read_intel_cores_exttopoenum(struct procinfo *infos, unsigned leaf, 
 	case 5:
 	  infos->ids[DIE] = id;
 	  break;
+        case 6:
+          /* TODO: "DieGrp" on Intel */
+          /* fallthrough */
 	default:
 	  hwloc_debug("x2APIC %u: unknown type %u\n", level, apic_type);
 	  infos->otherids[level] = apic_id >> apic_shift;
