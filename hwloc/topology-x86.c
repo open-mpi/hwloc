@@ -40,6 +40,7 @@ struct hwloc_x86_backend_data_s {
   int is_knl;
   int is_hybrid;
   int found_die_ids;
+  int found_complex_ids;
   int found_unit_ids;
   int found_module_ids;
   int found_tile_ids;
@@ -215,7 +216,8 @@ struct procinfo {
 #define TILE 4
 #define MODULE 5
 #define DIE 6
-#define HWLOC_X86_PROCINFO_ID_NR 7
+#define COMPLEX 7
+#define HWLOC_X86_PROCINFO_ID_NR 8
   unsigned ids[HWLOC_X86_PROCINFO_ID_NR];
   unsigned *otherids;
   unsigned levels;
@@ -530,8 +532,10 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
   }
 }
 
-/* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration) */
-static void read_intel_cores_exttopoenum(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
+/* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration)
+ * or AMD complex/ccd from CPUID 0x80000026 (extended CPU topology)
+ */
+static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
@@ -543,7 +547,7 @@ static void read_intel_cores_exttopoenum(struct hwloc_x86_backend_data_s *data, 
     eax = leaf;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     /* Intel specifies that 0x0b/0x1f return 0 in ecx[8:15] and 0 in eax/ebx for invalid subleaves
-     * however AMD only says that 0x0b returns 0 in ebx[0:15].
+     * however AMD only says that 0x80000026/0x0b returns 0 in ebx[0:15].
      * So use the common condition: 0 in ebx[0:15].
      */
     if (!(ebx & 0xffff))
@@ -574,34 +578,49 @@ static void read_intel_cores_exttopoenum(struct hwloc_x86_backend_data_s *data, 
                     id);
 	infos->apicid = apic_id;
 	infos->otherids[level] = UINT_MAX;
-	switch (apic_type) {
-	case 1:
-	  threadid = id;
-	  break;
-	case 2:
-	  infos->ids[CORE] = id;
-	  break;
-	case 3:
-          data->found_module_ids = 1;
-	  infos->ids[MODULE] = id;
-	  break;
-	case 4:
-          data->found_tile_ids = 1;
-	  infos->ids[TILE] = id;
-	  break;
-	case 5:
-          data->found_die_ids = 1;
-	  infos->ids[DIE] = id;
-	  break;
+        switch (apic_type) {
+        case 1:
+          threadid = id;
+          break;
+        case 2:
+          infos->ids[CORE] = id;
+          break;
+        case 3:
+          if (leaf == 0x80000026) {
+            data->found_complex_ids = 1;
+            infos->ids[COMPLEX] = id;
+          } else {
+            data->found_module_ids = 1;
+            infos->ids[MODULE] = id;
+          }
+          break;
+        case 4:
+          if (leaf == 0x80000026) {
+            data->found_die_ids = 1;
+            infos->ids[DIE] = id;
+          } else {
+            data->found_tile_ids = 1;
+            infos->ids[TILE] = id;
+          }
+          break;
+        case 5:
+          if (leaf == 0x80000026) {
+            goto unknown_type;
+          } else {
+            data->found_die_ids = 1;
+            infos->ids[DIE] = id;
+          }
+          break;
         case 6:
           /* TODO: "DieGrp" on Intel */
           /* fallthrough */
-	default:
-	  hwloc_debug("x2APIC %u: unknown type %u\n", level, apic_type);
-	  infos->otherids[level] = apic_id >> apic_shift;
-	  break;
-	}
-	apic_shift = apic_nextshift;
+        default:
+        unknown_type:
+          hwloc_debug("x2APIC %u: unknown type %u\n", level, apic_type);
+          infos->otherids[level] = apic_id >> apic_shift;
+          break;
+        }
+        apic_shift = apic_nextshift;
       }
       infos->apicid = apic_id;
       infos->ids[PKG] = apic_id >> apic_shift;
@@ -751,18 +770,24 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     read_amd_cores_topoext(data, infos, flags, src_cpuiddump);
   }
 
-  if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
+  if ((cpuid_type == amd) && highest_ext_cpuid >= 0x80000026) {
+    /* Get socket/die/complex/core/thread information from cpuid 0x80000026
+     * (AMD Extended CPU Topology)
+     */
+    read_extended_topo(data, infos, 0x80000026, src_cpuiddump);
+
+  } else if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
-    read_intel_cores_exttopoenum(data, infos, 0x1f, src_cpuiddump);
+    read_extended_topo(data, infos, 0x1f, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == zhaoxin)
 	     && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
-    read_intel_cores_exttopoenum(data, infos, 0x0b, src_cpuiddump);
+    read_extended_topo(data, infos, 0x0b, src_cpuiddump);
   }
 
   /**************************************
@@ -1063,6 +1088,13 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   if (hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
     if (fulldiscovery) {
+      if (data->found_unit_ids) {
+        /* Look for AMD Complex inside packages */
+        hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
+        hwloc_x86_add_groups(topology, infos, nbprocs, remaining_cpuset,
+                             COMPLEX, "Complex",
+                             HWLOC_GROUP_KIND_AMD_COMPLEX, 0);
+      }
       if (data->found_unit_ids) {
         /* Look for AMD Compute units inside packages */
         hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
@@ -1858,6 +1890,7 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
   data->found_die_ids = 0;
+  data->found_complex_ids = 0;
   data->found_unit_ids = 0;
   data->found_module_ids = 0;
   data->found_tile_ids = 0;
