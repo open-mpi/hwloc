@@ -517,6 +517,8 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
       fprintf(output, "# stopped at ecx=256\n");
   }
 
+  /* AMD Genoa reports highest_ext_cpuid == 0x80000028 but these last 2 leaves aren't documented yet */
+
   if (highest_ext_cpuid > 0x80000026) {
     static int reported = 0;
     if (!reported)
