@@ -25,6 +25,7 @@ cpuid_outputs = \
 	Intel-Core-2xXeon-E5345.output \
 	Intel-KnightsLanding-XeonPhi-7210.output \
 	Intel-KnightsCorner-XeonPhi-SE10P.output \
+	AMD-19h-Zen4-2xEpyc-9654.output \
 	AMD-19h-Zen3-2xEpyc-7763.output \
 	AMD-17h-Zen-2xEpyc-7451.output \
 	AMD-15h-Piledriver-4xOpteron-6348.output \
@@ -56,6 +57,7 @@ cpuid_tarballs = \
 	Intel-Core-2xXeon-E5345.tar.bz2 \
 	Intel-KnightsLanding-XeonPhi-7210.tar.bz2 \
 	Intel-KnightsCorner-XeonPhi-SE10P.tar.bz2 \
+	AMD-19h-Zen4-2xEpyc-9654.tar.bz2 \
 	AMD-19h-Zen3-2xEpyc-7763.tar.bz2 \
 	AMD-17h-Zen-2xEpyc-7451.tar.bz2 \
 	AMD-15h-Piledriver-4xOpteron-6348.tar.bz2 \
