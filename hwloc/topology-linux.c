@@ -56,6 +56,7 @@ struct hwloc_linux_backend_data_s {
   } arch;
   int is_knl;
   int is_amd_with_CU;
+  int is_fake_numa_uniform; /* 0 if not fake, -1 if fake non-uniform, N if fake=<N>U */
   int use_numa_distances;
   int use_numa_distances_for_cpuless;
   int use_numa_initiators;
@@ -3971,10 +3972,25 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned failednodes = 0;
   unsigned i;
   DIR *dir;
-  int allow_overlapping_node_cpusets = (getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS") != NULL);
+  char *env;
+  int allow_overlapping_node_cpusets = 0;
   int need_memcaches = hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_MEMCACHE);
+  int need_memattrs = !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS);
 
   hwloc_debug("\n\n * Topology extraction from /sys/devices/system/node *\n\n");
+
+  if (data->is_fake_numa_uniform) {
+    hwloc_debug("Disabling memory-side caches, memory attributes and HMAT initiators because of fake numa\n");
+    need_memcaches = 0;
+    need_memattrs = 0;
+    data->use_numa_initiators = 0;
+    allow_overlapping_node_cpusets = 2; /* accept without warning */
+  }
+
+  env = getenv("HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS");
+  if (env) {
+    allow_overlapping_node_cpusets = atoi(env); /* 0 drop non-first overlapping nodes, 1 allows with warning, 2 allows without warning */
+  }
 
   /* NUMA nodes cannot be filtered out */
   indexes = list_sysfsnode(topology, data, &nbnodes);
@@ -4023,7 +4039,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	failednodes++;
 	continue;
       }
-      if (HWLOC_SHOW_CRITICAL_ERRORS())
+      if (allow_overlapping_node_cpusets < 2 && HWLOC_SHOW_CRITICAL_ERRORS())
         fprintf(stderr, "hwloc/linux: node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
     }
     hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
@@ -4043,8 +4059,9 @@ look_sysfsnode(struct hwloc_topology *topology,
       dir = hwloc_opendir("/proc/driver/nvidia/gpus", data->root_fd);
       if (dir) {
 	struct dirent *dirent;
-	char *env = getenv("HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES");
-	int keep = env && atoi(env);
+	int keep;
+	env = getenv("HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES");
+        keep = env && atoi(env);
 	while ((dirent = readdir(dir)) != NULL) {
 	  char nvgpunumapath[300], line[256];
           int err;
@@ -4115,8 +4132,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       if (data->is_knl) {
 	/* apply KNL quirks */
-	char *env = getenv("HWLOC_KNL_NUMA_QUIRK");
-	int noquirk = (env && !atoi(env));
+	int noquirk;
+	env = getenv("HWLOC_KNL_NUMA_QUIRK");
+        noquirk = (env && !atoi(env));
 	if (!noquirk) {
 	  hwloc_linux_knl_numa_quirk(topology, data, nodes, nbnodes, distances, &failednodes);
 	  free(distances);
@@ -4174,7 +4192,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	  trees[nr_trees++] = tree;
 	}
         /* By the way, get their memattrs now that cpuset is fixed */
-        if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+        if (need_memattrs)
           read_node_local_memattrs(topology, data, node);
       }
 
@@ -5531,6 +5549,40 @@ static int check_sysfs_cpu_path(int root_fd, int *old_filenames)
   return -1;
 }
 
+static void
+hwloc_linuxfs_check_kernel_cmdline(struct hwloc_linux_backend_data_s *data)
+{
+  FILE *file;
+  char cmdline[4096];
+  char *fakenuma;
+
+  file = hwloc_fopen("/proc/cmdline", "r", data->root_fd);
+  if (!file)
+    return;
+
+  cmdline[0] = 0;
+  fgets(cmdline, sizeof(cmdline), file);
+
+  fakenuma = strstr(cmdline, "numa=fake=");
+  if (fakenuma) {
+    /* in fake numa emulation, SLIT is updated but HMAT isn't, hence we need to disable/fix things later */
+    unsigned width = 0;
+    char type = 0;
+    if (sscanf(fakenuma+10, "%u%c", &width, &type) == 2 && type == 'U') {
+      /* if <N>U, each node is split in 8 nodes, we can still do things in this case */
+      data->is_fake_numa_uniform = width;
+    } else {
+      /* otherwise fake nodes are created by just dividing the entire RAM,
+       * without respecting locality at all
+       */
+      data->is_fake_numa_uniform = -1;
+    }
+    hwloc_debug("Found fake numa %d\n", data->is_fake_numa_uniform);
+  }
+
+  fclose(file);
+}
+
 static int
 hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -5582,6 +5634,11 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
    * Platform information for later
    */
   hwloc_gather_system_info(topology, data);
+
+  /**********************************
+   * Detect things in /proc/cmdline
+   */
+  hwloc_linuxfs_check_kernel_cmdline(data);
 
   /**********************
    * /proc/cpuinfo
@@ -7215,6 +7272,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
   data->is_amd_with_CU = 0;
+  data->is_fake_numa_uniform = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
