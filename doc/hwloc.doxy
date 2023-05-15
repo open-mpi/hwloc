@@ -2127,6 +2127,11 @@ and GID #1 of port #3.
 These info attributes are attached to objects specified in parentheses.
 
 <dl>
+<dt>CXLDevice (NUMA Nodes or DAX Memory OS devices)</dt>
+<dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
+There may be multiple instances of this attributes if multiple device memories
+are interleaved.
+</dd>
 <dt>DAXDevice (NUMA Nodes)</dt>
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
 memory region as a volatile NUMA node.
