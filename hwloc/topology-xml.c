@@ -562,7 +562,13 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, s
     char *attrname, *attrvalue;
     if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
       break;
-    if (!strcmp(attrname, "size"))
+    if (!strcmp(attrname, "info")) {
+      char *infoname, *infovalue;
+      int ret = hwloc___xml_import_info(&infoname, &infovalue, state);
+      if (ret < 0)
+        return -1;
+      /* ignored */
+    } else if (!strcmp(attrname, "size"))
       size = strtoull(attrvalue, NULL, 10);
     else if (!strcmp(attrname, "count"))
       count = strtoull(attrvalue, NULL, 10);
@@ -1433,7 +1439,14 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     if (ret <= 0)
       break;
 
-    if (!strcmp(tag, "indexes"))
+    if (!strcmp(tag, "info")) {
+      char *infoname, *infovalue;
+      ret = hwloc___xml_import_info(&infoname, &infovalue, state);
+      if (ret < 0)
+        return ret;
+      /* ignored */
+      continue;
+    } else if (!strcmp(tag, "indexes"))
       is_index = 1;
     else if (!strcmp(tag, "u64values"))
       is_u64values = 1;
@@ -1766,6 +1779,10 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
 
     if (!strcmp(tag, "memattr_value")) {
       ret = hwloc__xml_import_memattr_value(topology, id, flags, &childstate);
+    } else if (!strcmp(tag, "info")) {
+      char *infoname, *infovalue;
+      ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
+      /* ignored */
     } else {
       if (hwloc__xml_verbose())
         fprintf(stderr, "%s: memattr with unrecognized child %s\n",
@@ -2144,6 +2161,12 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
         ret = hwloc__xml_import_cpukind(topology, &childstate);
         if (ret < 0)
           goto failed;
+      } else if (!strcmp(tag, "info")) {
+        char *infoname, *infovalue;
+        ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
+        if (ret < 0)
+          goto failed;
+        /* ignored */
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
