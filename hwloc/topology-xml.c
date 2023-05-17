@@ -1076,7 +1076,7 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
       char *infoname, *infovalue;
       ret = hwloc___xml_import_info(&infoname, &infovalue, state);
       if (ret < 0)
-        return ret;
+        goto out_with_arrays;
       /* ignored */
       continue;
     } else if (!strcmp(tag, "indexes"))
