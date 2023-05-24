@@ -1,75 +1,6 @@
-Introduction
+This is a truncated and poorly-formatted version of the documentation main page.
+See https://www.open-mpi.org/projects/hwloc/doc/ for more.
 
-The Hardware Locality (hwloc) software project aims at easing the process of
-discovering hardware resources in parallel architectures. It offers
-command-line tools and a C API for consulting these resources, their locality,
-attributes, and interconnection. hwloc primarily aims at helping
-high-performance computing (HPC) applications, but is also applicable to any
-project seeking to exploit code and/or data locality on modern computing
-platforms.
-
-hwloc Summary
-
-hwloc provides command line tools and a C API to obtain the hierarchical map of
-key computing elements within a node, such as: NUMA memory nodes, shared
-caches, processor packages, dies and cores, processing units (logical
-processors or "threads") and even I/O devices. hwloc also gathers various
-attributes such as cache and memory information, and is portable across a
-variety of different operating systems and platforms.
-
-hwloc primarily aims at helping high-performance computing (HPC) applications,
-but is also applicable to any project seeking to exploit code and/or data
-locality on modern computing platforms.
-
-hwloc supports the following operating systems:
-
-  * Linux (with knowledge of cgroups and cpusets, memory targets/initiators,
- etc.) on all supported hardware, including Intel Xeon Phi, ScaleMP vSMP,
- and NumaScale NumaConnect.
-  * Solaris (with support for processor sets and logical domains)
-  * AIX
-  * Darwin / OS X
-  * FreeBSD and its variants (such as kFreeBSD/GNU)
-  * NetBSD
-  * HP-UX
-  * Microsoft Windows
-
-Since it uses standard Operating System information, hwloc's support is mostly
-independant from the processor type (x86, powerpc, ...) and just relies on the
-Operating System support. The main exception is BSD operating systems (NetBSD,
-FreeBSD, etc.) because they do not provide support topology information, hence
-hwloc uses an x86-only CPUID-based backend (which can be used for other OSes
-too, see the Components and plugins section).
-
-To check whether hwloc works on a particular machine, just try to build it and
-run lstopo or lstopo-no-graphics. If some things do not look right (e.g. bogus
-or missing cache information), see Questions and Bugs.
-
-hwloc only reports the number of processors on unsupported operating systems;
-no topology information is available.
-
-For development and debugging purposes, hwloc also offers the ability to work
-on "fake" topologies:
-
-  * Symmetrical tree of resources generated from a list of level arities, see
- Synthetic topologies.
-  * Remote machine simulation through the gathering of topology as XML files,
- see Importing and exporting topologies from/to XML files.
-
-hwloc can display the topology in a human-readable format, either in graphical
-mode (X11), or by exporting in one of several different formats, including:
-plain text, LaTeX tikzpicture, PDF, PNG, and FIG (see Command-line Examples
-below). Note that some of the export formats require additional support
-libraries.
-
-hwloc offers a programming interface for manipulating topologies and objects.
-It also brings a powerful CPU bitmap API that is used to describe topology
-objects location on physical/logical processors. See the Programming Interface
-below. It may also be used to binding applications onto certain cores or memory
-nodes. Several utility programs are also provided to ease command-line
-manipulation of topology objects, binding of processes, and so on.
-
-Bindings for several other languages are available from the project website.
 
 Installation
 
@@ -142,7 +73,7 @@ may need to specify additional CPPFLAGS, LDFLAGS, or PKG_CONFIG_PATH values on
 the configure command line.
 
 For example, if libpciaccess was installed into /opt/pciaccess, hwloc's
-configure script may not find it by default. Try adding PKG_CONFIG_PATH to the
+configure script may not find it be default. Try adding PKG_CONFIG_PATH to the
 ./configure command line, like this:
 
 ./configure PKG_CONFIG_PATH=/opt/pciaccess/lib/pkgconfig ...
@@ -547,7 +478,7 @@ Allocate a topology context.
 hwloc_topology_t
 struct hwloc_topology * hwloc_topology_t
 Topology context.
-Definition: hwloc.h:712
+Definition: hwloc.h:716
 hwloc_topology_destroy
 void hwloc_topology_destroy(hwloc_topology_t topology)
 Terminate and free a topology context.
@@ -585,14 +516,14 @@ Get the depth of the hierarchical tree of objects.
 HWLOC_TYPE_DEPTH_UNKNOWN
 @ HWLOC_TYPE_DEPTH_UNKNOWN
 No object of given type exists in the topology.
-Definition: hwloc.h:849
+Definition: hwloc.h:853
 hwloc_obj_attr_snprintf
 int hwloc_obj_attr_snprintf(char *restrict string, size_t size, hwloc_obj_t
-obj, const char *restrict separator, unsigned long flags)
+obj, const char *restrict separator, int verbose)
 Stringify the attributes of a given topology object into a human-readable form.
 hwloc_obj_type_snprintf
 int hwloc_obj_type_snprintf(char *restrict string, size_t size, hwloc_obj_t
-obj, unsigned long flags)
+obj, int verbose)
 Stringify the type of a given topology object into a human-readable form.
 hwloc_set_cpubind
 int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int
@@ -614,11 +545,11 @@ specified by set.
 HWLOC_MEMBIND_BYNODESET
 @ HWLOC_MEMBIND_BYNODESET
 Consider the bitmap argument as a nodeset.
-Definition: hwloc.h:1599
+Definition: hwloc.h:1576
 HWLOC_MEMBIND_BIND
 @ HWLOC_MEMBIND_BIND
 Allocate memory on the specified nodes.
-Definition: hwloc.h:1511
+Definition: hwloc.h:1488
 hwloc_obj_type_is_cache
 int hwloc_obj_type_is_cache(hwloc_obj_type_t type)
 Check whether an object type is a CPU Cache (Data, Unified or Instruction).
@@ -636,47 +567,47 @@ hwloc_bitmap_t hwloc_bitmap_dup(hwloc_const_bitmap_t bitmap)
 Duplicate bitmap bitmap by allocating a new bitmap and copying bitmap contents.
 hwloc_obj
 Structure of a topology object.
-Definition: hwloc.h:423
+Definition: hwloc.h:420
 hwloc_obj::children
 struct hwloc_obj ** children
 Normal children, children[0 .. arity -1].
-Definition: hwloc.h:483
+Definition: hwloc.h:480
 hwloc_obj::nodeset
 hwloc_nodeset_t nodeset
 NUMA nodes covered by this object or containing this object.
-Definition: hwloc.h:567
+Definition: hwloc.h:564
 hwloc_obj::os_index
 unsigned os_index
 OS-provided physical index number. It is not guaranteed unique across the
 entire machine,...
-Definition: hwloc.h:428
+Definition: hwloc.h:425
 hwloc_obj::cpuset
 hwloc_cpuset_t cpuset
 CPUs covered by this object.
-Definition: hwloc.h:539
+Definition: hwloc.h:536
 hwloc_obj::arity
 unsigned arity
 Number of normal children. Memory, Misc and I/O children are not listed here
 but rather in their dedi...
-Definition: hwloc.h:479
+Definition: hwloc.h:476
 hwloc_obj::type
 hwloc_obj_type_t type
 Type of object.
-Definition: hwloc.h:425
+Definition: hwloc.h:422
 hwloc_obj::attr
 union hwloc_obj_attr_u * attr
 Object type-specific Attributes, may be NULL if no attribute value was found.
-Definition: hwloc.h:442
+Definition: hwloc.h:439
 hwloc_obj::parent
 struct hwloc_obj * parent
 Parent, NULL if root (Machine object)
-Definition: hwloc.h:473
+Definition: hwloc.h:470
 hwloc_obj_attr_u::cache
 struct hwloc_obj_attr_u::hwloc_cache_attr_s cache
 hwloc_obj_attr_u::hwloc_cache_attr_s::size
 hwloc_uint64_t size
 Size of cache in bytes.
-Definition: hwloc.h:644
+Definition: hwloc.h:641
 
 hwloc provides a pkg-config executable to obtain relevant compiler and linker
 flags. For example, it can be used thusly to compile applications that utilize
@@ -762,4 +693,5 @@ Make sure to have had a look at those too!
 
 
 
-See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation.
+See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation,
+actual links to related pages, images, etc.
