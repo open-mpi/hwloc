@@ -7,11 +7,12 @@
  * See COPYING in top-level directory.
  */
 
-/*! \page hwloc_intro Hardware Locality (hwloc) Introduction
+/*! \mainpage Hardware Locality
 
 <h1 class="sub">Portable abstraction of hierarchical architectures for high-performance computing</h1>
 
 <hr>
+<br>
 
 \htmlonly
 <div class="section">
@@ -26,8 +27,19 @@ for links to more sections about hwloc concepts.
 \endhtmlonly
 
 \htmlonly
-<div class="section" id="hwloc_summary">
+<div class="section" id="introduction">
 \endhtmlonly
+\section Introduction
+
+The Hardware Locality (hwloc) software project aims at easing the process
+of discovering hardware resources in parallel architectures.
+It offers command-line tools and a C API for consulting these
+resources, their locality, attributes, and interconnection.
+hwloc primarily aims at helping high-performance computing (HPC)
+applications, but is also applicable to any project seeking to exploit
+code and/or data locality on modern computing platforms.
+
+
 \section hwloc_summary hwloc Summary
 
 hwloc provides command line tools and a C API to obtain the
@@ -100,19 +112,41 @@ Bindings for several other languages are available from the
 
 
 \htmlonly
-</div><div class="section" id="hwloc_installation">
+</div><div class="section" id="installation">
 \endhtmlonly
-\section hwloc_installation hwloc Installation
+\section installation Installation
 
-The generic installation procedure
-is described in \ref common_installation.
+hwloc (https://www.open-mpi.org/projects/hwloc/) is available under the
+BSD license.  It is hosted as a sub-project of the overall Open MPI
+project (https://www.open-mpi.org/).  Note that hwloc does not require
+any functionality from Open MPI -- it is a wholly separate (and much
+smaller!) project and code base.  It just happens to be hosted as part
+of the overall Open MPI project.
+
+\subsection basic_installation Basic Installation
+
+Installation is the fairly common GNU-based process:
+
+\verbatim
+shell$ ./configure --prefix=...
+shell$ make
+shell$ make install
+\endverbatim
 
 The hwloc command-line tool "lstopo" produces human-readable topology
-maps, as mentioned above.  It can also export maps to the "fig" file
-format.  Support for PDF, Postscript, and PNG exporting is provided if
+maps, as mentioned above.
+Running the "lstopo" tool is a good way to check as a graphical output
+whether hwloc properly detected the architecture of your node.
+
+
+\subsection optional_dependencies Optional Dependencies
+
+lstopo may also export graphics to the SVG and "fig" file formats.
+Support for PDF, Postscript, and PNG exporting is provided if
 the "Cairo" development package (usually <tt>cairo-devel</tt> or
 <tt>libcairo2-dev</tt>) can be found in "lstopo" when hwloc
 is configured and build.
+<br>
 
 The hwloc core may also benefit from the following development packages:
 <ul>
@@ -121,7 +155,6 @@ The hwloc core may also benefit from the following development packages:
     On Linux, PCI discovery may still be performed (without vendor/device names)
     even if libpciaccess cannot be used.
 </li>
-
 <li>AMD or NVIDIA OpenCL implementations for OpenCL device discovery.
 </li>
 <li>the NVIDIA CUDA Toolkit for CUDA device discovery.
@@ -169,9 +202,58 @@ PCI and XML support may be statically built inside the main hwloc
 library, or as separate dynamically-loaded plugins (see the
 \ref plugins section).
 
+Also note that if you install supplemental libraries in non-standard
+locations, hwloc's configure script may not be able to find them
+without some help.  You may need to specify additional CPPFLAGS,
+LDFLAGS, or PKG_CONFIG_PATH values on the configure command line.
+
+For example, if libpciaccess was installed into /opt/pciaccess,
+hwloc's configure script may not find it be default.  Try adding
+PKG_CONFIG_PATH to the ./configure command line, like this:
+
+\verbatim
+./configure PKG_CONFIG_PATH=/opt/pciaccess/lib/pkgconfig ...
+\endverbatim
+
 Note that because of the possibility of GPL taint, the
 <tt>pciutils</tt> library <tt>libpci</tt> will not be used (remember
 that hwloc is BSD-licensed).
+
+
+\subsection gitclone_installation Installing from a Git clone
+
+Additionally, the code can be directly cloned from Git:
+
+\verbatim
+shell$ git clone https://github.com/open-mpi/hwloc.git
+shell$ cd hwloc
+shell$ ./autogen.sh
+\endverbatim
+
+Note that GNU Autoconf >=2.63, Automake >=1.11 and Libtool >=2.2.6 are
+required when building from a Git clone.
+
+Nightly development snapshots are available on the web site,
+they can be configured and built without any need for Git
+or GNU Autotools.
+
+
+
+\htmlonly
+</div><div class="section" id="bugs">
+\endhtmlonly
+\section bugs Questions and Bugs
+
+Bugs should be reported in the tracker
+(https://github.com/open-mpi/hwloc/issues).
+Opening a new issue automatically displays lots of hints about
+how to debug and report issues.
+
+Questions may be sent to the users or developers mailing lists
+(https://www.open-mpi.org/community/lists/hwloc.php).
+
+There is also a <tt>\#hwloc</tt> IRC channel on Libera Chat (<tt>irc.libera.chat</tt>).
+
 
 
 \htmlonly
