@@ -33,7 +33,6 @@ PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png \
 BUILT_IMAGES = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
-        main.doxy \
         hwloc.doxy \
         README.sed \
         doxygen.css \
@@ -60,7 +59,6 @@ if HWLOC_BUILD_DOXYGEN
 hwloc_include_dir = $(HWLOC_top_srcdir)/include
 
 dox_inputs = $(DOX_CONFIG) \
-       $(srcdir)/main.doxy \
        $(srcdir)/hwloc.doxy \
        $(hwloc_include_dir)/hwloc.h \
        $(hwloc_include_dir)/hwloc/helper.h \
