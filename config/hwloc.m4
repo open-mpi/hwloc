@@ -1863,11 +1863,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_CXX], [test "x$hwloc_have_cxx" = "xyes"])
     ])
     hwloc_did_am_conditionals=yes
-
-    # For backwards compatibility (i.e., packages that only call
-    # HWLOC_DO_AM_CONDITIONS, not NETLOC DO_AM_CONDITIONALS), we also have to
-    # do the netloc AM conditionals here
-    NETLOC_DO_AM_CONDITIONALS
 ])dnl
 
 #-----------------------------------------------------------------------

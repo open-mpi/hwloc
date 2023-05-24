@@ -27,6 +27,7 @@ Version 2.10.0
   emulation is enabled on the Linux kernel command-line.
 * Fix installation failures when configuring with --target,
   thanks to Clement Foyer for the patch.
+* Remove Netloc.
 
 
 Version 2.9.1

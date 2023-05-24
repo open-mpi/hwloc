@@ -125,7 +125,7 @@ quiet_print "==> This year: $year\n";
 # Find the top-level HWLOC source tree dir
 my $start = defined $ARGV[0] ? $ARGV[0] : cwd();
 my $top = $start;
-while (! -d "$top/hwloc" && ! -d "$top/netloc") {
+while (! -d "$top/hwloc") {
     chdir("..");
     $top = cwd();
     die "Can't find top-level hwloc directory"

@@ -28,15 +28,13 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 # images already available in repository
 PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png \
         images/ppc64-with-smt.png images/ppc64-without-smt.png images/ppc64-full-with-smt.png \
-        images/devel09-pci.png \
-        images/netloc_design.png images/netloc_draw.png
+        images/devel09-pci.png
 # images built from repository before inclusion in make dist
 BUILT_IMAGES = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
         main.doxy \
         hwloc.doxy \
-        netloc.doxy \
         README.sed \
         doxygen.css \
         doxygen.cfg \
@@ -85,9 +83,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/levelzero.h \
        $(hwloc_include_dir)/hwloc/gl.h \
        $(hwloc_include_dir)/hwloc/windows.h \
-       $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
-       $(srcdir)/netloc.doxy \
-       $(hwloc_include_dir)/netloc.h
+       $(hwloc_include_dir)/hwloc/openfabrics-verbs.h
 
 #
 # Create the images that we need for the PDF output and the HTML
