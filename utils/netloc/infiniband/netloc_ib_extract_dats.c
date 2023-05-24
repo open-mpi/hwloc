@@ -512,7 +512,7 @@ int main(int argc, char **argv)
     if (!outdir) {
         fprintf(stderr, "Couldn't open output directory: \"%s\"\n", outpath);
         perror("opendir");
-        closedir(outdir);
+        closedir(indir);
         return 2;
     }
 
