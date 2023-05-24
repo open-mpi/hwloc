@@ -46,9 +46,8 @@ code and/or data locality on modern computing platforms.
 hwloc supports the following operating systems:
 
 <ul>
-<li>Linux (including old kernels not having sysfs topology
-information, with knowledge of cpusets, ScaleMP vSMP support, etc.)
-on all supported hardware, including Intel Xeon Phi
+<li>Linux (with knowledge of cgroups and cpusets, memory targets/initiators, etc.)
+on all supported hardware, including Intel Xeon Phi, ScaleMP vSMP,
 and NumaScale NumaConnect.</li>
 <li>Solaris (with support for processor sets and logical domains)</li>
 <li>AIX</li>
