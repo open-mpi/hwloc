@@ -1,75 +1,6 @@
-Introduction
+This is a truncated and poorly-formatted version of the documentation main page.
+See https://www.open-mpi.org/projects/hwloc/doc/ for more.
 
-The Hardware Locality (hwloc) software project aims at easing the process of
-discovering hardware resources in parallel architectures. It offers
-command-line tools and a C API for consulting these resources, their locality,
-attributes, and interconnection. hwloc primarily aims at helping
-high-performance computing (HPC) applications, but is also applicable to any
-project seeking to exploit code and/or data locality on modern computing
-platforms.
-
-hwloc Summary
-
-hwloc provides command line tools and a C API to obtain the hierarchical map of
-key computing elements within a node, such as: NUMA memory nodes, shared
-caches, processor packages, dies and cores, processing units (logical
-processors or "threads") and even I/O devices. hwloc also gathers various
-attributes such as cache and memory information, and is portable across a
-variety of different operating systems and platforms.
-
-hwloc primarily aims at helping high-performance computing (HPC) applications,
-but is also applicable to any project seeking to exploit code and/or data
-locality on modern computing platforms.
-
-hwloc supports the following operating systems:
-
-  * Linux (with knowledge of cgroups and cpusets, memory targets/initiators,
- etc.) on all supported hardware, including Intel Xeon Phi, ScaleMP vSMP,
- and NumaScale NumaConnect.
-  * Solaris (with support for processor sets and logical domains)
-  * AIX
-  * Darwin / OS X
-  * FreeBSD and its variants (such as kFreeBSD/GNU)
-  * NetBSD
-  * HP-UX
-  * Microsoft Windows
-
-Since it uses standard Operating System information, hwloc's support is mostly
-independant from the processor type (x86, powerpc, ...) and just relies on the
-Operating System support. The main exception is BSD operating systems (NetBSD,
-FreeBSD, etc.) because they do not provide support topology information, hence
-hwloc uses an x86-only CPUID-based backend (which can be used for other OSes
-too, see the Components and plugins section).
-
-To check whether hwloc works on a particular machine, just try to build it and
-run lstopo or lstopo-no-graphics. If some things do not look right (e.g. bogus
-or missing cache information), see Questions and Bugs.
-
-hwloc only reports the number of processors on unsupported operating systems;
-no topology information is available.
-
-For development and debugging purposes, hwloc also offers the ability to work
-on "fake" topologies:
-
-  * Symmetrical tree of resources generated from a list of level arities, see
- Synthetic topologies.
-  * Remote machine simulation through the gathering of topology as XML files,
- see Importing and exporting topologies from/to XML files.
-
-hwloc can display the topology in a human-readable format, either in graphical
-mode (X11), or by exporting in one of several different formats, including:
-plain text, LaTeX tikzpicture, PDF, PNG, and FIG (see Command-line Examples
-below). Note that some of the export formats require additional support
-libraries.
-
-hwloc offers a programming interface for manipulating topologies and objects.
-It also brings a powerful CPU bitmap API that is used to describe topology
-objects location on physical/logical processors. See the Programming Interface
-below. It may also be used to binding applications onto certain cores or memory
-nodes. Several utility programs are also provided to ease command-line
-manipulation of topology objects, binding of processes, and so on.
-
-Bindings for several other languages are available from the project website.
 
 Installation
 
@@ -762,4 +693,5 @@ Make sure to have had a look at those too!
 
 
 
-See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation.
+See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation,
+actual links to related pages, images, etc.
