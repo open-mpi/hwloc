@@ -633,9 +633,6 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
 
-/* Define to 1 if scotch is netlocscotch is enabled */
-/* #undef NETLOC_SCOTCH */
-
 /* Name of package */
 #define PACKAGE "hwloc"
 

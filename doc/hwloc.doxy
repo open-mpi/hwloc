@@ -104,7 +104,7 @@ Bindings for several other languages are available from the
 \endhtmlonly
 \section hwloc_installation hwloc Installation
 
-The generic installation procedure for both hwloc and netloc
+The generic installation procedure
 is described in \ref common_installation.
 
 The hwloc command-line tool "lstopo" produces human-readable topology
