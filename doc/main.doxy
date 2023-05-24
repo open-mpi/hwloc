@@ -71,7 +71,7 @@ without some help.  You may need to specify additional CPPFLAGS,
 LDFLAGS, or PKG_CONFIG_PATH values on the configure command line.
 
 For example, if libpciaccess was installed into /opt/pciaccess,
-hwloc's configure script may not find it be default.  Try adding
+hwloc's configure script may not find it by default.  Try adding
 PKG_CONFIG_PATH to the ./configure command line, like this:
 
 \verbatim
