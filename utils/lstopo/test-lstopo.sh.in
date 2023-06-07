@@ -123,7 +123,7 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   echo "** Export synthetic flag extended,attrs,v1..."
   $ls -i "node:4 pu:4" -.synthetic --export-synthetic-flags extended,attrs,v1
   echo "** Export XML flag v2..."
-  $ls -i "node:4 pu:4" -.xml --export-xml-flags v2
+  $ls -i "node:4 pu:4" -.v2xml
   echo "** Topology flag disallowed..."
   $ls -i "node:4 pu:4" - --allow 0xf --flags disallowed -v
 ) > "$file"

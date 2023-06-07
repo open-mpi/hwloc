@@ -71,6 +71,9 @@ that are passed to \fIhwloc_topology_export_xml()\fR.
 Those names may be substrings of actual flag names as long as a single one matches.
 A value of \fB2\fR (or \fBv2\fR) reverts to the format of hwloc v2.x.
 The default is \fB0\fR (or \fBnone\fR).
+
+Output formats \fBv2xml\fR and \fBv3xml\fR may also be used to specify
+which XML version is desired.
 .TP
 \fB\-\-export\-synthetic\-flags\fR <flags>
 Enforce flags when exporting to the synthetic format.
@@ -613,6 +616,9 @@ lstopo outputs an XML representation of the map.
 It may be reused later, even on another machine, with lstopo \-\-input,
 the HWLOC_XMLFILE environment variable, or the hwloc_topology_set_xml()
 function.
+
+\fBv2xml\fR may also be used to specify that hwloc v2-compatible XML
+should be exported.
 
 .PP
 The following special names may be used:

@@ -685,7 +685,7 @@ enum output_format {
 };
 
 static enum output_format
-parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
+parse_output_format(const char *name, unsigned long *xml_flags)
 {
   if (!hwloc_strncasecmp(name, "default", 3))
     return LSTOPO_OUTPUT_DEFAULT;
@@ -714,7 +714,13 @@ parse_output_format(const char *name, char *callname __hwloc_attribute_unused)
     return LSTOPO_OUTPUT_CAIROSVG;
   else if (!strcasecmp(name, "nativesvg") || !strcasecmp(name, "svg(native)"))
     return LSTOPO_OUTPUT_NATIVESVG;
-  else if (!strcasecmp(name, "xml"))
+  else if (!strcasecmp(name, "v2xml")) {
+    *xml_flags |= HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
+    return LSTOPO_OUTPUT_XML;
+  } else if (!strcasecmp(name, "v3xml")) {
+    *xml_flags &= ~HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2;
+    return LSTOPO_OUTPUT_XML;
+  } else if (!strcasecmp(name, "xml"))
     return LSTOPO_OUTPUT_XML;
   else if (!strcasecmp(name, "shmem"))
     return LSTOPO_OUTPUT_SHMEM;
@@ -1472,7 +1478,7 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "--output-format") || !strcmp (argv[0], "--of")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-        output_format = parse_output_format(argv[1], callname);
+        output_format = parse_output_format(argv[1], &loutput.export_xml_flags);
         opt = 1;
       } else {
 	if (filename) {
@@ -1513,7 +1519,7 @@ main (int argc, char *argv[])
     } else {
       char *dot = strrchr(filename, '.');
       if (dot) {
-        output_format = parse_output_format(dot+1, callname);
+        output_format = parse_output_format(dot+1, &loutput.export_xml_flags);
         if (dot == filename+1 && filename[0] == '-' && output_format != LSTOPO_OUTPUT_ERROR)
           filename = "-"; /* to simplify things later */
       } else {
