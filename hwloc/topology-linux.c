@@ -4510,6 +4510,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   int max_without_basefreq = 0; /* any cpu where we have maxfreq without basefreq? */
   char str[293];
   char *env;
+  hwloc_bitmap_t atom_pmu_set, core_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   unsigned adjust_max = 10;
   int i;
@@ -4572,6 +4573,28 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   } hwloc_bitmap_foreach_end();
   hwloc_linux_cpukinds_register(&cpu_capacity, topology, "LinuxCapacity", 1);
   hwloc_linux_cpukinds_destroy(&cpu_capacity);
+
+  /* look at Intel core/atom PMUs */
+  atom_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_atom/cpus", data->root_fd);
+  core_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_core/cpus", data->root_fd);
+  if (atom_pmu_set) {
+    struct hwloc_info_s infoattr;
+    infoattr.name = (char *) "CoreType";
+    infoattr.value = (char *) "IntelAtom";
+    hwloc_internal_cpukinds_register(topology, atom_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    /* the cpuset is given to the callee */
+  } else {
+    hwloc_bitmap_free(atom_pmu_set);
+  }
+  if (core_pmu_set) {
+    struct hwloc_info_s infoattr;
+    infoattr.name = (char *) "CoreType";
+    infoattr.value = (char *) "IntelCore";
+    hwloc_internal_cpukinds_register(topology, core_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    /* the cpuset is given to the callee */
+  } else {
+    hwloc_bitmap_free(core_pmu_set);
+  }
 
   return 0;
 }
