@@ -776,7 +776,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
      */
     read_extended_topo(data, infos, 0x80000026, src_cpuiddump);
 
-  } else if ((cpuid_type == intel) && highest_cpuid >= 0x1f) {
+  } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
