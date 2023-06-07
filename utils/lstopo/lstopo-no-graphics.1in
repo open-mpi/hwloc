@@ -41,7 +41,7 @@ See the OUTPUT FORMATS section below.
 \fB\-i\fR <path>, \fB\-\-input\fR <path>
 Read the topology from <path> instead of discovering the topology of the local machine.
 
-If <path> is a file and XML support has been compiled in hwloc,
+If <path> is a file,
 it may be a XML file exported by a previous hwloc program.
 If <path> is "\-", the standard input may be used as a XML file.
 
@@ -590,8 +590,7 @@ Note that Misc and I/O devices are ignored during this export.
 .
 .TP
 .B xml
-If lstopo was compiled with the proper
-support, lstopo outputs an XML representation of the map.
+lstopo outputs an XML representation of the map.
 It may be reused later, even on another machine, with lstopo \-\-input,
 the HWLOC_XMLFILE environment variable, or the hwloc_topology_set_xml()
 function.
