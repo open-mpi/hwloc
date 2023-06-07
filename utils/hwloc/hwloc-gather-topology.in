@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -238,6 +238,8 @@ savedir "$destdir/$basename" /sys/devices/system/cpu/
 savedir "$destdir/$basename" /sys/bus/cpu/devices/
 savedir "$destdir/$basename" /sys/devices/system/node/
 savedir "$destdir/$basename" /sys/bus/node/devices/
+savefile "$destdir/$basename" /sys/devices/cpu_atom/cpus
+savefile "$destdir/$basename" /sys/devices/cpu_core/cpus
 
 # Gather DMI IDs
 # (no need for aveclassdir since we only want "id" and it usually points to /sys/devices/virtual/dmi/id/)
