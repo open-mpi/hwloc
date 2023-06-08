@@ -28,15 +28,12 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 # images already available in repository
 PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png \
         images/ppc64-with-smt.png images/ppc64-without-smt.png images/ppc64-full-with-smt.png \
-        images/devel09-pci.png \
-        images/netloc_design.png images/netloc_draw.png
+        images/devel09-pci.png
 # images built from repository before inclusion in make dist
 BUILT_IMAGES = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
-        main.doxy \
         hwloc.doxy \
-        netloc.doxy \
         README.sed \
         doxygen.css \
         doxygen.cfg \
@@ -62,7 +59,6 @@ if HWLOC_BUILD_DOXYGEN
 hwloc_include_dir = $(HWLOC_top_srcdir)/include
 
 dox_inputs = $(DOX_CONFIG) \
-       $(srcdir)/main.doxy \
        $(srcdir)/hwloc.doxy \
        $(hwloc_include_dir)/hwloc.h \
        $(hwloc_include_dir)/hwloc/helper.h \
@@ -85,9 +81,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(hwloc_include_dir)/hwloc/levelzero.h \
        $(hwloc_include_dir)/hwloc/gl.h \
        $(hwloc_include_dir)/hwloc/windows.h \
-       $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
-       $(srcdir)/netloc.doxy \
-       $(hwloc_include_dir)/netloc.h
+       $(hwloc_include_dir)/hwloc/openfabrics-verbs.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -914,24 +908,27 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 if HWLOC_BUILD_README
 
 #
-# Rules for creating the top-level README file.  There does not appear
-# to be an easy way to know if AC_PATH_PROG found something in
-# configure.ac (!), so put a run-time check here to see if we have
-# w3c.
+# Rules for creating the top-level README file.
+# Take the main html doc page, ignore headers and footers, and add our owns.
 #
 # Just like BUILD_DOXYGEN, BUILD_README will automatically be false if
 # we're not building standalone.
 #
 readme: $(HWLOC_top_srcdir)/README
 $(HWLOC_top_srcdir)/README: $(DOX_TAG)
+	echo "This is a truncated and poorly-formatted version of the documentation main page." > $@
+	echo "See https://www.open-mpi.org/projects/hwloc/doc/ for more." >> $@
+	echo >> $@
+	echo >> $@
 	sed -n -f $(srcdir)/README.sed $(DOX_HTML_DIR)/index.html > $(DOX_HTML_README)
 	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_README) \
-	 | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' \
+	 | $(SED) -n -e 's/^   //' -e '/^Installation$$/,$$p' \
 	 | $(SED) -e '/^--*-$$/,$$ d' \
-	 > $@
+	 >> $@
 	echo >> $@
 	echo >> $@
-	echo "See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation." >> $@
+	echo "See https://www.open-mpi.org/projects/hwloc/doc/ for more hwloc documentation," >> $@
+	echo "actual links to related pages, images, etc." >> $@
 	rm -f $(DOX_HTML_README)
 
 else
