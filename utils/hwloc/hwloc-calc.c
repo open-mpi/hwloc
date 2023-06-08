@@ -414,8 +414,11 @@ int main(int argc, char *argv[])
         cpukind_infoname = argv[1];
         cpukind_infovalue = equal+1;
         *equal = 0;
-      } else {
+      } else if (argv[1][0] >= '0' && argv[1][0] <= '9') {
         cpukind_index = atoi(argv[1]);
+      } else {
+        fprintf(stderr, "Failed to recognize --cpukind argument %s\n", argv[1]);
+        return EXIT_FAILURE;
       }
       opt = 1;
       goto next_config;
