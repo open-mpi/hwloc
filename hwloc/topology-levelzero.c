@@ -604,8 +604,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   uint32_t nbdrivers, i, k, zeidx;
   struct hwloc_osdev_array oarray;
   struct hwloc_levelzero_ports hports;
-  int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
-  char *env;
+  int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early and zesInit() isn't available, 2 if ZES_ENABLE_SYSMAN=0 */
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -620,18 +619,22 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 #ifdef HWLOC_HAVE_ZESINIT
   res = zesInit(0);
   if (res != ZE_RESULT_SUCCESS) {
-    hwloc_debug("hwloc/levelzero: Failed to initialize LevelZero Sysman in zesInit(): 0x%x\n", (unsigned)res);
-    hwloc_debug("hwloc/levelzero: Continuing. Hopefully ZES_ENABLE_SYSMAN=1\n");
+    if (res == ZE_RESULT_ERROR_UNSUPPORTED_FEATURE) {
+      fprintf(stderr, "hwloc/levelzero: Unsupported zesInit(), please either an older or a more recent level-zero runtime.\n");
+    } else if (HWLOC_SHOW_ALL_ERRORS()) {
+      fprintf(stderr, "hwloc/levelzero: Failed to initialize LevelZero in zesInit(): 0x%x\n", (unsigned)res);
+    }
+    return 0;
   }
-#endif /* HWLOC_HAVE_ZESINIT */
-
+#else /* !HWLOC_HAVE_ZESINIT */
   /* Tell L0 to create sysman devices.
    * If somebody already initialized L0 without Sysman,
    * zesDeviceGetProperties() will fail and warn in hwloc__levelzero_properties_get().
    * The lib constructor and Windows DllMain tried to set ZES_ENABLE_SYSMAN=1 early (see topology.c),
    * we try again in case they didn't.
    */
-  env = getenv("ZES_ENABLE_SYSMAN");
+ {
+  char *env = getenv("ZES_ENABLE_SYSMAN");
   if (!env) {
     /* setenv() is safer than putenv() but not available on Windows */
 #ifdef HWLOC_WIN_SYS
@@ -644,6 +647,8 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   } else if (!atoi(env)) {
     sysman_maybe_missing = 2;
   }
+ }
+#endif /* !HWLOC_HAVE_ZESINIT */
 
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {

@@ -8,6 +8,7 @@
 
 typedef int ze_result_t;
 #define ZE_RESULT_SUCCESS 0
+#define ZE_RESULT_ERROR_UNSUPPORTED_FEATURE 0x78000003
 
 #define ZE_MAX_DEVICE_NAME 64
 
