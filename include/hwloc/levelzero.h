@@ -44,8 +44,9 @@ extern "C" {
  * the Level Zero device \p device.
  *
  * Topology \p topology and device \p device must match the local machine.
- * The Level Zero must have been initialized with Sysman enabled
- * (ZES_ENABLE_SYSMAN=1 in the environment).
+ * The Level Zero library must have been initialized with Sysman enabled
+ * (by calling zesInit(0) if supported,
+ *  or by setting ZES_ENABLE_SYSMAN=1 in the environment).
  * I/O devices detection and the Level Zero component are not needed in the
  * topology.
  *
