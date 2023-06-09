@@ -329,6 +329,12 @@ To bind memory on second memory node and run on first node (when supported by th
 
     $ hwloc-bind --cpubind node:1 --membind node:0 -- echo hello
 
+hwloc-bind does not have an option to select a kind of CPU core but it may
+be combined with hwloc-calc to do so. For instance, to bind on the first two
+cores whose kind matches CoreType=IntelAtom:
+
+    $ hwloc-bind $(hwloc-calc --restrict $(hwloc-calc --cpukind CoreType=IntelAtom all) core:0-1) -- echo hello
+
 The --get option can report current bindings.  This example shows
 nesting hwloc-bind invocations to set a binding and then report it:
 

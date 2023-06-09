@@ -50,6 +50,15 @@ When specified by index, it corresponds to hwloc ranking of CPU kinds
 which returns energy-efficient cores first, and high-performance
 power-hungry cores last.
 The full list of CPU kinds may be seen with \fIlstopo --cpukinds\fR.
+
+Note that this option is applied after searching locations.
+Hence \fB\-\-cpukind 0 core:1\fR will return the second core of
+the machine if it is of kind 0, and nothing otherwise.
+To rather get the second core among those of kind 0, you should
+combine invocations:
+
+  hwloc-calc --restrict $(hwloc-calc --cpukind 0 all) core:1
+
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
