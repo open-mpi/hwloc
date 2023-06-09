@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2021 Inria.  All rights reserved.
+.\" Copyright © 2009-2023 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -32,6 +32,15 @@ All topology options must be given before all other options.
 Only keep the first PU per core before binding.
 If \fI<N>\fR is specified, keep the <N>-th instead, if any.
 PUs are ordered by physical index during this filtering.
+
+Note that this option is applied after searching locations.
+Hence \fB\-\-no\-smt pu:2-5\fR will first select the PUs #2
+to #5 in the machine before binding on one of them per core.
+To rather bind on PUs #2 to #5 after filtering one per core,
+you should combine with hwloc-calc:
+
+  hwloc-bind $(hwloc-calc --restrict $(hwloc-calc --no-smt all) pu:2-5) -- echo hello
+
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
