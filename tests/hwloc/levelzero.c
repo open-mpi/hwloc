@@ -26,7 +26,7 @@ int main(void)
 
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
-    fprintf(stderr, "Failed to initialize LevelZero in ze_init(): %d\n", (int)res);
+    fprintf(stderr, "Failed to initialize LevelZero in zeInit(): %d\n", (int)res);
     return 0;
   }
   

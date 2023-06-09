@@ -640,7 +640,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
     if (HWLOC_SHOW_ALL_ERRORS()) {
-      fprintf(stderr, "Failed to initialize LevelZero in ze_init(): 0x%x\n", (unsigned)res);
+      fprintf(stderr, "Failed to initialize LevelZero in zeInit(): 0x%x\n", (unsigned)res);
     }
     return 0;
   }
