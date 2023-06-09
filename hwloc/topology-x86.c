@@ -535,7 +535,7 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration)
  * or AMD complex/ccd from CPUID 0x80000026 (extended CPU topology)
  */
-static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
+static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
@@ -546,12 +546,21 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
     ecx = level;
     eax = leaf;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-    /* Intel specifies that 0x0b/0x1f return 0 in ecx[8:15] and 0 in eax/ebx for invalid subleaves
-     * however AMD only says that 0x80000026/0x0b returns 0 in ebx[0:15].
-     * So use the common condition: 0 in ebx[0:15].
+    /* Intel specifies that the 0x0b/0x1f loop should stop when we get "invalid domain" (0 in ecx[8:15])
+     * (if so, we also get 0 in eax/ebx for invalid subleaves).
+     * However AMD rather says that the 0x80000026/0x0b loop should stop when we get "no thread at this level" (0 in ebx[0:15]).
+     * Zhaoxin follows the Intel specs but also returns "no thread at this level" for the last *valid* level (at least on KH-4000).
+     * From the Linux kernel code, it's very likely that AMD also returns "invalid domain"
+     * (because detect_extended_topology() uses that for all x86 CPUs)
+     * but keep with the official doc until AMD can clarify that (see #593).
      */
-    if (!(ebx & 0xffff))
-      break;
+    if (cpuid_type == amd) {
+      if (!(ebx & 0xffff))
+        break;
+    } else {
+      if (!(ecx & 0xff00))
+        break;
+    }
     apic_packageshift = eax & 0x1f;
   }
 
@@ -563,8 +572,13 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
 	ecx = level;
 	eax = leaf;
 	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-	if (!(ebx & 0xffff))
-	  break;
+        if (cpuid_type == amd) {
+          if (!(ebx & 0xffff))
+            break;
+        } else {
+          if (!(ecx & 0xff00))
+            break;
+        }
 	apic_nextshift = eax & 0x1f;
 	apic_type = (ecx & 0xff00) >> 8;
 	apic_id = edx;
@@ -774,20 +788,20 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     /* Get socket/die/complex/core/thread information from cpuid 0x80000026
      * (AMD Extended CPU Topology)
      */
-    read_extended_topo(data, infos, 0x80000026, src_cpuiddump);
+    read_extended_topo(data, infos, 0x80000026, cpuid_type, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
-    read_extended_topo(data, infos, 0x1f, src_cpuiddump);
+    read_extended_topo(data, infos, 0x1f, cpuid_type, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == zhaoxin)
 	     && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
-    read_extended_topo(data, infos, 0x0b, src_cpuiddump);
+    read_extended_topo(data, infos, 0x0b, cpuid_type, src_cpuiddump);
   }
 
   /**************************************
