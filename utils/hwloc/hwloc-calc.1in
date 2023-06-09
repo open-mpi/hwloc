@@ -31,6 +31,15 @@ All topology options must be given before all other options.
 Only keep the first PU per core in the input locations.
 If \fI<N>\fR is specified, keep the <N>-th instead, if any.
 PUs are ordered by physical index during this filtering.
+
+Note that this option is applied after searching locations.
+Hence \fB\-\-no\-smt pu:2-5\fR will first select the PUs #2
+to #5 in the machine before keeping one of them per core.
+To rather get PUs #2 to #5 after filtering one per core,
+you should combine invocations:
+
+  hwloc-calc --restrict $(hwloc-calc --no-smt all) pu:2-5
+
 .TP
 \fB\-\-cpukind\fR <n>, \fB\-\-cpukind\fR <infoname>=<infovalue>
 Only keep PUs whose CPU kind match.
@@ -44,6 +53,8 @@ The full list of CPU kinds may be seen with \fIlstopo --cpukinds\fR.
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
+This is useful when combining invocations to filter some objects
+before selecting among them.
 .TP
 \fB\-\-restrict\fR nodeset=<nodeset>
 Restrict the topology to the given nodeset, unless \fB\-\-restrict\-flags\fR specifies something different.
