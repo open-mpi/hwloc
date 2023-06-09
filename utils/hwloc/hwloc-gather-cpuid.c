@@ -53,7 +53,7 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   int has_intel_sgx = 0;
   int has_amd_topoext = 0;
   FILE *output;
-  int err;
+  int is_amd, err;
 
   err = hwloc_set_cpubind(topo, pu->cpuset, HWLOC_CPUBIND_PROCESS);
   if (err < 0) {
@@ -90,6 +90,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
   /* 0x0 = Highest cpuid + Vendor string */
   regs[0] = 0x0;
   dump_one_cpuid(output, regs, 0x1);
+
+  /* AuthenticAMD */
+#define AMD_EBX ('A' | ('u'<<8) | ('t'<<16) | ('h'<<24))
+#define AMD_EDX ('e' | ('n'<<8) | ('t'<<16) | ('i'<<24))
+#define AMD_ECX ('c' | ('A'<<8) | ('M'<<16) | ('D'<<24))
+  if (regs[1] == AMD_EBX && regs[2] == AMD_ECX && regs[3] == AMD_EDX)
+    is_amd = 1;
+  else
+    is_amd = 0;
 
   /* 0x1 = Family, Model, Stepping, Topology, Features */
   if (highest_cpuid >= 0x1) {
@@ -171,9 +180,15 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     for(i=0; i<256; i++) {
       regs[0] = 0xb; regs[2] = i;
       dump_one_cpuid(output, regs, 0x5);
-      if (!(regs[2] & 0xff00))
-	/* invalid, no more levels */
-	break;
+      if (is_amd) {
+        /* AMD invalid (no more levels) = logprocatthislevel = ebx[0:15] == 0 */
+        if (!(regs[1] & 0xffff))
+          break;
+      } else {
+        /* Intel invalid (no more levels) = invalid level type = ecx[8:15] == 0 */
+        if (!(regs[2] & 0xff00))
+          break;
+      }
     }
     if (i == 256)
       fprintf(output, "# stopped at ecx=256\n");
