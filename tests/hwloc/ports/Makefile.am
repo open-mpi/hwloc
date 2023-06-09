@@ -1,4 +1,4 @@
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012, 2020 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -185,7 +185,8 @@ libhwloc_port_levelzero_la_SOURCES = \
         include/levelzero/level_zero/ze_api.h \
         include/levelzero/level_zero/zes_api.h
 libhwloc_port_levelzero_la_CPPFLAGS = $(common_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/levelzero
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/levelzero \
+        -DHWLOC_HAVE_ZESINIT=1
 
 nodist_libhwloc_port_gl_la_SOURCES = topology-gl.c
 libhwloc_port_gl_la_SOURCES = \
