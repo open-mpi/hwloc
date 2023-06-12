@@ -29,9 +29,8 @@ int main(void)
     fprintf(stderr, "Failed to initialize LevelZero in zesInit(): %d\n", (int)res);
     return 0;
   }
-#else
-  putenv((char *) "ZES_ENABLE_SYSMAN=1");
 #endif
+  /* if !HWLOC_HAVE_ZESINIT, the user must set ZES_ENABLE_SYSMAN=1 in his environment */
 
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {

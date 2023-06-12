@@ -533,25 +533,8 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     }
     return 0;
   }
-#else /* !HWLOC_HAVE_ZESINIT */
-  /* Tell L0 to create sysman devices.
-   * If somebody already initialized L0 without Sysman,
-   * zesDeviceGetProperties() will fail and warn in hwloc__levelzero_properties_get().
-   * The lib constructor and Windows DllMain tried to set ZES_ENABLE_SYSMAN=1 early (see topology.c),
-   * we try again in case they didn't.
-   */
- {
-  char *env = getenv("ZES_ENABLE_SYSMAN");
-  if (!env) {
-    /* setenv() is safer than putenv() but not available on Windows */
-#ifdef HWLOC_WIN_SYS
-    putenv("ZES_ENABLE_SYSMAN=1");
-#else
-    setenv("ZES_ENABLE_SYSMAN", "1", 1);
-#endif
-  }
- }
 #endif /* !HWLOC_HAVE_ZESINIT */
+  /* if !HWLOC_HAVE_ZESINIT, the user must set ZES_ENABLE_SYSMAN=1 in his environment */
 
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
