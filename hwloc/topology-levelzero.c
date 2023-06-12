@@ -63,7 +63,6 @@ hwloc__levelzero_osdev_array_find(struct hwloc_osdev_array *array,
 
 static void
 hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
-                                int sysman_maybe_missing,
                                 int *is_integrated_p)
 {
   ze_result_t res;
@@ -139,11 +138,8 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
       hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop2.boardNumber);
   } else {
     static int warned = 0;
-    if (!warned) {
-      if (sysman_maybe_missing == 1 && HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
-      else if (sysman_maybe_missing == 2 && HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
+    if (!warned && HWLOC_SHOW_ALL_ERRORS()) {
+      fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (sysman missing?).\n");
       warned = 1;
     }
     /* continue in degraded mode, we'll miss locality and some attributes */
@@ -516,7 +512,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   uint32_t nbdrivers, i, k, zeidx;
   struct hwloc_osdev_array oarray;
   struct hwloc_levelzero_ports hports;
-  int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early and zesInit() isn't available, 2 if ZES_ENABLE_SYSMAN=0 */
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -554,10 +549,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 #else
     setenv("ZES_ENABLE_SYSMAN", "1", 1);
 #endif
-    /* we'll warn in hwloc__levelzero_properties_get() if we fail to get zes devices */
-    sysman_maybe_missing = 1;
-  } else if (!atoi(env)) {
-    sysman_maybe_missing = 2;
   }
  }
 #endif /* !HWLOC_HAVE_ZESINIT */
@@ -633,7 +624,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(dvh[j], osdev, sysman_maybe_missing, &is_integrated);
+      hwloc__levelzero_properties_get(dvh[j], osdev, &is_integrated);
 
       hwloc__levelzero_cqprops_get(dvh[j], osdev);
 
@@ -659,7 +650,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
-            hwloc__levelzero_properties_get(subh[k], subosdevs[k], sysman_maybe_missing, NULL);
+            hwloc__levelzero_properties_get(subh[k], subosdevs[k], NULL);
 
             hwloc__levelzero_cqprops_get(subh[k], subosdevs[k]);
           }
