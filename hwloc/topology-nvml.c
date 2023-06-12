@@ -42,7 +42,7 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
     if (pfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
       static int warned = 0;
       if (!warned && HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc failed to find NVLink peer %04x:%02x:%02x\n",
+        fprintf(stderr, "hwloc/nvml: failed to find NVLink peer %04x:%02x:%02x\n",
                 peer_bdf.domain, peer_bdf.bus, peer_bdf.device);
       warned = 1;
     } else {
@@ -90,7 +90,7 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
   default: {
     static int warned = 0;
     if (!warned && HWLOC_SHOW_ALL_ERRORS())
-      fprintf(stderr, "hwloc failed to recognize NVLink peer %04x:%02x:%02x class %04x vendor %04x device %04x\n",
+      fprintf(stderr, "hwloc/nvml: failed to recognize NVLink peer %04x:%02x:%02x class %04x vendor %04x device %04x\n",
               peer_bdf.domain, peer_bdf.bus, peer_bdf.device,
               obj->attr->pcidev.class_id, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
     warned = 1;
@@ -367,7 +367,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
         } else {
           static int warned = 0;
           if (!warned && HWLOC_SHOW_ALL_ERRORS())
-            fprintf(stderr, "Failed to recognize NVLink version %u\n", version);
+            fprintf(stderr, "hwloc/nvml: Failed to recognize NVLink version %u\n", version);
           warned = 1;
           continue;
         }

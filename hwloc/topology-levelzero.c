@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2022 Inria.  All rights reserved.
+ * Copyright © 2020-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -228,7 +228,7 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
           if (mprop.onSubdevice) {
             if (mprop.subdeviceId >= nr_osdevs || !nr_osdevs || !sub_osdevs) {
               if (HWLOC_SHOW_ALL_ERRORS())
-                fprintf(stderr, "LevelZero: memory module #%u on unexpected subdeviceId #%u\n", m, mprop.subdeviceId);
+                fprintf(stderr, "hwloc/levelzero: memory module #%u on unexpected subdeviceId #%u\n", m, mprop.subdeviceId);
               osdev = NULL; /* we'll ignore it but we'll still agregate its subdevice memories into totalHBM/DDRkB */
             } else {
               osdev = sub_osdevs[mprop.subdeviceId];
@@ -640,7 +640,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
     if (HWLOC_SHOW_ALL_ERRORS()) {
-      fprintf(stderr, "Failed to initialize LevelZero in zeInit(): 0x%x\n", (unsigned)res);
+      fprintf(stderr, "hwloc/levelzero Failed to initialize in zeInit(): 0x%x\n", (unsigned)res);
     }
     return 0;
   }
