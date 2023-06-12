@@ -172,9 +172,9 @@ hwloc__levelzero_cqprops_get(ze_device_handle_t zeh,
 }
 
 static int
-hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t zesh,
-                                        hwloc_obj_t root_osdev,
-                                        unsigned nr_osdevs, hwloc_obj_t *sub_osdevs)
+hwloc__levelzero_memory_get(zes_device_handle_t zesh,
+                            hwloc_obj_t root_osdev,
+                            unsigned nr_osdevs, hwloc_obj_t *sub_osdevs)
 {
   zes_mem_handle_t *mh;
   uint32_t nr_mems;
@@ -277,95 +277,6 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t zesh,
   }
 
   return 0;
-}
-
-static void
-hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t zeh,
-                                         hwloc_obj_t osdev,
-                                         int ignore_ddr)
-{
-  ze_device_memory_properties_t *mh;
-  uint32_t nr_mems;
-  ze_result_t res;
-
-  nr_mems = 0;
-  res = zeDeviceGetMemoryProperties(zeh, &nr_mems, NULL);
-  if (res != ZE_RESULT_SUCCESS || !nr_mems)
-    return;
-  hwloc_debug("L0/CoreAPI: found %u memories in osdev %s\n",
-              nr_mems, osdev->name);
-
-  mh = malloc(nr_mems * sizeof(*mh));
-  if (mh) {
-    res = zeDeviceGetMemoryProperties(zeh, &nr_mems, mh);
-    if (res == ZE_RESULT_SUCCESS) {
-      unsigned m;
-      for(m=0; m<nr_mems; m++) {
-        const char *_name = mh[m].name;
-        char name[300], value[64];
-        /* FIXME: discrete GPUs report 95% of the physical memory (what sysman sees)
-         * while integrated GPUs report 80% of the host RAM (sysman sees 0), adjust?
-         */
-        hwloc_debug("L0/CoreAPI: found memory name %s size %llu in osdev %s\n",
-                    mh[m].name, (unsigned long long) mh[m].totalSize, osdev->name);
-        if (!mh[m].totalSize)
-          continue;
-        if (ignore_ddr && !strcmp(_name, "DDR"))
-          continue;
-        if (!_name[0])
-          _name = "Memory";
-        snprintf(name, sizeof(name), "LevelZero%sSize", _name); /* HBM or DDR, or Memory if unknown */
-        snprintf(value, sizeof(value), "%lluKiB", (unsigned long long) mh[m].totalSize >> 10);
-        hwloc_obj_add_info(osdev, name, value);
-      }
-    }
-    free(mh);
-  }
-}
-
-
-static void
-hwloc__levelzero_memory_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
-                            hwloc_obj_t root_osdev, int is_integrated,
-                            unsigned nr_subdevices, zes_device_handle_t *subzehs, hwloc_obj_t *sub_osdevs)
-{
-  static int memory_from_coreapi = -1; /* 1 means coreapi, 0 means sysman, -1 means sysman if available or coreapi otherwise */
-  static int first = 1;
-
-  if (first) {
-    char *env;
-    env = getenv("HWLOC_L0_COREAPI_MEMORY");
-    if (env)
-      memory_from_coreapi = atoi(env);
-
-    if (memory_from_coreapi == -1) {
-      int ret = hwloc__levelzero_memory_get_from_sysman(zesh, root_osdev, nr_subdevices, sub_osdevs);
-      if (!ret) {
-        /* sysman worked, we're done, disable coreapi for next time */
-        hwloc_debug("levelzero: sysman/memory succeeded, disabling coreapi memory queries\n");
-        memory_from_coreapi = 0;
-        return;
-      }
-      /* sysman failed, enable coreapi */
-      hwloc_debug("levelzero: sysman/memory failed, enabling coreapi memory queries\n");
-      memory_from_coreapi = 1;
-    }
-
-    first = 0;
-  }
-
-  if (memory_from_coreapi > 0) {
-    unsigned k;
-    int ignore_ddr = (memory_from_coreapi != 2) && is_integrated; /* DDR ignored in integrated GPUs, it's like the host DRAM */
-    hwloc__levelzero_memory_get_from_coreapi(zeh, root_osdev, ignore_ddr);
-    for(k=0; k<nr_subdevices; k++)
-      hwloc__levelzero_memory_get_from_coreapi(subzehs[k], sub_osdevs[k], ignore_ddr);
-  } else {
-    hwloc__levelzero_memory_get_from_sysman(zesh, root_osdev, nr_subdevices, sub_osdevs);
-    /* no need to call hwloc__levelzero_memory_get() on subdevices,
-     * the call on the root device is enough (and identical to a call on subdevices)
-     */
-  }
 }
 
 struct hwloc_levelzero_ports {
@@ -641,7 +552,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       }
 
       /* get all memory info at once */
-      hwloc__levelzero_memory_get(zeh, zesh, osdev, is_integrated, nr_subdevices, subzehs, subosdevs);
+      hwloc__levelzero_memory_get(zesh, osdev, nr_subdevices, subosdevs);
 
       /* get all ports info at once */
       if (!(hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))

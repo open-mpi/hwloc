@@ -58,13 +58,6 @@ extern ze_result_t zeDeviceGetCommandQueueGroupProperties(ze_driver_handle_t, ui
 
 extern ze_result_t zeDeviceGetSubDevices(ze_device_handle_t, uint32_t *, ze_device_handle_t*);
 
-typedef struct ze_device_memory_properties {
-  uint64_t totalSize;
-  char *name;
-} ze_device_memory_properties_t;
-
-extern ze_result_t zeDeviceGetMemoryProperties(ze_device_handle_t, uint32_t *, ze_device_memory_properties_t*);
-
 typedef struct ze_pci_address_ext {
   uint32_t domain, bus, device, function;
 } ze_pci_address_ext_t;
