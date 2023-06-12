@@ -392,7 +392,7 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
 
     } else {
       size_t length = strcspn(attrs, " )");
-      fprintf(stderr, "Ignoring unknown attribute at '%s'\n", attrs);
+      fprintf(stderr, "hwloc/synthetic: Ignoring unknown attribute at '%s'\n", attrs);
       attrs += length;
     }
 
