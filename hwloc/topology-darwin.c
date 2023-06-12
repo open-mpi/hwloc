@@ -85,7 +85,7 @@ static void hwloc__darwin_cpukinds_add_cpu(struct hwloc_darwin_cpukinds *kinds,
         if (!kinds->kinds[i].compatible)
           kinds->kinds[i].compatible = strdup(compatible);
         else if (strcmp(kinds->kinds[i].compatible, compatible))
-          fprintf(stderr, "got a different compatible string inside same cluster type %c\n", cluster_type);
+          fprintf(stderr, "hwloc/darwin/cpukinds: got a different compatible string inside same cluster type %c\n", cluster_type);
       }
       kind = &kinds->kinds[i];
       goto found;

@@ -3011,7 +3011,7 @@ hwloc_linux_knl_read_hwdata_properties(struct hwloc_linux_backend_data_s *data,
 
   /* file must start with version information */
   if (sscanf(data_beg, "version: %d", &version) != 1) {
-    fprintf(stderr, "Invalid knl_memoryside_cache header, expected \"version: <int>\".\n");
+    fprintf(stderr, "hwloc/linux/hwdata: Invalid knl_memoryside_cache header, expected \"version: <int>\".\n");
     return -1;
   }
 
@@ -5709,7 +5709,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 	      old_siblings_filenames ? "old" : "new");
   if (err < 0) {
     if (HWLOC_SHOW_CRITICAL_ERRORS())
-      fprintf(stderr, "[hwloc/linux] failed to find sysfs cpu topology directory, aborting linux discovery.\n");
+      fprintf(stderr, "hwloc/linux: failed to find sysfs cpu topology directory, aborting linux discovery.\n");
     return -1;
   }
 

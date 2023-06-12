@@ -86,7 +86,7 @@ cpuiddump_read(const char *dirpath, unsigned idx)
 
   cpuiddump = malloc(sizeof(*cpuiddump));
   if (!cpuiddump) {
-    fprintf(stderr, "Failed to allocate cpuiddump for PU #%u, ignoring cpuiddump.\n", idx);
+    fprintf(stderr, "hwloc/x86: Failed to allocate cpuiddump for PU #%u, ignoring cpuiddump.\n", idx);
     goto out;
   }
 
@@ -97,7 +97,7 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   snprintf(filename, filenamelen, "%s/pu%u", dirpath, idx);
   file = fopen(filename, "r");
   if (!file) {
-    fprintf(stderr, "Could not read dumped cpuid file %s, ignoring cpuiddump.\n", filename);
+    fprintf(stderr, "hwloc/x86: Could not read dumped cpuid file %s, ignoring cpuiddump.\n", filename);
     goto out_with_filename;
   }
 
@@ -106,7 +106,7 @@ cpuiddump_read(const char *dirpath, unsigned idx)
     nr++;
   cpuiddump->entries = malloc(nr * sizeof(struct cpuiddump_entry));
   if (!cpuiddump->entries) {
-    fprintf(stderr, "Failed to allocate %u cpuiddump entries for PU #%u, ignoring cpuiddump.\n", nr, idx);
+    fprintf(stderr, "hwloc/x86: Failed to allocate %u cpuiddump entries for PU #%u, ignoring cpuiddump.\n", nr, idx);
     goto out_with_file;
   }
 
@@ -162,7 +162,7 @@ cpuiddump_find_by_input(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *e
     return;
   }
 
-  fprintf(stderr, "Couldn't find %x,%x,%x,%x in dumped cpuid, returning 0s.\n",
+  fprintf(stderr, "hwloc/x86: Couldn't find %x,%x,%x,%x in dumped cpuid, returning 0s.\n",
 	  *eax, *ebx, *ecx, *edx);
   *eax = 0;
   *ebx = 0;
@@ -1813,17 +1813,17 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   sprintf(path, "%s/hwloc-cpuid-info", src_cpuiddump_path);
   file = fopen(path, "r");
   if (!file) {
-    fprintf(stderr, "Couldn't open dumped cpuid summary %s\n", path);
+    fprintf(stderr, "hwloc/x86: Couldn't open dumped cpuid summary %s\n", path);
     goto out_with_path;
   }
   if (!fgets(line, sizeof(line), file)) {
-    fprintf(stderr, "Found read dumped cpuid summary in %s\n", path);
+    fprintf(stderr, "hwloc/x86: Found read dumped cpuid summary in %s\n", path);
     fclose(file);
     goto out_with_path;
   }
   fclose(file);
   if (strcmp(line, "Architecture: x86\n")) {
-    fprintf(stderr, "Found non-x86 dumped cpuid summary in %s: %s\n", path, line);
+    fprintf(stderr, "hwloc/x86: Found non-x86 dumped cpuid summary in %s: %s\n", path, line);
     goto out_with_path;
   }
   free(path);
@@ -1835,19 +1835,19 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
       if (!*end)
 	hwloc_bitmap_set(set, idx);
       else
-	fprintf(stderr, "Ignoring invalid dirent `%s' in dumped cpuid directory `%s'\n",
+	fprintf(stderr, "hwloc/x86: Ignoring invalid dirent `%s' in dumped cpuid directory `%s'\n",
 		dirent->d_name, src_cpuiddump_path);
     }
   }
   closedir(dir);
 
   if (hwloc_bitmap_iszero(set)) {
-    fprintf(stderr, "Did not find any valid pu%%u entry in dumped cpuid directory `%s'\n",
+    fprintf(stderr, "hwloc/x86: Did not find any valid pu%%u entry in dumped cpuid directory `%s'\n",
 	    src_cpuiddump_path);
     return -1;
   } else if (hwloc_bitmap_last(set) != hwloc_bitmap_weight(set) - 1) {
     /* The x86 backends enforces contigous set of PUs starting at 0 so far */
-    fprintf(stderr, "Found non-contigous pu%%u range in dumped cpuid directory `%s'\n",
+    fprintf(stderr, "hwloc/x86: Found non-contigous pu%%u range in dumped cpuid directory `%s'\n",
 	    src_cpuiddump_path);
     return -1;
   }
@@ -1918,7 +1918,7 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
     } else {
-      fprintf(stderr, "Ignoring dumped cpuid directory.\n");
+      fprintf(stderr, "hwloc/x86: Ignoring dumped cpuid directory.\n");
     }
     hwloc_bitmap_free(set);
   }
