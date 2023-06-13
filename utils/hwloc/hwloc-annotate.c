@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2022 Inria.  All rights reserved.
+ * Copyright © 2012-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -601,19 +601,19 @@ int main(int argc, char *argv[])
 		sizevalue = strtoull(argv[1], &end, 0);
                 if (end) {
                   if (!strcasecmp(end, "kB"))
-                    sizevalue *= 1024ULL;
+                    sizevalue *= 1000ULL;
                   else if (!strcasecmp(end, "kiB"))
                     sizevalue <<= 10;
                   else if (!strcasecmp(end, "MB"))
-                    sizevalue *= 1024ULL*1024ULL;
+                    sizevalue *= 1000ULL*1000ULL;
                   else if (!strcasecmp(end, "MiB"))
                     sizevalue <<= 20;
                   else if (!strcasecmp(end, "GB"))
-                    sizevalue *= 1024ULL*1024ULL*1024ULL;
+                    sizevalue *= 1000ULL*1000ULL*1000ULL;
                   else if (!strcasecmp(end, "GiB"))
                     sizevalue <<= 30;
                   else if (!strcasecmp(end, "TB"))
-                    sizevalue *= 1024ULL*1024ULL*1024ULL*1024ULL;
+                    sizevalue *= 1000ULL*1000ULL*1000ULL*1000ULL;
                   else if (!strcasecmp(end, "TiB"))
                     sizevalue <<= 40;
                 }
