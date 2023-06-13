@@ -94,6 +94,8 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_setaffinity 222
 #       elif defined(__aarch64__)
 #         define __NR_sched_setaffinity 122
+#       elif defined(__riscv)
+#         define __NR_sched_setaffinity 122
 #       elif defined(__arm__)
 #         define __NR_sched_setaffinity 241
 #       elif defined(__cris__)
@@ -128,6 +130,8 @@ struct hwloc_linux_backend_data_s {
 #       elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #         define __NR_sched_getaffinity 223
 #       elif defined(__aarch64__)
+#         define __NR_sched_getaffinity 123
+#       elif defined(__riscv)
 #         define __NR_sched_getaffinity 123
 #       elif defined(__arm__)
 #         define __NR_sched_getaffinity 242
@@ -192,6 +196,8 @@ struct hwloc_linux_backend_data_s {
 #  define __NR_mbind 353
 # elif defined(__aarch64__)
 #  define __NR_mbind 235
+# elif defined(__riscv)
+#  define __NR_mbind 235
 # elif defined(__arm__)
 #  define __NR_mbind 319
 # endif
@@ -225,6 +231,8 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 #  define __NR_set_mempolicy 305
 # elif defined(__aarch64__)
 #  define __NR_set_mempolicy 237
+# elif defined(__riscv)
+#  define __NR_set_mempolicy 237
 # elif defined(__arm__)
 #  define __NR_set_mempolicy 321
 # endif
@@ -254,6 +262,8 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 # elif defined(__sparc__)
 #  define __NR_get_mempolicy 304
 # elif defined(__aarch64__)
+#  define __NR_get_mempolicy 236
+# elif defined(__riscv)
 #  define __NR_get_mempolicy 236
 # elif defined(__arm__)
 #  define __NR_get_mempolicy 320
@@ -287,6 +297,8 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #  define __NR_migrate_pages 302
 # elif defined(__aarch64__)
 #  define __NR_migrate_pages 238
+# elif defined(__riscv)
+#  define __NR_migrate_pages 238
 # elif defined(__arm__)
 #  define __NR_migrate_pages 400
 # endif
@@ -317,6 +329,8 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 # elif defined(__sparc__)
 #  define __NR_move_pages 307
 # elif defined(__aarch64__)
+#  define __NR_move_pages 239
+# elif defined(__riscv)
 #  define __NR_move_pages 239
 # elif defined(__arm__)
 #  define __NR_move_pages 344
