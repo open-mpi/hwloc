@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2014-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015      Research Organization for Information Science
@@ -146,12 +146,6 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   struct pci_device *pcidev;
   struct pci_id_match m;
 
-  m.subvendor_id = PCI_MATCH_ANY;
-  m.subdevice_id = PCI_MATCH_ANY;
-  m.device_class = 0;
-  m.device_class_mask = 0;
-  m.match_data = 0;
-
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &bfilter);
   if (bfilter == HWLOC_TYPE_FILTER_KEEP_NONE
@@ -165,6 +159,12 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   assert(dstatus->phase == HWLOC_DISC_PHASE_PCI);
 
   hwloc_debug("%s", "\nScanning PCI buses...\n");
+
+  m.subvendor_id = PCI_MATCH_ANY;
+  m.subdevice_id = PCI_MATCH_ANY;
+  m.device_class = 0;
+  m.device_class_mask = 0;
+  m.match_data = 0;
 
   /* pciaccess isn't thread-safe. it uses a single global variable that doesn't have
    * refcounting, and is dynamically reallocated when vendor/device names are needed, etc.
