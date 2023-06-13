@@ -3521,15 +3521,13 @@ hwloc_topology_load(topology);
 
 However, one should remember that filtering such objects out removes
 locality information from the hwloc tree.
-For instance, we do not know anymore which PU is close to which NUMA
+For instance, we may not know anymore which PU is close to which NUMA
 node.
 This would be useful to applications that explicitly want to
 place specific memory buffers close to specific tasks.
-Those applications should also tell hwloc to keep Group objects that
-bring structure information:
-\verbatim
-hwloc_topology_set_type_filter(topology, HWLOC_OBJ_GROUP, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
-\endverbatim
+To ignore useless objects but keep those that bring locality/hierarchy
+information, applications may replace ::HWLOC_TYPE_FILTER_KEEP_NONE
+with ::HWLOC_TYPE_FILTER_KEEP_STRUCTURE above.
 
 <br/>
 Starting with hwloc 2.8, it is also possible to ignore distances
