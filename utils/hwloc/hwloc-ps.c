@@ -470,7 +470,7 @@ int main(int argc, char *argv[])
       exit(EXIT_SUCCESS);
 
     } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
-      usage (callname, stderr);
+      usage (callname, stdout);
       exit(EXIT_SUCCESS);
     } else {
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
