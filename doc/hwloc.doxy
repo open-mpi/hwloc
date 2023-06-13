@@ -3461,7 +3461,7 @@ than any system-provided copy of hwloc.
 \section faq1 Concepts
 
 
-\subsection faq_why I only need binding, why should I use hwloc ?
+\subsection faq_why I only need binding, or the number of cores, why should I use hwloc ?
 
 hwloc is its portable API that works on a variety of operating
 systems.
@@ -3482,11 +3482,27 @@ multiple tasks are in the same physical core.
 However, using hwloc comes with an overhead since a topology must
 be loaded before gathering information and binding tasks or memory.
 Fortunately this overhead may be significantly reduced by filtering
-non-interesting information out of the topology.
+non-interesting information out of the topology,
+see \ref faq_disable_faster below.
+
+
+\subsection faq_disable_faster What may I disable to make hwloc faster?
+
+Building a hwloc topology on a large machine may be slow because
+the discovery of hundreds of hardware cores or threads takes time
+(especially when reading thousands of sysfs files on Linux).
+Ignoring some objects (for instance caches) that aren't useful
+to the current application may improve this overhead.
+One should also consider using XML (see \ref faq_xml) to work
+around such issues.
+
+Contrary to lstopo which enables most features (see \ref faq_slow_lstopo),
+the default hwloc configuration is to keep all objects enabled
+except I/Os and instruction caches.
+This usually builds a very precise view of the CPU and memory subsystems,
+which may be reduced if some information is unneeded.
 
 <br/>
-For instance, the default configuration is to keep all objects enabled
-(except I/Os and instruction caches).
 The following code tells hwloc to build a much smaller topology that
 only contains Cores (explicitly filtered-in below),
 hardware threads (PUs, cannot be filtered-out),
@@ -4009,17 +4025,9 @@ an I/O subtree.
 
 
 
-\subsection faq_slow_lstopo Why is hwloc slow?
+\subsection faq_slow_lstopo Why is lstopo slow?
 
-Building a hwloc topology on a large machine may be slow because
-the discovery of hundreds of hardware cores or threads takes time
-(especially when reading thousands of sysfs files on Linux).
-Ignoring some objects (for instance caches) that aren't useful
-to the current application may improve this overhead (see \ref faq_why).
-One should also consider using XML (see \ref faq_xml) to work
-around such issues.
-
-Additionally, lstopo enables most hwloc objects and discovery flags
+lstopo enables most hwloc objects and discovery flags
 by default so that the output topology is as precise as possible
 (while hwloc disables many of them by default).
 This includes I/O device discovery through PCI libraries as well as external
