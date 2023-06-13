@@ -223,17 +223,13 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
     /* filtered? */
     if (type == HWLOC_OBJ_PCI_DEVICE) {
-      enum hwloc_type_filter_e filter;
-      hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &filter);
-      if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+      if (pfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
 	continue;
-      if (filter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
+      if (pfilter == HWLOC_TYPE_FILTER_KEEP_IMPORTANT
 	  && !hwloc_filter_check_pcidev_subtype_important(device_class))
 	continue;
     } else if (type == HWLOC_OBJ_BRIDGE) {
-      enum hwloc_type_filter_e filter;
-      hwloc_topology_get_type_filter(topology, HWLOC_OBJ_BRIDGE, &filter);
-      if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
+      if (bfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
 	continue;
       /* HWLOC_TYPE_FILTER_KEEP_IMPORTANT filtered later in the core */
     }
