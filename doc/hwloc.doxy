@@ -3944,9 +3944,9 @@ libraries such as NVML.
 To speed up lstopo, you may disable such features with command-line
 options such as <tt>\--no-io</tt>.
 
-When NVIDIA GPU probing is enabled with CUDA or NVML, one should make sure that
-the <em>Persistent</em> mode is enabled (with <tt>nvidia-smi -pm 1</tt>)
-to avoid significant GPU initialization overhead.
+When NVIDIA GPU probing is enabled (e.g. with CUDA or NVML), one may enable
+the <em>Persistent</em> mode (with <tt>nvidia-smi -pm 1</tt>)
+to avoid significant GPU wakeup and initialization overhead.
 
 When AMD GPU discovery is enabled with OpenCL and hwloc is used remotely
 over ssh, some spurious round-trips on the network may significantly
@@ -3955,11 +3955,18 @@ Forcing the <tt>DISPLAY</tt> environment variable to the remote X server
 display (usually <tt>:0</tt>) instead of only setting the <tt>COMPUTE</tt>
 variable may avoid this.
 
-Also remember that these components may be disabled at build-time with
-configure flags such as <tt>\--disable-opencl</tt>, <tt>\--disable-cuda</tt> or <tt>\--disable-nvml</tt>,
-and at runtime with the environment variable
-<tt>HWLOC_COMPONENTS=-opencl,-cuda,-nvml</tt>
-or with hwloc_topology_set_components().
+Also remember that these hwloc components may be disabled.
+At build-time, one may pass configure flags such as <tt>\--disable-opencl</tt>,
+<tt>\--disable-cuda</tt>, <tt>\--disable-nvml</tt>, <tt>\--disable-rsmi</tt>,
+and <tt>\--disable-levelzero</tt>.
+At runtime, one may set the environment variable
+<tt>HWLOC_COMPONENTS=-opencl,-cuda,-nvml,-rsmi,-levelzero</tt>
+or call hwloc_topology_set_components().
+
+Remember that these backends are disabled by default, except in lstopo.
+If hwloc itself is still too slow even after disabling all the I/O devices
+as explained above, see also \ref faq_disable_faster for disabling even more
+features.
 
 
 \subsection faq_privileged Does hwloc require privileged access?
