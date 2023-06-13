@@ -446,6 +446,10 @@ int main(int argc, char *argv[])
     if (err) return EXIT_FAILURE;
   }
   err = hwloc_topology_load(topology);
+  if (err < 0) {
+    perror("Couldn't load the topology");
+    return EXIT_FAILURE;
+  }
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(restrictset, restrictstring);
