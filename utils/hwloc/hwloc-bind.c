@@ -35,15 +35,16 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --no-smt       Only keep a single PU per core\n");
   fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
   fprintf(where, "                 Restrict the topology to some processors or NUMA nodes.\n");
-  fprintf(where, "  --restrict-flags <n>  Set the flags to be used during restrict\n");
+  fprintf(where, "  --restrict-flags <n>\n");
+  fprintf(where, "                 Set the flags to be used during restrict\n");
   fprintf(where, "  --disallowed   Include objects disallowed by administrative limitations\n");
   fprintf(where, "  --hbm          Only consider high bandwidth memory nodes\n");
   fprintf(where, "  --no-hbm       Ignore high-bandwidth memory nodes\n");
   fprintf(where, "Options:\n");
   fprintf(where, "  --cpubind      Use following arguments for cpu binding (default)\n");
   fprintf(where, "  --membind      Use following arguments for memory binding\n");
-  fprintf(where, "  --mempolicy <default|firsttouch|bind|interleave|nexttouch>\n"
-		 "                 Change policy that --membind applies (default is bind)\n");
+  fprintf(where, "  --mempolicy <default|firsttouch|bind|interleave|nexttouch>\n");
+  fprintf(where, "                 Change policy that --membind applies (default is bind)\n");
   fprintf(where, "  --best-memattr <attr>\n");
   fprintf(where, "                 Select the best target node in the given memory binding\n");
   fprintf(where, "  -l --logical   Take logical object indexes (default)\n");
@@ -51,8 +52,8 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
   fprintf(where, "  --strict       Require strict binding\n");
   fprintf(where, "  --get          Retrieve current process binding\n");
-  fprintf(where, "  -e --get-last-cpu-location\n"
-		 "                 Retrieve the last processors where the current process ran\n");
+  fprintf(where, "  -e --get-last-cpu-location\n");
+  fprintf(where, "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --nodeset      Display (and parse) cpusets as nodesets\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
 #ifdef HWLOC_LINUX_SYS
@@ -120,8 +121,13 @@ int main(int argc, char *argv[])
   while (argc >= 1) {
     opt = 0;
 
-    if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
-      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
+    /* Topology */
+    if (!strcmp(argv[0], "--no-smt")) {
+      no_smt = 0;
+      goto next_config;
+    }
+    if (!strncmp(argv[0], "--no-smt=", 9)) {
+      no_smt = atoi(argv[0] + 9);
       goto next_config;
     }
     if (!strcmp (argv[0], "--restrict")) {
@@ -147,12 +153,8 @@ int main(int argc, char *argv[])
       opt = 1;
       goto next_config;
     }
-    if (!strcmp(argv[0], "--no-smt")) {
-      no_smt = 0;
-      goto next_config;
-    }
-    if (!strncmp(argv[0], "--no-smt=", 9)) {
-      no_smt = atoi(argv[0] + 9);
+    if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
       goto next_config;
     }
     if (!strcmp(argv[0], "--hbm")) {
@@ -161,15 +163,6 @@ int main(int argc, char *argv[])
     }
     if (!strcmp(argv[0], "--no-hbm")) {
       only_hbm = 0;
-      goto next_config;
-    }
-    if (!strcmp (argv[0], "--best-memattr")) {
-      if (argc < 2) {
-        usage (callname, stderr);
-        exit(EXIT_FAILURE);
-      }
-      best_memattr_str = argv[1];
-      opt = 1;
       goto next_config;
     }
 
@@ -213,30 +206,72 @@ int main(int argc, char *argv[])
     opt = 0;
 
     if (*argv[0] == '-') {
-      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
-	verbose++;
-	goto next;
+      /* Options */
+      if (!strcmp (argv[0], "--cpubind")) {
+        working_on_cpubind = 1;
+        goto next;
       }
-      if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
-	verbose--;
-	goto next;
+      if (!strcmp (argv[0], "--membind")) {
+        working_on_cpubind = 0;
+        goto next;
       }
-      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
-        usage(callname, stdout);
-	return EXIT_SUCCESS;
+      if (!strcmp (argv[0], "--mempolicy")) {
+        if (!strncmp(argv[1], "default", 2))
+          membind_policy = HWLOC_MEMBIND_DEFAULT;
+        else if (!strncmp(argv[1], "firsttouch", 2))
+          membind_policy = HWLOC_MEMBIND_FIRSTTOUCH;
+        else if (!strncmp(argv[1], "bind", 2))
+          membind_policy = HWLOC_MEMBIND_BIND;
+        else if (!strncmp(argv[1], "interleave", 2))
+          membind_policy = HWLOC_MEMBIND_INTERLEAVE;
+        else if (!strncmp(argv[1], "nexttouch", 2))
+          membind_policy = HWLOC_MEMBIND_NEXTTOUCH;
+        else {
+          fprintf(stderr, "Unrecognized memory binding policy %s\n", argv[1]);
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        got_mempolicy = 1;
+        opt = 1;
+        goto next;
+      }
+      if (!strcmp (argv[0], "--best-memattr")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        best_memattr_str = argv[1];
+        opt = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
+        logical = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
+        logical = 0;
+        goto next;
       }
       if (!strcmp(argv[0], "--single")) {
-	single = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--force")) {
-	force = 1;
-	goto next;
+        single = 1;
+        goto next;
       }
       if (!strcmp(argv[0], "--strict")) {
-	cpubind_flags |= HWLOC_CPUBIND_STRICT;
-	membind_flags |= HWLOC_MEMBIND_STRICT;
-	goto next;
+        cpubind_flags |= HWLOC_CPUBIND_STRICT;
+        membind_flags |= HWLOC_MEMBIND_STRICT;
+        goto next;
+      }
+      if (!strcmp (argv[0], "--get")) {
+        get_binding = 1;
+        goto next;
+      }
+      if (!strcmp (argv[0], "-e") || !strncmp (argv[0], "--get-last-cpu-location", 10)) {
+        get_last_cpu_location = 1;
+        goto next;
+      }
+      if (!strcmp (argv[0], "--nodeset")) {
+        use_nodeset = 1;
+        goto next;
       }
       if (!strcmp(argv[0], "--pid")) {
         if (argc < 2) {
@@ -258,63 +293,33 @@ int main(int argc, char *argv[])
         goto next;
       }
 #endif
-      if (!strcmp (argv[0], "--version")) {
-	printf("%s %s\n", callname, HWLOC_VERSION);
-	exit(EXIT_SUCCESS);
-      }
-      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
-        logical = 1;
-        goto next;
-      }
-      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
-        logical = 0;
-        goto next;
-      }
       if (!strcmp(argv[0], "--taskset")) {
         taskset = 1;
         goto next;
       }
-      if (!strcmp (argv[0], "-e") || !strncmp (argv[0], "--get-last-cpu-location", 10)) {
-	get_last_cpu_location = 1;
-	goto next;
+      /* Misc */
+      if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--force")) {
+        force = 1;
+        goto next;
       }
-      if (!strcmp (argv[0], "--get")) {
-	get_binding = 1;
-	goto next;
+      if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
+        verbose--;
+        goto next;
       }
-      if (!strcmp (argv[0], "--nodeset")) {
-	use_nodeset = 1;
-	goto next;
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
+        verbose++;
+        goto next;
       }
-      if (!strcmp (argv[0], "--cpubind")) {
-	working_on_cpubind = 1;
-	goto next;
+      if (!strcmp (argv[0], "--version")) {
+        printf("%s %s\n", callname, HWLOC_VERSION);
+        exit(EXIT_SUCCESS);
       }
-      if (!strcmp (argv[0], "--membind")) {
-	working_on_cpubind = 0;
-	goto next;
-      }
-      if (!strcmp (argv[0], "--mempolicy")) {
-	if (!strncmp(argv[1], "default", 2))
-	  membind_policy = HWLOC_MEMBIND_DEFAULT;
-	else if (!strncmp(argv[1], "firsttouch", 2))
-	  membind_policy = HWLOC_MEMBIND_FIRSTTOUCH;
-	else if (!strncmp(argv[1], "bind", 2))
-	  membind_policy = HWLOC_MEMBIND_BIND;
-	else if (!strncmp(argv[1], "interleave", 2))
-	  membind_policy = HWLOC_MEMBIND_INTERLEAVE;
-	else if (!strncmp(argv[1], "nexttouch", 2))
-	  membind_policy = HWLOC_MEMBIND_NEXTTOUCH;
-	else {
-	  fprintf(stderr, "Unrecognized memory binding policy %s\n", argv[1]);
-          usage (callname, stderr);
-          exit(EXIT_FAILURE);
-	}
-	got_mempolicy = 1;
-	opt = 1;
-	goto next;
+      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
+        usage(callname, stdout);
+        return EXIT_SUCCESS;
       }
 
+      /* Errors */
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(callname, stderr);
       return EXIT_FAILURE;

@@ -37,7 +37,8 @@ static unsigned current_obj;
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] [ locations ]\n", name);
-  fprintf (where, "\nOutput options:\n");
+  fprintf (where, "\n");
+  fprintf (where, "Output options:\n");
   fprintf (where, "  --objects             Report information about specific objects\n");
   fprintf (where, "  --topology            Report information the topology\n");
   fprintf (where, "  --support             Report information about supported features\n");
@@ -48,7 +49,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --children            Display all children\n");
   fprintf (where, "  --descendants <type>  Only display descendants of the given type\n");
   fprintf (where, "  --local-memory        Only display the local memory nodes\n");
-  fprintf (where, "  --local-memory-flags <x>   Change flags for selecting local memory nodes\n");
+  fprintf (where, "  --local-memory-flags <x>\n");
+  fprintf (where, "                        Change flags for selecting local memory nodes\n");
   fprintf (where, "  --best-memattr <attr> Only display the best target among the local nodes\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
@@ -57,6 +59,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
   fprintf (where, "  --restrict-flags <n>  Set the flags to be used during restrict\n");
   fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
+  fprintf (where, "     <type> may be `all', `io', `cache' or `icache'\n");
   fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `important'\n");
   fprintf (where, "  --no-icaches          Do not show instruction caches\n");
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
@@ -64,8 +67,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
-  fprintf (where, "  --thissystem          Assume that the input topology provides the topology\n"
-		  "                        for the system on which we are running\n");
+  fprintf (where, "  --thissystem          Assume that the input topology provides the topology\n");
+  fprintf (where, "                        for the system on which we are running\n");
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --disallowed          Include objects disallowed by administrative limitations\n");
   fprintf (where, "  -l --logical          Use logical object indexes for input (default)\n");
@@ -532,175 +535,174 @@ main (int argc, char *argv[])
   while (argc >= 1) {
     opt = 0;
     if (*argv[0] == '-') {
+      /* Output options */
       if (!strcmp (argv[0], "--objects"))
-	mode = HWLOC_INFO_MODE_OBJECTS;
+        mode = HWLOC_INFO_MODE_OBJECTS;
       else if (!strcmp (argv[0], "--topology"))
-	mode = HWLOC_INFO_MODE_TOPOLOGY;
+        mode = HWLOC_INFO_MODE_TOPOLOGY;
       else if (!strcmp (argv[0], "--support"))
-	mode = HWLOC_INFO_MODE_SUPPORT;
+        mode = HWLOC_INFO_MODE_SUPPORT;
       else if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose"))
         verbose_mode++;
       else if (!strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent"))
         verbose_mode--;
-      else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
-	usage(callname, stdout);
-        exit(EXIT_SUCCESS);
-      }
-      else if (!strcmp (argv[0], "-n"))
-	show_index_prefix = 1;
       else if (!strcmp (argv[0], "--ancestors"))
-	show_ancestors = 1;
+        show_ancestors = 1;
       else if (!strcmp (argv[0], "--ancestor")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	show_ancestor_type = argv[1];
-	opt = 1;
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        show_ancestor_type = argv[1];
+        opt = 1;
       }
       else if (!strcmp (argv[0], "--children"))
-	show_children = 1;
+        show_children = 1;
       else if (!strcmp (argv[0], "--descendants")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	show_descendants_type = argv[1];
-	opt = 1;
-      }
-      else if (!strcmp (argv[0], "--local-memory"))
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        show_descendants_type = argv[1];
+        opt = 1;
+      } else if (!strcmp (argv[0], "--local-memory"))
         show_local_memory = 1;
       else if (!strcmp (argv[0], "--local-memory-flags")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
         show_local_memory = 1;
-	show_local_memory_flags = hwloc_utils_parse_local_numanode_flags(argv[1]);
-	opt = 1;
-      }
-      else if (!strcmp (argv[0], "--best-memattr")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
+        show_local_memory_flags = hwloc_utils_parse_local_numanode_flags(argv[1]);
+        opt = 1;
+      } else if (!strcmp (argv[0], "--best-memattr")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
         show_local_memory = 1;
         best_memattr_str = argv[1];
         opt = 1;
+      } else if (!strcmp (argv[0], "-n")) {
+        show_index_prefix = 1;
       }
-      else if (!strcmp (argv[0], "--filter")) {
-        hwloc_obj_type_t type;
-        char *colon;
-        enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
-        int all = 0;
-	int allio = 0;
-	int allcaches = 0;
-	int allicaches = 0;
-        if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-        colon = strchr(argv[1], ':');
-        if (colon) {
-          *colon = '\0';
-          if (!strcmp(colon+1, "none"))
-            filter = HWLOC_TYPE_FILTER_KEEP_NONE;
-          else if (!strcmp(colon+1, "all"))
-            filter = HWLOC_TYPE_FILTER_KEEP_ALL;
-          else if (!strcmp(colon+1, "structure"))
-            filter = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
-	  else if (!strcmp(colon+1, "important"))
-	    filter = HWLOC_TYPE_FILTER_KEEP_IMPORTANT;
-	  else {
-	    fprintf(stderr, "Unsupported filtering kind `%s' passed to --filter.\n", colon+1);
-	    usage (callname, stderr);
-	    exit(EXIT_FAILURE);
-	  }
-        }
-        if (!strcmp(argv[1], "all"))
-          all = 1;
-	else if (!strcmp(argv[1], "io"))
-	  allio = 1;
-	else if (!strcmp(argv[1], "cache"))
-	  allcaches = 1;
-	else if (!strcmp(argv[1], "icache"))
-	  allicaches = 1;
-        else if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0) {
-          fprintf(stderr, "Unsupported type `%s' passed to --filter.\n", argv[1]);
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-        }
-        if (all)
-          hwloc_topology_set_all_types_filter(topology, filter);
-	else if (allio)
-          hwloc_topology_set_io_types_filter(topology, filter);
-	else if (allcaches) {
-	  hwloc_topology_set_cache_types_filter(topology, filter);
-	  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, filter);
-	} else if (allicaches)
-	  hwloc_topology_set_icache_types_filter(topology, filter);
-        else
-          hwloc_topology_set_type_filter(topology, type, filter);
-        opt = 1;
-      }
-      else if (!strcmp (argv[0], "--no-icaches")) {
-	hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
-      } else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system"))
-	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
-      else if (!strcmp (argv[0], "--no-io")) {
-	hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
-      } else if (!strcmp (argv[0], "--no-bridges")) {
-	hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
-      } else if (!strcmp (argv[0], "--whole-io")) {
-	hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
-      } else if (!strcmp (argv[0], "--thissystem"))
-	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
+      /* Object filtering options */
       else if (!strcmp (argv[0], "--restrict")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
         if(strncmp(argv[1], "nodeset=", 8)) {
           restrictstring = strdup(argv[1]);
         } else {
           restrictstring = strdup(argv[1]+8);
           restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
         }
-	opt = 1;
-      }
-      else if (!strcmp (argv[0], "--restrict-flags")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
+        opt = 1;
+      } else if (!strcmp (argv[0], "--restrict-flags")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
         }
-	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
-	opt = 1;
+        restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
+        opt = 1;
+      } else if (!strcmp (argv[0], "--filter")) {
+        hwloc_obj_type_t type;
+        char *colon;
+        enum hwloc_type_filter_e filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+        int all = 0;
+        int allio = 0;
+        int allcaches = 0;
+        int allicaches = 0;
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        colon = strchr(argv[1], ':');
+        if (colon) {
+          *colon = '\0';
+          if (!strcmp(colon+1, "all"))
+            filter = HWLOC_TYPE_FILTER_KEEP_ALL;
+          else if (!strcmp(colon+1, "none"))
+            filter = HWLOC_TYPE_FILTER_KEEP_NONE;
+          else if (!strcmp(colon+1, "structure"))
+            filter = HWLOC_TYPE_FILTER_KEEP_STRUCTURE;
+          else if (!strcmp(colon+1, "important"))
+            filter = HWLOC_TYPE_FILTER_KEEP_IMPORTANT;
+          else {
+            fprintf(stderr, "Unsupported filtering kind `%s' passed to --filter.\n", colon+1);
+            usage (callname, stderr);
+            exit(EXIT_FAILURE);
+          }
+        }
+        if (!strcmp(argv[1], "all"))
+          all = 1;
+        else if (!strcmp(argv[1], "io"))
+          allio = 1;
+        else if (!strcmp(argv[1], "cache"))
+          allcaches = 1;
+        else if (!strcmp(argv[1], "icache"))
+          allicaches = 1;
+        else if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0) {
+          fprintf(stderr, "Unsupported type `%s' passed to --filter.\n", argv[1]);
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        if (all)
+          hwloc_topology_set_all_types_filter(topology, filter);
+        else if (allio)
+          hwloc_topology_set_io_types_filter(topology, filter);
+        else if (allcaches) {
+          hwloc_topology_set_cache_types_filter(topology, filter);
+          hwloc_topology_set_type_filter(topology, HWLOC_OBJ_MEMCACHE, filter);
+        } else if (allicaches)
+          hwloc_topology_set_icache_types_filter(topology, filter);
+        else
+          hwloc_topology_set_type_filter(topology, type, filter);
+        opt = 1;
+      } else if (!strcmp (argv[0], "--no-icaches")) {
+        hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
+      } else if (!strcmp (argv[0], "--no-io")) {
+        hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_NONE);
+      } else if (!strcmp (argv[0], "--no-bridges")) {
+        hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_NONE);
+      } else if (!strcmp (argv[0], "--whole-io")) {
+        hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
       }
-
+      /* Input options */
       else if (hwloc_utils_lookup_input_option(argv, argc, &opt,
-					       &input, &input_format,
-					       callname)) {
-	/* we'll enable later */
-      }
+                                               &input, &input_format,
+                                               callname)) {
+        /* we'll enable later */
+      } else if (!strcmp (argv[0], "--thissystem"))
+        flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[0], "--pid")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	pid_number = atoi(argv[1]); opt = 1;
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        pid_number = atoi(argv[1]); opt = 1;
       }
+      else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system"))
+        flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
       else if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical"))
-	logical = 1;
+        logical = 1;
       else if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical"))
-	logical = 0;
+        logical = 0;
+      /* Misc */
       else if (!strcmp (argv[0], "--version")) {
         printf("%s %s\n", callname, HWLOC_VERSION);
         exit(EXIT_SUCCESS);
       }
+      else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
+        usage(callname, stdout);
+        exit(EXIT_SUCCESS);
+      }
+      /* Errors */
       else {
-	fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
-	usage(callname, stderr);
-	return EXIT_FAILURE;
+        fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
+        usage(callname, stderr);
+        return EXIT_FAILURE;
       }
       argc -= opt+1;
       argv += opt+1;

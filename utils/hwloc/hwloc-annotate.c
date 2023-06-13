@@ -494,6 +494,7 @@ int main(int argc, char *argv[])
 		putenv((char *) "HWLOC_XML_VERBOSE=1");
 
 	while (argc && *argv[0] == '-') {
+		/* Options */
 		if (!strcmp(argv[0], "--ci"))
 			clearinfos = 1;
 		else if (!strcmp(argv[0], "--ri"))
@@ -502,14 +503,17 @@ int main(int argc, char *argv[])
 			clearuserdata = 1;
 		else if (!strcmp(argv[0], "--cd"))
 			cleardistances = 1;
-                else if (!strcmp (argv[0], "--version")) {
-                  printf("%s %s\n", callname, HWLOC_VERSION);
-                  exit(EXIT_SUCCESS);
-                }
+		/* Misc */
+		else if (!strcmp (argv[0], "--version")) {
+			printf("%s %s\n", callname, HWLOC_VERSION);
+			exit(EXIT_SUCCESS);
+		}
 		else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
 			usage(callname, stdout);
 			exit(EXIT_SUCCESS);
-		} else {
+		}
+		/* Errors */
+		else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
 			usage(callname, stderr);
 			exit(EXIT_FAILURE);

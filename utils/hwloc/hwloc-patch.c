@@ -14,7 +14,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "Options:\n");
 	fprintf(where, "  -R --reverse     Reverse the sense of the difference\n");
 	fprintf(where, "  --version        Report version and exit\n");
-        fprintf(where, "  -h --help        Show this usage\n");
+	fprintf(where, "  -h --help        Show this usage\n");
 }
 
 static int hwloc_diff_read(const char *inputdiff,
@@ -88,15 +88,20 @@ int main(int argc, char *argv[])
 		putenv((char *) "HWLOC_XML_VERBOSE=1");
 
 	while (argc && *argv[0] == '-') {
+		/* Options */
 		if (!strcmp (argv[0], "-R") || !strcmp (argv[0], "--reverse")) {
 			patchflags ^= HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE;
-		} else if (!strcmp (argv[0], "--version")) {
+		}
+		/* Misc */
+		else if (!strcmp (argv[0], "--version")) {
 			printf("%s %s\n", callname, HWLOC_VERSION);
 			exit(EXIT_SUCCESS);
 		} else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
 			usage(callname, stdout);
 			exit(EXIT_SUCCESS);
-		} else {
+		}
+		/* Errors */
+		else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
 			usage(callname, stderr);
 			exit(EXIT_FAILURE);

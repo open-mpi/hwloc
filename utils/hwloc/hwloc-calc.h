@@ -785,7 +785,7 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 static __hwloc_inline void
 hwloc_calc_locations_usage(FILE *where)
 {
-  fprintf (where, "    core:2-3        for the third and fourth cores\n");
+  fprintf (where, "    core:2-3          for the third and fourth cores\n");
   fprintf (where, "    node:1.pu:2       the third PU of the second NUMA node\n");
   fprintf (where, "    0x12345678        a CPU set given a bitmask string\n");
   fprintf (where, "    os=eth0           the operating system device named eth0\n");

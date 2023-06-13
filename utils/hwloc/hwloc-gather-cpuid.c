@@ -594,13 +594,17 @@ int main(int argc, const char * const argv[])
       verbose--;
       argc--;
       argv++;
-    } else if (!strcmp (argv[0], "--version")) {
+    }
+    /* Misc */
+    else if (!strcmp (argv[0], "--version")) {
       printf("%s %s\n", callname, HWLOC_VERSION);
       exit(EXIT_SUCCESS);
     } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
       usage(callname, stdout);
       goto out;
-    } else {
+    }
+    /* Errors */
+    else {
       usage(callname, stderr);
       ret = EXIT_FAILURE;
       goto out;

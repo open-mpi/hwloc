@@ -449,28 +449,13 @@ int main(int argc, char *argv[])
 
   while (argc >= 1) {
     opt = 0;
-    if (!strcmp(argv[0], "-a"))
+    /* Options */
+    if (!strcmp(argv[0], "-a")) {
       show_all = 1;
-    else if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
-      logical = 1;
-    } else if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
-      logical = 0;
-    } else if (!strcmp(argv[0], "-c") || !strcmp(argv[0], "--cpuset")) {
-      show_cpuset = 1;
-    } else if (!strcmp(argv[0], "-e") || !strncmp(argv[0], "--get-last-cpu-location", 10)) {
-      get_last_cpu_location = 1;
-    } else if (!strcmp(argv[0], "-t") || !strcmp(argv[0], "--threads")) {
-#ifdef HWLOC_LINUX_SYS
-      show_threads = 1;
-#else
-      fprintf (stderr, "Listing threads is currently only supported on Linux\n");
-#endif
-    } else if (!strcmp(argv[0], "--single-ancestor")) {
-      single_ancestor = 1;
     } else if (!strcmp(argv[0], "--pid")) {
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       only_pid = strtol(argv[1], NULL, 10);
       opt = 1;
@@ -483,35 +468,54 @@ int main(int argc, char *argv[])
       opt = 1;
     } else if (!strcmp(argv[0], "--name")) {
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       only_name = argv[1];
       opt = 1;
     } else if (!strcmp(argv[0], "--uid")) {
 #ifdef HWLOC_LINUX_SYS
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       if (!strcmp(argv[1], "all"))
-	only_uid = HWLOC_PS_ALL_UIDS;
+        only_uid = HWLOC_PS_ALL_UIDS;
       else
-	only_uid = atoi(argv[1]);
+        only_uid = atoi(argv[1]);
       opt = 1;
 #else
       fprintf (stderr, "Filtering by UID is currently only supported on Linux\n");
 #endif
-    } else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
-      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
+    }
+    /* Output options */
+    else if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
+      logical = 1;
+    } else if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
+      logical = 0;
+    } else if (!strcmp(argv[0], "-c") || !strcmp(argv[0], "--cpuset")) {
+      show_cpuset = 1;
+    } else if (!strcmp(argv[0], "--single-ancestor")) {
+      single_ancestor = 1;
+    } else if (!strcmp(argv[0], "-t") || !strcmp(argv[0], "--threads")) {
+#ifdef HWLOC_LINUX_SYS
+      show_threads = 1;
+#else
+      fprintf (stderr, "Listing threads is currently only supported on Linux\n");
+#endif
+    } else if (!strcmp(argv[0], "-e") || !strncmp(argv[0], "--get-last-cpu-location", 10)) {
+      get_last_cpu_location = 1;
     } else if (!strcmp (argv[0], "--pid-cmd")) {
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       pidcmd = argv[1];
       opt = 1;
-
+    } else if (!strcmp (argv[0], "--short-name")) {
+      psflags |= HWLOC_PS_FLAG_SHORTNAME;
+    } else if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
     } else if (!strcmp (argv[0], "--lstopo-misc")) {
       if (argc < 2) {
 	usage(callname, stderr);
@@ -526,27 +530,22 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
       }
       opt = 1;
-
     } else if (!strcmp (argv[0], "--json-server")) {
       json_server = 1;
     } else if (!strcmp (argv[0], "--json-port")) {
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       json_port = atoi(argv[1]);
       opt = 1;
-
-    } else if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
+    }
+    /* Misc */
+    else if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
       verbose++;
-
-    } else if (!strcmp (argv[0], "--short-name")) {
-      psflags |= HWLOC_PS_FLAG_SHORTNAME;
-
     } else if (!strcmp (argv[0], "--version")) {
       printf("%s %s\n", callname, HWLOC_VERSION);
       exit(EXIT_SUCCESS);
-
     } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
       usage (callname, stdout);
       exit(EXIT_SUCCESS);
