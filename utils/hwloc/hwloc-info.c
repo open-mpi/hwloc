@@ -178,7 +178,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
       printf("%s attr PCI id = %04x:%04x\n",
 	     prefix, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
       if (obj->attr->pcidev.linkspeed)
-	printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
+        printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
       break;
     }
     switch (obj->attr->bridge.downstream_type) {
@@ -329,15 +329,15 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     hwloc_obj_t parent = obj;
     while (parent) {
       if (show_index_prefix)
-	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
+        snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
       hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       if (verbose < 0)
-	printf("%s%s:%u\n", prefix, parents, parent->logical_index);
+        printf("%s%s:%u\n", prefix, parents, parent->logical_index);
       else if (level)
-	printf("%s%s L#%u = parent #%u of %s L#%u\n",
+        printf("%s%s L#%u = parent #%u of %s L#%u\n",
 	       prefix, parents, parent->logical_index, level, objs, obj->logical_index);
       else
-	printf("%s%s L#%u\n", prefix, parents, parent->logical_index);
+        printf("%s%s L#%u\n", prefix, parents, parent->logical_index);
       hwloc_info_show_obj(topology, parent, parents, prefix, verbose);
       parent = parent->parent;
       level++;
@@ -347,14 +347,14 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     hwloc_obj_t parent = obj;
     while (parent) {
       if (parent->depth == show_ancestor_depth) {
-	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-	if (verbose < 0)
-	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
-	else
-	  printf("%s%s L#%u = parent of %s L#%u\n",
-		 prefix, parents, parent->logical_index, objs, obj->logical_index);
-	hwloc_info_show_obj(topology, parent, parents, prefix, verbose);
-	break;
+        hwloc_obj_type_snprintf(parents, sizeof(parents), parent, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+        if (verbose < 0)
+          printf("%s%s:%u\n", prefix, parents, parent->logical_index);
+        else
+          printf("%s%s L#%u = parent of %s L#%u\n",
+              prefix, parents, parent->logical_index, objs, obj->logical_index);
+        hwloc_info_show_obj(topology, parent, parents, prefix, verbose);
+        break;
       }
       parent = parent->parent;
     }
@@ -364,13 +364,13 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     while ((child = hwloc_get_next_child(topology, obj, child)) != NULL) {
       char childs[128];
       if (show_index_prefix)
-	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+        snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
       hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
       if (verbose < 0)
-	printf("%s%s:%u\n", prefix, childs, child->logical_index);
+        printf("%s%s:%u\n", prefix, childs, child->logical_index);
       else
-	printf("%s%s L#%u = child #%u of %s L#%u\n",
-	       prefix, childs, child->logical_index, i, objs, obj->logical_index);
+        printf("%s%s L#%u = child #%u of %s L#%u\n",
+            prefix, childs, child->logical_index, i, objs, obj->logical_index);
       hwloc_info_show_obj(topology, child, childs, prefix, verbose);
       i++;
     }
@@ -380,49 +380,49 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       unsigned i = 0;
       unsigned n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth);
       for(i=0; i<n; i++) {
-	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth, i);
-	char childs[128];
-	if (show_index_prefix)
-	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-	if (verbose < 0)
-	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
-	else
-	  printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+        hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth, i);
+        char childs[128];
+        if (show_index_prefix)
+          snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+        hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+        if (verbose < 0)
+          printf("%s%s:%u\n", prefix, childs, child->logical_index);
+        else
+          printf("%s%s L#%u = descendant #%u of %s L#%u\n",
 		 prefix, childs, child->logical_index, i, objs, obj->logical_index);
-	hwloc_info_show_obj(topology, child, childs, prefix, verbose);
+        hwloc_info_show_obj(topology, child, childs, prefix, verbose);
       }
     } else {
       /* custom level */
       unsigned i = 0;
       hwloc_obj_t child = NULL;
       while ((child = hwloc_get_next_obj_by_depth(topology, show_descendants_depth, child)) != NULL) {
-	char childs[128];
-	hwloc_obj_t parent = child->parent;
-	if (obj->cpuset) {
-	  while (parent && !parent->cpuset)
-	    parent = parent->parent;
-	  if (!parent)
-	    continue;
-	  if (!hwloc_bitmap_isincluded(parent->cpuset, obj->cpuset)
-	      || !hwloc_bitmap_isincluded(parent->nodeset, obj->nodeset))
-	    continue;
-	} else {
-	  while (parent && parent != obj)
-	    parent = parent->parent;
-	  if (!parent)
-	    continue;
-	}
-	if (show_index_prefix)
-	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-	if (verbose < 0)
-	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
-	else
-	  printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+        char childs[128];
+        hwloc_obj_t parent = child->parent;
+        if (obj->cpuset) {
+          while (parent && !parent->cpuset)
+            parent = parent->parent;
+          if (!parent)
+            continue;
+          if (!hwloc_bitmap_isincluded(parent->cpuset, obj->cpuset)
+              || !hwloc_bitmap_isincluded(parent->nodeset, obj->nodeset))
+            continue;
+        } else {
+          while (parent && parent != obj)
+            parent = parent->parent;
+          if (!parent)
+            continue;
+        }
+        if (show_index_prefix)
+          snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+        hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+        if (verbose < 0)
+          printf("%s%s:%u\n", prefix, childs, child->logical_index);
+        else
+          printf("%s%s L#%u = descendant #%u of %s L#%u\n",
 		 prefix, childs, child->logical_index, i, objs, obj->logical_index);
-	hwloc_info_show_obj(topology, child, childs, prefix, verbose);
-	i++;
+        hwloc_info_show_obj(topology, child, childs, prefix, verbose);
+        i++;
       }
     }
   } else if (show_local_memory) {
@@ -464,7 +464,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
           if (!nodes[i])
             continue;
           if (show_index_prefix)
-	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
+            snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
           hwloc_obj_type_snprintf(nodestr, sizeof(nodestr), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
           if (verbose < 0)
             printf("%s%s:%u\n", prefix, nodestr, nodes[i]->logical_index);
@@ -722,7 +722,7 @@ main (int argc, char *argv[])
 
   if (pid_number > 0) {
     if (hwloc_pid_from_number(&pid, pid_number, 0, 1 /* verbose */) < 0
-	|| hwloc_topology_set_pid(topology, pid)) {
+        || hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
       if (input) hwloc_utils_disable_input_format(&input_format);
       return EXIT_FAILURE;
@@ -785,9 +785,9 @@ main (int argc, char *argv[])
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
       if (pid_number > 0)
-	hwloc_get_proc_cpubind(topology, pid, restrictset, HWLOC_CPUBIND_PROCESS);
+        hwloc_get_proc_cpubind(topology, pid, restrictset, HWLOC_CPUBIND_PROCESS);
       else
-	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
+        hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
     } else {
       hwloc_bitmap_sscanf(restrictset, restrictstring);
     }
@@ -886,17 +886,17 @@ main (int argc, char *argv[])
     current_obj = 0;
     while (argc >= 1) {
       if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
-	hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
+        hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
       } else if (*argv[0] == '-') {
         fprintf(stderr, "Cannot handle command-line option %s after some locations.\n", argv[0]);
         return EXIT_FAILURE;
       } else {
-	/* try to match a type/depth followed by a special character */
-	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
-	  err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
+        /* try to match a type/depth followed by a special character */
+        typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
+          err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
 					    hwloc_calc_process_location_info_cb, NULL);
-	}
+        }
       }
       argc--; argv++;
     }

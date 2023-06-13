@@ -38,7 +38,7 @@ typedef enum hwloc_calc_append_mode_e {
 
 static __hwloc_inline int
 hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
-		      hwloc_calc_append_mode_t mode, int verbose)
+                      hwloc_calc_append_mode_t mode, int verbose)
 {
   char *s1, *s2;
   hwloc_bitmap_asprintf(&s1, newset);
@@ -47,25 +47,25 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
   case HWLOC_CALC_APPEND_ADD:
     if (verbose > 0)
       fprintf(stderr, "adding %s to %s\n",
-          s1, s2);
+              s1, s2);
     hwloc_bitmap_or(set, set, newset);
     break;
   case HWLOC_CALC_APPEND_CLR:
     if (verbose > 0)
       fprintf(stderr, "clearing %s from %s\n",
-          s1, s2);
+              s1, s2);
     hwloc_bitmap_andnot(set, set, newset);
     break;
   case HWLOC_CALC_APPEND_AND:
     if (verbose > 0)
       fprintf(stderr, "and'ing %s from %s\n",
-          s1, s2);
+              s1, s2);
     hwloc_bitmap_and(set, set, newset);
     break;
   case HWLOC_CALC_APPEND_XOR:
     if (verbose > 0)
       fprintf(stderr, "xor'ing %s from %s\n",
-          s1, s2);
+              s1, s2);
     hwloc_bitmap_xor(set, set, newset);
     break;
   default:
@@ -78,8 +78,8 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 
 static __hwloc_inline unsigned
 hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
-					   hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					   int depth)
+                                           hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
+                                           int depth)
 {
   hwloc_topology_t topology = lcontext->topology;
   int only_hbm = lcontext->only_hbm;
@@ -97,7 +97,7 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
       /* filter on hbm */
       int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
       if (only_hbm != obj_is_hbm)
-	continue;
+        continue;
     }
     n++;
   }
@@ -106,8 +106,8 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
 
 static __hwloc_inline hwloc_obj_t
 hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
-					hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					int depth, unsigned ind)
+                                        hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
+                                        int depth, unsigned ind)
 {
   hwloc_topology_t topology = lcontext->topology;
   int only_hbm = lcontext->only_hbm;
@@ -126,15 +126,15 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
       /* filter on hbm */
       int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
       if (only_hbm != obj_is_hbm)
-	continue;
+        continue;
     }
     if (logical) {
       if (i == ind)
-	return obj;
+        return obj;
       i++;
     } else {
       if (obj->os_index == ind)
-	return obj;
+        return obj;
     }
   }
   return NULL;
@@ -142,8 +142,8 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
 
 static __hwloc_inline int
 hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
-			      const char *string, size_t typelen,
-			      hwloc_obj_type_t *typep)
+                              const char *string, size_t typelen,
+                              hwloc_obj_type_t *typep)
 {
   hwloc_topology_t topology = lcontext->topology;
   int topodepth = lcontext->topodepth;
@@ -196,9 +196,9 @@ hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
 
 static __hwloc_inline int
 hwloc_calc_parse_range(const char *_string,
-		       int *firstp, int *amountp, int *stepp, int *wrapp,
-		       const char **dotp,
-		       int verbose)
+                       int *firstp, int *amountp, int *stepp, int *wrapp,
+                       const char **dotp,
+                       int verbose)
 {
   char string[65];
   size_t len;
@@ -242,7 +242,7 @@ hwloc_calc_parse_range(const char *_string,
       return 0;
     } else {
       if (verbose >= 0)
-	fprintf(stderr, "unrecognized range keyword `%s'\n", string);
+        fprintf(stderr, "unrecognized range keyword `%s'\n", string);
       return -1;
     }
   }
@@ -255,7 +255,7 @@ hwloc_calc_parse_range(const char *_string,
     last = strtol(end+1, &end2, 10);
     if (*end2) {
       if (verbose >= 0)
-	fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
+        fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
       return -1;
     } else if (end2 == end+1) {
       /* X- */
@@ -271,11 +271,11 @@ hwloc_calc_parse_range(const char *_string,
     amount = strtol(end+1, &end2, 10);
     if (*end2) {
       if (verbose >= 0)
-	fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
+        fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
       return -1;
     } else if (end2 == end+1) {
       if (verbose >= 0)
-	fprintf(stderr, "missing width at `%s' in range at `%s'\n", end2, string);
+        fprintf(stderr, "missing width at `%s' in range at `%s'\n", end2, string);
       return -1;
     }
 
@@ -294,9 +294,9 @@ hwloc_calc_parse_range(const char *_string,
 
 static __hwloc_inline int
 hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
-			       hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, int depth,
-			       const char *string, /* starts with indexes following the colon */
-			       void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
+                               hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, int depth,
+                               const char *string, /* starts with indexes following the colon */
+                               void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   int verbose = lcontext->verbose;
   hwloc_obj_t obj;
@@ -309,9 +309,9 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
   int err;
 
   err = hwloc_calc_parse_range(string,
-			       &first, &amount, &step, &wrap,
-			       &dot,
-			       verbose);
+                               &first, &amount, &step, &wrap,
+                               &dot,
+                               verbose);
   if (err < 0) {
     if (verbose >= 0)
       fprintf(stderr, "Failed to parse object index range %s\n", string);
@@ -327,28 +327,28 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     typelen = strspn(nextstring, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
     if (!typelen || nextstring[typelen] != ':') {
       if (verbose >= 0)
-	fprintf(stderr, "hierarchical sublocation %s contains types not followed by colon and index range\n", nextstring);
+        fprintf(stderr, "hierarchical sublocation %s contains types not followed by colon and index range\n", nextstring);
       return -1;
     }
     nextsep = &nextstring[typelen];
 
     nextdepth = hwloc_calc_parse_depth_prefix(lcontext,
-					      nextstring, typelen,
-					      &type);
+                                              nextstring, typelen,
+                                              &type);
     if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
       if (verbose >= 0)
-	fprintf(stderr, "could not find level specified by location %s\n", nextstring);
+        fprintf(stderr, "could not find level specified by location %s\n", nextstring);
       return -1;
     }
     if (nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
       if (verbose >= 0)
-	fprintf(stderr, "found multiple levels for location %s\n", nextstring);
+        fprintf(stderr, "found multiple levels for location %s\n", nextstring);
       return -1;
     }
     /* we need an object with a cpuset, that's depth>=0 or memory */
     if (nextdepth < 0 && nextdepth != HWLOC_TYPE_DEPTH_NUMANODE) {
       if (verbose >= 0)
-	fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
+        fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
       return -1;
     }
   }
@@ -367,22 +367,22 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
       hwloc_bitmap_asprintf(&sc, rootcpuset);
       hwloc_bitmap_asprintf(&sn, rootnodeset);
       if (obj)
-	printf("using object #%u depth %d below cpuset %s nodeset %s\n",
-	       i, depth, sc, sn);
+        printf("using object #%u depth %d below cpuset %s nodeset %s\n",
+               i, depth, sc, sn);
       else
-	fprintf(stderr, "object #%u depth %d below cpuset %s nodeset %s does not exist\n",
-		i, depth, sc, sn);
+        fprintf(stderr, "object #%u depth %d below cpuset %s nodeset %s does not exist\n",
+                i, depth, sc, sn);
       free(sc);
       free(sn);
     }
     if (obj) {
       found++;
       if (dot) {
-	hwloc_calc_append_object_range(lcontext, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, cbfunc, cbdata);
+        hwloc_calc_append_object_range(lcontext, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, cbfunc, cbdata);
       } else {
-	/* add to the temporary cpuset
-	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
-	 */
+        /* add to the temporary cpuset
+         * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
+         */
         cbfunc(lcontext, cbdata, obj);
       }
     }
@@ -395,8 +395,8 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 
 static __hwloc_inline int
 hwloc_calc_append_iodev(struct hwloc_calc_location_context_s *lcontext,
-			void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata,
-			hwloc_obj_t obj)
+                        void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata,
+                        hwloc_obj_t obj)
 {
   cbfunc(lcontext, cbdata, obj);
   return 0;
@@ -404,8 +404,8 @@ hwloc_calc_append_iodev(struct hwloc_calc_location_context_s *lcontext,
 
 static __hwloc_inline int
 hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
-				 hwloc_obj_type_t type, int depth, const char *string,
-				 void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
+                                 hwloc_obj_type_t type, int depth, const char *string,
+                                 void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
@@ -425,28 +425,28 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
       /* try to match by [vendor:device] */
       pcivendor = strtoul(current, &endp, 16);
       if (*endp != ':') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
-	return -1;
+        if (verbose >= 0)
+          fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
+        return -1;
       }
       if (endp == current)
-	pcivendor = -1;
+        pcivendor = -1;
       current = endp+1;
 
       pcidevice = strtoul(current, &endp, 16);
       if (*endp != ']') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
-      	return -1;
+        if (verbose >= 0)
+          fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
+        return -1;
       }
       if (endp == current)
-	pcidevice = -1;
+        pcidevice = -1;
       current = endp+1;
 
       if (*current != ':' && *current != '\0') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
-      	return -1;
+        if (verbose >= 0)
+          fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
+        return -1;
       }
 
     } else if (type == HWLOC_OBJ_OS_DEVICE) {
@@ -456,32 +456,32 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
 
       endp = strchr(current, ']');
       if (!endp) {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
-	return -1;
+        if (verbose >= 0)
+          fprintf(stderr, "invalid OS device subtype specification %s\n", string);
+        return -1;
       }
       *endp = 0;
 
       err = hwloc_type_sscanf(current, &type2, &attr, sizeof(attr));
       *endp = ']';
       if (err < 0 || type2 != HWLOC_OBJ_OS_DEVICE) {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
-	return -1;
+        if (verbose >= 0)
+          fprintf(stderr, "invalid OS device subtype specification %s\n", string);
+        return -1;
       }
       osdevtype = attr.osdev.type;
 
       current = endp+1;
       if (*current != ':' && *current != '\0') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
+        if (verbose >= 0)
+          fprintf(stderr, "invalid OS device subtype specification %s\n", string);
         return -1;
       }
 
     } else {
       /* no matching for non-PCI devices */
       if (verbose >= 0)
-	fprintf(stderr, "invalid matching specification %s\n", string);
+        fprintf(stderr, "invalid matching specification %s\n", string);
       return -1;
     }
 
@@ -493,16 +493,16 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
   if (*current != '\0') {
     current++;
     err = hwloc_calc_parse_range(current,
-				 &first, &amount, &step, &wrap,
-				 &dot,
-				 verbose);
+                                 &first, &amount, &step, &wrap,
+                                 &dot,
+                                 verbose);
     if (dot) {
       fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
       return -1;
     }
     if (err < 0) {
       if (verbose >= 0)
-	fprintf(stderr, "Failed to parse object index range %s\n", current);
+        fprintf(stderr, "Failed to parse object index range %s\n", current);
       return -1;
     }
   }
@@ -523,14 +523,14 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
 
     if (type == HWLOC_OBJ_PCI_DEVICE) {
       if (pcivendor != -1 && (int) obj->attr->pcidev.vendor_id != pcivendor)
-	continue;
+        continue;
       if (pcidevice != -1 && (int) obj->attr->pcidev.device_id != pcidevice)
-	continue;
+        continue;
     }
 
     if (type == HWLOC_OBJ_OS_DEVICE) {
       if (osdevtype != -1 && (int) obj->attr->osdev.type != osdevtype)
-	continue;
+        continue;
     }
 
     if (first--)
@@ -539,7 +539,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     /* ok, got one object */
     if (verbose > 0)
       printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
-	     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+             obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
     hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
 
     if (!prev)
@@ -557,8 +557,8 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
 
 static __hwloc_inline int
 hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
-			    const char *arg, size_t typelen,
-			    void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
+                            const char *arg, size_t typelen,
+                            void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
@@ -567,8 +567,8 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
   int depth;
 
   depth = hwloc_calc_parse_depth_prefix(lcontext,
-					arg, typelen,
-					&type);
+                                        arg, typelen,
+                                        &type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     if (verbose >= 0)
       fprintf(stderr, "could not find level specified by location %s\n", arg);
@@ -593,31 +593,31 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
       /* try to match a busid */
       obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
       if (obj)
-	return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
+        return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
       if (verbose >= 0)
-	fprintf(stderr, "invalid PCI device %s\n", sep+1);
+        fprintf(stderr, "invalid PCI device %s\n", sep+1);
       return -1;
 
     } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
       /* try to match a OS device name */
       while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
-	if (!strcmp(obj->name, sep+1))
-	  return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
+        if (!strcmp(obj->name, sep+1))
+          return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
       }
       if (verbose >= 0)
-	fprintf(stderr, "invalid OS device %s\n", sep+1);
+        fprintf(stderr, "invalid OS device %s\n", sep+1);
       return -1;
 
     } else if (*sep == '=' && type == HWLOC_OBJ_MISC) {
       /* try to match a Misc device name */
       obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_MISC, 0);
       while (obj) {
-	if (!strcmp(obj->name, sep+1))
-	  return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
-	obj = obj->next_cousin;
+        if (!strcmp(obj->name, sep+1))
+          return hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
+        obj = obj->next_cousin;
       }
       if (verbose >= 0)
-	fprintf(stderr, "invalid Misc object %s\n", sep+1);
+        fprintf(stderr, "invalid Misc object %s\n", sep+1);
       return -1;
 
     } else
@@ -626,9 +626,9 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 
   /* look at indexes following this type/depth */
   return hwloc_calc_append_object_range(lcontext,
-					hwloc_topology_get_complete_cpuset(topology),
-					hwloc_topology_get_complete_nodeset(topology),
-					depth, sep+1, cbfunc, cbdata);
+                                        hwloc_topology_get_complete_cpuset(topology),
+                                        hwloc_topology_get_complete_nodeset(topology),
+                                        depth, sep+1, cbfunc, cbdata);
 }
 
 struct hwloc_calc_set_context_s {
@@ -656,14 +656,14 @@ hwloc_calc_process_location_set_cb(struct hwloc_calc_location_context_s *lcontex
     /* do nothing */
     return;
   hwloc_calc_append_set(set,
-			nodeset_output ? obj->nodeset : obj->cpuset,
-			HWLOC_CALC_APPEND_ADD, verbose);
+                        nodeset_output ? obj->nodeset : obj->cpuset,
+                        HWLOC_CALC_APPEND_ADD, verbose);
 }
 
 static __hwloc_inline int
 hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontext,
-				   struct hwloc_calc_set_context_s *scontext,
-				   const char *arg)
+                                   struct hwloc_calc_set_context_s *scontext,
+                                   const char *arg)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
@@ -687,8 +687,8 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 
   if (!strcmp(arg, "all") || !strcmp(arg, "root"))
     return hwloc_calc_append_set(output_set,
-				 nodeset_output ? hwloc_topology_get_topology_nodeset(topology) : hwloc_topology_get_topology_cpuset(topology),
-				 mode, verbose);
+                                 nodeset_output ? hwloc_topology_get_topology_nodeset(topology) : hwloc_topology_get_topology_cpuset(topology),
+                                 mode, verbose);
 
   /* try to match a type/depth followed by a special character */
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
@@ -698,7 +698,7 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
     cbdata.set = hwloc_bitmap_alloc();
     cbdata.scontext = scontext;
     err = hwloc_calc_process_location(lcontext, arg, typelen,
-				      hwloc_calc_process_location_set_cb, &cbdata);
+                                      hwloc_calc_process_location_set_cb, &cbdata);
     if (!err)
       err = hwloc_calc_append_set(output_set, cbdata.set, mode, verbose);
     hwloc_bitmap_free(cbdata.set);
@@ -737,23 +737,23 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
     } else {
       /* check that the remaining is a comma-separated list of hexadecimal integer with 0x as an optional prefix */
       while (1) {
-	char *next = strchr(tmp, ',');
-	size_t len;
+        char *next = strchr(tmp, ',');
+        size_t len;
         if (hwloc_strncasecmp(tmp, "0x", 2) == 0) {
-	  tmp += 2;
-	  if (',' == *tmp || 0 == *tmp) {
-	    err = -1;
-	    goto out;
-	  }
-	}
-	len = next ? (size_t) (next-tmp) : strlen(tmp);
-	if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
-	  err = -1;
-	  goto out;
-	}
-	if (!next)
-	  break;
-	tmp = next+1;
+          tmp += 2;
+          if (',' == *tmp || 0 == *tmp) {
+            err = -1;
+            goto out;
+          }
+        }
+        len = next ? (size_t) (next-tmp) : strlen(tmp);
+        if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
+          err = -1;
+          goto out;
+        }
+        if (!next)
+          break;
+        tmp = next+1;
       }
     }
 

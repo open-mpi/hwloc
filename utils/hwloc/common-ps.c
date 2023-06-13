@@ -23,8 +23,8 @@
 #include "misc.h"
 
 int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
-			  struct hwloc_ps_process *proc,
-			  unsigned long flags)
+                          struct hwloc_ps_process *proc,
+                          unsigned long flags)
 {
 #ifdef HAVE_DIRENT_H
   hwloc_pid_t realpid;
@@ -68,9 +68,9 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
       n = read(fd, comm, sizeof(comm) - 1);
       close(fd);
       if (n > 0) {
-	comm[n] = '\0';
-	if (n > 1 && comm[n-1] == '\n')
-	  comm[n-1] = '\0';
+        comm[n] = '\0';
+        if (n > 1 && comm[n-1] == '\n')
+          comm[n-1] = '\0';
       }
 
     } else {
@@ -81,19 +81,19 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
       snprintf(path, pathlen, "/proc/%ld/stat", proc->pid);
       fd = open(path, O_RDONLY);
       if (fd >= 0) {
-	/* "pid (comm) ..." */
-	n = read(fd, stats, sizeof(stats) - 1);
-	close(fd);
-	if (n > 0) {
-	  stats[n] = '\0';
-	  parenl = strchr(stats, '(');
-	  parenr = strchr(stats, ')');
-	  if (!parenr)
-	    parenr = &stats[sizeof(stats)-1];
-	  *parenr = '\0';
-	  if (parenl)
-	    snprintf(comm, sizeof(comm), "%s", parenl+1);
-	}
+        /* "pid (comm) ..." */
+        n = read(fd, stats, sizeof(stats) - 1);
+        close(fd);
+        if (n > 0) {
+          stats[n] = '\0';
+          parenl = strchr(stats, '(');
+          parenr = strchr(stats, ')');
+          if (!parenr)
+            parenr = &stats[sizeof(stats)-1];
+          *parenr = '\0';
+          if (parenl)
+            snprintf(comm, sizeof(comm), "%s", parenl+1);
+        }
       }
     }
 
@@ -147,78 +147,78 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
       unsigned nbth = 0;
       /* count threads */
       while ((taskdirent = readdir(taskdir))) {
-	tid = strtol(taskdirent->d_name, &end, 10);
-	if (*end)
-	  /* Not a number */
-	  continue;
-	nbth++;
+        tid = strtol(taskdirent->d_name, &end, 10);
+        if (*end)
+          /* Not a number */
+          continue;
+        nbth++;
       }
       if (nbth > 1) {
-	/* if there's more than one thread, see if some are bound */
-	proc->threads = calloc(nbth, sizeof(*proc->threads));
-	if (proc->threads) {
-	  /* reread the directory but gather info now */
-	  rewinddir(taskdir);
-	  unsigned i = 0;
-	  while ((taskdirent = readdir(taskdir))) {
-	    char *path2;
-	    unsigned path2len;
+        /* if there's more than one thread, see if some are bound */
+        proc->threads = calloc(nbth, sizeof(*proc->threads));
+        if (proc->threads) {
+          /* reread the directory but gather info now */
+          rewinddir(taskdir);
+          unsigned i = 0;
+          while ((taskdirent = readdir(taskdir))) {
+            char *path2;
+            unsigned path2len;
 
-	    tid = strtol(taskdirent->d_name, &end, 10);
-	    if (*end)
-	      /* Not a number */
-	      continue;
+            tid = strtol(taskdirent->d_name, &end, 10);
+            if (*end)
+              /* Not a number */
+              continue;
 
-	    proc->threads[i].tid = tid;
+            proc->threads[i].tid = tid;
 
-	    path2len = pathlen + 1 + 21 + 1 + 4 + 1;
-	    path2 = malloc(path2len);
-	    if (path2) {
-	      int commfd;
-	      snprintf(path2, path2len, "%s/%ld/comm", path, tid);
-	      commfd = open(path2, O_RDWR);
-	      if (commfd >= 0) {
-		n = read(commfd, proc->threads[i].name, sizeof(proc->threads[i].name));
-		close(commfd);
-		if (n <= 0)
-		  proc->threads[i].name[0] = '\0';
-		else if ((size_t)n < sizeof(proc->threads[i].name))
-		  proc->threads[i].name[n] = '\0';
-		proc->threads[i].name[sizeof(proc->threads[i].name)-1] = '\0';
-		end = strchr(proc->threads[i].name, '\n');
-		if (end)
-		  *end = '\0';
-	      }
-	      free(path2);
-	    }
+            path2len = pathlen + 1 + 21 + 1 + 4 + 1;
+            path2 = malloc(path2len);
+            if (path2) {
+              int commfd;
+              snprintf(path2, path2len, "%s/%ld/comm", path, tid);
+              commfd = open(path2, O_RDWR);
+              if (commfd >= 0) {
+                n = read(commfd, proc->threads[i].name, sizeof(proc->threads[i].name));
+                close(commfd);
+                if (n <= 0)
+                  proc->threads[i].name[0] = '\0';
+                else if ((size_t)n < sizeof(proc->threads[i].name))
+                  proc->threads[i].name[n] = '\0';
+                proc->threads[i].name[sizeof(proc->threads[i].name)-1] = '\0';
+                end = strchr(proc->threads[i].name, '\n');
+                if (end)
+                  *end = '\0';
+              }
+              free(path2);
+            }
 
-	    if (flags & HWLOC_PS_FLAG_LASTCPULOCATION) {
-	      if (hwloc_linux_get_tid_last_cpu_location(topology, tid, cpuset))
-		goto next;
-	    } else {
-	      if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
-		goto next;
-	    }
-	    hwloc_bitmap_and(cpuset, cpuset, topocpuset);
-	    if (hwloc_bitmap_iszero(cpuset))
-	      goto next;
+            if (flags & HWLOC_PS_FLAG_LASTCPULOCATION) {
+              if (hwloc_linux_get_tid_last_cpu_location(topology, tid, cpuset))
+                goto next;
+            } else {
+              if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
+                goto next;
+            }
+            hwloc_bitmap_and(cpuset, cpuset, topocpuset);
+            if (hwloc_bitmap_iszero(cpuset))
+              goto next;
 
-	    proc->threads[i].cpuset = hwloc_bitmap_dup(cpuset);
-	    if (!hwloc_bitmap_isequal(cpuset, topocpuset)) {
-	      proc->threads[i].bound = 1;
-	      proc->nboundthreads++;
-	    }
+            proc->threads[i].cpuset = hwloc_bitmap_dup(cpuset);
+            if (!hwloc_bitmap_isequal(cpuset, topocpuset)) {
+              proc->threads[i].bound = 1;
+              proc->nboundthreads++;
+            }
 
-	  next:
-	    i++;
-	    proc->nthreads++;
-	    if (i == nbth)
-	      /* ignore the lastly created threads, I'm too lazy to reallocate */
-	      break;
-	  }
-	} else {
-	  /* failed to alloc, behave as if there were no threads */
-	}
+          next:
+            i++;
+            proc->nthreads++;
+            if (i == nbth)
+              /* ignore the lastly created threads, I'm too lazy to reallocate */
+              break;
+          }
+        } else {
+          /* failed to alloc, behave as if there were no threads */
+        }
       }
       closedir(taskdir);
     }
@@ -342,16 +342,16 @@ void hwloc_ps_free_process(struct hwloc_ps_process *proc)
   if (proc->nthreads)
     for(i=0; i<proc->nthreads; i++)
       if (proc->threads[i].cpuset)
-	hwloc_bitmap_free(proc->threads[i].cpuset);
+        hwloc_bitmap_free(proc->threads[i].cpuset);
   free(proc->threads);
 
   hwloc_bitmap_free(proc->cpuset);
 }
 
 int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
-			     void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
-			     void *cbdata,
-			     unsigned long flags, const char *only_name, long uid)
+                             void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
+                             void *cbdata,
+                             unsigned long flags, const char *only_name, long uid)
 {
 #ifdef HAVE_DIRENT_H
   DIR *dir;

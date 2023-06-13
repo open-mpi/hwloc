@@ -227,8 +227,8 @@ int main(int argc, char *argv[])
     if (input) {
       err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose, callname);
       if (err) {
-	free(cpuset);
-	return EXIT_FAILURE;
+        free(cpuset);
+        return EXIT_FAILURE;
       }
     }
     hwloc_topology_set_flags(topology, flags);
@@ -247,8 +247,8 @@ int main(int argc, char *argv[])
       hwloc_bitmap_sscanf(restrictset, restrictstring);
       err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
       if (err) {
-	perror("Restricting the topology");
-	/* FALLTHRU */
+        perror("Restricting the topology");
+        /* FALLTHRU */
       }
       hwloc_bitmap_free(restrictset);
       free(restrictstring);
@@ -260,8 +260,8 @@ int main(int argc, char *argv[])
       union hwloc_obj_attr_u attr;
       if (hwloc_type_sscanf(from_type, &type, &attr, sizeof(attr)) < 0
           || (from_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr))) < 0) {
-	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", from_type);
-	return EXIT_FAILURE;
+        fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", from_type);
+        return EXIT_FAILURE;
       }
     }
 
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
       union hwloc_obj_attr_u attr;
       if (hwloc_type_sscanf(to_type, &type, &attr, sizeof(attr)) < 0
           || (to_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr))) < 0) {
-	return EXIT_FAILURE;
+        return EXIT_FAILURE;
       }
     }
 
@@ -287,22 +287,22 @@ int main(int argc, char *argv[])
       hwloc_distrib(topology, roots, chunks, cpuset, n, to_depth, dflags);
 
       for (i = 0; (long) i < n; i++) {
-	char *str = NULL;
-	if (singlify) {
-	  if (dflags & HWLOC_DISTRIB_FLAG_REVERSE) {
-	    unsigned last = hwloc_bitmap_last(cpuset[i]);
-	    hwloc_bitmap_only(cpuset[i], last);
-	  } else {
-	    hwloc_bitmap_singlify(cpuset[i]);
-	  }
-	}
-	if (taskset)
-	  hwloc_bitmap_taskset_asprintf(&str, cpuset[i]);
-	else
-	  hwloc_bitmap_asprintf(&str, cpuset[i]);
-	printf("%s\n", str);
-	free(str);
-	hwloc_bitmap_free(cpuset[i]);
+        char *str = NULL;
+        if (singlify) {
+          if (dflags & HWLOC_DISTRIB_FLAG_REVERSE) {
+            unsigned last = hwloc_bitmap_last(cpuset[i]);
+            hwloc_bitmap_only(cpuset[i], last);
+          } else {
+            hwloc_bitmap_singlify(cpuset[i]);
+          }
+        }
+        if (taskset)
+          hwloc_bitmap_taskset_asprintf(&str, cpuset[i]);
+        else
+          hwloc_bitmap_asprintf(&str, cpuset[i]);
+        printf("%s\n", str);
+        free(str);
+        hwloc_bitmap_free(cpuset[i]);
       }
 
       free(roots);

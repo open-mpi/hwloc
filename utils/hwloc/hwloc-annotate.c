@@ -14,32 +14,32 @@
 
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
-	fprintf(where, "Usage: hwloc-annotate [options] <input.xml> <output.xml> -- <location1> <location2> ... -- <annotation>\n");
-	fprintf(where, "Usage: hwloc-annotate [options] <input.xml> <output.xml> <location> <annotation>\n");
-	fprintf(where, "  <location> may be:\n");
-	fprintf(where, "    all, root, <type>:<logicalindex>, <type>:all\n");
-	fprintf(where, "  <annotation> may be:\n");
-	fprintf(where, "    info <name> <value>\n");
-	fprintf(where, "    subtype <subtype>\n");
-	fprintf(where, "    size <memory or cache size>\n");
-	fprintf(where, "    misc <name>\n");
-	fprintf(where, "    distances <filename> [<flags>]\n");
-	fprintf(where, "    memattr <name> <flags>\n");
-	fprintf(where, "    memattr <name> <initiator> <value>\n");
-        fprintf(where, "    cpukind <cpuset> <efficiency> <flags> [<infoname> <infovalue>]\n");
-        fprintf(where, "    distances-transform <name> links\n");
-        fprintf(where, "    distances-transform <name> merge-switch-ports\n");
-        fprintf(where, "    distances-transform <name> transitive-closure\n");
-        fprintf(where, "    distances-transform <name> remove-obj <obj>\n");
-        fprintf(where, "    distances-transform <name> replace-objs <oldtype> <newtype>\n");
-	fprintf(where, "    none\n");
-        fprintf(where, "Options:\n");
-	fprintf(where, "  --ci\tClear existing infos\n");
-	fprintf(where, "  --ri\tReplace or remove existing infos with same name (annotation must be info)\n");
-	fprintf(where, "  --cu\tClear existing userdata\n");
-	fprintf(where, "  --cd\tClear existing distances\n");
-        fprintf(where, "  --version\tReport version and exit\n");
-        fprintf(where, "  -h --help\tShow this usage\n");
+  fprintf(where, "Usage: hwloc-annotate [options] <input.xml> <output.xml> -- <location1> <location2> ... -- <annotation>\n");
+  fprintf(where, "Usage: hwloc-annotate [options] <input.xml> <output.xml> <location> <annotation>\n");
+  fprintf(where, "  <location> may be:\n");
+  fprintf(where, "    all, root, <type>:<logicalindex>, <type>:all\n");
+  fprintf(where, "  <annotation> may be:\n");
+  fprintf(where, "    info <name> <value>\n");
+  fprintf(where, "    subtype <subtype>\n");
+  fprintf(where, "    size <memory or cache size>\n");
+  fprintf(where, "    misc <name>\n");
+  fprintf(where, "    distances <filename> [<flags>]\n");
+  fprintf(where, "    memattr <name> <flags>\n");
+  fprintf(where, "    memattr <name> <initiator> <value>\n");
+  fprintf(where, "    cpukind <cpuset> <efficiency> <flags> [<infoname> <infovalue>]\n");
+  fprintf(where, "    distances-transform <name> links\n");
+  fprintf(where, "    distances-transform <name> merge-switch-ports\n");
+  fprintf(where, "    distances-transform <name> transitive-closure\n");
+  fprintf(where, "    distances-transform <name> remove-obj <obj>\n");
+  fprintf(where, "    distances-transform <name> replace-objs <oldtype> <newtype>\n");
+  fprintf(where, "    none\n");
+  fprintf(where, "Options:\n");
+  fprintf(where, "  --ci\tClear existing infos\n");
+  fprintf(where, "  --ri\tReplace or remove existing infos with same name (annotation must be info)\n");
+  fprintf(where, "  --cu\tClear existing userdata\n");
+  fprintf(where, "  --cd\tClear existing distances\n");
+  fprintf(where, "  --version\tReport version and exit\n");
+  fprintf(where, "  -h --help\tShow this usage\n");
 }
 
 static char *infoname = NULL, *infovalue = NULL;
@@ -110,29 +110,29 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 		else
 			obj->subtype = strdup(subtype);
 	}
-        if (sizevalue != ~0ULL) {
-          if (obj->type == HWLOC_OBJ_NUMANODE)
-            obj->attr->numanode.local_memory = sizevalue;
-          else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
-            obj->attr->cache.size = sizevalue;
-        }
+	if (sizevalue != ~0ULL) {
+		if (obj->type == HWLOC_OBJ_NUMANODE)
+			obj->attr->numanode.local_memory = sizevalue;
+		else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
+			obj->attr->cache.size = sizevalue;
+	}
 	if (miscname)
 		hwloc_topology_insert_misc_object(topology, obj, miscname);
-        if (mavname) {
-          struct hwloc_location loc, *locp = NULL;
-          if (maviobj) {
-            loc.type = HWLOC_LOCATION_TYPE_OBJECT;
-            loc.location.object = maviobj;
-            locp = &loc;
-          } else if (mavicpuset) {
-            loc.type = HWLOC_LOCATION_TYPE_CPUSET;
-            loc.location.cpuset = mavicpuset;
-            locp = &loc;
-          }
-          if (hwloc_memattr_set_value(topology, mavid, obj, locp, 0, mavvalue) < 0) {
-            fprintf(stderr, "Failed to add memattr value (%s)\n", strerror(errno));
-          }
-        }
+	if (mavname) {
+		struct hwloc_location loc, *locp = NULL;
+		if (maviobj) {
+			loc.type = HWLOC_LOCATION_TYPE_OBJECT;
+			loc.location.object = maviobj;
+			locp = &loc;
+		} else if (mavicpuset) {
+			loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+			loc.location.cpuset = mavicpuset;
+			locp = &loc;
+		}
+		if (hwloc_memattr_set_value(topology, mavid, obj, locp, 0, mavvalue) < 0) {
+			fprintf(stderr, "Failed to add memattr value (%s)\n", strerror(errno));
+		}
+	}
 }
 
 static void apply_recursive(hwloc_topology_t topology, hwloc_obj_t obj)
@@ -198,7 +198,7 @@ get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
 static void
 add_distances(hwloc_topology_t topology, int topodepth)
 {
-        char *name = NULL;
+	char *name = NULL;
 	unsigned long kind = 0;
 	unsigned nbobjs = 0;
 	hwloc_obj_t *objs = NULL;
@@ -206,7 +206,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 	FILE *file;
 	char line[64], *end;
 	unsigned i, x, y, z;
-        hwloc_distances_add_handle_t handle;
+	hwloc_distances_add_handle_t handle;
 	int err;
 
 	file = fopen(distancesfilename, "r");
@@ -219,19 +219,19 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		fprintf(stderr, "Failed to read header line\n");
 		goto out;
 	}
-        if (!strncmp(line, "name=", 5)) {
-          end = strchr(line, '\n');
-          if (end) {
-            *end = '\0';
-            name = strdup(line+5);
-          }
-          if (!fgets(line, sizeof(line), file)) {
-            fprintf(stderr, "Failed to read kind line\n");
-            goto out;
-          }
-        }
+	if (!strncmp(line, "name=", 5)) {
+		end = strchr(line, '\n');
+		if (end) {
+			*end = '\0';
+			name = strdup(line+5);
+		}
+		if (!fgets(line, sizeof(line), file)) {
+			fprintf(stderr, "Failed to read kind line\n");
+			goto out;
+		}
+	}
 
-        kind = strtoul(line, NULL, 0);
+	kind = strtoul(line, NULL, 0);
 
 	if (!fgets(line, sizeof(line), file)) {
 		fprintf(stderr, "Failed to read nbobjs line\n");
@@ -253,21 +253,21 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		int ignored_multiple;
 
 		if (!fgets(line, sizeof(line), file)) {
-		  fprintf(stderr, "Failed to read object line #%u.\n", i);
-		  goto out;
+			fprintf(stderr, "Failed to read object line #%u.\n", i);
+			goto out;
 		}
-                end = strchr(line, '\n');
-                if (end)
-                  *end = '\0';
+		end = strchr(line, '\n');
+		if (end)
+			*end = '\0';
 
 		obj = get_unique_obj(topology, topodepth, line, &ignored_multiple);
 		if (!obj) {
-		  fprintf(stderr, "Couldn't parse object line #%u.\n", i);
-		  goto out;
+			fprintf(stderr, "Couldn't parse object line #%u.\n", i);
+			goto out;
 		}
 
 		if (ignored_multiple) {
-		  fprintf(stderr, "Only the first object specified on line #%u was used.\n", i);
+			fprintf(stderr, "Only the first object specified on line #%u was used.\n", i);
 		}
 
 		objs[i] = obj;
@@ -299,7 +299,7 @@ add_distances(hwloc_topology_t topology, int topodepth)
 					values[i*nbobjs+j] = 80;
 	} else {
 		/* read all other values */
-	  values[0] = strtoull(line, NULL, 10);
+		values[0] = strtoull(line, NULL, 10);
 
 		for(i=1; i<nbobjs*nbobjs; i++) {
 			if (!fgets(line, sizeof(line), file)) {
@@ -310,21 +310,21 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		}
 	}
 
-        err = -1;
-        handle = hwloc_distances_add_create(topology, name, kind, 0);
-        if (handle) {
-          err = hwloc_distances_add_values(topology, handle, nbobjs, objs, values, 0);
-          if (!err) {
-            err = hwloc_distances_add_commit(topology, handle, distancesflags);
-          }
-        }
-        if (err < 0 || !handle) {
-          fprintf(stderr, "Failed to add distances\n");
-          goto out;
+	err = -1;
+	handle = hwloc_distances_add_create(topology, name, kind, 0);
+	if (handle) {
+		err = hwloc_distances_add_values(topology, handle, nbobjs, objs, values, 0);
+		if (!err) {
+			err = hwloc_distances_add_commit(topology, handle, distancesflags);
+		}
+	}
+	if (err < 0 || !handle) {
+		fprintf(stderr, "Failed to add distances\n");
+		goto out;
 	}
 
 out:
-        free(name);
+	free(name);
 	free(objs);
 	free(values);
 	fclose(file);
@@ -478,11 +478,11 @@ int main(int argc, char *argv[])
 	int topodepth;
 	int err;
 
-        callname = strrchr(argv[0], '/');
-        if (!callname)
-          callname = argv[0];
-        else
-          callname++;
+	callname = strrchr(argv[0], '/');
+	if (!callname)
+		callname = argv[0];
+	else
+		callname++;
 
 	/* skip argv[0], handle options */
 	argc--;
@@ -532,27 +532,27 @@ int main(int argc, char *argv[])
 	argv += 2;
 
 	if (!strcmp(argv[0], "--")) {
-	  /* modern syntax with locations between "--" */
-	  argc--;
-	  argv++;
-	  locations = &argv[0];
-	  nr_locations = 0;
-	  while (nr_locations < argc && strcmp(argv[nr_locations], "--"))
-	    nr_locations++;
-	  /* check we have an ending "--" */
-	  if (nr_locations == argc || strcmp(argv[nr_locations], "--")) {
-	    usage(callname, stderr);
-	    exit(EXIT_FAILURE);
-	  }
-	  /* skip those locations and the ending "--" */
-	  argc -= nr_locations+1;
-	  argv += nr_locations+1;
+		/* modern syntax with locations between "--" */
+		argc--;
+		argv++;
+		locations = &argv[0];
+		nr_locations = 0;
+		while (nr_locations < argc && strcmp(argv[nr_locations], "--"))
+			nr_locations++;
+		/* check we have an ending "--" */
+		if (nr_locations == argc || strcmp(argv[nr_locations], "--")) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		/* skip those locations and the ending "--" */
+		argc -= nr_locations+1;
+		argv += nr_locations+1;
 	} else {
-	  /* old syntax with a single location without "--" before and after */
-	  locations = &argv[0];
-	  nr_locations = 1;
-	  argc--;
-	  argv++;
+		/* old syntax with a single location without "--" before and after */
+		locations = &argv[0];
+		nr_locations = 1;
+		argc--;
+		argv++;
 	}
 
 	if (argc < 1) {
@@ -581,24 +581,24 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 		sizevalue = strtoull(argv[1], &end, 0);
-                if (end) {
-                  if (!strcasecmp(end, "kB"))
-                    sizevalue *= 1000ULL;
-                  else if (!strcasecmp(end, "kiB"))
-                    sizevalue <<= 10;
-                  else if (!strcasecmp(end, "MB"))
-                    sizevalue *= 1000ULL*1000ULL;
-                  else if (!strcasecmp(end, "MiB"))
-                    sizevalue <<= 20;
-                  else if (!strcasecmp(end, "GB"))
-                    sizevalue *= 1000ULL*1000ULL*1000ULL;
-                  else if (!strcasecmp(end, "GiB"))
-                    sizevalue <<= 30;
-                  else if (!strcasecmp(end, "TB"))
-                    sizevalue *= 1000ULL*1000ULL*1000ULL*1000ULL;
-                  else if (!strcasecmp(end, "TiB"))
-                    sizevalue <<= 40;
-                }
+		if (end) {
+			if (!strcasecmp(end, "kB"))
+				sizevalue *= 1000ULL;
+			else if (!strcasecmp(end, "kiB"))
+				sizevalue <<= 10;
+			else if (!strcasecmp(end, "MB"))
+				sizevalue *= 1000ULL*1000ULL;
+			else if (!strcasecmp(end, "MiB"))
+				sizevalue <<= 20;
+			else if (!strcasecmp(end, "GB"))
+				sizevalue *= 1000ULL*1000ULL*1000ULL;
+			else if (!strcasecmp(end, "GiB"))
+				sizevalue <<= 30;
+			else if (!strcasecmp(end, "TB"))
+				sizevalue *= 1000ULL*1000ULL*1000ULL*1000ULL;
+			else if (!strcasecmp(end, "TiB"))
+				sizevalue <<= 40;
+		}
 
 	} else if (!strcmp(argv[0], "misc")) {
 		if (argc < 2) {
@@ -615,89 +615,89 @@ int main(int argc, char *argv[])
 		distancesfilename = argv[1];
 		if (argc >= 3) {
 			distancesflags = hwloc_utils_parse_distances_add_flags(argv[2]);
-                        if(distancesflags == (unsigned long)-1)
-                                goto out;
-                }
+			if(distancesflags == (unsigned long)-1)
+				goto out;
+		}
 
-        } else if (!strcmp(argv[0], "distances-transform")) {
-          if (argc < 3) {
-            usage(callname, stderr);
-            exit(EXIT_FAILURE);
-          }
-          distances_transform_name = argv[1];
-          if (!strcmp(argv[2], "links")) {
-            distances_transform_links = 1;
-          } else if (!strcmp(argv[2], "merge-switch-ports")) {
-            distances_transform_merge_switch_ports = 1;
-          } else if (!strcmp(argv[2], "transitive-closure")) {
-            distances_transform_closure = 1;
-          } else if (!strcmp(argv[2], "remove-obj")) {
-            if (argc < 4) {
-              usage(callname, stderr);
-              exit(EXIT_FAILURE);
-            }
-            distances_transform_removeobj = argv[3];
-          } else if (!strcmp(argv[2], "replace-objs")) {
-            if (argc < 5) {
-              usage(callname, stderr);
-              exit(EXIT_FAILURE);
-            }
-            distances_transform_replace_oldtype = argv[3];
-            distances_transform_replace_newtype = argv[4];
-          } else {
-	    fprintf(stderr, "Unrecognized distances-transform operation `%s'\n", argv[2]);
-            usage(callname, stderr);
-            exit(EXIT_FAILURE);
-          }
+	} else if (!strcmp(argv[0], "distances-transform")) {
+		if (argc < 3) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		distances_transform_name = argv[1];
+		if (!strcmp(argv[2], "links")) {
+			distances_transform_links = 1;
+		} else if (!strcmp(argv[2], "merge-switch-ports")) {
+			distances_transform_merge_switch_ports = 1;
+		} else if (!strcmp(argv[2], "transitive-closure")) {
+			distances_transform_closure = 1;
+		} else if (!strcmp(argv[2], "remove-obj")) {
+			if (argc < 4) {
+				usage(callname, stderr);
+				exit(EXIT_FAILURE);
+			}
+			distances_transform_removeobj = argv[3];
+		} else if (!strcmp(argv[2], "replace-objs")) {
+			if (argc < 5) {
+				usage(callname, stderr);
+				exit(EXIT_FAILURE);
+			}
+			distances_transform_replace_oldtype = argv[3];
+			distances_transform_replace_newtype = argv[4];
+		} else {
+			fprintf(stderr, "Unrecognized distances-transform operation `%s'\n", argv[2]);
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
 
-        } else if (!strcmp(argv[0], "memattr")) {
-                if (argc < 3) {
-                        usage(callname, stderr);
-                        exit(EXIT_FAILURE);
-                }
-                if (argc == 3) {
-                        maname = argv[1];
-                        maflags = hwloc_utils_parse_memattr_flags(argv[2]);
-                } else {
-                        mavname = argv[1];
-                        mavvalue = strtoull(argv[3], NULL, 0);
-                        if (strcmp(argv[2], "none")) {
-                          if (!strncmp(argv[2], "0x", 2)) {
-                            /* parse a cpuset */
-                            mavicpuset = hwloc_bitmap_alloc();
-                            if (!mavicpuset) {
-                              fprintf(stderr, "Failed to allocate cpuset for memattr initiator\n");
-                              goto out;
-                            }
-                            hwloc_bitmap_sscanf(mavicpuset, argv[2]);
-                          } else {
-                            /* parse an object */
-                            maviobjstr = argv[2];
-                          }
-                        }
-                }
+	} else if (!strcmp(argv[0], "memattr")) {
+		if (argc < 3) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		if (argc == 3) {
+			maname = argv[1];
+			maflags = hwloc_utils_parse_memattr_flags(argv[2]);
+		} else {
+			mavname = argv[1];
+			mavvalue = strtoull(argv[3], NULL, 0);
+			if (strcmp(argv[2], "none")) {
+				if (!strncmp(argv[2], "0x", 2)) {
+					/* parse a cpuset */
+					mavicpuset = hwloc_bitmap_alloc();
+					if (!mavicpuset) {
+						fprintf(stderr, "Failed to allocate cpuset for memattr initiator\n");
+						goto out;
+					}
+					hwloc_bitmap_sscanf(mavicpuset, argv[2]);
+				} else {
+					/* parse an object */
+					maviobjstr = argv[2];
+				}
+			}
+		}
 
-        } else if (!strcmp(argv[0], "cpukind")) {
-          if (argc < 4) {
-            usage(callname, stderr);
-            exit(EXIT_FAILURE);
-          }
-          ckcpuset = hwloc_bitmap_alloc();
-          if (!ckcpuset) {
-            fprintf(stderr, "Failed to allocate cpuset for cpukind\n");
-            goto out;
-          }
-          hwloc_bitmap_sscanf(ckcpuset, argv[1]);
-          ckefficiency = atoi(argv[2]);
-          ckflags = atoi(argv[3]);
-          if (argc == 5) {
-            fprintf(stderr, "cpukind with info name without info value\n");
-            goto out;
-          }
-          if (argc >= 6 && *argv[4] && *argv[5]) {
-            ckiname = argv[4];
-            ckivalue = argv[5];
-          }
+	} else if (!strcmp(argv[0], "cpukind")) {
+		if (argc < 4) {
+			usage(callname, stderr);
+			exit(EXIT_FAILURE);
+		}
+		ckcpuset = hwloc_bitmap_alloc();
+		if (!ckcpuset) {
+			fprintf(stderr, "Failed to allocate cpuset for cpukind\n");
+			goto out;
+		}
+		hwloc_bitmap_sscanf(ckcpuset, argv[1]);
+		ckefficiency = atoi(argv[2]);
+		ckflags = atoi(argv[3]);
+		if (argc == 5) {
+			fprintf(stderr, "cpukind with info name without info value\n");
+			goto out;
+		}
+		if (argc >= 6 && *argv[4] && *argv[5]) {
+			ckiname = argv[4];
+			ckivalue = argv[5];
+		}
 
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
@@ -735,97 +735,97 @@ int main(int argc, char *argv[])
 	}
 
 	if (distancesfilename) {
-	  /* ignore locations */
-	  add_distances(topology, topodepth);
+		/* ignore locations */
+		add_distances(topology, topodepth);
 
-        } else if (distances_transform_name) {
-          transform_distances(topology, topodepth);
+	} else if (distances_transform_name) {
+		transform_distances(topology, topodepth);
 
-        } else if (maname) {
-          hwloc_memattr_id_t id;
-          err = hwloc_memattr_register(topology, maname, maflags, &id);
-          if (err < 0) {
-            fprintf(stderr, "Failed to register new memattr (%s)\n", strerror(errno));
-            goto out_with_topology;
-          }
+	} else if (maname) {
+		hwloc_memattr_id_t id;
+		err = hwloc_memattr_register(topology, maname, maflags, &id);
+		if (err < 0) {
+			fprintf(stderr, "Failed to register new memattr (%s)\n", strerror(errno));
+			goto out_with_topology;
+		}
 
-        } else if (ckcpuset) {
-          struct hwloc_infos_s infos;
-          struct hwloc_info_s info;
-          info.name = ckiname;
-          info.value = ckivalue;
-          infos.count = 1;
-          infos.array = &info;
-          infos.allocated = 0;
-          if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
-                                      ckiname ? &infos : NULL,
-                                      ckflags) < 0) {
-            fprintf(stderr, "Failed to register CPU kind (%s)\n", strerror(errno));
-          }
+	} else if (ckcpuset) {
+		struct hwloc_infos_s infos;
+		struct hwloc_info_s info;
+		info.name = ckiname;
+		info.value = ckivalue;
+		infos.count = 1;
+		infos.array = &info;
+		infos.allocated = 0;
+		if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
+					ckiname ? &infos : NULL,
+					ckflags) < 0) {
+			fprintf(stderr, "Failed to register CPU kind (%s)\n", strerror(errno));
+		}
 
 	} else {
-	  int i;
-          unsigned long mavflags = 0;
+		int i;
+		unsigned long mavflags = 0;
 
-          if (mavname) {
-            mavid = hwloc_utils_parse_memattr_name(topology, mavname);
-            if (mavid == (hwloc_memattr_id_t) -1) {
-              fprintf(stderr, "Failed to find memattr by name %s\n", mavname);
-              goto out_with_topology;
-            }
-            hwloc_memattr_get_flags(topology, mavid, &mavflags);
-          }
-
-          if (maviobjstr && (mavflags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
-            int ignored_multiple;
-            maviobj = get_unique_obj(topology, topodepth, maviobjstr, &ignored_multiple);
-            if (!maviobj) {
-              fprintf(stderr, "Failed to find memattr initiator object %s\n", maviobjstr);
-              goto out_with_topology;
-            }
-            if (ignored_multiple) {
-              fprintf(stderr, "Only the first object specified is used as a memattr initiator.\n");
-            }
-          }
-
-	  for(i=0; i<nr_locations; i++) {
-	    char *location = locations[i];
-            if (!strncmp(location, "cpukind#", 8) && (infoname || clearinfos)) {
-              struct hwloc_infos_s *infos;
-              int num;
-              if (location[8] < '0' || location[8] > '9') {
-                fprintf(stderr, "Failed to recognize number after cpukind# in location %s\n", location);
-                goto out_with_topology;
-              }
-              num = atoi(location+8);
-              err = hwloc_cpukinds_get_info(topology, num, NULL, NULL, &infos, 0);
-              if (err < 0) {
-                fprintf(stderr, "Failed to find cpukind#%d\n", num);
-                goto out_with_topology;
-              } else {
-                apply_infos(infos);
-              }
-            } else if (!strcmp(location, "topology") && (infoname || clearinfos)) {
-              apply_infos(hwloc_topology_get_infos(topology));
-            } else if (!strcmp(location, "all")) {
-	      apply_recursive(topology, hwloc_get_root_obj(topology));
-	    } else if (!strcmp(location, "root")) {
-	      apply(topology, hwloc_get_root_obj(topology));
-	    } else {
-		size_t typelen;
-		typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-		if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
-			struct hwloc_calc_location_context_s lcontext;
-			lcontext.topology = topology;
-			lcontext.topodepth = topodepth;
-			lcontext.only_hbm = -1;
-			lcontext.logical = 1;
-			lcontext.verbose = 0;
-			err = hwloc_calc_process_location(&lcontext, location, typelen,
-							  hwloc_calc_process_location_annotate_cb, NULL);
+		if (mavname) {
+			mavid = hwloc_utils_parse_memattr_name(topology, mavname);
+			if (mavid == (hwloc_memattr_id_t) -1) {
+				fprintf(stderr, "Failed to find memattr by name %s\n", mavname);
+				goto out_with_topology;
+			}
+			hwloc_memattr_get_flags(topology, mavid, &mavflags);
 		}
-	    }
-	  }
+
+		if (maviobjstr && (mavflags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
+			int ignored_multiple;
+			maviobj = get_unique_obj(topology, topodepth, maviobjstr, &ignored_multiple);
+			if (!maviobj) {
+				fprintf(stderr, "Failed to find memattr initiator object %s\n", maviobjstr);
+				goto out_with_topology;
+			}
+			if (ignored_multiple) {
+				fprintf(stderr, "Only the first object specified is used as a memattr initiator.\n");
+			}
+		}
+
+		for(i=0; i<nr_locations; i++) {
+			char *location = locations[i];
+			if (!strncmp(location, "cpukind#", 8) && (infoname || clearinfos)) {
+				struct hwloc_infos_s *infos;
+				int num;
+				if (location[8] < '0' || location[8] > '9') {
+					fprintf(stderr, "Failed to recognize number after cpukind# in location %s\n", location);
+					goto out_with_topology;
+				}
+				num = atoi(location+8);
+				err = hwloc_cpukinds_get_info(topology, num, NULL, NULL, &infos, 0);
+				if (err < 0) {
+					fprintf(stderr, "Failed to find cpukind#%d\n", num);
+					goto out_with_topology;
+				} else {
+					apply_infos(infos);
+				}
+			} else if (!strcmp(location, "topology") && (infoname || clearinfos)) {
+				apply_infos(hwloc_topology_get_infos(topology));
+			} else if (!strcmp(location, "all")) {
+				apply_recursive(topology, hwloc_get_root_obj(topology));
+			} else if (!strcmp(location, "root")) {
+				apply(topology, hwloc_get_root_obj(topology));
+			} else {
+				size_t typelen;
+				typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+				if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
+					struct hwloc_calc_location_context_s lcontext;
+					lcontext.topology = topology;
+					lcontext.topodepth = topodepth;
+					lcontext.only_hbm = -1;
+					lcontext.logical = 1;
+					lcontext.verbose = 0;
+					err = hwloc_calc_process_location(&lcontext, location, typelen,
+							hwloc_calc_process_location_annotate_cb, NULL);
+				}
+			}
+		}
 	}
 
 	err = hwloc_topology_export_xml(topology, output, 0);
@@ -841,6 +841,6 @@ out_with_topology:
 	hwloc_topology_destroy(topology);
 out:
 	hwloc_bitmap_free(mavicpuset);
-        hwloc_bitmap_free(ckcpuset);
+	hwloc_bitmap_free(ckcpuset);
 	exit(EXIT_FAILURE);
 }

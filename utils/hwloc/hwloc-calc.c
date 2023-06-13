@@ -211,7 +211,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
           && intersectattr.osdev.type != obj->attr->osdev.type)
         continue;
       if (!first)
-	printf("%s", sep);
+        printf("%s", sep);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned)-1)
         printf("-1");
@@ -665,7 +665,7 @@ int main(int argc, char *argv[])
     while (1) {
       tmp = strchr(tmp, '.');
       if (!tmp)
-	break;
+        break;
       tmp++;
       hiernblevels++;
     }
@@ -674,12 +674,12 @@ int main(int argc, char *argv[])
     for(i=0; i<hiernblevels; i++) {
       next = strchr(tmp, '.');
       if (next)
-	*next = '\0';
+        *next = '\0';
       if (hwloc_calc_type_depth(topology, tmp, &hierdepth[i], NULL, "--hierarchical") < 0)
-	goto out;
+        goto out;
       if (hierdepth[i] < 0 && hierdepth[i] != HWLOC_TYPE_DEPTH_NUMANODE) {
-	fprintf(stderr, "unsupported (non-normal) --hierarchical type %s\n", tmp);
-	goto out;
+        fprintf(stderr, "unsupported (non-normal) --hierarchical type %s\n", tmp);
+        goto out;
       }
       tmp = next+1;
     }
@@ -713,38 +713,38 @@ int main(int argc, char *argv[])
       /* keep reading until we get EOL */
       tmpline = line;
       while (!strchr(tmpline, '\n')) {
-	char *tmp;
-	tmp = realloc(line, len*2);
-	if (!tmp) {
-	  /* failed to allocate, ignore that line */
-	  fprintf(stderr, "Failed to allocate line buffer, line ignored.\n");
-	  free(line);
-	  goto out;
-	}
-	line = tmp;
-	tmpline = line + len-1;
-	if (!fgets(tmpline, (int)(len+1), stdin))
-	  break;
-	len *= 2;
+        char *tmp;
+        tmp = realloc(line, len*2);
+        if (!tmp) {
+          /* failed to allocate, ignore that line */
+          fprintf(stderr, "Failed to allocate line buffer, line ignored.\n");
+          free(line);
+          goto out;
+        }
+        line = tmp;
+        tmpline = line + len-1;
+        if (!fgets(tmpline, (int)(len+1), stdin))
+          break;
+        len *= 2;
       }
       /* parse now that we got everything */
       current = line;
       hwloc_bitmap_zero(set);
       while (1) {
-	char *token = strtok(current, " \n");
-	if (!token)
-	  break;
-	current = NULL;
-	lcontext.topology = topology;
-	lcontext.topodepth = depth;
-	lcontext.only_hbm = -1;
-	lcontext.logical = logicali;
-	lcontext.verbose = verbose;
-	scontext.output_set = set;
-	scontext.nodeset_input = nodeseti;
-	scontext.nodeset_output = nodeseto;
-	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
-	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
+        char *token = strtok(current, " \n");
+        if (!token)
+          break;
+        current = NULL;
+        lcontext.topology = topology;
+        lcontext.topodepth = depth;
+        lcontext.only_hbm = -1;
+        lcontext.logical = logicali;
+        lcontext.verbose = verbose;
+        scontext.output_set = set;
+        scontext.nodeset_input = nodeseti;
+        scontext.nodeset_output = nodeseto;
+        if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
+          fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }
       hwloc_calc_output(topology, outsep, set);
     }

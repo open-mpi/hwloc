@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
 	unsigned i, j;
 	int err;
 
-        callname = strrchr(argv[0], '/');
-        if (!callname)
-          callname = argv[0];
-        else
-          callname++;
+	callname = strrchr(argv[0], '/');
+	if (!callname)
+		callname = argv[0];
+	else
+		callname++;
 
 	/* skip argv[0], handle options */
 	argc--;

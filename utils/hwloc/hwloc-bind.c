@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
     ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, location);
     if (ret < 0) {
       if (verbose > 0)
-	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
+        fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
       break;
     }
     if (working_on_cpubind)
@@ -387,76 +387,76 @@ int main(int argc, char *argv[])
     int err;
     if (working_on_cpubind) {
       if (get_last_cpu_location) {
-	if (pid_number > 0)
-	  err = hwloc_get_proc_last_cpu_location(topology, pid, cpubind_set, 0);
+        if (pid_number > 0)
+          err = hwloc_get_proc_last_cpu_location(topology, pid, cpubind_set, 0);
 #ifdef HWLOC_LINUX_SYS
-	else if (tid_number > 0)
-	  err = hwloc_linux_get_tid_last_cpu_location(topology, tid_number, cpubind_set);
+        else if (tid_number > 0)
+          err = hwloc_linux_get_tid_last_cpu_location(topology, tid_number, cpubind_set);
 #endif
-	else
-	  err = hwloc_get_last_cpu_location(topology, cpubind_set, 0);
+        else
+          err = hwloc_get_last_cpu_location(topology, cpubind_set, 0);
       } else {
-	if (pid_number > 0)
-	  err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
+        if (pid_number > 0)
+          err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
 #ifdef HWLOC_LINUX_SYS
-	else if (tid_number > 0)
-	  err = hwloc_linux_get_tid_cpubind(topology, tid_number, cpubind_set);
+        else if (tid_number > 0)
+          err = hwloc_linux_get_tid_cpubind(topology, tid_number, cpubind_set);
 #endif
-	else
-	  err = hwloc_get_cpubind(topology, cpubind_set, 0);
+        else
+          err = hwloc_get_cpubind(topology, cpubind_set, 0);
       }
       if (err) {
-	const char *errmsg = strerror(errno);
-	if (pid_number > 0)
-	  fprintf(stderr, "hwloc_get_proc_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", pid_number, errno, errmsg);
-	else if (tid_number > 0)
-	  fprintf(stderr, "hwloc_get_tid_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", tid_number, errno, errmsg);
-	else
-	  fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
-	return EXIT_FAILURE;
+        const char *errmsg = strerror(errno);
+        if (pid_number > 0)
+          fprintf(stderr, "hwloc_get_proc_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", pid_number, errno, errmsg);
+        else if (tid_number > 0)
+          fprintf(stderr, "hwloc_get_tid_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", tid_number, errno, errmsg);
+        else
+          fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
+        return EXIT_FAILURE;
       }
       if (use_nodeset) {
-	hwloc_bitmap_t nset = hwloc_bitmap_alloc();
-	hwloc_cpuset_to_nodeset(topology, cpubind_set, nset);
-	if (taskset)
-	  hwloc_bitmap_taskset_asprintf(&s, nset);
-	else
-	  hwloc_bitmap_asprintf(&s, nset);
-	hwloc_bitmap_free(nset);
+        hwloc_bitmap_t nset = hwloc_bitmap_alloc();
+        hwloc_cpuset_to_nodeset(topology, cpubind_set, nset);
+        if (taskset)
+          hwloc_bitmap_taskset_asprintf(&s, nset);
+        else
+          hwloc_bitmap_asprintf(&s, nset);
+        hwloc_bitmap_free(nset);
       } else {
-	if (taskset)
-	  hwloc_bitmap_taskset_asprintf(&s, cpubind_set);
-	else
-	  hwloc_bitmap_asprintf(&s, cpubind_set);
+        if (taskset)
+          hwloc_bitmap_taskset_asprintf(&s, cpubind_set);
+        else
+          hwloc_bitmap_asprintf(&s, cpubind_set);
       }
 
-      } else {
+    } else {
       hwloc_membind_policy_t policy;
       if (pid_number > 0) {
-	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, use_nodeset ? HWLOC_MEMBIND_BYNODESET : 0);
+        err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, use_nodeset ? HWLOC_MEMBIND_BYNODESET : 0);
       } else if (tid_number > 0) {
-	err = -1; errno = ENOSYS;
+        err = -1; errno = ENOSYS;
       } else {
-	err = hwloc_get_membind(topology, membind_set, &policy, use_nodeset ? HWLOC_MEMBIND_BYNODESET : 0);
+        err = hwloc_get_membind(topology, membind_set, &policy, use_nodeset ? HWLOC_MEMBIND_BYNODESET : 0);
       }
       if (err) {
-	const char *errmsg = strerror(errno);
+        const char *errmsg = strerror(errno);
         if (pid_number > 0)
           fprintf(stderr, "hwloc_get_proc_membind %d failed (errno %d %s)\n", pid_number, errno, errmsg);
         else
-	  fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
-	return EXIT_FAILURE;
+          fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
+        return EXIT_FAILURE;
       }
       if (taskset)
-	hwloc_bitmap_taskset_asprintf(&s, membind_set);
+        hwloc_bitmap_taskset_asprintf(&s, membind_set);
       else
-	hwloc_bitmap_asprintf(&s, membind_set);
+        hwloc_bitmap_asprintf(&s, membind_set);
       switch (policy) {
-      case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
-      case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
-      case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
-      case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
-      default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
+        case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
+        case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
+        case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
+        case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
+        default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
       }
     }
     if (policystr)
@@ -469,9 +469,9 @@ int main(int argc, char *argv[])
   if (got_membind) {
     if (hwloc_bitmap_iszero(membind_set)) {
       if (verbose >= 0)
-	fprintf(stderr, "cannot membind to empty set\n");
+        fprintf(stderr, "cannot membind to empty set\n");
       if (!force)
-	goto failed_binding;
+        goto failed_binding;
     }
 
     if (best_memattr_str) {
@@ -545,9 +545,9 @@ int main(int argc, char *argv[])
   if (got_cpubind) {
     if (hwloc_bitmap_iszero(cpubind_set)) {
       if (verbose >= 0)
-	fprintf(stderr, "cannot cpubind to empty set\n");
+        fprintf(stderr, "cannot cpubind to empty set\n");
       if (!force)
-	goto failed_binding;
+        goto failed_binding;
     }
     if (verbose > 0) {
       char *s;
@@ -557,14 +557,14 @@ int main(int argc, char *argv[])
     }
     if (got_membind && !hwloc_bitmap_isequal(membind_set, cpubind_set)) {
       if (verbose)
-	fprintf(stderr, "Conflicting CPU and memory binding requested, adding HWLOC_CPUBIND_NOMEMBIND flag.\n");
+        fprintf(stderr, "Conflicting CPU and memory binding requested, adding HWLOC_CPUBIND_NOMEMBIND flag.\n");
       cpubind_flags |= HWLOC_CPUBIND_NOMEMBIND;
     }
     if (no_smt != -1) {
       if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
+        fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
       } else {
-	hwloc_bitmap_singlify_per_core(topology, cpubind_set, no_smt);
+        hwloc_bitmap_singlify_per_core(topology, cpubind_set, no_smt);
       }
     }
     if (single)

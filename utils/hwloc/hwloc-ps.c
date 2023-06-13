@@ -134,7 +134,7 @@ static void print_process(hwloc_topology_t topology,
   if (proc->nthreads)
     for(i=0; i<proc->nthreads; i++)
       if (proc->threads[i].cpuset)
-	print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
+        print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
 }
 
 static void print_process_lstopo_misc(hwloc_topology_t topology __hwloc_attribute_unused,
@@ -160,11 +160,11 @@ static void print_process_lstopo_misc(hwloc_topology_t topology __hwloc_attribut
   if (proc->nthreads)
     for(i=0; i<proc->nthreads; i++)
       if (proc->threads[i].cpuset) {
-	char task_name[150];
-	if (*proc->threads[i].name)
-	  snprintf(task_name, sizeof(task_name), "%s %li %s", name, proc->threads[i].tid, proc->threads[i].name);
-	else
-	  snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
+        char task_name[150];
+        if (*proc->threads[i].name)
+          snprintf(task_name, sizeof(task_name), "%s %li %s", name, proc->threads[i].tid, proc->threads[i].name);
+        else
+          snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
         hwloc_bitmap_asprintf(&s, proc->threads[i].cpuset);
         fprintf(lstopo_misc_output,
                 "name=%s\n"
@@ -193,14 +193,14 @@ static void print_process_json(hwloc_topology_t topology,
     obj = obj->parent;
   hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
   fprintf(json_output,
-	  "{\n"
-	  "  \"PID\": %ld,\n"
-	  "  \"name\": \"%s\",\n"
-	  "  \"object\": \"%s:%u\"%s\n",
-	  proc->pid,
-	  proc->name,
-	  type, obj->logical_index,
-	  proc->nthreads ? "," : "");
+      "{\n"
+      "  \"PID\": %ld,\n"
+      "  \"name\": \"%s\",\n"
+      "  \"object\": \"%s:%u\"%s\n",
+      proc->pid,
+      proc->name,
+      type, obj->logical_index,
+      proc->nthreads ? "," : "");
 
   /* threads */
   if (proc->nthreads) {
@@ -209,21 +209,21 @@ static void print_process_json(hwloc_topology_t topology,
     for(i=0; i<proc->nthreads; i++) {
       struct hwloc_ps_thread *thread = &proc->threads[i];
       if (thread->cpuset) {
-	obj = hwloc_get_obj_covering_cpuset(topology, thread->cpuset);
-	while (obj->parent && hwloc_bitmap_isequal(obj->cpuset, obj->parent->cpuset))
-	  obj = obj->parent;
-	hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+        obj = hwloc_get_obj_covering_cpuset(topology, thread->cpuset);
+        while (obj->parent && hwloc_bitmap_isequal(obj->cpuset, obj->parent->cpuset))
+          obj = obj->parent;
+        hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
 
-	fprintf(json_output,
-		"    {\n"
-		"      \"PID\": %ld,\n"
-		"      \"name\": \"%s\",\n"
-		"      \"object\": \"%s:%u\"\n"
-		"    }%s\n",
-		thread->tid,
-		thread->name,
-		type, obj->logical_index,
-		i < proc->nthreads-1 ? "," : "");
+        fprintf(json_output,
+            "    {\n"
+            "      \"PID\": %ld,\n"
+            "      \"name\": \"%s\",\n"
+            "      \"object\": \"%s:%u\"\n"
+            "    }%s\n",
+            thread->tid,
+            thread->name,
+            type, obj->logical_index,
+            i < proc->nthreads-1 ? "," : "");
       }
     }
     fprintf(json_output, "  ]\n");
@@ -283,11 +283,11 @@ static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
         hwloc_ps_pidcmd(&proc, pidcmd);
 
       if (json_output)
-	print_process_json(topology, &proc);
+        print_process_json(topology, &proc);
       else if (lstopo_misc_output)
         print_process_lstopo_misc(topology, &proc);
       else
-	print_process(topology, &proc);
+        print_process(topology, &proc);
     }
     hwloc_ps_free_process(&proc);
     return ret;
@@ -357,48 +357,48 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
       /* read the client request */
       ret = read(client_socket, req, sizeof(req)-1);
       if (ret <= 0)
-	break;
+        break;
       req[ret] = '\0';
       end = strchr(req, '\n');
       if (end)
-	*end = '\0';
+        *end = '\0';
 
       if (verbose > 0)
-	printf(" received request `%s'\n", req);
+        printf(" received request `%s'\n", req);
 
       only_name = NULL;
       only_pid = NO_ONLY_PID;
       children_of_pid = NO_ONLY_PID;
       current = req;
       while (*current) {
-	if (!strncmp(current, "lastcpulocation ", 16)) {
-	  psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
-	  current += 16;
-	  continue;
-	} else if (!strncmp(current, "threads ", 8)) {
-	  psflags |= HWLOC_PS_FLAG_THREADS;
-	  current += 8;
-	  continue;
-	} else if (!strcmp(current, "all")) {
-	  show_all = 1;
-	  break;
-	} else if (!strcmp(current, "bound")) {
-	  show_all = 0;
-	  break;
-	} else if (!strncmp(current, "pid=", 4)) {
-	  only_pid = atoi(current+4);
-	  psflags |= HWLOC_PS_FLAG_THREADS;
-	  show_all = 1;
-	  break;
-	} else if (!strncmp(current, "childrenofpid=", 14)) {
-	  children_of_pid = atoi(current+14);
-	  show_all = 1;
-	  break;
-	} else if (!strncmp(current, "name=", 5)) {
-	  only_name = current+5;
-	  show_all = 1;
-	  break;
-	}
+        if (!strncmp(current, "lastcpulocation ", 16)) {
+          psflags |= HWLOC_PS_FLAG_LASTCPULOCATION;
+          current += 16;
+          continue;
+        } else if (!strncmp(current, "threads ", 8)) {
+          psflags |= HWLOC_PS_FLAG_THREADS;
+          current += 8;
+          continue;
+        } else if (!strcmp(current, "all")) {
+          show_all = 1;
+          break;
+        } else if (!strcmp(current, "bound")) {
+          show_all = 0;
+          break;
+        } else if (!strncmp(current, "pid=", 4)) {
+          only_pid = atoi(current+4);
+          psflags |= HWLOC_PS_FLAG_THREADS;
+          show_all = 1;
+          break;
+        } else if (!strncmp(current, "childrenofpid=", 14)) {
+          children_of_pid = atoi(current+14);
+          show_all = 1;
+          break;
+        } else if (!strncmp(current, "name=", 5)) {
+          only_name = current+5;
+          show_all = 1;
+          break;
+        }
       }
 
       fprintf(json_output, "[ ");
@@ -461,8 +461,8 @@ int main(int argc, char *argv[])
       opt = 1;
     } else if (!strcmp(argv[0], "--children-of-pid")) {
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       children_of_pid = strtol(argv[1], NULL, 10);
       opt = 1;
@@ -518,8 +518,8 @@ int main(int argc, char *argv[])
       flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
     } else if (!strcmp (argv[0], "--lstopo-misc")) {
       if (argc < 2) {
-	usage(callname, stderr);
-	exit(EXIT_FAILURE);
+        usage(callname, stderr);
+        exit(EXIT_FAILURE);
       }
       if (!strcmp(argv[1], "-"))
         lstopo_misc_output = stdout;
