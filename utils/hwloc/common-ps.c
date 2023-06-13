@@ -57,7 +57,7 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
     free(path);
     goto out;
   }
-  proc->name[n] = 0;
+  proc->name[n] = '\0';
 
   if (flags & HWLOC_PS_FLAG_SHORTNAME) {
     /* try to get a small name from comm */
@@ -68,9 +68,9 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
       n = read(fd, comm, sizeof(comm) - 1);
       close(fd);
       if (n > 0) {
-	comm[n] = 0;
+	comm[n] = '\0';
 	if (n > 1 && comm[n-1] == '\n')
-	  comm[n-1] = 0;
+	  comm[n-1] = '\0';
       }
 
     } else {
@@ -85,12 +85,12 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
 	n = read(fd, stats, sizeof(stats) - 1);
 	close(fd);
 	if (n > 0) {
-	  stats[n] = 0;
+	  stats[n] = '\0';
 	  parenl = strchr(stats, '(');
 	  parenr = strchr(stats, ')');
 	  if (!parenr)
 	    parenr = &stats[sizeof(stats)-1];
-	  *parenr = 0;
+	  *parenr = '\0';
 	  if (parenl)
 	    snprintf(comm, sizeof(comm), "%s", parenl+1);
 	}

@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
       if (equal) {
         cpukind_infoname = argv[1];
         cpukind_infovalue = equal+1;
-        *equal = 0;
+        *equal = '\0';
       } else if (argv[1][0] >= '0' && argv[1][0] <= '9') {
         cpukind_index = atoi(argv[1]);
       } else {
