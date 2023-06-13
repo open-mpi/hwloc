@@ -716,8 +716,8 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
           zeDeviceGetSubDevices(dvh[j], &nr_subdevices, subh);
           for(k=0; k<nr_subdevices; k++) {
             subosdevs[k] = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
-            snprintf(buffer, sizeof(buffer), "ze%u.%u", zeidx, k);
-            subosdevs[k]->name = strdup(buffer);
+            snprintf(tmp, sizeof(tmp), "ze%u.%u", zeidx, k);
+            subosdevs[k]->name = strdup(tmp);
             subosdevs[k]->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
             subosdevs[k]->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
             subosdevs[k]->subtype = strdup("LevelZero");
