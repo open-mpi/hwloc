@@ -607,15 +607,15 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
   char *env;
 
-  hwloc__levelzero_osdev_array_init(&oarray);
-
-  hwloc__levelzero_ports_init(&hports);
-
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
   hwloc_topology_get_type_filter(topology, HWLOC_OBJ_OS_DEVICE, &filter);
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
+
+  hwloc__levelzero_osdev_array_init(&oarray);
+
+  hwloc__levelzero_ports_init(&hports);
 
   /* Tell L0 to create sysman devices.
    * If somebody already initialized L0 without Sysman,
