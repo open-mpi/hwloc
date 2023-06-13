@@ -184,6 +184,10 @@ int main(int argc, char *argv[])
   hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_set_flags(topology, flags);
   ret = hwloc_topology_load(topology);
+  if (ret < 0) {
+    perror("Couldn't load the topology");
+    return EXIT_FAILURE;
+  }
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     hwloc_bitmap_sscanf(restrictset, restrictstring);
@@ -194,8 +198,6 @@ int main(int argc, char *argv[])
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
   }
-  if (ret < 0)
-    return EXIT_FAILURE;
   depth = hwloc_topology_get_depth(topology);
 
   while (argc >= 1) {
