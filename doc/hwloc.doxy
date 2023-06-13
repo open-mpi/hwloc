@@ -3551,7 +3551,7 @@ One of the original reasons why hwloc was created is that <b>physical/OS indexes
 processors numbers are usually
 non-contiguous (processors 0 and 1 are not physically close), they vary from
 one machine to another, and may even change after a BIOS or system update.
-This numbers make task placement hardly portable.
+These numbers make task placement hardly portable.
 Moreover some objects have no physical/OS numbers (caches), and some objects
 have non-unique numbers (core numbers are only unique within a socket).
 Physical/OS indexes are only guaranteed to exist and be unique for PU
