@@ -750,15 +750,15 @@ struct lstopo_type_filter { enum hwloc_type_filter_e filter; int changed; };
 /* must operate on same types as hwloc_topology_set_cache_types_filter() */
 #define set_cache_types_filter(_filter) do { \
   unsigned _i; \
-  for(_i=HWLOC_OBJ_L1CACHE; _i<HWLOC_OBJ_L3ICACHE; _i++) \
-    set_type_filter(_i, _filter);                        \
+  for(_i=HWLOC_OBJ_L1CACHE; _i<=HWLOC_OBJ_L3ICACHE; _i++) \
+    set_type_filter(_i, _filter);                         \
 } while (0)
 
 /* must operate on same types as hwloc_topology_set_icache_types_filter() */
 #define set_icache_types_filter(_filter) do { \
   unsigned _i; \
-  for(_i=HWLOC_OBJ_L1ICACHE; _i<HWLOC_OBJ_L3ICACHE; _i++) \
-    set_type_filter(_i, _filter);                         \
+  for(_i=HWLOC_OBJ_L1ICACHE; _i<=HWLOC_OBJ_L3ICACHE; _i++) \
+    set_type_filter(_i, _filter);                          \
 } while (0)
 
 #define apply_type_filters(_topo) do { \
