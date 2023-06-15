@@ -4043,6 +4043,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 {
   struct hwloc_disc_status dstatus;
   const char *env;
+  unsigned i;
   int err;
 
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
@@ -4055,6 +4056,14 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* initialize envvar-related things */
   hwloc_internal_distances_prepare(topology);
   hwloc_internal_memattrs_prepare(topology);
+
+  /* check if any cpu cache filter is not NONE */
+  topology->want_some_cpu_caches = 0;
+  for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
+    if (topology->type_filter[i] != HWLOC_TYPE_FILTER_KEEP_NONE) {
+      topology->want_some_cpu_caches = 1;
+      break;
+    }
 
   if (getenv("HWLOC_XML_USERDATA_NOT_DECODED"))
     topology->userdata_not_decoded = 1;

@@ -253,6 +253,12 @@ struct hwloc_topology {
    * temporary variables during discovery
    */
 
+  /* set to 1 at the beginning of load() if the filter of any cpu cache type (L1 to L3i) is not NONE,
+   * may be checked by backends before querying caches
+   * (when they don't know the level of caches they are querying).
+   */
+  int want_some_cpu_caches;
+
   /* machine-wide memory.
    * temporarily stored there by OSes that only provide this without NUMA information,
    * and actually used later by the core.

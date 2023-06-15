@@ -804,6 +804,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     read_extended_topo(data, infos, 0x0b, cpuid_type, src_cpuiddump);
   }
 
+ if (backend->topology->want_some_cpu_caches) {
   /**************************************
    * Get caches from CPU-specific leaves
    */
@@ -901,6 +902,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
       }
     }
   }
+ }
 
   if (hwloc_bitmap_isset(data->apicid_set, infos->apicid))
     data->apicid_unique = 0;

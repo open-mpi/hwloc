@@ -1053,12 +1053,16 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
         unsigned efficiency_class = 0;
         GROUP_AFFINITY *GroupMask;
 
-        /* Ignore unknown caches */
-	if (procInfo->Relationship == RelationCache
-		&& procInfo->Cache.Type != CacheUnified
-		&& procInfo->Cache.Type != CacheData
-		&& procInfo->Cache.Type != CacheInstruction)
-	  continue;
+	if (procInfo->Relationship == RelationCache) {
+          if (!topology->want_some_cpu_caches)
+            /* TODO: check if RelationAll&~RelationCache works? */
+            continue;
+          if (procInfo->Cache.Type != CacheUnified
+              && procInfo->Cache.Type != CacheData
+              && procInfo->Cache.Type != CacheInstruction)
+            /* Ignore unknown caches */
+            continue;
+        }
 
 	id = HWLOC_UNKNOWN_INDEX;
 	switch (procInfo->Relationship) {
