@@ -3949,7 +3949,7 @@ int
 hwloc_topology_set_cache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter)
 {
   unsigned i;
-  for(i=HWLOC_OBJ_L1CACHE; i<HWLOC_OBJ_L3ICACHE; i++)
+  for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
     hwloc_topology_set_type_filter(topology, (hwloc_obj_type_t) i, filter);
   return 0;
 }
@@ -3958,7 +3958,7 @@ int
 hwloc_topology_set_icache_types_filter(hwloc_topology_t topology, enum hwloc_type_filter_e filter)
 {
   unsigned i;
-  for(i=HWLOC_OBJ_L1ICACHE; i<HWLOC_OBJ_L3ICACHE; i++)
+  for(i=HWLOC_OBJ_L1ICACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
     hwloc_topology_set_type_filter(topology, (hwloc_obj_type_t) i, filter);
   return 0;
 }
