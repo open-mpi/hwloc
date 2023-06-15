@@ -4975,7 +4975,8 @@ look_sysfscpu(struct hwloc_topology *topology,
     }
 
     /* look at the caches */
-    for(j=0; j<10; j++) {
+    if (topology->want_some_cpu_caches) {
+     for(j=0; j<10; j++) {
       char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
       hwloc_bitmap_t cacheset;
 
@@ -5090,6 +5091,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       }
       hwloc_bitmap_free(cacheset);
      }
+    }
 
   } hwloc_bitmap_foreach_end();
 
