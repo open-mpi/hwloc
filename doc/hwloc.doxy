@@ -3076,7 +3076,7 @@ may be set to get verbose messages about component registration
 
 If no topology configuration functions such as
 <tt>hwloc_topology_set_synthetic()</tt> have been called,
-plugins may be selected with environment variables such as
+components may be selected with environment variables such as
 <tt>HWLOC_XMLFILE</tt>, <tt>HWLOC_SYNTHETIC</tt>,
 <tt>HWLOC_FSROOT</tt>, or <tt>HWLOC_CPUID_PATH</tt> (see \ref envvar).
 
@@ -3084,7 +3084,7 @@ Finally, the environment variable <tt>HWLOC_COMPONENTS</tt>
 resets the list of selected components.
 If the variable is set and empty (or set to a single comma separating nothing,
 since some operating systems do not accept empty variables),
-the normal plugin priority order is used.
+the normal component priority order is used.
 
 If the variable is set to <tt>x86</tt> in this variable will cause
 the <tt>x86</tt> component to take precedence over any other component,
