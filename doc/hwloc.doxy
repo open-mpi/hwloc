@@ -2999,9 +2999,10 @@ For reference, ::hwloc_topology_t modification operations include
 <div class="section">
 \endhtmlonly
 
-hwloc is organized in components that are responsible for discovering
+hwloc is organized in <b>components</b> that are responsible for discovering
 objects.
-Depending on the topology configuration, some components will be used,
+Depending on the topology configuration, some components will be used
+(once enabled, they create a <b>backend</b>),
 some will be ignored.
 The usual default is to enable the native operating system component,
 (e.g. <tt>linux</tt> or <tt>solaris</tt>) and the
@@ -3113,7 +3114,7 @@ Only the components listed before this keyword will be enabled.
 \endhtmlonly
 \section plugins_load Loading components from plugins
 
-Components may optionally be built as plugins so that the hwloc core
+Components may optionally be built as <b>plugins</b> so that the hwloc core
 library does not directly depend on their dependencies (for instance
 the <tt>libpciaccess</tt> library).
 Plugin support may be enabled with the <tt>\--enable-plugins</tt>
@@ -3132,7 +3133,7 @@ specified in the <tt>HWLOC_PLUGINS_PATH</tt> environment variable.
 
 Note that loading a plugin just means that the corresponding component
 is registered to the hwloc core.
-Components are then only enabled if the topology configuration
+Components are then only enabled (as a <b>backend</b>) if the topology configuration
 requests it, as explained in the previous sections.
 
 Also note that plugins should carefully be enabled and used when
