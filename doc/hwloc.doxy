@@ -3002,11 +3002,14 @@ objects.
 Depending on the topology configuration, some components will be used
 (once enabled, they create a <b>backend</b>),
 some will be ignored.
+
 The usual default is to enable the native operating system component,
 (e.g. <tt>linux</tt> or <tt>solaris</tt>) and the
-<tt>pci</tt> miscellaneous component.
+<tt>pci</tt> one.
 If available, an architecture-specific component (such as <tt>x86</tt>)
 may also improve the topology detection.
+Finally, some hardware-specific components (such as <tt>cuda</tt> or <tt>rsmi</tt>)
+may add information about GPUs, accelerators, etc.
 
 If a XML topology is loaded, the <tt>xml</tt> discovery  component
 will be used instead of all other components.
@@ -3056,13 +3059,13 @@ priorities) that does not conflict.
 Certain components that manage a virtual topology, for instance XML
 topology import or synthetic topology description,
 conflict with all other components.
-Therefore, one of them may only be loaded
+Therefore, they may only be loaded
 (e.g. with <tt>hwloc_topology_set_xml()</tt>)
 if no other component is enabled.
 
 The environment variable <tt>HWLOC_COMPONENTS_VERBOSE</tt>
-may be set to get verbose messages about component registration
-(including their priority) and enabling.
+may be set to get verbose messages about available components
+(including their priority) and enabling as backends.
 
 
 \htmlonly
@@ -3096,12 +3099,13 @@ name with <tt>-</tt> in the list. For instance <tt>x86,-pci</tt> will load the
 <tt>x86</tt> component, then let hwloc load all the usual components except
 <tt>pci</tt>.
 A single component phase may also be blacklisted, for instance with <tt>-linux:io</tt>.
-hwloc_topology_set_components() may also be used inside the program
-to prevent the loading of a specific component (or phases) for the target topology.
 
 It is possible to prevent all remaining components from being loaded
 by placing <tt>stop</tt> in the environment variable.
 Only the components listed before this keyword will be enabled.
+
+hwloc_topology_set_components() may also be used inside the program
+to prevent the loading of a specific component (or phases) for the target topology.
 
 
 \htmlonly
@@ -3180,7 +3184,7 @@ environment variable (see \ref envvar).
 </dd>
 <dt>pci</dt>
 <dd>
- PCI object discovery uses the external pciaccess library (aka libpciaccess);
+ PCI object discovery uses the external libpciaccess library;
  see \ref iodevices. It may also annotate existing PCI devices with vendor
  and device names.
  <b>It may be built as a plugin</b>.
