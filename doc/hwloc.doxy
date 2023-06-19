@@ -3012,9 +3012,6 @@ may also improve the topology detection.
 
 If a XML topology is loaded, the <tt>xml</tt> discovery  component
 will be used instead of all other components.
-It internally uses a specific class of components for the actual XML
-import/export routines (<tt>xml_libxml</tt> and <tt>xml_nolibxml</tt>)
-but these will not be discussed here (see \ref xml_backends).
 
 
 \htmlonly
@@ -3237,7 +3234,8 @@ environment variable (see \ref envvar).
 <dt>xml</dt>
 <dd>
  XML topology import (see \ref xml) is always built statically.
- It internally uses one of the XML backends (see \ref xml_backends).
+ It internally uses a specific class of components for the actual XML
+ import/export routines (see \ref xml_backends for details).
  <ul>
  <li><b>xml_nolibxml</b> is a basic and hwloc-specific XML import/export.
   It is always statically built.
