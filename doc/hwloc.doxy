@@ -3457,6 +3457,15 @@ hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_NO_DISTANCES
 hwloc_topology_load(topology);
 \endverbatim
 
+<br/>
+Finally it is possible to prevent some hwloc components from being
+loaded and queried.
+If you are sure that the Linux (or x86) component is enough to discover
+everything you need, you may ask hwloc to disable all other components
+by setting something like <tt>HWLOC_COMPONENTS=linux,stop</tt>
+in the environment.
+See \ref plugins for details.
+
 
 \subsection faq_indexes Should I use logical or physical/OS indexes? and how?
 
