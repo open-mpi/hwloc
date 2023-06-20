@@ -163,7 +163,8 @@ nodist_libhwloc_port_nvml_la_SOURCES = topology-nvml.c
 libhwloc_port_nvml_la_SOURCES = \
         include/nvml/nvml.h
 libhwloc_port_nvml_la_CPPFLAGS = $(common_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/nvml
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/nvml \
+        -DHAVE_DECL_NVMLDEVICEGETMAXPCIELINKGENERATION=1
 
 nodist_libhwloc_port_rsmi_la_SOURCES = topology-rsmi.c
 libhwloc_port_rsmi_la_SOURCES = \
@@ -177,6 +178,7 @@ libhwloc_port_levelzero_la_SOURCES = \
         include/levelzero/level_zero/zes_api.h
 libhwloc_port_levelzero_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/levelzero \
+        -DHWLOC_HAVE_ZEDEVICEPCIGETPROPERTIESEXT=1 \
         -DHWLOC_HAVE_ZESINIT=1
 
 nodist_libhwloc_port_gl_la_SOURCES = topology-gl.c
