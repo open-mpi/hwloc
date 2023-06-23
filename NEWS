@@ -17,6 +17,26 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.9.2
+-------------
+* Don't forget L3i when defining filters for multiple levels of caches
+  with hwloc_topology_set_cache/icache_types_filter().
+* Fix object total_memory after hwloc_topology_insert_group_object().
+* Fix the (non-yet) exporting in synthetic description for complex memory
+  hierarchies with memory-side caches, etc.
+* Fix some default size attributes when building synthetic topologies.
+* Fix size units in hwloc-annotate.
+* Improve bitmap reallocation error management in many functions.
+* Documentation improvements:
+  + Better document return values of functions.
+  + Add "Error reporting" section (in hwloc.h and in the doxygen doc).
+  + Add FAQ entry "What may I disable to make hwloc faster?"
+  + Improve FAQ Entries "Why is lstopo slow?"
+    and "I only need ..., why should I use hwloc?"
+  + Clarify how to deal with cpukinds in hwloc-calc and hwloc-bind
+    manpages.
+
+
 Version 2.9.1
 -------------
 * Don't forget to apply object type filters to "perflevel" caches detected
