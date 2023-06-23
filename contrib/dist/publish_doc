@@ -12,7 +12,7 @@ if test "x$dst" = "x" -o "x$dst" = "x-h" -o "x$dst" = "x--help"; then
   exit_usage
 fi
 
-EXAMPLE=v2.0.4
+EXAMPLE=v2.8.0
 if test -d "$dst/projects/hwloc/doc/$EXAMPLE/"; then
   dst=`realpath "$dst/projects/hwloc/doc/"`
 else if test -d "$dst/hwloc/doc/$EXAMPLE/"; then
