@@ -1736,7 +1736,11 @@ output_draw(struct lstopo_output *loutput)
     unsigned maxtextwidth = 0, textwidth;
     unsigned ndl = 0;
     char hostname[122] = "";
-    unsigned long hostname_size = sizeof(hostname);
+#if defined(HWLOC_WIN_SYS) && !defined(__CYGWIN__)
+    DWORD hostname_size = sizeof(hostname);
+#else
+    size_t hostname_size = sizeof(hostname);
+#endif
     unsigned infocount = 0;
 
     /* prepare legend lines and compute the width */

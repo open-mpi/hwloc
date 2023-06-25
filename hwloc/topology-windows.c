@@ -987,7 +987,11 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   OSVERSIONINFOEX osvi;
   char versionstr[20];
   char hostname[122] = "";
-  unsigned hostname_size = sizeof(hostname);
+#if !defined(__CYGWIN__)
+  DWORD hostname_size = sizeof(hostname);
+#else
+  size_t hostname_size = sizeof(hostname);
+#endif
   int has_efficiencyclass = 0;
   struct hwloc_win_efficiency_classes eclasses;
   char *env = getenv("HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS");
