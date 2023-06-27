@@ -108,8 +108,6 @@ static void hwloc__darwin_cpukinds_add_cpu(struct hwloc_darwin_cpukinds *kinds,
 #define kIOMainPortDefault kIOMasterPortDefault
 #endif
 
-#define DT_PLANE "IODeviceTree"
-
 static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds,
                                              int *matched_perflevels)
 {
@@ -118,16 +116,19 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
   io_registry_entry_t cpus_child;
   kern_return_t kret;
   unsigned i;
+#define DT_PLANE "IODeviceTree"
+  io_string_t cpu_plane_string = DT_PLANE ":/cpus";
+  io_name_t dt_plane_name = DT_PLANE;
 
-  hwloc_debug("\nLooking at cpukinds under " DT_PLANE ":/cpus ...\n");
+  hwloc_debug("\nLooking at cpukinds under %s\n", (const char *) cpu_plane_string);
 
-  cpus_root = IORegistryEntryFromPath(kIOMainPortDefault, DT_PLANE ":/cpus");
+  cpus_root = IORegistryEntryFromPath(kIOMainPortDefault, cpu_plane_string);
   if (!cpus_root) {
-    fprintf(stderr, "hwloc/darwin/cpukinds: failed to find " DT_PLANE ":/cpus\n");
+    fprintf(stderr, "hwloc/darwin/cpukinds: failed to find %s\n", (const char *) cpu_plane_string);
     return -1;
   }
 
-  kret = IORegistryEntryGetChildIterator(cpus_root, DT_PLANE, &cpus_iter);
+  kret = IORegistryEntryGetChildIterator(cpus_root, dt_plane_name, &cpus_iter);
   if (kret != KERN_SUCCESS) {
     if (HWLOC_SHOW_ALL_ERRORS())
       fprintf(stderr, "hwloc/darwin/cpukinds: failed to create iterator\n");
@@ -145,7 +146,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
     {
       /* get the name */
       io_name_t name;
-      kret = IORegistryEntryGetNameInPlane(cpus_child, DT_PLANE, name);
+      kret = IORegistryEntryGetNameInPlane(cpus_child, dt_plane_name, name);
       if (kret != KERN_SUCCESS) {
         hwloc_debug("failed to find cpu name\n");
       } else {
@@ -155,7 +156,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
 #endif
 
     /* get logical-cpu-id */
-    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("logical-cpu-id"), kCFAllocatorDefault, kNilOptions);
+    ref = IORegistryEntrySearchCFProperty(cpus_child, dt_plane_name, CFSTR("logical-cpu-id"), kCFAllocatorDefault, kNilOptions);
     if (!ref) {
       /* this may happen on old/x86 systems that aren't hybrid, don't warn */
       hwloc_debug("failed to find logical-cpu-id\n");
@@ -183,7 +184,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
 
 #ifdef HWLOC_DEBUG
     /* get logical-cluster-id */
-    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("logical-cluster-id"), kCFAllocatorDefault, kNilOptions);
+    ref = IORegistryEntrySearchCFProperty(cpus_child, dt_plane_name, CFSTR("logical-cluster-id"), kCFAllocatorDefault, kNilOptions);
     if (!ref) {
       hwloc_debug("failed to find logical-cluster-id\n");
       continue;
@@ -207,7 +208,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
 #endif
 
     /* get cluster-type */
-    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("cluster-type"), kCFAllocatorDefault, kNilOptions);
+    ref = IORegistryEntrySearchCFProperty(cpus_child, dt_plane_name, CFSTR("cluster-type"), kCFAllocatorDefault, kNilOptions);
     if (!ref) {
       if (HWLOC_SHOW_ALL_ERRORS())
         fprintf(stderr, "hwloc/darwin/cpukinds: failed to find cluster-type\n");
@@ -244,7 +245,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
     CFRelease(ref);
 
     /* get compatible */
-    ref = IORegistryEntrySearchCFProperty(cpus_child, DT_PLANE, CFSTR("compatible"), kCFAllocatorDefault, kNilOptions);
+    ref = IORegistryEntrySearchCFProperty(cpus_child, dt_plane_name, CFSTR("compatible"), kCFAllocatorDefault, kNilOptions);
     if (!ref) {
       if (HWLOC_SHOW_ALL_ERRORS())
         fprintf(stderr, "hwloc/darwin/cpukinds: failed to find compatible\n");
