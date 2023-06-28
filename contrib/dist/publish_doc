@@ -54,13 +54,6 @@ else if ! test -d doc/www.open-mpi.org/html/; then
   exit 1
 fi fi fi
 
-jquerydir="$dst/../../../includes/"
-jquery=$(cd "$jquerydir" && ls --sort=time jquery-*.js | head -1)
-if test x$jquery = x; then
-  echo "ERROR: jquery*.js not found in $jquerydir"
-  exit 1
-fi
-
 echo "Installing hwloc-v${VERSION}-a4.pdf ..."
 cp -f doc/doxygen-doc/hwloc-a4.pdf "$dst/hwloc-v${VERSION}-a4.pdf"
 
@@ -71,9 +64,9 @@ echo "Installing v${VERSION}/ HTML directory ..."
 rsync -avz doc/www.open-mpi.org*inc doc/www.open-mpi.org/html/ "$dst/v${VERSION}/"
 
 echo
-echo "Replacing jquery.js with the common $jquery ..."
+echo "Replacing jquery.js with the common one ..."
 rm -f "$dst/v${VERSION}/jquery.js"
-ln -sf ../../../../includes/$jquery "$dst/v${VERSION}/jquery.js"
+ln -sf ../../../../includes/jquery.js "$dst/v${VERSION}/jquery.js"
 
 echo
 cd "$dst/v${VERSION}/"
