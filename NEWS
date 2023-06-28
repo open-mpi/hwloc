@@ -31,8 +31,8 @@ Version 2.9.2
   + Better document return values of functions.
   + Add "Error reporting" section (in hwloc.h and in the doxygen doc).
   + Add FAQ entry "What may I disable to make hwloc faster?"
-  + Improve FAQ Entries "Why is lstopo slow?"
-    and "I only need ..., why should I use hwloc?"
+  + Improve FAQ entries "Why is lstopo slow?" and
+    "I only need ..., why should I use hwloc?"
   + Clarify how to deal with cpukinds in hwloc-calc and hwloc-bind
     manpages.
 
