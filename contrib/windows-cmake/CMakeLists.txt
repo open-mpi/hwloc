@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(hwloc
     LANGUAGES C
-    VERSION 2.9.2)
+    VERSION 2.9.3)
 
 enable_testing()
 
