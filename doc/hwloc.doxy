@@ -2244,8 +2244,12 @@ These info attributes are attached to objects specified in parentheses.
 <dl>
 <dt>CXLDevice (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
-There may be multiple instances of this attributes if multiple device memories
-are interleaved.
+If multiple devices are interleaved, their bus IDs are separated by commas,
+and the number of devices in reported in CXLDeviceInterleaveWays.
+</dd>
+<dt>CXLDeviceInterleaveWays (NUMA Nodes or DAX Memory OS devices)</dt>
+<dd>If multiple CXL devices are interleaved, this attribute shows the
+number of devices (and the number of bus IDs in the CXLDevice attributes).
 </dd>
 <dt>DAXDevice (NUMA Nodes)</dt>
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
