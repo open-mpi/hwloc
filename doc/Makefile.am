@@ -922,7 +922,7 @@ $(HWLOC_top_srcdir)/README: $(DOX_TAG)
 	echo >> $@
 	sed -n -f $(srcdir)/README.sed $(DOX_HTML_DIR)/index.html > $(DOX_HTML_README)
 	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_README) \
-	 | $(SED) -n -e 's/^   //' -e '/^Installation$$/,$$p' \
+	 | $(SED) -n -e 's/^   //' -e '/^hwloc Overview$$/,$$p' \
 	 | $(SED) -e '/^--*-$$/,$$ d' \
 	 >> $@
 	echo >> $@
