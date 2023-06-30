@@ -113,134 +113,6 @@ Bindings for several other languages are available from the
 
 
 \htmlonly
-</div><div class="section" id="installation">
-\endhtmlonly
-\section installation Installation
-
-hwloc (https://www.open-mpi.org/projects/hwloc/) is available under the
-BSD license.  It is hosted as a sub-project of the overall Open MPI
-project (https://www.open-mpi.org/).  Note that hwloc does not require
-any functionality from Open MPI -- it is a wholly separate (and much
-smaller!) project and code base.  It just happens to be hosted as part
-of the overall Open MPI project.
-
-\subsection basic_installation Basic Installation
-
-Installation is the fairly common GNU-based process:
-
-\verbatim
-shell$ ./configure --prefix=...
-shell$ make
-shell$ make install
-\endverbatim
-
-The hwloc command-line tool "lstopo" produces human-readable topology
-maps, as mentioned above.
-Running the "lstopo" tool is a good way to check as a graphical output
-whether hwloc properly detected the architecture of your node.
-
-
-\subsection optional_dependencies Optional Dependencies
-
-lstopo may also export graphics to the SVG and "fig" file formats.
-Support for PDF, Postscript, and PNG exporting is provided if
-the "Cairo" development package (usually <tt>cairo-devel</tt> or
-<tt>libcairo2-dev</tt>) can be found in "lstopo" when hwloc
-is configured and build.
-<br>
-
-The hwloc core may also benefit from the following development packages:
-<ul>
-<li>libpciaccess for full I/O device discovery
-    (<tt>libpciaccess-devel</tt> or <tt>libpciaccess-dev</tt> package).
-    On Linux, PCI discovery may still be performed (without vendor/device names)
-    even if libpciaccess cannot be used.
-</li>
-<li>AMD or NVIDIA OpenCL implementations for OpenCL device discovery.
-</li>
-<li>the NVIDIA CUDA Toolkit for CUDA device discovery.
-  See \ref faq_cuda_build.
-</li>
-<li>the NVIDIA Management Library (NVML) for NVML device discovery.
-  It is included in CUDA since version 8.0.
-  Older NVML releases were available within the NVIDIA GPU Deployment Kit
-  from https://developer.nvidia.com/gpu-deployment-kit .
-</li>
-<li>the NV-CONTROL X extension library (NVCtrl) for NVIDIA display discovery.
-  The relevant development package is usually <tt>libXNVCtrl-devel</tt>
-  or <tt>libxnvctrl-dev</tt>.
-  It is also available within nvidia-settings from ftp://download.nvidia.com/XFree86/nvidia-settings/
-  and https://github.com/NVIDIA/nvidia-settings/ .
-</li>
-<li>the AMD ROCm SMI library for RSMI device discovery.
-  The relevant development package is usually <tt>rocm-smi-lib64</tt>
-  or <tt>librocm-smi-dev</tt>.
-  See \ref faq_rocm_build.
-</li>
-<li>the oneAPI Level Zero library.
-  The relevant development package is usually <tt>level-zero-dev</tt>
-  or <tt>level-zero-devel</tt>.
-</li>
-<li>libxml2 for full XML import/export support (otherwise, the
-    internal minimalistic parser will only be able to import
-    XML files that were exported by the same hwloc release).
-    See \ref xml for details.
-    The relevant development package is usually <tt>libxml2-devel</tt>
-    or <tt>libxml2-dev</tt>.
-</li>
-<li>libudev on Linux for easier discovery of OS device information
-    (otherwise hwloc will try to manually parse udev raw files).
-    The relevant development package is usually <tt>libudev-devel</tt>
-    or <tt>libudev-dev</tt>.
-</li>
-<li>libtool's ltdl library for dynamic plugin loading if the native dlopen cannot be used.
-  The relevant development package is usually <tt>libtool-ltdl-devel</tt>
-  or <tt>libltdl-dev</tt>.
-</li>
-</ul>
-
-PCI and XML support may be statically built inside the main hwloc
-library, or as separate dynamically-loaded plugins (see the
-\ref plugins section).
-
-Also note that if you install supplemental libraries in non-standard
-locations, hwloc's configure script may not be able to find them
-without some help.  You may need to specify additional CPPFLAGS,
-LDFLAGS, or PKG_CONFIG_PATH values on the configure command line.
-
-For example, if libpciaccess was installed into /opt/pciaccess,
-hwloc's configure script may not find it by default.  Try adding
-PKG_CONFIG_PATH to the ./configure command line, like this:
-
-\verbatim
-./configure PKG_CONFIG_PATH=/opt/pciaccess/lib/pkgconfig ...
-\endverbatim
-
-Note that because of the possibility of GPL taint, the
-<tt>pciutils</tt> library <tt>libpci</tt> will not be used (remember
-that hwloc is BSD-licensed).
-
-
-\subsection gitclone_installation Installing from a Git clone
-
-Additionally, the code can be directly cloned from Git:
-
-\verbatim
-shell$ git clone https://github.com/open-mpi/hwloc.git
-shell$ cd hwloc
-shell$ ./autogen.sh
-\endverbatim
-
-Note that GNU Autoconf >=2.63, Automake >=1.11 and Libtool >=2.2.6 are
-required when building from a Git clone.
-
-Nightly development snapshots are available on the web site,
-they can be configured and built without any need for Git
-or GNU Autotools.
-
-
-
-\htmlonly
 </div><div class="section" id="bugs">
 \endhtmlonly
 \section bugs Questions and Bugs
@@ -557,6 +429,7 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
 The documentation chapters include
 
 <ul>
+<li> \ref installation
 <li> \ref termsanddefs 
 <li> \ref tools
 <li> \ref envvar
@@ -580,6 +453,140 @@ Make sure to have had a look at those too!
 \htmlonly
 </div>
 \endhtmlonly
+
+
+
+\page installation Installation
+
+hwloc (https://www.open-mpi.org/projects/hwloc/) is available under the
+BSD license.  It is hosted as a sub-project of the overall Open MPI
+project (https://www.open-mpi.org/).  Note that hwloc does not require
+any functionality from Open MPI -- it is a wholly separate (and much
+smaller!) project and code base.  It just happens to be hosted as part
+of the overall Open MPI project.
+
+\htmlonly
+</div><div class="section" id="basic_installation">
+\endhtmlonly
+\section basic_installation Basic Installation
+
+Installation is the fairly common GNU-based process:
+
+\verbatim
+shell$ ./configure --prefix=...
+shell$ make
+shell$ make install
+\endverbatim
+
+The hwloc command-line tool "lstopo" produces human-readable topology
+maps, as mentioned above.
+Running the "lstopo" tool is a good way to check as a graphical output
+whether hwloc properly detected the architecture of your node.
+
+
+\htmlonly
+</div><div class="section" id="optional_dependencies">
+\endhtmlonly
+\section optional_dependencies Optional Dependencies
+
+lstopo may also export graphics to the SVG and "fig" file formats.
+Support for PDF, Postscript, and PNG exporting is provided if
+the "Cairo" development package (usually <tt>cairo-devel</tt> or
+<tt>libcairo2-dev</tt>) can be found in "lstopo" when hwloc
+is configured and build.
+<br>
+
+The hwloc core may also benefit from the following development packages:
+<ul>
+<li>libpciaccess for full I/O device discovery
+    (<tt>libpciaccess-devel</tt> or <tt>libpciaccess-dev</tt> package).
+    On Linux, PCI discovery may still be performed (without vendor/device names)
+    even if libpciaccess cannot be used.
+</li>
+<li>AMD or NVIDIA OpenCL implementations for OpenCL device discovery.
+</li>
+<li>the NVIDIA CUDA Toolkit for CUDA device discovery.
+  See \ref faq_cuda_build.
+</li>
+<li>the NVIDIA Management Library (NVML) for NVML device discovery.
+  It is included in CUDA since version 8.0.
+  Older NVML releases were available within the NVIDIA GPU Deployment Kit
+  from https://developer.nvidia.com/gpu-deployment-kit .
+</li>
+<li>the NV-CONTROL X extension library (NVCtrl) for NVIDIA display discovery.
+  The relevant development package is usually <tt>libXNVCtrl-devel</tt>
+  or <tt>libxnvctrl-dev</tt>.
+  It is also available within nvidia-settings from ftp://download.nvidia.com/XFree86/nvidia-settings/
+  and https://github.com/NVIDIA/nvidia-settings/ .
+</li>
+<li>the AMD ROCm SMI library for RSMI device discovery.
+  The relevant development package is usually <tt>rocm-smi-lib64</tt>
+  or <tt>librocm-smi-dev</tt>.
+  See \ref faq_rocm_build.
+</li>
+<li>the oneAPI Level Zero library.
+  The relevant development package is usually <tt>level-zero-dev</tt>
+  or <tt>level-zero-devel</tt>.
+</li>
+<li>libxml2 for full XML import/export support (otherwise, the
+    internal minimalistic parser will only be able to import
+    XML files that were exported by the same hwloc release).
+    See \ref xml for details.
+    The relevant development package is usually <tt>libxml2-devel</tt>
+    or <tt>libxml2-dev</tt>.
+</li>
+<li>libudev on Linux for easier discovery of OS device information
+    (otherwise hwloc will try to manually parse udev raw files).
+    The relevant development package is usually <tt>libudev-devel</tt>
+    or <tt>libudev-dev</tt>.
+</li>
+<li>libtool's ltdl library for dynamic plugin loading if the native dlopen cannot be used.
+  The relevant development package is usually <tt>libtool-ltdl-devel</tt>
+  or <tt>libltdl-dev</tt>.
+</li>
+</ul>
+
+PCI and XML support may be statically built inside the main hwloc
+library, or as separate dynamically-loaded plugins (see the
+\ref plugins section).
+
+Also note that if you install supplemental libraries in non-standard
+locations, hwloc's configure script may not be able to find them
+without some help.  You may need to specify additional CPPFLAGS,
+LDFLAGS, or PKG_CONFIG_PATH values on the configure command line.
+
+For example, if libpciaccess was installed into /opt/pciaccess,
+hwloc's configure script may not find it by default.  Try adding
+PKG_CONFIG_PATH to the ./configure command line, like this:
+
+\verbatim
+./configure PKG_CONFIG_PATH=/opt/pciaccess/lib/pkgconfig ...
+\endverbatim
+
+Note that because of the possibility of GPL taint, the
+<tt>pciutils</tt> library <tt>libpci</tt> will not be used (remember
+that hwloc is BSD-licensed).
+
+
+\htmlonly
+</div><div class="section" id="gitclone_installation">
+\endhtmlonly
+\section gitclone_installation Installing from a Git clone
+
+Additionally, the code can be directly cloned from Git:
+
+\verbatim
+shell$ git clone https://github.com/open-mpi/hwloc.git
+shell$ cd hwloc
+shell$ ./autogen.sh
+\endverbatim
+
+Note that GNU Autoconf >=2.63, Automake >=1.11 and Libtool >=2.2.6 are
+required when building from a Git clone.
+
+Nightly development snapshots are available on the web site,
+they can be configured and built without any need for Git
+or GNU Autotools.
 
 
 
