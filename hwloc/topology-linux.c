@@ -3708,7 +3708,11 @@ static int
 annotate_cxl_dax(hwloc_obj_t obj, unsigned region, int root_fd)
 {
   char path[300];
+  char bdfs[(12+1)*16]; /* 16 interleaved devices max, 12 chars par BDF, comma-separated + ending \0 */
+  char *curbdfptr = bdfs;
+  unsigned interleave_ways = 0;
   unsigned i;
+  *curbdfptr = '\0';
 
   for(i=0; ; i++) {
     char decoder[20]; /* "decoderX.Y" */
@@ -3760,8 +3764,27 @@ annotate_cxl_dax(hwloc_obj_t obj, unsigned region, int root_fd)
     }
     *slash = '\0';
     if (pcibdf) {
-      hwloc_obj_add_info(obj, "CXLDevice", pcibdf);
+      if (interleave_ways) {
+        if (interleave_ways >= 16) {
+          if (HWLOC_SHOW_CRITICAL_ERRORS())
+            fprintf(stderr, "Found more than 16 interleaved devices for region%u, ignoring the last ones.\n", region);
+          break;
+        }
+        *(curbdfptr++) = ',';
+      }
+      strcpy(curbdfptr, pcibdf);
+      curbdfptr += 12;
+      interleave_ways++;
     }
+  }
+
+  if (interleave_ways) {
+    if (interleave_ways > 1) {
+      char tmp[12]; /* interleave ways is 16 max */
+      snprintf(tmp, sizeof(tmp), "%u", interleave_ways);
+      hwloc_obj_add_info(obj, "CXLDeviceInterleaveWays", tmp);
+    }
+    hwloc_obj_add_info(obj, "CXLDevice", bdfs);
   }
 
   return 0;
