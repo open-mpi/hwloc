@@ -15,21 +15,50 @@
 <br>
 
 \htmlonly
-<div class="section">
+<div class="section" id="toc">
 \endhtmlonly
-See also \ref further_reading
+\section toc Table of Contents
+
+<ul>
+<li> Introduction
+ <ul>
+ <li> \ref overview
+ <li> \ref bugs
+ <li> \ref cli_examples
+ <li> \ref interface
+ <li> \ref history
+ </ul>
+<li> Chapters
+ <ul>
+ <li> \ref installation
+ <li> \ref termsanddefs
+ <li> \ref tools
+ <li> \ref envvar
+ <li> \ref cpu_mem_bind
+ <li> \ref iodevices
+ <li> \ref miscobjs
+ <li> \ref attributes
+ <li> \ref topoattrs
+ <li> \ref xml
+ <li> \ref synthetic
+ <li> \ref interoperability
+ <li> \ref threadsafety
+ <li> \ref plugins
+ <li> \ref embed
+ <li> \ref faq
+ <li> \ref upgrade_to_api_2x
+ </ul>
+</ul>
 \htmlonly
-or the Related pages tab above
-\endhtmlonly
-for links to more sections about hwloc concepts.
-\htmlonly
-</div>
+This page contains all the <i>Introduction</i> sections.
+Chapters are also available from the <i>Related Pages</i> tab above.
 \endhtmlonly
 
+
 \htmlonly
-<div class="section" id="introduction">
+</div><div class="section" id="overview">
 \endhtmlonly
-\section Introduction
+\section overview hwloc Overview
 
 The Hardware Locality (hwloc) software project aims at easing the process
 of discovering hardware resources in parallel architectures.
@@ -38,9 +67,6 @@ resources, their locality, attributes, and interconnection.
 hwloc primarily aims at helping high-performance computing (HPC)
 applications, but is also applicable to any project seeking to exploit
 code and/or data locality on modern computing platforms.
-
-
-\section hwloc_summary hwloc Summary
 
 hwloc provides command line tools and a C API to obtain the
 hierarchical map of key computing elements within a node, such as: NUMA memory
@@ -421,34 +447,6 @@ PLPA was initially developed by
 the Open MPI development team as a sub-project. Both are now deprecated
 in favor of hwloc, which is distributed as an Open MPI sub-project.
 
-\htmlonly
-</div><div class="section" id="further_reading">
-\endhtmlonly
-\section further_reading Further Reading
-
-The documentation chapters include
-
-<ul>
-<li> \ref installation
-<li> \ref termsanddefs 
-<li> \ref tools
-<li> \ref envvar
-<li> \ref cpu_mem_bind
-<li> \ref iodevices
-<li> \ref miscobjs
-<li> \ref attributes
-<li> \ref topoattrs
-<li> \ref xml
-<li> \ref synthetic
-<li> \ref interoperability
-<li> \ref threadsafety
-<li> \ref plugins
-<li> \ref embed
-<li> \ref faq
-<li> \ref upgrade_to_api_2x
-</ul>
-
-Make sure to have had a look at those too!
 
 \htmlonly
 </div>
