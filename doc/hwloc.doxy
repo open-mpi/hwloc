@@ -23,9 +23,9 @@
 <li> Introduction
  <ul>
  <li> \ref overview
- <li> \ref bugs
  <li> \ref cli_examples
  <li> \ref interface
+ <li> \ref bugs
  <li> \ref history
  </ul>
 <li> Chapters
@@ -135,22 +135,6 @@ binding of processes, and so on.
 
 Bindings for several other languages are available from the
 <a href="https://www.open-mpi.org/projects/hwloc/#language_bindings">project website</a>.
-
-
-\htmlonly
-</div><div class="section" id="bugs">
-\endhtmlonly
-\section bugs Questions and Bugs
-
-Bugs should be reported in the tracker
-(https://github.com/open-mpi/hwloc/issues).
-Opening a new issue automatically displays lots of hints about
-how to debug and report issues.
-
-Questions may be sent to the users or developers mailing lists
-(https://www.open-mpi.org/community/lists/hwloc.php).
-
-There is also a <tt>\#hwloc</tt> IRC channel on Libera Chat (<tt>irc.libera.chat</tt>).
 
 
 
@@ -427,6 +411,23 @@ Machine
 *** Logical processor 0 has 0 caches totaling 0KB
 shell$ 
 \endverbatim
+
+
+
+\htmlonly
+</div><div class="section" id="bugs">
+\endhtmlonly
+\section bugs Questions and Bugs
+
+Bugs should be reported in the tracker
+(https://github.com/open-mpi/hwloc/issues).
+Opening a new issue automatically displays lots of hints about
+how to debug and report issues.
+
+Questions may be sent to the users or developers mailing lists
+(https://www.open-mpi.org/community/lists/hwloc.php).
+
+There is also a <tt>\#hwloc</tt> IRC channel on Libera Chat (<tt>irc.libera.chat</tt>).
 
 
 
