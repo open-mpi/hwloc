@@ -35,7 +35,6 @@ BUILT_IMAGES = images/diagram.png images/diagram.eps
 EXTRA_DIST = \
         hwloc.doxy \
         README.sed \
-        doxygen.css \
         doxygen.cfg \
         images/diagram.fig \
         www.open-mpi.org.cfg \
@@ -117,18 +116,6 @@ images/diagram.eps: $(srcdir)/images/diagram.fig
 # Remove useless manpages, they have too long filenames anyway because
 # of nested structurre/union declarations.
 #
-
-#
-# Note that we want to use our own doxygen.css file; not the one that
-# doxygen installs in the HTML directory.  So manually copy it over.
-# Be a little clever: only copy the doxygen.css file over if it exists
-# in DOX_HTML_DIR (which is in the build tree).  If the html tree
-# doesn't exist in the build tree, then we're using an html tree in
-# the source tree, and we don't need to copy over the doxygen.css
-# because we didn't build the html tree (e.g., the html tree came
-# pre-bundled in a tarball).
-#
-
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
@@ -142,10 +129,6 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	@mv $(DOX_MAN_DIR)/man3/hwloc* $(DOX_MAN_DIR)/man3/HWLOC* $(DOX_DIR)/man.tmp/
 	@rm -rf $(DOX_MAN_DIR)/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_MAN_DIR)/man3
-	@echo "Copying custom doxygen.css..."
-	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
-	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
-	fi
 
 #
 # Rules for building the PDF
