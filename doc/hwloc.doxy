@@ -1346,6 +1346,42 @@ HWLOC_DARWIN_CPUKINDS_FROM_SYSCTL=0
 <div class="section">
 \endhtmlonly
 
+Binding tasks and data buffers is hwloc's second main goal after
+discovering and exposing the hardware topology.
+hwloc defines APIs to bind threads and processes to cores and
+processing units (see \ref hwlocality_cpubinding),
+and to bind memory buffers to NUMA nodes (see \ref hwlocality_membinding).
+Some examples are available under doc/examples/ in the source tree.
+
+Sections below provide high-level insights on how these APIs work.
+
+\section cpu_mem_bind_portability Binding Policies and Portability
+
+hwloc binding APIs are portable to multiple operating systems.
+However operating systems sometimes define slightly different policies,
+which means hwloc's behavior might slightly differ.
+
+On the CPU binding side, OSes have different constraints of which sets
+of PUs can be used for binding (only full cores, random sets of PUs, etc.).
+Moreover the ::HWLOC_CPUBIND_STRICT may be given to clarify what to do
+in some corner cases.
+It is recommended to read \ref hwlocality_cpubinding for details.
+
+On the memory binding side, things are more complicated.
+First, there are multiple API for binding existing memory buffers,
+allocating new ones, etc.
+Second, multiple policies exist (first-touch, bind, interleave, etc.)
+but some of them are not implemented by all operating systems.
+Third, some of these policies have slightly different meanings.
+For instance, hwloc's <b>bind</b> (::HWLOC_MEMBIND_BIND) uses
+Linux' <b>MPOL_PREFERRED_MANY</b> (or <b>MPOL_PREFERRED</b>) by default,
+but it switches to <b>MPOL_BIND</b> when strict binding is requested
+(::HWLOC_MEMBIND_STRICT).
+Reading \ref hwlocality_membinding is strongly recommended.
+
+
+\section cpu_mem_bind_joint Joint CPU and Memory Binding (or not)
+
 Some operating systems do not systematically provide separate
 functions for CPU and memory binding.  This means that CPU binding
 functions may have have effects on the memory binding policy.
@@ -1373,6 +1409,9 @@ memory will not change with it.  When binding and allocating further
 memory, the CPU binding should be performed again in case the memory
 binding altered the previously-selected CPU binding.
 
+
+\section cpu_mem_bind_current_membind Current Memory Binding Policy
+
 Not all operating systems support the notion of a "current" memory
 binding policy for the current process, but such operating systems often still
 provide a way to allocate data on a given node set.  Conversely, some
@@ -1383,7 +1422,7 @@ these facilities, hwloc provides:
 
 <ul>
 <li>functions that set/get the current memory binding policies (if supported):
-hwloc_set/get_membind() and hwloc_set/get_proc_membind()
+hwloc_set_membind(), hwloc_get_membind(), hwloc_set_proc_membind() and hwloc_get_proc_membind()
 <li>a function that allocates memory bound to specific node set without changing
 the current memory binding policy (if supported): hwloc_alloc_membind().
 <li>a helper which, if needed, changes the current memory binding policy of the
@@ -1394,10 +1433,7 @@ An application can thus use the two first sets of functions if it wants to
 manage separately the global process binding policy and directed allocation,
 or use the third set of functions if it does not care about the process memory
 binding policy.
-
-See \ref hwlocality_cpubinding and \ref hwlocality_membinding for
-hwloc's API functions regarding CPU and memory binding, respectively.
-There are some examples under doc/examples/ in the source tree.
+Again, reading \ref hwlocality_membinding is strongly recommended.
 
 
 
