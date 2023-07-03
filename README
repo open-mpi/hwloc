@@ -74,17 +74,6 @@ manipulation of topology objects, binding of processes, and so on.
 
 Bindings for several other languages are available from the project website.
 
-Questions and Bugs
-
-Bugs should be reported in the tracker (https://github.com/open-mpi/hwloc/
-issues). Opening a new issue automatically displays lots of hints about how to
-debug and report issues.
-
-Questions may be sent to the users or developers mailing lists (https://
-www.open-mpi.org/community/lists/hwloc.php).
-
-There is also a #hwloc IRC channel on Libera Chat (irc.libera.chat).
-
 Command-line Examples
 
 On a 4-package 2-core machine with hyper-threading, the lstopo tool may show
@@ -473,6 +462,17 @@ Machine
 *** 2 package(s)
 *** Logical processor 0 has 0 caches totaling 0KB
 shell$
+
+Questions and Bugs
+
+Bugs should be reported in the tracker (https://github.com/open-mpi/hwloc/
+issues). Opening a new issue automatically displays lots of hints about how to
+debug and report issues.
+
+Questions may be sent to the users or developers mailing lists (https://
+www.open-mpi.org/community/lists/hwloc.php).
+
+There is also a #hwloc IRC channel on Libera Chat (irc.libera.chat).
 
 History / Credits
 
