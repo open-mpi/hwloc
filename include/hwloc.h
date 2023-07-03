@@ -1484,6 +1484,12 @@ typedef enum {
   HWLOC_MEMBIND_FIRSTTOUCH =	1,
 
   /** \brief Allocate memory on the specified nodes.
+   *
+   * The actual behavior may slightly vary between operating systems,
+   * especially when (some of) the requested nodes are full.
+   * On Linux, by default, the MPOL_PREFERRED_MANY (or MPOL_PREFERRED) policy
+   * is used. However, if the hwloc strict flag is also given, the Linux
+   * MPOL_BIND policy is rather used.
    * \hideinitializer */
   HWLOC_MEMBIND_BIND =		2,
 
