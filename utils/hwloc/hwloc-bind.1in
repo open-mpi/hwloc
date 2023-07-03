@@ -100,12 +100,21 @@ the default policy is bind.
 .TP
 \fB\-\-mempolicy\fR <policy>
 Change the memory binding policy.
-The available policies are default, firsttouch, bind, interleave
-and nexttouch.
+
 This option is only meaningful when an actual binding is also given
 with \fB\-\-membind\fR.
 If \fB\-\-membind\fR is given without \fB\-\-mempolicy\fR,
 the default policy is bind.
+
+The available policies are \fBdefault\fR, \fBfirsttouch\fR,
+\fBbind\fR, \fBinterleave\fR and \fBnexttouch\fR.
+See hwloc.h for details about these policies.
+
+Note that hwloc's memory binding policies may be slightly different
+from operating system policies.
+For instance, the hwloc \fBbind\fR policy uses Linux \fIMPOL_PREFERRED_MANY\fR
+(or \fIMPOL_PREFERRED\fR) by default, but it switches to Linux \fIMPOL_BIND\fR
+if the hwloc strict option or flag is also given.
 
 .TP
 \fB\-\-get\fR
