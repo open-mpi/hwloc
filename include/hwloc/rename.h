@@ -216,6 +216,7 @@ extern "C" {
 #define hwloc_type_sscanf HWLOC_NAME(type_sscanf)
 
 #define hwloc_obj_get_info_by_name HWLOC_NAME(obj_get_info_by_name)
+#define hwloc_get_info_by_name HWLOC_NAME(get_info_by_name)
 #define hwloc_obj_add_info HWLOC_NAME(obj_add_info)
 
 #define HWLOC_CPUBIND_PROCESS HWLOC_NAME_CAPS(CPUBIND_PROCESS)

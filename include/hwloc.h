@@ -1135,7 +1135,14 @@ HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
  * @{
  */
 
-/** \brief Search the given name in object infos and return the corresponding value.
+/** \brief Search the given name in the object array of infos and return the corresponding value.
+ *
+ * Identical to hwloc_get_info_by_name() but operates on the infos of the given object.
+ */
+static __hwloc_inline const char *
+hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_pure;
+
+/** \brief Search the given name in the array of infos and return the corresponding value.
  *
  * If multiple info attributes match the given name, only the first one is returned.
  *
@@ -1145,7 +1152,7 @@ HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
  * \note The string should not be freed by the caller, it belongs to the hwloc library.
  */
 static __hwloc_inline const char *
-hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_pure;
+hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name) __hwloc_attribute_pure;
 
 /** \brief Add the given name and value pair to the given object info attributes.
  *
