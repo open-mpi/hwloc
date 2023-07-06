@@ -264,7 +264,7 @@ lstopo_add_cpukind_style(struct lstopo_output *loutput, hwloc_topology_t topolog
   nr = hwloc_cpukinds_get_nr(topology, 0);
   for(i=0; i<nr; i++) {
     hwloc_obj_t obj;
-    hwloc_cpukinds_get_info(topology, i, cpuset, NULL, NULL, NULL, 0);
+    hwloc_cpukinds_get_info(topology, i, cpuset, NULL, NULL, 0);
     obj = NULL;
     while ((obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, cpuset, HWLOC_OBJ_PU, obj)) != NULL)
       ((struct lstopo_obj_userdata *)obj->userdata)->cpukind_style = i;

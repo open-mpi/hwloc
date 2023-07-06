@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2021 Inria.  All rights reserved.
+ * Copyright © 2020-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -118,12 +118,11 @@ hwloc_cpukinds_get_by_cpuset(hwloc_topology_t topology,
  * the efficiency of all kinds is set to \c -1,
  * and kinds are reported in no specific order.
  *
- * The array of info attributes (for instance the "CoreType",
+ * If \p infosp is not \c NULL, it will receive a pointer to a structure
+ * containing the array of info attributes (for instance "CoreType",
  * "FrequencyMaxMHz" or "FrequencyBaseMHz", see \ref topoattrs_cpukinds)
- * and its length are returned in \p infos or \p nr_infos.
- * The array belongs to the topology, it should not be freed or modified.
- *
- * If \p nr_infos or \p infos is \c NULL, no info is returned.
+ * and its length.
+ * This structure belongs to the hwloc library, it should not be freed or modified.
  *
  * \p flags must be \c 0 for now.
  *
@@ -136,7 +135,7 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
                         unsigned kind_index,
                         hwloc_bitmap_t cpuset,
                         int *efficiency,
-                        unsigned *nr_infos, struct hwloc_info_s **infos,
+                        struct hwloc_infos_s **infosp,
                         unsigned long flags);
 
 /** \brief Register a kind of CPU in the topology.
@@ -149,8 +148,8 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
  * the ranking of all kinds if all of them have valid (and
  * different) efficiencies.
  *
- * The array \p infos of size \p nr_infos may be used to provide
- * info names and values describing this kind of PUs.
+ * The array \p infos may be used to provide info names and values
+ * describing this kind of PUs, or it may be \c NULL.
  *
  * \p flags must be \c 0 for now.
  *
@@ -180,7 +179,7 @@ HWLOC_DECLSPEC int
 hwloc_cpukinds_register(hwloc_topology_t topology,
                         hwloc_bitmap_t cpuset,
                         int forced_efficiency,
-                        unsigned nr_infos, struct hwloc_info_s *infos,
+                        struct hwloc_infos_s *infos,
                         unsigned long flags);
 
 /** @} */

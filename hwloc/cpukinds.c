@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2022 Inria.  All rights reserved.
+ * Copyright © 2020-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -234,11 +234,10 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
 int
 hwloc_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t _cpuset,
                         int forced_efficiency,
-                        unsigned nr_infos, struct hwloc_info_s *infos,
+                        struct hwloc_infos_s *infos,
                         unsigned long flags)
 {
   hwloc_bitmap_t cpuset;
-  struct hwloc_infos_s _infos;
   int err;
 
   if (flags) {
@@ -258,9 +257,7 @@ hwloc_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t _cpuset,
   if (forced_efficiency < 0)
     forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
 
-  _infos.array = infos;
-  _infos.count = nr_infos;
-  err = hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+  err = hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
   if (err < 0)
     return err;
 
@@ -604,7 +601,7 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
                         unsigned id,
                         hwloc_bitmap_t cpuset,
                         int *efficiencyp,
-                        unsigned *nr_infosp, struct hwloc_info_s **infosp,
+                        struct hwloc_infos_s **infosp,
                         unsigned long flags)
 {
   struct hwloc_internal_cpukind_s *kind;
@@ -627,10 +624,8 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
   if (efficiencyp)
     *efficiencyp = kind->efficiency;
 
-  if (nr_infosp && infosp) {
-    *nr_infosp = kind->infos.count;
-    *infosp = kind->infos.array;
-  }
+  if (infosp)
+    *infosp = &kind->infos;
   return 0;
 }
 

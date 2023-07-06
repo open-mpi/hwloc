@@ -768,11 +768,14 @@ int main(int argc, char *argv[])
           }
 
         } else if (ckcpuset) {
+          struct hwloc_infos_s infos;
           struct hwloc_info_s info;
           info.name = ckiname;
           info.value = ckivalue;
+          infos.count = 1;
+          infos.array = &info;
           if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
-                                      ckiname ? 1 : 0, ckiname ? &info : NULL,
+                                      ckiname ? &infos : NULL,
                                       ckflags) < 0) {
             fprintf(stderr, "Failed to register CPU kind (%s)\n", strerror(errno));
           }

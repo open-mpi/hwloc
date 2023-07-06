@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -451,18 +451,17 @@ static void output_cpukinds(struct lstopo_output *loutput)
 
   for(i=0; i<nr; i++) {
     int efficiency;
-    struct hwloc_info_s *infos;
-    unsigned nr_infos;
+    struct hwloc_infos_s *infosp;
     int err;
 
-    err = hwloc_cpukinds_get_info(topology, i, cpuset, &efficiency, &nr_infos, &infos, 0);
+    err = hwloc_cpukinds_get_info(topology, i, cpuset, &efficiency, &infosp, 0);
     if (!err) {
       char *cpusets;
       hwloc_bitmap_asprintf(&cpusets, cpuset);
       printf("CPU kind #%u efficiency %d cpuset %s\n", i, efficiency, cpusets);
       free(cpusets);
-      for(j=0; j<nr_infos; j++)
-        printf("  %s = %s\n", infos[j].name, infos[j].value);
+      for(j=0; j<infosp->count; j++)
+        printf("  %s = %s\n", infosp->array[j].name, infosp->array[j].value);
     }
   }
 
