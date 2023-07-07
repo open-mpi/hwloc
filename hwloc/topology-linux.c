@@ -4434,6 +4434,7 @@ hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
     infoattr.value = value;
     infos.array = &infoattr;
     infos.count = 1;
+    infos.allocated = 0;
     snprintf(value, sizeof(value), "%lu", cpukinds->sets[i].value);
     /* value (at least cpu_capacity) may be > INT_MAX, too large for a forced_efficiency, hence use i instead */
     hwloc_internal_cpukinds_register(topology, cpukinds->sets[i].cpuset,
@@ -4624,6 +4625,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     infoattr.value = (char *) "IntelAtom";
     infos.array = &infoattr;
     infos.count = 1;
+    infos.allocated = 0;
     hwloc_internal_cpukinds_register(topology, atom_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infos, 0);
     /* the cpuset is given to the callee */
   } else {
@@ -4636,6 +4638,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     infoattr.value = (char *) "IntelCore";
     infos.array = &infoattr;
     infos.count = 1;
+    infos.allocated = 0;
     hwloc_internal_cpukinds_register(topology, core_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infos, 0);
     /* the cpuset is given to the callee */
   } else {
@@ -5394,6 +5397,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     Lprocs[curproc].Pproc = Pproc;
     Lprocs[curproc].infos.array = NULL;
     Lprocs[curproc].infos.count = 0;
+    Lprocs[curproc].infos.allocated = 0;
     getprocnb_end() else {
 
       /* architecture specific or default routine for parsing cpumodel */
@@ -5780,6 +5784,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
    */
   global_infos.array = NULL;
   global_infos.count = 0;
+  global_infos.allocated = 0;
   numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos);
   if (numprocs < 0)
     numprocs = 0;
@@ -6915,6 +6920,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
 
   infos.array = NULL;
   infos.count = 0;
+  infos.allocated = 0;
 
   /* start after the header */
   foff = header->length;

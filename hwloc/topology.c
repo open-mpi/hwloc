@@ -471,20 +471,37 @@ void hwloc__free_infos(struct hwloc_infos_s *infos)
   free(infos->array);
 }
 
-int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value)
+static int hwloc__realloc_infos(struct hwloc_infos_s *infos, unsigned nr)
 {
-  unsigned count = infos->count;
-  struct hwloc_info_s *array = infos->array;
+  struct hwloc_info_s *tmparray;
+  unsigned alloccount;
+
+  if (infos->allocated > infos->count + nr)
+    return 0;
+
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
-  unsigned alloccount = (count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
-  if (count != alloccount) {
-    struct hwloc_info_s *tmparray = realloc(array, alloccount*sizeof(*array));
-    if (!tmparray)
-      /* failed to allocate, ignore this info */
-      goto out_with_array;
-    infos->array = array = tmparray;
-  }
+  alloccount = (infos->count + nr + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
+  tmparray = realloc(infos->array, alloccount*sizeof(*tmparray));
+  if (!tmparray)
+    return -1;
+
+  infos->array = tmparray;
+  infos->allocated = alloccount;
+  return 0;
+}
+
+int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value)
+{
+  unsigned count;
+  struct hwloc_info_s *array;
+
+  if (hwloc__realloc_infos(infos, 1) < 0)
+    return -1;
+
+  count = infos->count;
+  array = infos->array;
+
   array[count].name = strdup(name);
   if (!array[count].name)
     goto out_with_array;
@@ -526,21 +543,19 @@ int hwloc__add_info_nodup(struct hwloc_infos_s *infos,
 int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
 		      struct hwloc_infos_s *src_infos)
 {
-  unsigned dst_count = dst_infos->count;
-  struct hwloc_info_s *dst_array = dst_infos->array;
-  unsigned src_count = src_infos->count;
-  struct hwloc_info_s *src_array = src_infos->array;
+  struct hwloc_info_s *dst_array, *src_array;
+  unsigned dst_count, src_count;
   unsigned i;
-#define OBJECT_INFO_ALLOC 8
-  /* nothing allocated initially, (re-)allocate by multiple of 8 */
-  unsigned alloccount = (dst_count + src_count + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
-  if (dst_count != alloccount) {
-    struct hwloc_info_s *tmp_array = realloc(dst_array, alloccount*sizeof(*dst_array));
-    if (!tmp_array)
-      /* Failed to realloc, ignore the appended infos */
-      goto drop;
-    dst_array = tmp_array;
-  }
+
+  src_count = src_infos->count;
+  src_array = src_infos->array;
+
+  if (hwloc__realloc_infos(dst_infos, src_count) < 0)
+    goto drop;
+
+  dst_count = dst_infos->count;
+  dst_array = dst_infos->array;
+
   for(i=0; i<src_count; i++, dst_count++) {
     dst_array[dst_count].name = src_array[i].name;
     dst_array[dst_count].value = src_array[i].value;
@@ -561,6 +576,7 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
   free(src_array);
   src_infos->array = NULL;
   src_infos->count = 0;
+  src_infos->allocated = 0;
   return -1;
 }
 
@@ -576,7 +592,7 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
 {
   struct hwloc_info_s *newa;
   unsigned i, j;
-  newa = hwloc_tma_calloc(tma, oldi->count * sizeof(*newa));
+  newa = hwloc_tma_calloc(tma, oldi->allocated * sizeof(*newa));
   if (!newa)
     return -1;
   for(i=0; i<oldi->count; i++) {
@@ -587,6 +603,7 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
   }
   newi->array = newa;
   newi->count = oldi->count;
+  newi->allocated = oldi->allocated;
   return 0;
 
  failed:
@@ -597,6 +614,7 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
   }
   newi->array = NULL;
   newi->count = 0;
+  newi->allocated = 0;
   return -1;
 }
 

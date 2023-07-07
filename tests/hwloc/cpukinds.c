@@ -91,6 +91,7 @@ int main(void)
   info.value = (char*) "BigCore";
   infos.array = &info;
   infos.count = 1;
+  infos.allocated = 0;
   err = hwloc_cpukinds_register(topology, cpuset, 1000, &infos, 0);
   assert(!err);
   /* PU 6-9 (third package) are small and less efficient */
@@ -100,6 +101,7 @@ int main(void)
   info.value = (char*) "SmallCore";
   infos.array = &info;
   infos.count = 1;
+  infos.allocated = 0;
   err = hwloc_cpukinds_register(topology, cpuset, 10, &infos, 0);
   assert(!err);
 
@@ -165,6 +167,7 @@ int main(void)
   info.value = (char*) "this, that and those";
   infos.array = &info;
   infos.count = 1;
+  infos.allocated = 0;
   err = hwloc_cpukinds_register(topology, cpuset, -1, &infos, 0);
   assert(!err);
 

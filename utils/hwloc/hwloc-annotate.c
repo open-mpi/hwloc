@@ -92,6 +92,7 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 		free(obj->infos.array);
 		obj->infos.array = NULL;
 		obj->infos.count = 0;
+                obj->infos.allocated = 0;
 	}
 	if (clearuserdata) {
 		hwloc_utils_userdata_free(obj);
@@ -119,6 +120,7 @@ static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 			if (!j) {
 				free(obj->infos.array);
 				obj->infos.array = NULL;
+                                obj->infos.allocated = 0;
 			}
 		}
 		if (infovalue)
@@ -774,6 +776,7 @@ int main(int argc, char *argv[])
           info.value = ckivalue;
           infos.count = 1;
           infos.array = &info;
+          infos.allocated = 0;
           if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
                                       ckiname ? &infos : NULL,
                                       ckflags) < 0) {

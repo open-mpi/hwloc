@@ -433,6 +433,7 @@ struct hwloc_info_s {
 struct hwloc_infos_s {
   struct hwloc_info_s *array;  /**< \brief Array of string pairs */
   unsigned count;              /**< \brief Number of elements in the array. */
+  unsigned allocated;          /**< \private Internal use only (number of allocated elements in the array). */
 };
 
 /** \brief Structure of a topology object

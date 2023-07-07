@@ -333,6 +333,7 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
       infoattr.value = kinds->kinds[i].compatible;
       infos.array = &infoattr;
       infos.count = 1;
+      infos.allocated = 0;
     }
     if (kinds->kinds[i].perflevel >= 0) {
       /* perflevel0 always refers to the highest performance core type in the system. */

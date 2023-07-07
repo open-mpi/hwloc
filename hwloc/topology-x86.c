@@ -1442,6 +1442,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
           infoattr.value = (char *) "IntelAtom";
           _infos.array = &infoattr;
           _infos.count = 1;
+          _infos.allocated = 0;
           hwloc_internal_cpukinds_register(topology, atomset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &_infos, 0);
           /* the cpuset is given to the callee */
         } else {
@@ -1455,6 +1456,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
           infoattr.value = (char *) "IntelCore";
           _infos.array = &infoattr;
           _infos.count = 1;
+          _infos.allocated = 0;
           hwloc_internal_cpukinds_register(topology, coreset, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &_infos, 0);
           /* the cpuset is given to the callee */
         } else {

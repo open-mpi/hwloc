@@ -1464,6 +1464,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
 
   infos.array = NULL;
   infos.count = 0;
+  infos.allocated = 0;
 
   while (1) {
     char *attrname, *attrvalue;
