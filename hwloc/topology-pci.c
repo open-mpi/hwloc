@@ -141,6 +141,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e pfilter, bfilter;
   struct hwloc_obj *tree = NULL;
+  unsigned added = 0;
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
@@ -362,6 +363,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
     hwloc_pci_get_obj_names(obj, &m);
     hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
+    added++;
   }
 
   /* finalize device scanning */
@@ -375,6 +377,9 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;
   /* no need to run the annotate phase, we did it above */
   backend->phases &= HWLOC_DISC_PHASE_ANNOTATE;
+
+  if (added)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "PCI");
   return 0;
 }
 
