@@ -159,7 +159,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
   nvmlReturn_t ret;
-  unsigned nb, i;
+  unsigned nb, i, added = 0;
 #ifdef NVML_NVLINK_MAX_LINKS
   unsigned nbobjs, j;
   hwloc_obj_t *objs;
@@ -224,7 +224,6 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
-    hwloc_obj_add_info(osdev, "Backend", "NVML");
     hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
 
     buffer[0] = '\0';
@@ -272,6 +271,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 #ifdef NVML_NVLINK_MAX_LINKS
     objs[i] = osdev;
 #endif
+    added++;
   }
 
 #ifdef NVML_NVLINK_MAX_LINKS
@@ -397,6 +397,9 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 #endif /* NVML_NVLINK_MAX_LINKS */
 
   nvmlShutdown();
+
+  if (added)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "NVML");
   return 0;
 }
 

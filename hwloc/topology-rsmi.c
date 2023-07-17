@@ -246,7 +246,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   rsmi_version_t version;
   rsmi_status_t ret;
   int may_shutdown;
-  unsigned nb, i, j;
+  unsigned nb, i, j, added = 0;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -296,7 +296,6 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
-    hwloc_obj_add_info(osdev, "Backend", "RSMI");
     hwloc_obj_add_info(osdev, "GPUVendor", "AMD");
 
     buffer[0] = '\0';
@@ -374,6 +373,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
     hwloc_insert_object_by_parent(topology, parent, osdev);
     osdevs[i] = osdevs2[i] = osdev;
+    added++;
   }
 
   if (hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
@@ -416,6 +416,9 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   free(xgmi_bws);
   free(osdevs2);
   free(xgmi_hops);
+
+  if (added)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "RSMI");
   return 0;
 }
 

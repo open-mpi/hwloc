@@ -32,7 +32,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
-  unsigned i;
+  unsigned i, added = 0;
   int err;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
@@ -123,7 +123,6 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       osdev->name = strdup(name);
       osdev->subtype = strdup("Display");
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
-      hwloc_obj_add_info(osdev, "Backend", "GL");
       hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
       if (productname)
 	hwloc_obj_add_info(osdev, "GPUModel", productname);
@@ -133,6 +132,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 	parent = hwloc_get_root_obj(topology);
 
       hwloc_insert_object_by_parent(topology, parent, osdev);
+      added++;
 
       hwloc_debug("GL device %s (product %s) on PCI %04x:%02x:%02x.%01x\n",
 		  name, productname,
@@ -141,6 +141,8 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
     XCloseDisplay(display);
   }
 
+  if (added)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "GL");
   return 0;
 }
 

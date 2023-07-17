@@ -15,12 +15,24 @@
 
 /* check the RSMI helpers */
 
+static int check_levelzero_backend(hwloc_topology_t topology)
+{
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
+  unsigned i;
+  for(i=0; i<root->infos_count; i++)
+    if (!strcmp(root->infos[i].name, "Backend")
+        || !strcmp(root->infos[i].value, "LevelZero"))
+      return 1;
+  return 0;
+}
+
 int main(void)
 {
   hwloc_topology_t topology;
   ze_driver_handle_t *drh;
   uint32_t nbdrivers, i, k;
   ze_result_t res;
+  int has_levelzero_backend;
   int err = 0;
 
 #ifdef HWLOC_HAVE_ZESINIT
@@ -42,6 +54,8 @@ int main(void)
   hwloc_topology_init(&topology);
   hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
   hwloc_topology_load(topology);
+
+  has_levelzero_backend = check_levelzero_backend(topology);
 
   nbdrivers = 0;
   res = zeDriverGet(&nbdrivers, NULL);
@@ -95,9 +109,7 @@ int main(void)
 
       assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
 
-      value = hwloc_obj_get_info_by_name(osdev, "Backend");
-      err = strcmp(value, "LevelZero");
-      assert(!err);
+      assert(has_levelzero_backend);
 
       value = hwloc_obj_get_info_by_name(osdev, "LevelZeroDriverIndex");
       assert(value);
