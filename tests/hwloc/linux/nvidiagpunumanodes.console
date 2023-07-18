@@ -1,4 +1,4 @@
-Machine (P#0 total=252GiB PlatformName=PowerNV PlatformModel="PowerNV 8335-GTW" Backend=Linux LinuxCgroup=/jjh OSName=Linux OSRelease=4.14.0-49.el7a.bz1553205.page_fault_hang.ppc64le OSVersion="#1 SMP Fri Mar 30 12:06:11 CDT 2018" HostName=c685f8n02 Architecture=ppc64le)
+Machine (P#0 total=252GiB PlatformName=PowerNV PlatformModel="PowerNV 8335-GTW" LinuxCgroup=/jjh Backend=Linux OSName=Linux OSRelease=4.14.0-49.el7a.bz1553205.page_fault_hang.ppc64le OSVersion="#1 SMP Fri Mar 30 12:06:11 CDT 2018" HostName=c685f8n02 Architecture=ppc64le)
   Package L#0 (P#0 total=124GiB CPUModel="POWER9, altivec supported" CPURevision="2.1 (pvr 004e 1201)")
     NUMANode L#0 (P#0 local=124GiB total=124GiB)
     L3Cache L#0 (size=10MiB linesize=0)

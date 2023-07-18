@@ -1,4 +1,4 @@
-Machine (P#0 total=16GiB DMIProductName=H8QM8 DMIProductVersion=1234567890 DMIBoardVendor=Supermicro DMIBoardName=H8QM8 DMIBoardVersion=1234567890 DMIBoardAssetTag="To Be Filled By O.E.M." DMIChassisVendor="To Be Filled By O.E.M." DMIChassisType=3 DMIChassisVersion="To Be Filled By O.E.M." DMIChassisAssetTag="To Be Filled By O.E.M." DMIBIOSVendor="American Megatrends Inc." DMIBIOSVersion="080014 " DMIBIOSDate=12/20/2008 DMISysVendor=Supermicro Backend=Linux LinuxCgroup=/prout)
+Machine (P#0 total=16GiB LinuxCgroup=/prout DMIProductName=H8QM8 DMIProductVersion=1234567890 DMIBoardVendor=Supermicro DMIBoardName=H8QM8 DMIBoardVersion=1234567890 DMIBoardAssetTag="To Be Filled By O.E.M." DMIChassisVendor="To Be Filled By O.E.M." DMIChassisType=3 DMIChassisVersion="To Be Filled By O.E.M." DMIChassisAssetTag="To Be Filled By O.E.M." DMIBIOSVendor="American Megatrends Inc." DMIBIOSVersion="080014 " DMIBIOSDate=12/20/2008 DMISysVendor=Supermicro Backend=Linux)
   Package L#0 (P#0 CPUModel="Quad-Core AMD Opteron(tm) Processor 8347 HE")
     L3Cache L#0 (size=2048KiB linesize=64 ways=32)
       PU L#0 (P#0)

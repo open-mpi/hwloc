@@ -63,6 +63,7 @@ struct hwloc_linux_backend_data_s {
   struct utsname utsname; /* fields contain \0 when unknown */
   int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
+  int need_global_infos;
 };
 
 
@@ -5768,16 +5769,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
-  /*********************************
-   * Platform information for later
-   */
-  hwloc_gather_system_info(topology, data);
-
-  /**********************************
-   * Detect things in /proc/cmdline
-   */
-  hwloc_linuxfs_check_kernel_cmdline(data);
-
   /**********************
    * /proc/cpuinfo
    */
@@ -5862,21 +5853,10 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   } else
     nbnodes = 0;
 
-  /**********************
-   * Misc
-   */
-
-  /* Gather DMI info */
-  hwloc__get_dmi_id_info(data, topology->levels[0][0]);
-
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "Linux");
   if (cpuset_name) {
     hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
-
-  /* data->utsname was filled with real uname or \0, we can safely pass it */
-  hwloc_add_uname_info(topology, &data->utsname);
 
   hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
   return 0;
@@ -7292,14 +7272,20 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
    * or not (modified fsroot path).
    */
 
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc_topology *topology = backend->topology;
 #ifdef HWLOC_HAVE_LINUXIO
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
 #endif /* HWLOC_HAVE_LINUXIO */
 
+  if (data->need_global_infos) {
+    hwloc_gather_system_info(topology, data);
+    hwloc_linuxfs_check_kernel_cmdline(data);
+  }
+
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
     hwloc_linuxfs_look_cpu(backend, dstatus);
-    return 0;
+    goto out;
   }
 
 #ifdef HWLOC_HAVE_LINUXIO
@@ -7353,6 +7339,14 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 #endif /* HWLOC_HAVE_LINUXIO */
 
+ out:
+  if (data->need_global_infos) {
+    hwloc__get_dmi_id_info(data, topology->levels[0][0]);
+    hwloc_obj_add_info(topology->levels[0][0], "Backend", "Linux");
+    /* data->utsname was filled with real uname or \0, we can safely pass it */
+    hwloc_add_uname_info(topology, &data->utsname);
+    data->need_global_infos = 0;
+  }
   return 0;
 }
 
@@ -7405,6 +7399,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->is_knl = 0;
   data->is_amd_with_CU = 0;
   data->is_fake_numa_uniform = 0;
+  data->need_global_infos = 1;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
