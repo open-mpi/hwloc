@@ -1673,7 +1673,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
    */
 
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_xml_backend_data_s *data = backend->private_data;
+  struct hwloc_xml_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc__xml_import_state_s state, childstate;
   struct hwloc_obj *root = topology->levels[0][0];
   char *tag;
@@ -2810,10 +2810,9 @@ hwloc_topology_set_userdata_import_callback(hwloc_topology_t topology,
 static void
 hwloc_xml_backend_disable(struct hwloc_backend *backend)
 {
-  struct hwloc_xml_backend_data_s *data = backend->private_data;
+  struct hwloc_xml_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   data->backend_exit(data);
   free(data->msgprefix);
-  free(data);
 }
 
 static struct hwloc_backend *
@@ -2847,17 +2846,12 @@ hwloc_xml_component_instantiate(struct hwloc_topology *topology,
     }
   }
 
-  backend = hwloc_backend_alloc(topology, component);
+  backend = hwloc_backend_alloc(topology, component, sizeof(struct hwloc_xml_backend_data_s));
   if (!backend)
     goto out;
 
-  data = malloc(sizeof(*data));
-  if (!data) {
-    errno = ENOMEM;
-    goto out_with_backend;
-  }
+  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 
-  backend->private_data = data;
   backend->discover = hwloc_look_xml;
   backend->disable = hwloc_xml_backend_disable;
   backend->is_thissystem = 0;
@@ -2885,14 +2879,12 @@ retry:
     }
   }
   if (err < 0)
-    goto out_with_data;
+    goto out_with_msgprefix;
 
   return backend;
 
- out_with_data:
+ out_with_msgprefix:
   free(data->msgprefix);
-  free(data);
- out_with_backend:
   free(backend);
  out:
   return NULL;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -930,9 +930,10 @@ hwloc_components_fini(void)
 
 struct hwloc_backend *
 hwloc_backend_alloc(struct hwloc_topology *topology,
-		    struct hwloc_disc_component *component)
+		    struct hwloc_disc_component *component,
+                    unsigned long private_data_size)
 {
-  struct hwloc_backend * backend = malloc(sizeof(*backend));
+  struct hwloc_backend * backend = malloc(sizeof(*backend) + private_data_size);
   if (!backend) {
     errno = ENOMEM;
     return NULL;

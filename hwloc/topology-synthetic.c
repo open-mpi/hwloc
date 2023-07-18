@@ -1031,7 +1031,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *ds
    */
 
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_synthetic_backend_data_s *data = backend->private_data;
+  struct hwloc_synthetic_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   unsigned i;
 
@@ -1071,10 +1071,9 @@ hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *ds
 static void
 hwloc_synthetic_backend_disable(struct hwloc_backend *backend)
 {
-  struct hwloc_synthetic_backend_data_s *data = backend->private_data;
+  struct hwloc_synthetic_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   hwloc_synthetic_free_levels(data);
   free(data->string);
-  free(data);
 }
 
 static struct hwloc_backend *
@@ -1100,29 +1099,22 @@ hwloc_synthetic_component_instantiate(struct hwloc_topology *topology,
     }
   }
 
-  backend = hwloc_backend_alloc(topology, component);
+  backend = hwloc_backend_alloc(topology, component, sizeof(struct hwloc_synthetic_backend_data_s));
   if (!backend)
     goto out;
 
-  data = malloc(sizeof(*data));
-  if (!data) {
-    errno = ENOMEM;
-    goto out_with_backend;
-  }
+  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 
   err = hwloc_backend_synthetic_init(data, (const char *) _data1);
   if (err < 0)
-    goto out_with_data;
+    goto out_with_backend;
 
-  backend->private_data = data;
   backend->discover = hwloc_look_synthetic;
   backend->disable = hwloc_synthetic_backend_disable;
   backend->is_thissystem = 0;
 
   return backend;
 
- out_with_data:
-  free(data);
  out_with_backend:
   free(backend);
  out:

@@ -648,7 +648,7 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
  * infos for summarize to analyze them globally */
 static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
-  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   unsigned eax, ebx, ecx = 0, edx;
   unsigned cachenum;
   struct cacheinfo *cache;
@@ -981,7 +981,7 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
 static void summarize(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
   unsigned i, j, l, level;
@@ -1368,7 +1368,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
 	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags),
            hwloc_bitmap_t restrict_set)
 {
-  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc_topology *topology = backend->topology;
   unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t orig_cpuset = NULL;
@@ -1528,7 +1528,7 @@ static int fake_set_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 static
 int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 {
-  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc_topology *topology = backend->topology;
   unsigned nbprocs = data->nbprocs;
   unsigned eax, ebx, ecx = 0, edx;
@@ -1712,7 +1712,7 @@ out:
 static int
 hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
-  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc_topology *topology = backend->topology;
   unsigned long flags = 0;
   int alreadypus = 0;
@@ -1867,10 +1867,9 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
 static void
 hwloc_x86_backend_disable(struct hwloc_backend *backend)
 {
-  struct hwloc_x86_backend_data_s *data = backend->private_data;
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   hwloc_bitmap_free(data->apicid_set);
   free(data->src_cpuiddump_path);
-  free(data);
 }
 
 static struct hwloc_backend *
@@ -1885,21 +1884,15 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   struct hwloc_x86_backend_data_s *data;
   const char *src_cpuiddump_path;
 
-  backend = hwloc_backend_alloc(topology, component);
+  backend = hwloc_backend_alloc(topology, component, sizeof(*data));
   if (!backend)
     goto out;
 
-  data = malloc(sizeof(*data));
-  if (!data) {
-    errno = ENOMEM;
-    goto out_with_backend;
-  }
-
-  backend->private_data = data;
   backend->discover = hwloc_x86_discover;
   backend->disable = hwloc_x86_backend_disable;
 
   /* default values */
+  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   data->is_knl = 0;
   data->is_hybrid = 0;
   data->apicid_set = hwloc_bitmap_alloc();
@@ -1927,8 +1920,6 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
 
   return backend;
 
- out_with_backend:
-  free(backend);
  out:
   return NULL;
 }

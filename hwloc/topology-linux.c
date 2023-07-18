@@ -5571,7 +5571,7 @@ static int
 hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 
   if (getenv("HWLOC_NO_HARDWIRED_TOPOLOGY"))
     return -1;
@@ -5625,7 +5625,7 @@ static void
 hwloc_linux_fallback_pu_level(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 
   if (data->fallback_nbprocessors >= 1)
     topology->support.discovery->pu = 1;
@@ -5730,7 +5730,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
    */
 
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   unsigned nbnodes;
   char *cpuset_name = NULL;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
@@ -5895,7 +5895,7 @@ static int
 hwloc_linux_backend_get_pci_busid_cpuset(struct hwloc_backend *backend,
 					 struct hwloc_pcidev_attr_s *busid, hwloc_bitmap_t cpuset)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   char path[256];
   int err;
 
@@ -6068,7 +6068,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 				    struct hwloc_obj *obj, const char *osdevpath)
 {
 #ifdef HWLOC_HAVE_LIBUDEV
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 #endif
   FILE *file;
   char path[296]; /* osdevpath <= 256 */
@@ -6238,7 +6238,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 static int
 hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6319,7 +6319,7 @@ hwloc_linuxfs_dax_class_fillinfos(struct hwloc_backend *backend __hwloc_attribut
 static int
 hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6407,7 +6407,7 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
 static int
 hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6524,7 +6524,7 @@ hwloc_linuxfs_infiniband_class_fillinfos(int root_fd,
 static int
 hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6582,7 +6582,7 @@ hwloc_linuxfs_bxi_class_fillinfos(int root_fd,
 static int
 hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6693,7 +6693,7 @@ hwloc_linuxfs_ve_class_fillinfos(int root_fd,
 static int
 hwloc_linuxfs_lookup_ve_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6730,7 +6730,7 @@ hwloc_linuxfs_lookup_ve_class(struct hwloc_backend *backend, unsigned osdev_flag
 static int
 hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6785,7 +6785,7 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_fla
 static int
 hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -6846,7 +6846,7 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
 static int
 hwloc_linuxfs_lookup_cxlmem(struct hwloc_backend *backend, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7066,7 +7066,7 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
 static int
 hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc_topology *topology = backend->topology;
   hwloc_obj_t tree = NULL;
   int root_fd = data->root_fd;
@@ -7234,7 +7234,7 @@ static int
 hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7349,7 +7349,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   if (dstatus->phase == HWLOC_DISC_PHASE_MISC
       && mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-    hwloc__get_firmware_dmi_memory_info(topology, backend->private_data);
+    hwloc__get_firmware_dmi_memory_info(topology, HWLOC_BACKEND_PRIVATE_DATA(backend));
   }
 #endif /* HWLOC_HAVE_LINUXIO */
 
@@ -7363,7 +7363,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 static void
 hwloc_linux_backend_disable(struct hwloc_backend *backend)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 #ifdef HAVE_OPENAT
   if (data->root_fd >= 0) {
     free(data->root_path);
@@ -7374,7 +7374,6 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
   if (data->udev)
     udev_unref(data->udev);
 #endif
-  free(data);
 }
 
 static struct hwloc_backend *
@@ -7391,17 +7390,12 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   int root = -1;
   char *env;
 
-  backend = hwloc_backend_alloc(topology, component);
+  backend = hwloc_backend_alloc(topology, component, sizeof(struct hwloc_linux_backend_data_s));
   if (!backend)
     goto out;
 
-  data = malloc(sizeof(*data));
-  if (!data) {
-    errno = ENOMEM;
-    goto out_with_backend;
-  }
+  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 
-  backend->private_data = data;
   backend->discover = hwloc_look_linuxfs;
   backend->get_pci_busid_cpuset = hwloc_linux_backend_get_pci_busid_cpuset;
   backend->disable = hwloc_linux_backend_disable;
@@ -7476,8 +7470,6 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
 #ifdef HAVE_OPENAT
   free(data->root_path);
 #endif
-  free(data);
- out_with_backend:
   free(backend);
  out:
   return NULL;
