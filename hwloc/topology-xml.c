@@ -1971,6 +1971,27 @@ hwloc__xml_export_safestrdup(const char *old)
 }
 
 static void
+hwloc__xml_export_info_attr_safe(hwloc__xml_export_state_t state, const char *name, const char *value)
+{
+  struct hwloc__xml_export_state_s childstate;
+  state->new_child(state, &childstate, "info");
+  childstate.new_prop(&childstate, "name", name);
+  childstate.new_prop(&childstate, "value", value);
+  childstate.end_object(&childstate, "info");
+}
+
+static void
+hwloc__xml_export_info_attr(hwloc__xml_export_state_t state, const char *_name, const char *_value)
+{
+  char *name = hwloc__xml_export_safestrdup(_name);
+  char *value = hwloc__xml_export_safestrdup(_value);
+  if (name && value)
+    hwloc__xml_export_info_attr_safe(state, name, value);
+  free(name);
+  free(value);
+}
+
+static void
 hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
   char *setstring = NULL;
@@ -2123,19 +2144,8 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     break;
   }
 
-  for(i=0; i<obj->infos_count; i++) {
-    char *name = hwloc__xml_export_safestrdup(obj->infos[i].name);
-    char *value = hwloc__xml_export_safestrdup(obj->infos[i].value);
-    if (name && value) {
-      struct hwloc__xml_export_state_s childstate;
-      state->new_child(state, &childstate, "info");
-      childstate.new_prop(&childstate, "name", name);
-      childstate.new_prop(&childstate, "value", value);
-      childstate.end_object(&childstate, "info");
-    }
-    free(name);
-    free(value);
-  }
+  for(i=0; i<obj->infos_count; i++)
+    hwloc__xml_export_info_attr(state, obj->infos[i].name, obj->infos[i].value);
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) state, topology, obj);
 }
@@ -2428,17 +2438,8 @@ hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t top
       cstate.new_prop(&cstate, "forced_efficiency", tmp);
     }
 
-    for(j=0; j<kind->nr_infos; j++) {
-      char *name = hwloc__xml_export_safestrdup(kind->infos[j].name);
-      char *value = hwloc__xml_export_safestrdup(kind->infos[j].value);
-      struct hwloc__xml_export_state_s istate;
-      cstate.new_child(&cstate, &istate, "info");
-      istate.new_prop(&istate, "name", name);
-      istate.new_prop(&istate, "value", value);
-      istate.end_object(&istate, "info");
-      free(name);
-      free(value);
-    }
+    for(j=0; j<kind->nr_infos; j++)
+      hwloc__xml_export_info_attr(&cstate, kind->infos[j].name, kind->infos[j].value);
 
     cstate.end_object(&cstate, "cpukind");
   }
