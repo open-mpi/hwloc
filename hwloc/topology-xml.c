@@ -754,6 +754,26 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       obj->type = HWLOC_OBJ_DIE;
   }
 
+  /* 2.x backward compatibility */
+  if (data->version_major <= 2 && obj->type == HWLOC_OBJ_OS_DEVICE) {
+    /* check if we need to add backend info to the root */
+    const char *backend = hwloc_obj_get_info_by_name(obj, "Backend");
+    if (backend) {
+      if (!strcmp(backend, "CUDA"))
+        data->need_cuda_backend_info = 1;
+      else if (!strcmp(backend, "NVML"))
+        data->need_nvml_backend_info = 1;
+      else if (!strcmp(backend, "RSMI"))
+        data->need_rsmi_backend_info = 1;
+      else if (!strcmp(backend, "LevelZero"))
+        data->need_levelzero_backend_info = 1;
+      else if (!strcmp(backend, "OpenCL"))
+        data->need_opencl_backend_info = 1;
+      else if (!strcmp(backend, "GL"))
+        data->need_gl_backend_info = 1;
+    }
+  }
+
   /* check that cache attributes are coherent with the actual type */
   if (hwloc__obj_type_is_cache(obj->type)
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
@@ -1690,6 +1710,12 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   hwloc_localeswitch_init();
 
   data->nbnumanodes = 0;
+  data->need_cuda_backend_info = 0;
+  data->need_nvml_backend_info = 0;
+  data->need_rsmi_backend_info = 0;
+  data->need_levelzero_backend_info = 0;
+  data->need_opencl_backend_info = 0;
+  data->need_gl_backend_info = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -1805,7 +1831,39 @@ done:
   /* allocate default cpusets and nodesets if missing, the core will restrict them */
   hwloc_alloc_root_sets(root);
 
-  /* keep the "Backend" information intact */
+  /* keep the "Backend" information intact, but we had missing ones from v3 */
+  if (data->version_major <= 2) {
+    unsigned i;
+    /* check if root already has some backend info */
+    for(i=0; i<root->infos_count; i++)
+      if (!strcmp(root->infos[i].name, "Backend")) {
+        if (!strcmp(root->infos[i].value, "CUDA"))
+          data->need_cuda_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "NVML"))
+          data->need_nvml_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "RSMI"))
+          data->need_rsmi_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "LevelZero"))
+          data->need_levelzero_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "OpenCL"))
+          data->need_opencl_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "GL"))
+          data->need_gl_backend_info = 0;
+      }
+    /* add missing backend info */
+    if (data->need_cuda_backend_info)
+      hwloc_obj_add_info(root, "Backend", "CUDA");
+    if (data->need_nvml_backend_info)
+      hwloc_obj_add_info(root, "Backend", "NVML");
+    if (data->need_rsmi_backend_info)
+      hwloc_obj_add_info(root, "Backend", "RSMI");
+    if (data->need_levelzero_backend_info)
+      hwloc_obj_add_info(root, "Backend", "LevelZero");
+    if (data->need_opencl_backend_info)
+      hwloc_obj_add_info(root, "Backend", "OpenCL");
+    if (data->need_gl_backend_info)
+      hwloc_obj_add_info(root, "Backend", "GL");
+  }
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
