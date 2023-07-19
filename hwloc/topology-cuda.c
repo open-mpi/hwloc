@@ -73,6 +73,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
   cudaError_t cures;
+  unsigned added = 0;
   int nb, i;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
@@ -105,7 +106,6 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     cuda_device->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
     cuda_device->subtype = strdup("CUDA");
-    hwloc_obj_add_info(cuda_device, "Backend", "CUDA");
     hwloc_obj_add_info(cuda_device, "GPUVendor", "NVIDIA Corporation");
 
     cures = cudaGetDeviceProperties(&prop, i);
@@ -138,8 +138,11 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
       parent = hwloc_get_root_obj(topology);
 
     hwloc_insert_object_by_parent(topology, parent, cuda_device);
+    added++;
   }
 
+  if (added > 0)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "CUDA");
   return 0;
 }
 

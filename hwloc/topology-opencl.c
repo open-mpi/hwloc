@@ -51,7 +51,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
   cl_uint nr_platforms;
   cl_platform_id *platform_ids;
   cl_int clret;
-  unsigned j;
+  unsigned j, added = 0;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -123,7 +123,6 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
       osdev->subtype = strdup("OpenCL");
-      hwloc_obj_add_info(osdev, "Backend", "OpenCL");
 
       /* in theory, we should handle cases such GPU|Accelerator|CPU for strange platforms/devices */
       if (type & CL_DEVICE_TYPE_GPU)
@@ -179,10 +178,14 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 	parent = hwloc_get_root_obj(topology);
 
       hwloc_insert_object_by_parent(topology, parent, osdev);
+      added++;
     }
     free(device_ids);
   }
   free(platform_ids);
+
+  if (added)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "OpenCL");
   return 0;
 }
 

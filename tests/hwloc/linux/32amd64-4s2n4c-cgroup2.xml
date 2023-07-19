@@ -2,6 +2,7 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x0000003f" complete_cpuset="0xffffffff" allowed_cpuset="0x0000003f" nodeset="0x0000003f" complete_nodeset="0x000000ff" allowed_nodeset="0x0000003f">
+    <info name="LinuxCgroup" value="/uid_2008/job_15389/step_0"/>
     <info name="DMIProductName" value="H8QG6"/>
     <info name="DMIProductVersion" value="1234567890"/>
     <info name="DMIBoardVendor" value="Supermicro"/>
@@ -17,7 +18,6 @@
     <info name="DMIBIOSDate" value="07/26/2011"/>
     <info name="DMISysVendor" value="Supermicro"/>
     <info name="Backend" value="Linux"/>
-    <info name="LinuxCgroup" value="/uid_2008/job_15389/step_0"/>
     <object type="Package" os_index="0" cpuset="0x0000003f" complete_cpuset="0x000000ff" nodeset="0x00000003" complete_nodeset="0x00000003">
       <info name="CPUModel" value="AMD Opteron(tm) Processor 6134"/>
       <object type="L3Cache" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="5240832" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">

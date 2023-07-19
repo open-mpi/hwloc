@@ -32,6 +32,8 @@ Version 3.0.0
     in PCI object attributes.
   + "Block" OS devices are now "Storage" (for actual Block devices)
     or "Memory" (for Linux DAX and CXL devices, etc).
+  + The "Backend" info attribute of OS devices is now in the topology
+    root object together with other backends.
 * Tools
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.

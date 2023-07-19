@@ -754,6 +754,26 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       obj->type = HWLOC_OBJ_DIE;
   }
 
+  /* 2.x backward compatibility */
+  if (data->version_major <= 2 && obj->type == HWLOC_OBJ_OS_DEVICE) {
+    /* check if we need to add backend info to the root */
+    const char *backend = hwloc_obj_get_info_by_name(obj, "Backend");
+    if (backend) {
+      if (!strcmp(backend, "CUDA"))
+        data->need_cuda_backend_info = 1;
+      else if (!strcmp(backend, "NVML"))
+        data->need_nvml_backend_info = 1;
+      else if (!strcmp(backend, "RSMI"))
+        data->need_rsmi_backend_info = 1;
+      else if (!strcmp(backend, "LevelZero"))
+        data->need_levelzero_backend_info = 1;
+      else if (!strcmp(backend, "OpenCL"))
+        data->need_opencl_backend_info = 1;
+      else if (!strcmp(backend, "GL"))
+        data->need_gl_backend_info = 1;
+    }
+  }
+
   /* check that cache attributes are coherent with the actual type */
   if (hwloc__obj_type_is_cache(obj->type)
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
@@ -1690,6 +1710,12 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   hwloc_localeswitch_init();
 
   data->nbnumanodes = 0;
+  data->need_cuda_backend_info = 0;
+  data->need_nvml_backend_info = 0;
+  data->need_rsmi_backend_info = 0;
+  data->need_levelzero_backend_info = 0;
+  data->need_opencl_backend_info = 0;
+  data->need_gl_backend_info = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -1805,7 +1831,39 @@ done:
   /* allocate default cpusets and nodesets if missing, the core will restrict them */
   hwloc_alloc_root_sets(root);
 
-  /* keep the "Backend" information intact */
+  /* keep the "Backend" information intact, but we had missing ones from v3 */
+  if (data->version_major <= 2) {
+    unsigned i;
+    /* check if root already has some backend info */
+    for(i=0; i<root->infos_count; i++)
+      if (!strcmp(root->infos[i].name, "Backend")) {
+        if (!strcmp(root->infos[i].value, "CUDA"))
+          data->need_cuda_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "NVML"))
+          data->need_nvml_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "RSMI"))
+          data->need_rsmi_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "LevelZero"))
+          data->need_levelzero_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "OpenCL"))
+          data->need_opencl_backend_info = 0;
+        if (!strcmp(root->infos[i].value, "GL"))
+          data->need_gl_backend_info = 0;
+      }
+    /* add missing backend info */
+    if (data->need_cuda_backend_info)
+      hwloc_obj_add_info(root, "Backend", "CUDA");
+    if (data->need_nvml_backend_info)
+      hwloc_obj_add_info(root, "Backend", "NVML");
+    if (data->need_rsmi_backend_info)
+      hwloc_obj_add_info(root, "Backend", "RSMI");
+    if (data->need_levelzero_backend_info)
+      hwloc_obj_add_info(root, "Backend", "LevelZero");
+    if (data->need_opencl_backend_info)
+      hwloc_obj_add_info(root, "Backend", "OpenCL");
+    if (data->need_gl_backend_info)
+      hwloc_obj_add_info(root, "Backend", "GL");
+  }
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
@@ -1971,6 +2029,27 @@ hwloc__xml_export_safestrdup(const char *old)
 }
 
 static void
+hwloc__xml_export_info_attr_safe(hwloc__xml_export_state_t state, const char *name, const char *value)
+{
+  struct hwloc__xml_export_state_s childstate;
+  state->new_child(state, &childstate, "info");
+  childstate.new_prop(&childstate, "name", name);
+  childstate.new_prop(&childstate, "value", value);
+  childstate.end_object(&childstate, "info");
+}
+
+static void
+hwloc__xml_export_info_attr(hwloc__xml_export_state_t state, const char *_name, const char *_value)
+{
+  char *name = hwloc__xml_export_safestrdup(_name);
+  char *value = hwloc__xml_export_safestrdup(_value);
+  if (name && value)
+    hwloc__xml_export_info_attr_safe(state, name, value);
+  free(name);
+  free(value);
+}
+
+static void
 hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topology_t topology, hwloc_obj_t obj, unsigned long flags)
 {
   char *setstring = NULL;
@@ -2123,18 +2202,24 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     break;
   }
 
-  for(i=0; i<obj->infos_count; i++) {
-    char *name = hwloc__xml_export_safestrdup(obj->infos[i].name);
-    char *value = hwloc__xml_export_safestrdup(obj->infos[i].value);
-    if (name && value) {
-      struct hwloc__xml_export_state_s childstate;
-      state->new_child(state, &childstate, "info");
-      childstate.new_prop(&childstate, "name", name);
-      childstate.new_prop(&childstate, "value", value);
-      childstate.end_object(&childstate, "info");
+  for(i=0; i<obj->infos_count; i++)
+    hwloc__xml_export_info_attr(state, obj->infos[i].name, obj->infos[i].value);
+
+  if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
+    /* v2 gpus had Backend inside the object itself */
+    if (!strcmp(obj->subtype, "CUDA")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "CUDA");
+    } else if (!strcmp(obj->subtype, "NVML")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "NVML");
+    } else if (!strcmp(obj->subtype, "OpenCL")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "OpenCL");
+    } else if (!strcmp(obj->subtype, "RSMI")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "RSMI");
+    } else if (!strcmp(obj->subtype, "LevelZero")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "LevelZero");
+    } else if (!strcmp(obj->subtype, "Display")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "GL");
     }
-    free(name);
-    free(value);
   }
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) state, topology, obj);
@@ -2428,17 +2513,8 @@ hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t top
       cstate.new_prop(&cstate, "forced_efficiency", tmp);
     }
 
-    for(j=0; j<kind->nr_infos; j++) {
-      char *name = hwloc__xml_export_safestrdup(kind->infos[j].name);
-      char *value = hwloc__xml_export_safestrdup(kind->infos[j].value);
-      struct hwloc__xml_export_state_s istate;
-      cstate.new_child(&cstate, &istate, "info");
-      istate.new_prop(&istate, "name", name);
-      istate.new_prop(&istate, "value", value);
-      istate.end_object(&istate, "info");
-      free(name);
-      free(value);
-    }
+    for(j=0; j<kind->nr_infos; j++)
+      hwloc__xml_export_info_attr(&cstate, kind->infos[j].name, kind->infos[j].value);
 
     cstate.end_object(&cstate, "cpukind");
   }

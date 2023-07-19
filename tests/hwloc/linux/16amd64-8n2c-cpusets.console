@@ -1,4 +1,4 @@
-Machine (P#0 total=32GiB DMIBoardVendor="TYAN Computer Corp" DMIBoardName="S4881 " DMIBoardVersion=S4881 DMIBoardAssetTag= Backend=Linux LinuxCgroup=/dummy)
+Machine (P#0 total=32GiB LinuxCgroup=/dummy DMIBoardVendor="TYAN Computer Corp" DMIBoardName="S4881 " DMIBoardVersion=S4881 DMIBoardAssetTag= Backend=Linux)
   Package L#0 (P#0 CPUModel="Dual Core AMD Opteron(tm) Processor 865")
     L2Cache L#0 (size=1024KiB linesize=64 ways=16)
       L1dCache L#0 (size=64KiB linesize=64 ways=2)

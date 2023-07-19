@@ -1,4 +1,4 @@
-Machine (P#0 total=16GiB Backend=Linux LinuxCgroup=/prout)
+Machine (P#0 total=16GiB LinuxCgroup=/prout Backend=Linux)
   NUMANode L#0 (P#0 local=16GiB total=16GiB)
   Package L#0 (P#0 CPUModel="Intel(R) Xeon(TM) CPU 2.60GHz")
     L2Cache L#0 (size=1024KiB linesize=64 ways=8)

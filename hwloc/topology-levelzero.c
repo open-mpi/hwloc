@@ -601,7 +601,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   enum hwloc_type_filter_e filter;
   ze_result_t res;
   ze_driver_handle_t *drh;
-  uint32_t nbdrivers, i, k, zeidx;
+  uint32_t nbdrivers, i, k, zeidx, added = 0;
   struct hwloc_osdev_array oarray;
   struct hwloc_levelzero_ports hports;
   int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
@@ -709,7 +709,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
       osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
       osdev->subtype = strdup("LevelZero");
-      hwloc_obj_add_info(osdev, "Backend", "LevelZero");
 
       snprintf(buffer, sizeof(buffer), "%u", i);
       hwloc_obj_add_info(osdev, "LevelZeroDriverIndex", buffer);
@@ -738,7 +737,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
             subosdevs[k]->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
             subosdevs[k]->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
             subosdevs[k]->subtype = strdup("LevelZero");
-            hwloc_obj_add_info(subosdevs[k], "Backend", "LevelZero");
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
@@ -805,11 +803,13 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
        */
       hwloc_insert_object_by_parent(topology, parent, osdev);
       hwloc__levelzero_osdev_array_add(&oarray, osdev);
+      added++;
       if (nr_subdevices) {
         for(k=0; k<nr_subdevices; k++)
           if (subosdevs[k]) {
             hwloc_insert_object_by_parent(topology, osdev, subosdevs[k]);
             hwloc__levelzero_osdev_array_add(&oarray, subosdevs[k]);
+            added++;
           }
         free(subosdevs);
         free(subh);
@@ -826,6 +826,9 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   hwloc__levelzero_osdev_array_free(&oarray);
 
   free(drh);
+
+  if (added)
+    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "LevelZero");
   return 0;
 }
 

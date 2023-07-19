@@ -78,7 +78,7 @@ int main(void)
   char xmlfile[] = "hwloc_backends.tmpxml.XXXXXX";
   char env[64];
   int xmlbufok = 0, xmlfileok = 0, xmlfilefd;
-  const char *orig_backend_name;
+  const char *orig_backend_name, *backend_name;
   int err;
 
   putenv((char *) "HWLOC_LIBXML_CLEANUP=1");
@@ -257,7 +257,9 @@ int main(void)
   assert(!err);
 #endif
   hwloc_topology_load(topology1);
-  assert(!get_backend_name(topology1)); /* noos doesn't put any Backend info attr */
+  backend_name = get_backend_name(topology1);
+  assert(backend_name);
+  assert(!strcmp(backend_name, "noOS"));
   hwloc_topology_check(topology1);
   assert(hwloc_topology_is_thissystem(topology1));
   hwloc_topology_destroy(topology1);

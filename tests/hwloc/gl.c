@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2015 Inria.  All rights reserved.
+ * Copyright © 2012-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -13,6 +13,17 @@
 #include <string.h>
 #include "stdlib.h"
 
+static int check_gl_backend(hwloc_topology_t topology)
+{
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
+  unsigned i;
+  for(i=0; i<root->infos_count; i++)
+    if (!strcmp(root->infos[i].name, "Backend")
+        || !strcmp(root->infos[i].value, "GL"))
+      return 1;
+  return 0;
+}
+
 int main(void)
 {
   hwloc_topology_t topology;
@@ -24,6 +35,7 @@ int main(void)
   unsigned nr_osdev;
   unsigned nr_gpus;
   unsigned i;
+  int has_gl_backend;
   int err;
 
   hwloc_topology_init(&topology); /* Topology initialization */
@@ -33,6 +45,8 @@ int main(void)
 
   /* Perform topology detection */
   hwloc_topology_load(topology);
+
+  has_gl_backend = check_gl_backend(topology);
 
   /* Case 1: Get the cpusets of the packages connecting the PCI devices in the topology */
   nr_pcidev = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PCI_DEVICE);
@@ -49,17 +63,14 @@ int main(void)
   nr_gpus = 0;
   nr_osdev = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_OS_DEVICE);
   for (i = 0; i < nr_osdev; ++i) {
-      const char *model, *backend;
+      const char *model;
       osdev = hwloc_get_obj_by_type(topology, HWLOC_OBJ_OS_DEVICE, i);
 
-      backend = hwloc_obj_get_info_by_name(osdev, "Backend");
       model = hwloc_obj_get_info_by_name(osdev, "GPUModel");
 
       err = hwloc_gl_get_display_by_osdev(topology, osdev, &port, &device);
       if (!err) {
-	err = strcmp(backend, "GL");
-	assert(!err);
-
+        assert(has_gl_backend);
 	assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_GPU);
 
 	if (!firstgpu)
@@ -67,11 +78,6 @@ int main(void)
 	lastgpu = osdev;
 	printf("GPU #%u (%s) is connected to DISPLAY:%u.%u \n", nr_gpus, model, port, device);
 	nr_gpus++;
-      } else {
-	if (backend) {
-	  err = strcmp(backend, "GL");
-	  assert(err);
-	}
       }
     }
 

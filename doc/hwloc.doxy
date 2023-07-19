@@ -2046,11 +2046,11 @@ placed.
 Unless specified, these info attributes are attached to the root object (Machine).
 
 <dl>
-<dt>Backend (topology root, or specific object added by that backend)</dt>
-<dd>The name of the hwloc backend/component that filled the topology.
+<dt>Backend (topology root object)</dt>
+<dd>The name of a hwloc backend/component that added objects in the topology.
 If several components were combined, multiple Backend keys may exist,
-with different values, for instance <tt>x86</tt> and <tt>Linux</tt> in the root
-object and <tt>CUDA</tt> in CUDA OS device objects.
+with different values, for instance <tt>x86</tt>, <tt>Linux</tt> and
+<tt>CUDA</tt>.
 </dd>
 <dt>SyntheticDescription</dt>
 <dd>The description string that was given to hwloc to build this

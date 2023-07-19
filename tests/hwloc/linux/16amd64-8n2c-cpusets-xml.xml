@@ -2,12 +2,12 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x0000f06f" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000f06f" nodeset="0x0000001e" complete_nodeset="0x000000ff" allowed_nodeset="0x0000001e">
+    <info name="LinuxCgroup" value="/dummy"/>
     <info name="DMIBoardVendor" value="TYAN Computer Corp"/>
     <info name="DMIBoardName" value="S4881 "/>
     <info name="DMIBoardVersion" value="S4881"/>
     <info name="DMIBoardAssetTag" value=""/>
     <info name="Backend" value="Linux"/>
-    <info name="LinuxCgroup" value="/dummy"/>
     <object type="Package" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001">
       <info name="CPUModel" value="Dual Core AMD Opteron(tm) Processor 865"/>
       <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x0" complete_nodeset="0x00000001" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
