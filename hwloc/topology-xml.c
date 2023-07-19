@@ -2146,6 +2146,23 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 
   for(i=0; i<obj->infos_count; i++)
     hwloc__xml_export_info_attr(state, obj->infos[i].name, obj->infos[i].value);
+
+  if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
+    /* v2 gpus had Backend inside the object itself */
+    if (!strcmp(obj->subtype, "CUDA")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "CUDA");
+    } else if (!strcmp(obj->subtype, "NVML")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "NVML");
+    } else if (!strcmp(obj->subtype, "OpenCL")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "OpenCL");
+    } else if (!strcmp(obj->subtype, "RSMI")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "RSMI");
+    } else if (!strcmp(obj->subtype, "LevelZero")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "LevelZero");
+    } else if (!strcmp(obj->subtype, "Display")) {
+      hwloc__xml_export_info_attr_safe(state, "Backend", "GL");
+    }
+  }
   if (obj->userdata && topology->userdata_export_cb)
     topology->userdata_export_cb((void*) state, topology, obj);
 }
