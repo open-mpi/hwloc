@@ -1171,6 +1171,22 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* block replaced by storage+memory in 3.0 */
     if (obj->attr->osdev.type == 6 /* MEMORY */)
       obj->attr->osdev.type = HWLOC_OBJ_OSDEV_BLOCK;
+    /* Backend info only in root */
+    if (obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
+      if (!strcmp(obj->subtype, "CUDA")) {
+        hwloc_obj_add_info(obj, "Backend", "CUDA");
+      } else if  (!strcmp(obj->subtype, "NVML")) {
+        hwloc_obj_add_info(obj, "Backend", "NVML");
+      } else if  (!strcmp(obj->subtype, "OpenCL")) {
+        hwloc_obj_add_info(obj, "Backend", "OpenCL");
+      } else if  (!strcmp(obj->subtype, "RSMI")) {
+        hwloc_obj_add_info(obj, "Backend", "RSMI");
+      } else if  (!strcmp(obj->subtype, "LevelZero")) {
+        hwloc_obj_add_info(obj, "Backend", "LevelZero");
+      } else if  (!strcmp(obj->subtype, "Display")) {
+        hwloc_obj_add_info(obj, "Backend", "GL");
+      }
+    }
   }
 
   if (!hwloc_filter_check_keep_object(topology, obj)) {
