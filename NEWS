@@ -37,6 +37,8 @@ Version 3.0.0
   + The array and count of info attributes are now embedded in the new
     struct hwloc_infos_s.
     - hwloc_infos_s structures may be modified with hwloc_modify_infos().
+    - hwloc_topology_get_infos() returns the new topology-global array
+      of info attributes.
     - hwloc_cpukinds_get_info() and hwloc_cpukinds_register() now manipulate
       infos as such a structure.
 * Tools

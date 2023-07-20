@@ -1972,6 +1972,9 @@ or using the hwloc_obj_get_info_by_name().
 The user may additionally add new name-value pairs to any object using
 hwloc_obj_add_info(), hwloc_modify_infos() or the \ref cli_hwloc_annotate program.
 
+Some topology-global info attributes (not specific to some objects)
+are also accessible using hwloc_topology_get_infos().
+
 Here is a non-exhaustive list of attributes that may be automatically
 added by hwloc.
 Note that these attributes heavily depend on the ability of the
@@ -2316,9 +2319,9 @@ that have a special meaning:
 <div class="section">
 \endhtmlonly
 
-Besides the hierarchy of objects and individual object attributes
-(see \ref attributes), hwloc may also expose finer information about
-the hardware organization.
+Besides the hierarchy of objects, individual object attributes
+and topology info attributes (see \ref attributes),
+hwloc may also expose finer information about the hardware organization.
 
 
 \htmlonly

@@ -461,6 +461,11 @@ hwloc_debug_print_objects(int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 #define hwloc_debug_print_objects(indent, obj) do { /* nothing */ } while (0)
 #endif /* !HWLOC_DEBUG */
 
+struct hwloc_infos_s * hwloc_topology_get_infos(hwloc_topology_t topology)
+{
+  return &topology->infos;
+}
+
 void hwloc__free_infos(struct hwloc_infos_s *infos)
 {
   unsigned i;
@@ -1205,6 +1210,8 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   err = hwloc__duplicate_object(new, NULL, newroot, oldroot);
   if (err < 0)
     goto out_with_topology;
+
+  hwloc__tma_dup_infos(tma, &new->infos, &old->infos);
 
   err = hwloc_internal_distances_dup(new, old);
   if (err < 0)
@@ -3830,6 +3837,10 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->support.membind = hwloc_tma_malloc(tma, sizeof(*topology->support.membind));
   topology->support.misc = hwloc_tma_malloc(tma, sizeof(*topology->support.misc));
 
+  topology->infos.count = 0;
+  topology->infos.allocated = 0;
+  topology->infos.array = NULL;
+
   topology->nb_levels_allocated = nblevels; /* enough for default 10 levels = Mach+Pack+Die+NUMA+L3+L2+L1d+L1i+Co+PU */
   topology->levels = hwloc_tma_calloc(tma, topology->nb_levels_allocated * sizeof(*topology->levels));
   topology->level_nbobjects = hwloc_tma_calloc(tma, topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
@@ -4126,6 +4137,8 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_components_fini();
 
   hwloc_topology_clear(topology);
+
+  hwloc__free_infos(&topology->infos);
 
   free(topology->levels);
   free(topology->level_nbobjects);

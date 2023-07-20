@@ -1782,7 +1782,8 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
         ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
         if (ret < 0)
           goto failed;
-        /* ignored */
+        if (infoname && infovalue)
+          hwloc__add_info(&topology->infos, infoname, infovalue);
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
@@ -2518,6 +2519,14 @@ hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t top
   }
 }
 
+static void
+hwloc__xml_export_infos(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  unsigned j;
+  for(j=0; j<topology->infos.count; j++)
+    hwloc__xml_export_info_attr(state, topology->infos.array[j].name, topology->infos.array[j].value);
+}
+
 void
 hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t topology, unsigned long flags)
 {
@@ -2531,6 +2540,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
       hwloc__xml_v2export_support(state, topology);
     hwloc__xml_export_memattrs(state, topology);
     hwloc__xml_export_cpukinds(state, topology);
+    hwloc__xml_export_infos(state, topology);
 }
 
 void
