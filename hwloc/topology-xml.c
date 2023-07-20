@@ -104,7 +104,6 @@ hwloc_xml_callbacks_reset(void)
 
 static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology,
-			      struct hwloc_xml_backend_data_s *data __hwloc_attribute_unused,
 			      struct hwloc_obj *obj,
 			      const char *name, const char *value,
 			      hwloc__xml_import_state_t state,
@@ -435,8 +434,7 @@ hwloc___xml_import_info(char **infonamep, char **infovaluep,
 }
 
 static int
-hwloc__xml_import_obj_info(struct hwloc_xml_backend_data_s *data __hwloc_attribute_unused,
-                           hwloc_obj_t obj,
+hwloc__xml_import_obj_info(hwloc_obj_t obj,
                            hwloc__xml_import_state_t state)
 {
   char *infoname = NULL;
@@ -457,7 +455,7 @@ hwloc__xml_import_obj_info(struct hwloc_xml_backend_data_s *data __hwloc_attribu
 }
 
 static int
-hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, struct hwloc_numanode_attr_s *memory,
+hwloc__xml_import_pagetype(struct hwloc_numanode_attr_s *memory,
 			   hwloc__xml_import_state_t state)
 {
   uint64_t size = 0, count = 0;
@@ -496,7 +494,8 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, s
 }
 
 static int
-hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj,
+hwloc__xml_import_userdata(hwloc_topology_t topology,
+                           hwloc_obj_t obj,
 			   hwloc__xml_import_state_t state)
 {
   size_t length = 0;
@@ -619,7 +618,7 @@ static void hwloc__xml_import_report_outoforder(hwloc_topology_t topology, hwloc
 
 static int
 hwloc__xml_import_object(hwloc_topology_t topology,
-			 struct hwloc_xml_backend_data_s *data __hwloc_attribute_unused,
+			 struct hwloc_xml_backend_data_s *data,
 			 hwloc_obj_t parent, hwloc_obj_t obj, int *gotignored,
 			 hwloc__xml_import_state_t state)
 {
@@ -668,7 +667,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		  state->global->msgprefix,  attrname);
 	goto error_with_object;
       }
-      hwloc__xml_import_object_attr(topology, data, obj, attrname, attrvalue, state, &ignored);
+      hwloc__xml_import_object_attr(topology, obj, attrname, attrvalue, state, &ignored);
     }
   }
 
@@ -689,9 +688,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     } else if (!strcmp(tag, "page_type")) {
       if (obj->type == HWLOC_OBJ_NUMANODE) {
-	ret = hwloc__xml_import_pagetype(topology, &obj->attr->numanode, &childstate);
+	ret = hwloc__xml_import_pagetype(&obj->attr->numanode, &childstate);
       } else if (!parent) {
-	ret = hwloc__xml_import_pagetype(topology, &topology->machine_memory, &childstate);
+	ret = hwloc__xml_import_pagetype(&topology->machine_memory, &childstate);
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
@@ -700,7 +699,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_obj_info(data, obj, &childstate);
+      ret = hwloc__xml_import_obj_info(obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
