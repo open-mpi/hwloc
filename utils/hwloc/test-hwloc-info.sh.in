@@ -42,8 +42,8 @@ set -e
   echo "# (default)"
   $info --if synthetic --input "node:2 core:3 pu:4"
   echo
-  echo "# --topology"
-  $info --if synthetic --input "node:2 core:3 pu:4" --topology
+  echo "# --topology --verbose"
+  $info --if synthetic --input "node:2 core:3 pu:4" --topology --verbose
   echo
   echo "# --support"
   $info --if synthetic --input "node:2 core:3 pu:4" --support

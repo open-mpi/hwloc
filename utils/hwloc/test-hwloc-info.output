@@ -5,7 +5,7 @@ depth 0:           1 Machine (type #0)
    depth 3:        24 PU (type #3)
 Special depth -3:  2 NUMANode (type #13)
 
-# --topology
+# --topology --verbose
 depth 0:           1 Machine (type #0)
  depth 1:          2 Group0 (type #12)
   depth 2:         6 Core (type #2)
