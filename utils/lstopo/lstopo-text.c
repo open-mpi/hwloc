@@ -529,6 +529,7 @@ output_console(struct lstopo_output *loutput, const char *filename)
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
     hwloc_const_bitmap_t allowed = hwloc_topology_get_allowed_cpuset(topology);
+    struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
 
     if (!hwloc_bitmap_isequal(topo, complete)) {
       hwloc_bitmap_t unknown = hwloc_bitmap_alloc();
@@ -549,6 +550,19 @@ output_console(struct lstopo_output *loutput, const char *filename)
       fprintf(output, "%d processors represented but not allowed: %s\n", hwloc_bitmap_weight(disallowed), disallowedstr);
       free(disallowedstr);
       hwloc_bitmap_free(disallowed);
+    }
+    if (infos->count) {
+      unsigned i;
+      fprintf(output, "Topology infos:");
+      for(i=0; i<infos->count; i++) {
+        const char *quote;
+        if (strchr(infos->array[i].value, ' '))
+          quote = "\"";
+        else
+          quote = "";
+        fprintf(output, " %s=%s%s%s", infos->array[i].name, quote, infos->array[i].value, quote);
+      }
+      fprintf(output, "\n");
     }
     if (!hwloc_topology_is_thissystem(topology))
       fprintf (output, "Topology not from this system\n");
