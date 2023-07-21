@@ -157,6 +157,8 @@ Group:4 NUMANode:1 PU:4
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="2.0">
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x0000000f" complete_nodeset="0x0000000f" allowed_nodeset="0x0000000f" gp_index="1">
+    <info name="Backend" value="Synthetic"/>
+    <info name="SyntheticDescription" value="node:4 pu:4"/>
     <object type="Group" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7" kind="1001" subkind="0">
       <object type="NUMANode" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" local_memory="1073741824">
         <page_type size="4096" count="262144"/>
@@ -198,8 +200,6 @@ Group:4 NUMANode:1 PU:4
   <support name="discovery.numa"/>
   <support name="discovery.numa_memory"/>
   <support name="custom.exported_support"/>
-  <info name="Backend" value="Synthetic"/>
-  <info name="SyntheticDescription" value="node:4 pu:4"/>
 </topology>
 ** Topology flag disallowed...
 assuming `node:4 pu:4' is a synthetic topology description

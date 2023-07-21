@@ -2222,6 +2222,9 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
 
   for(i=0; i<obj->infos.count; i++)
     hwloc__xml_export_info_attr(state, obj->infos.array[i].name, obj->infos.array[i].value);
+  if (v2export && !obj->parent)
+    for(i=0; i<topology->infos.count; i++)
+      hwloc__xml_export_info_attr(state, topology->infos.array[i].name, topology->infos.array[i].value);
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
     /* v2 gpus had Backend inside the object itself */
@@ -2559,7 +2562,8 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
       hwloc__xml_v2export_support(state, topology);
     hwloc__xml_export_memattrs(state, topology);
     hwloc__xml_export_cpukinds(state, topology);
-    hwloc__xml_export_infos(state, topology);
+    if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2))
+      hwloc__xml_export_infos(state, topology);
 }
 
 void
