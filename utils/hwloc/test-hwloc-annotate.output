@@ -180,4 +180,5 @@
     <info name="foo" value="bar"/>
     <info name="foo2" value="bar2"/>
   </cpukind>
+  <info name="Foooo" value="Barrr"/>
 </topology>
