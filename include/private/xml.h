@@ -19,7 +19,7 @@ HWLOC_DECLSPEC int hwloc__xml_verbose(void);
 typedef struct hwloc__xml_import_state_s {
   struct hwloc__xml_import_state_s *parent;
 
-  /* globals shared because the entire stack of states during import */
+  /* globals shared between the entire stack of states during import */
   struct hwloc_xml_backend_data_s *global;
 
   /* opaque data used to store backend-specific data.
