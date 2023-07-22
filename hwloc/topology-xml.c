@@ -818,7 +818,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 		state->global->msgprefix, obj->os_index);
       goto error_with_object;
     }
-    data->nbnumanodes++;
   }
 
   if (!hwloc_filter_check_keep_object(topology, obj)) {
@@ -1708,7 +1707,6 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
   hwloc_localeswitch_init();
 
-  data->nbnumanodes = 0;
   data->need_cuda_backend_info = 0;
   data->need_nvml_backend_info = 0;
   data->need_rsmi_backend_info = 0;
@@ -1868,11 +1866,9 @@ done:
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
     topology->support.discovery->pu = 1;
     topology->support.discovery->disallowed_pu = 1;
-    if (data->nbnumanodes) {
-      topology->support.discovery->numa = 1;
-      topology->support.discovery->numa_memory = 1; // FIXME
-      topology->support.discovery->disallowed_numa = 1;
-    }
+    topology->support.discovery->numa = 1;
+    topology->support.discovery->numa_memory = 1; // FIXME
+    topology->support.discovery->disallowed_numa = 1;
   }
 
   if (data->look_done)

@@ -44,7 +44,6 @@ struct hwloc_xml_backend_data_s {
   char * msgprefix;
   void *data; /* libxml2 doc, or nolibxml buffer */
   unsigned version_major, version_minor;
-  unsigned nbnumanodes;
   unsigned char need_cuda_backend_info, need_nvml_backend_info, need_rsmi_backend_info, need_levelzero_backend_info, need_opencl_backend_info, need_gl_backend_info;
 };
 
