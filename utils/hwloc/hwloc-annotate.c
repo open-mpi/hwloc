@@ -786,7 +786,22 @@ int main(int argc, char *argv[])
 
 	  for(i=0; i<nr_locations; i++) {
 	    char *location = locations[i];
-	    if (!strcmp(location, "all")) {
+            if (!strncmp(location, "cpukind#", 8) && (infoname || clearinfos)) {
+              struct hwloc_infos_s *infos;
+              int num;
+              if (location[8] < '0' || location[8] > '9') {
+                fprintf(stderr, "Failed to recognize number after cpukind# in location %s\n", location);
+                goto out_with_topology;
+              }
+              num = atoi(location+8);
+              err = hwloc_cpukinds_get_info(topology, num, NULL, NULL, &infos, 0);
+              if (err < 0) {
+                fprintf(stderr, "Failed to find cpukind#%d\n", num);
+                goto out_with_topology;
+              } else {
+                apply_infos(infos);
+              }
+            } else if (!strcmp(location, "all")) {
 	      apply_recursive(topology, hwloc_get_root_obj(topology));
 	    } else if (!strcmp(location, "root")) {
 	      apply(topology, hwloc_get_root_obj(topology));

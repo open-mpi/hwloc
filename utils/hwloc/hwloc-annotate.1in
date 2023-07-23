@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2013-2022 Inria.  All rights reserved.
+.\" Copyright © 2013-2023 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-ANNOTATE "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -80,6 +80,8 @@ This is specified by the \fImode\fR:
 .B info <name> <value>
 Specifies a new string info attribute whose name is \fIname\fR and
 value is \fIvalue\fR.
+If \fBlocation\fR is \fIcpukind#<N>\fR, operate on the info attributes
+of the N-th cpukind.
 .TP
 .B subtype <subtype>
 Specifies that the subtype attribute of the object should now be \fIsubtype\fR.
@@ -131,6 +133,10 @@ ranking of kinds. It should be -1 if unknown.
 
 If \fIinfoname\fR and \fIinfovalue\fR are given and non-empty,
 they are added as info attributes to this kind of CPU.
+
+More info attributes may be added by applying this operating
+multiple times. See also the \fBinfo\fR operation above for ways
+to tweak info attributes using the \fIcpukind#<N>\fR location.
 
 See the function hwloc_cpukinds_register() for details.
 
@@ -218,6 +224,10 @@ Only add to all Core objects:
 
     $ hwloc-annotate input.xml output.xml Core:all info infoname infovalue
 
+Remove all info attributes from the first cpukind:
+
+    $ hwloc-annotate --ci input.xml output.xml -- cpukind#0 -- none
++
 Add a Misc object named "foobar" under the root object of the topology
 and modify the input XML directly:
 
