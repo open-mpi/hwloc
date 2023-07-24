@@ -1,4 +1,4 @@
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -63,9 +63,9 @@ check_PROGRAMS = \
         hwloc_topology_dup \
         hwloc_topology_diff \
         hwloc_topology_abi \
-        hwloc_obj_infos \
         hwloc_iodevs \
         cpuset_nodeset \
+        infos \
         memattrs \
         memtiers \
         cpukinds \
