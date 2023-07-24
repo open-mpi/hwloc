@@ -426,7 +426,8 @@ struct hwloc_info_s {
 
 /** \brief Array of string info attributes (pairs of name and value).
  *
- * These structures may only be modified with hwloc_obj_add_info().
+ * These structures may only be modified with hwloc_obj_add_info()
+ * and hwloc_modify_infos().
  *
  * \sa hwlocality_info_attr
  */
@@ -1155,10 +1156,61 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
 static __hwloc_inline const char *
 hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name) __hwloc_attribute_pure;
 
+/** \brief Modify an array of info attributes.
+ *
+ * \p operation is a single value among enum hwloc_modify_infos_op_e.
+ *
+ * If adding (::HWLOC_MODIFY_INFOS_OP_ADD or ::HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE)
+ * or replacing (::HWLOC_MODIFY_INFOS_OP_REPLACE) an info attribute,
+ * \p name and \p value cannot be \c NULL.
+ * The input strings are copied before being added in the object infos.
+ *
+ * If removing existing info pairs (::HWLOC_MODIFY_INFOS_OP_REMOVE),
+ * \p name and/or \p value may be non \c NULL to specify which pair(s) to remove.
+ * If both \p name and \p value are \c NULL, all pairs are removed.
+ *
+ * \return \c 0 on success, \c -1 on error.
+ *
+ * \note If \p value contains some non-printable characters, they will
+ * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
+ */
+HWLOC_DECLSPEC int hwloc_modify_infos(struct hwloc_infos_s *infos,
+                                      unsigned long operation,
+                                      const char *name, const char *value);
+
+/** \brief Operations given to hwloc_modify_infos(). */
+enum hwloc_modify_infos_op_e {
+  /** \brief Add a new info attribute with the given name and value.
+   * \hideinitializer
+   */
+  HWLOC_MODIFY_INFOS_OP_ADD = 1UL<<0,
+
+  /** \brief Add a new info attribute with the given name and value
+   * only if that pair doesn't exist yet.
+   * \hideinitializer
+   */
+  HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE = 1UL<<1,
+
+  /** \brief Replace existing info attributes with the given name,
+   * with a single attribute with the given name and value.
+   * If no existing pair matches, add a new one.
+   * If multiple pairs match, only one remains.
+   * \hideinitializer
+   */
+  HWLOC_MODIFY_INFOS_OP_REPLACE = 1UL<<2,
+
+  /** \brief Remove existing info attributes that matches the given
+   * name and/or value if not \c NULL.
+   * \hideinitializer
+   */
+  HWLOC_MODIFY_INFOS_OP_REMOVE = 1UL<<3
+};
+
 /** \brief Add the given name and value pair to the given object info attributes.
  *
  * The info pair is appended to the existing info array even if another pair
- * with the same name already exists.
+ * with the same name already exists. See hwloc_modify_infos() for a more
+ * flexible variant.
  *
  * The input strings are copied before being added in the object infos.
  *
@@ -1173,7 +1225,8 @@ hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name) __hwloc_at
  * \note If \p name or \p value contain some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
-HWLOC_DECLSPEC int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
+static __hwloc_inline int
+hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 
 /** @} */
 

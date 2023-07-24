@@ -125,6 +125,12 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
   return hwloc_get_info_by_name(&obj->infos, name);
 }
 
+static __hwloc_inline int
+hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
+{
+  return hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, name, value);
+}
+
 static __hwloc_inline void *
 hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
 {

@@ -523,6 +523,23 @@ int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *v
   return -1;
 }
 
+static int hwloc__add_info_unique(struct hwloc_infos_s *infos, const char *name, const char *value)
+{
+  struct hwloc_info_s *array = infos->array;
+  unsigned i, count = infos->count;
+
+  if (!name || !value) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for(i=0; i<count; i++)
+    if (!strcmp(array[i].name, name) && !strcmp(array[i].value, value))
+      return 0;
+
+  return hwloc__add_info(infos, name, value);
+}
+
 int hwloc__add_info_nodup(struct hwloc_infos_s *infos,
 			  const char *name, const char *value,
 			  int replace)
@@ -549,6 +566,92 @@ int hwloc__add_info_nodup(struct hwloc_infos_s *infos,
     }
   }
   return hwloc__add_info(infos, name, value);
+}
+
+static int hwloc__replace_infos(struct hwloc_infos_s *infos,
+                                const char *name, const char *value)
+{
+  struct hwloc_info_s *array = infos->array;
+  unsigned count = infos->count;
+  unsigned i;
+  int found = 0;
+
+  if (!name || !value) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for(i=0; i<count; i++) {
+    if (!strcmp(array[i].name, name)) {
+      if (!found) {
+        /* first match, replace */
+        char *new = strdup(value);
+        if (!new)
+	  return -1;
+	free(array[i].value);
+	array[i].value = new;
+      } else {
+        /* non-first match, remove */
+        free(array[i].name);
+        free(array[i].value);
+      }
+      found++;
+    } else if (found > 1) {
+      /* non-match, move left by found-1 */
+      array[i-(found-1)].name = array[i].name;
+      array[i-(found-1)].value = array[i].value;
+    }
+  }
+  if (found) {
+    if (found > 1)
+      infos->count -= found-1;
+    return 0;
+  } else {
+    /* no match, just add */
+    return hwloc__add_info(infos, name, value);
+  }
+}
+
+static int hwloc__remove_infos(struct hwloc_infos_s *infos,
+                        const char *name, const char *value)
+{
+  struct hwloc_info_s *array = infos->array;
+  unsigned count = infos->count;
+  unsigned i;
+  int found = 0;
+
+  for(i=0; i<count; i++) {
+    if ((!name || !strcmp(array[i].name, name))
+        && (!value || !strcmp(array[i].value, value))) {
+      /* match, remove */
+      free(array[i].name);
+      free(array[i].value);
+      found++;
+    } else {
+      /* non-match, move left by found */
+      array[i-found].name = array[i].name;
+      array[i-found].value = array[i].value;
+    }
+  }
+  infos->count -= found;
+  return 0;
+}
+
+int hwloc_modify_infos(struct hwloc_infos_s *infos, unsigned long op, const char *name, const char *value)
+{
+  switch (op) {
+  case HWLOC_MODIFY_INFOS_OP_ADD:
+    return hwloc__add_info(infos, name, value);
+  case HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE:
+    return hwloc__add_info_unique(infos, name, value);
+  case HWLOC_MODIFY_INFOS_OP_REPLACE:
+    return hwloc__replace_infos(infos, name, value);
+  case HWLOC_MODIFY_INFOS_OP_REMOVE:
+    return hwloc__remove_infos(infos, name, value);
+  default:
+    errno = EINVAL;
+    return -1;
+  }
 }
 
 int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
@@ -589,11 +692,6 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
   src_infos->count = 0;
   src_infos->allocated = 0;
   return -1;
-}
-
-int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
-{
-  return hwloc__add_info(&obj->infos, name, value);
 }
 
 /* This function may be called with topology->tma set, it cannot free() or realloc() */

@@ -36,6 +36,7 @@ Version 3.0.0
     root object together with other backends.
   + The array and count of info attributes are now embedded in the new
     struct hwloc_infos_s.
+    - hwloc_infos_s structures may be modified with hwloc_modify_infos().
     - hwloc_cpukinds_get_info() and hwloc_cpukinds_register() now manipulate
       infos as such a structure.
 * Tools

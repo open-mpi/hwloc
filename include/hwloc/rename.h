@@ -218,6 +218,12 @@ extern "C" {
 #define hwloc_obj_get_info_by_name HWLOC_NAME(obj_get_info_by_name)
 #define hwloc_get_info_by_name HWLOC_NAME(get_info_by_name)
 #define hwloc_obj_add_info HWLOC_NAME(obj_add_info)
+#define hwloc_modify_infos HWLOC_NAME(modify_infos)
+#define hwloc_modify_infos_op_e HWLOC_NAME(modify_infos_op_e)
+#define HWLOC_MODIFY_INFOS_OP_ADD HWLOC_NAME_CAPS(MODIFY_INFOS_OP_ADD)
+#define HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE HWLOC_NAME_CAPS(MODIFY_INFOS_OP_ADD_UNIQUE)
+#define HWLOC_MODIFY_INFOS_OP_REPLACE HWLOC_NAME_CAPS(MODIFY_INFOS_OP_REPLACE)
+#define HWLOC_MODIFY_INFOS_OP_REMOVE HWLOC_NAME_CAPS(MODIFY_INFOS_OP_REMOVE)
 
 #define HWLOC_CPUBIND_PROCESS HWLOC_NAME_CAPS(CPUBIND_PROCESS)
 #define HWLOC_CPUBIND_THREAD HWLOC_NAME_CAPS(CPUBIND_THREAD)

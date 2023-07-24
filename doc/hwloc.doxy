@@ -1970,7 +1970,7 @@ Each object contains a list of such pairs that may be consulted
 manually (looking at the object <tt>infos</tt> array field)
 or using the hwloc_obj_get_info_by_name().
 The user may additionally add new name-value pairs to any object using
-hwloc_obj_add_info() or the \ref cli_hwloc_annotate program.
+hwloc_obj_add_info(), hwloc_modify_infos() or the \ref cli_hwloc_annotate program.
 
 Here is a non-exhaustive list of attributes that may be automatically
 added by hwloc.
@@ -3970,7 +3970,7 @@ and <tt>hwloc_topology_set_userdata_import_callback()</tt>.
 Each object may also contain some <em>info</em> attributes
 (name and value strings) that are setup by hwloc during discovery
 and that may be extended by the user with
-<tt>hwloc_obj_add_info()</tt> (see also \ref attributes).
+<tt>hwloc_obj_add_info()</tt> or <tt>hwloc_modify_infos()</tt> (see also \ref attributes).
 Contrary to the <tt>userdata</tt> field which is unique, multiple info
 attributes may exist for each object, even with the same name.
 These attributes are always exported to XML.
