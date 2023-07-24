@@ -81,46 +81,16 @@ static char *distances_transform_replace_newtype = NULL;
 
 static void apply_infos(struct hwloc_infos_s *infos)
 {
-  unsigned i, j;
   if (clearinfos) {
-    /* this may be considered dangerous, applications should not modify objects directly */
-    for(i=0; i<infos->count; i++) {
-      struct hwloc_info_s *info = &infos->array[i];
-      free(info->name);
-      free(info->value);
-    }
-    free(infos->array);
-    infos->array = NULL;
-    infos->count = 0;
-    infos->allocated = 0;
+    hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_REMOVE, NULL, NULL);
   }
   if (infoname) {
     if (replaceinfos) {
-      /* this may be considered dangerous, applications should not modify objects directly */
-      for(i=0, j=0; i<infos->count; i++) {
-        struct hwloc_info_s *info = &infos->array[i];
-        if (!strcmp(infoname, info->name)) {
-          /* remove info */
-          free(info->name);
-          info->name = NULL;
-          free(info->value);
-        } else {
-          if (i != j) {
-            /* shift info to where it belongs */
-            infos->array[j].name = info->name;
-            infos->array[j].value = info->value;
-          }
-          j++;
-        }
-      }
-      infos->count = j;
-      if (!j) {
-        free(infos->array);
-        infos->array = NULL;
-        infos->allocated = 0;
-      }
-    }
-    if (infovalue)
+      if (infovalue)
+        hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_REPLACE, infoname, infovalue);
+      else
+        hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_REMOVE, infoname, NULL);
+    } else
       hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_ADD, infoname, infovalue);
   }
 }
