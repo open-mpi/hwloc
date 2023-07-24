@@ -326,7 +326,7 @@ extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
 extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
 
 extern int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value);
-extern int hwloc__add_info_nodup(struct hwloc_infos_s *infos, const char *name, const char *value, int replace);
+extern int hwloc__replace_infos(struct hwloc_infos_s *infos, const char *name, const char *value);
 extern int hwloc__move_infos(struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
 extern int hwloc__tma_dup_infos(struct hwloc_tma *tma, struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
 extern void hwloc__free_infos(struct hwloc_infos_s *infos);

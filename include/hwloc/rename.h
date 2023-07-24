@@ -833,7 +833,7 @@ extern "C" {
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
-#define hwloc__add_info_nodup HWLOC_NAME(_add_info_nodup)
+#define hwloc__replace_infos HWLOC_NAME(_replace_infos)
 #define hwloc__move_infos HWLOC_NAME(_move_infos)
 #define hwloc__free_infos HWLOC_NAME(_free_infos)
 #define hwloc__tma_dup_infos HWLOC_NAME(_tma_dup_infos)

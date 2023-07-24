@@ -911,23 +911,24 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
 }
 
 static void
-hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int replace)
+hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info)
 {
+  /* these attributes may have been set by somebody else earlier, so always try to replace */
   char number[12];
   if (info->cpuvendor[0])
-    hwloc__add_info_nodup(&obj->infos, "CPUVendor", info->cpuvendor, replace);
+    hwloc__replace_infos(&obj->infos, "CPUVendor", info->cpuvendor);
   snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
-  hwloc__add_info_nodup(&obj->infos, "CPUFamilyNumber", number, replace);
+  hwloc__replace_infos(&obj->infos, "CPUFamilyNumber", number);
   snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
-  hwloc__add_info_nodup(&obj->infos, "CPUModelNumber", number, replace);
+  hwloc__replace_infos(&obj->infos, "CPUModelNumber", number);
   if (info->cpumodel[0]) {
     const char *c = info->cpumodel;
     while (*c == ' ')
       c++;
-    hwloc__add_info_nodup(&obj->infos, "CPUModel", c, replace);
+    hwloc__replace_infos(&obj->infos, "CPUModel", c);
   }
   snprintf(number, sizeof(number), "%u", info->cpustepping);
-  hwloc__add_info_nodup(&obj->infos, "CPUStepping", number, replace);
+  hwloc__replace_infos(&obj->infos, "CPUStepping", number);
 }
 
 static void
@@ -1037,7 +1038,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	package = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PACKAGE, packageid);
 	package->cpuset = package_cpuset;
 
-	hwloc_x86_add_cpuinfos(package, &infos[i], 0);
+	hwloc_x86_add_cpuinfos(package, &infos[i]);
 
 	hwloc_debug_1arg_bitmap("os package %u has cpuset %s\n",
 				packageid, package_cpuset);
@@ -1050,12 +1051,12 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	package = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PACKAGE, NULL);
 	hwloc_bitmap_free(set);
 	if (package) {
-	  /* Found package above that PU, annotate if no such attribute yet */
-	  hwloc_x86_add_cpuinfos(package, &infos[i], 1);
+	  /* Found package above that PU, annotate */
+	  hwloc_x86_add_cpuinfos(package, &infos[i]);
 	  hwloc_bitmap_andnot(remaining_cpuset, remaining_cpuset, package->cpuset);
 	} else {
 	  /* No package, annotate the root object */
-	  hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[i], 1);
+	  hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[i]);
 	  break;
 	}
       }

@@ -2163,8 +2163,8 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 
   hwloc_linux__get_allowed_resources(topology, fsroot_path, root_fd, &cpuset_name);
   if (cpuset_name) {
-    hwloc__add_info_nodup(&topology->levels[0][0]->infos,
-			  "LinuxCgroup", cpuset_name, 1 /* replace */);
+    hwloc__replace_infos(&topology->levels[0][0]->infos,
+                         "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
   if (root_fd != -1)
@@ -5238,7 +5238,7 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
       hwloc__add_info(infos, "PlatformName", value);
   } else if (!strcmp("model", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, "PlatformModel", value);
+      hwloc__replace_infos(infos, "PlatformModel", value);
   }
   /* platform-specific fields */
   else if (!strcasecmp("vendor", prefix)) {
@@ -5251,7 +5251,7 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
 	     || !strcasecmp("Machine", prefix)) {
     /* machine and board are similar (and often more precise) than model above */
     if (value[0])
-      hwloc__add_info_nodup(infos, "PlatformModel", value, 1);
+      hwloc__replace_infos(infos, "PlatformModel", value);
   } else if (!strcasecmp("Revision", prefix)
 	     || !strcmp("Hardware rev", prefix)) {
     if (value[0])
@@ -5303,7 +5303,7 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
      * we should have the Architecture keypair for basic information anyway.
      */
     if (value[0])
-      hwloc__add_info_nodup(infos, "CPUModel", value, 1);
+      hwloc__replace_infos(infos, "CPUModel", value);
   }
   return 0;
 }

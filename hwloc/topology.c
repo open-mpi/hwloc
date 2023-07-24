@@ -540,36 +540,8 @@ static int hwloc__add_info_unique(struct hwloc_infos_s *infos, const char *name,
   return hwloc__add_info(infos, name, value);
 }
 
-int hwloc__add_info_nodup(struct hwloc_infos_s *infos,
-			  const char *name, const char *value,
-			  int replace)
-{
-  struct hwloc_info_s *array = infos->array;
-  unsigned count = infos->count;
-  unsigned i;
-
-  if (!name || !value) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  for(i=0; i<count; i++) {
-    if (!strcmp(array[i].name, name)) {
-      if (replace) {
-	char *new = strdup(value);
-	if (!new)
-	  return -1;
-	free(array[i].value);
-	array[i].value = new;
-      }
-      return 0;
-    }
-  }
-  return hwloc__add_info(infos, name, value);
-}
-
-static int hwloc__replace_infos(struct hwloc_infos_s *infos,
-                                const char *name, const char *value)
+int hwloc__replace_infos(struct hwloc_infos_s *infos,
+                         const char *name, const char *value)
 {
   struct hwloc_info_s *array = infos->array;
   unsigned count = infos->count;
