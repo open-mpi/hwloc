@@ -1834,36 +1834,37 @@ done:
 
   /* keep the "Backend" information intact, but we had missing ones from v3 */
   if (data->version_major <= 2) {
+    struct hwloc_infos_s *infos = &topology->infos;
     unsigned i;
     /* check if root already has some backend info */
-    for(i=0; i<root->infos.count; i++)
-      if (!strcmp(root->infos.array[i].name, "Backend")) {
-        if (!strcmp(root->infos.array[i].value, "CUDA"))
+    for(i=0; i<infos->count; i++)
+      if (!strcmp(infos->array[i].name, "Backend")) {
+        if (!strcmp(infos->array[i].value, "CUDA"))
           data->need_cuda_backend_info = 0;
-        if (!strcmp(root->infos.array[i].value, "NVML"))
+        if (!strcmp(infos->array[i].value, "NVML"))
           data->need_nvml_backend_info = 0;
-        if (!strcmp(root->infos.array[i].value, "RSMI"))
+        if (!strcmp(infos->array[i].value, "RSMI"))
           data->need_rsmi_backend_info = 0;
-        if (!strcmp(root->infos.array[i].value, "LevelZero"))
+        if (!strcmp(infos->array[i].value, "LevelZero"))
           data->need_levelzero_backend_info = 0;
-        if (!strcmp(root->infos.array[i].value, "OpenCL"))
+        if (!strcmp(infos->array[i].value, "OpenCL"))
           data->need_opencl_backend_info = 0;
-        if (!strcmp(root->infos.array[i].value, "GL"))
+        if (!strcmp(infos->array[i].value, "GL"))
           data->need_gl_backend_info = 0;
       }
     /* add missing backend info */
     if (data->need_cuda_backend_info)
-      hwloc_obj_add_info(root, "Backend", "CUDA");
+      hwloc__add_info(infos, "Backend", "CUDA");
     if (data->need_nvml_backend_info)
-      hwloc_obj_add_info(root, "Backend", "NVML");
+      hwloc__add_info(infos, "Backend", "NVML");
     if (data->need_rsmi_backend_info)
-      hwloc_obj_add_info(root, "Backend", "RSMI");
+      hwloc__add_info(infos, "Backend", "RSMI");
     if (data->need_levelzero_backend_info)
-      hwloc_obj_add_info(root, "Backend", "LevelZero");
+      hwloc__add_info(infos, "Backend", "LevelZero");
     if (data->need_opencl_backend_info)
-      hwloc_obj_add_info(root, "Backend", "OpenCL");
+      hwloc__add_info(infos, "Backend", "OpenCL");
     if (data->need_gl_backend_info)
-      hwloc_obj_add_info(root, "Backend", "GL");
+      hwloc__add_info(infos, "Backend", "GL");
   }
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 

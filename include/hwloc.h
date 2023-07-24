@@ -1230,6 +1230,9 @@ hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 
 /** \brief Get the structure of info attributes attached to the topology.
  *
+ * These attributes contain information about the topology discovery (backends)
+ * and about the operating system.
+ *
  * \note The function cannot return \c NULL.
  * \note The returned pointer belongs to the hwloc library, it should not be freed or modified.
  */

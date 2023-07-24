@@ -3734,11 +3734,11 @@ hwloc_discover(struct hwloc_topology *topology,
       && !getenv("HWLOC_DONT_ADD_VERSION_INFO")) {
     char *value;
     /* add a hwlocVersion */
-    hwloc_obj_add_info(topology->levels[0][0], "hwlocVersion", HWLOC_VERSION);
+    hwloc__add_info(&topology->infos, "hwlocVersion", HWLOC_VERSION);
     /* add a ProcessName */
     value = hwloc_progname(topology);
     if (value) {
-      hwloc_obj_add_info(topology->levels[0][0], "ProcessName", value);
+      hwloc__add_info(&topology->infos, "ProcessName", value);
       free(value);
     }
   }

@@ -1,4 +1,4 @@
-Machine (P#0 total=1024MiB ClusterMode=All2All MemoryMode=Cache Backend=Linux OSName=Linux OSRelease=3.10.0-327.el7.x86_64 OSVersion="#1 SMP Thu Oct 29 17:29:29 EDT 2015" HostName=localhost.localdomain Architecture=x86_64)
+Machine (P#0 total=1024MiB ClusterMode=All2All MemoryMode=Cache)
   Package L#0 (P#0 total=1024MiB CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=87 CPUModel=06/57 CPUStepping=0)
     NUMANode L#0 (P#0 local=1024MiB total=1024MiB)
     L3Cache(MemorySideCache) L#0 (size=16GiB linesize=64 ways=1 Inclusive=1)
@@ -131,4 +131,5 @@ depth 0:           1 Machine (type #0)
       depth 6:     16 Core (type #2)
        depth 7:    64 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
+Topology infos: Backend=Linux OSName=Linux OSRelease=3.10.0-327.el7.x86_64 OSVersion="#1 SMP Thu Oct 29 17:29:29 EDT 2015" HostName=localhost.localdomain Architecture=x86_64
 Topology not from this system

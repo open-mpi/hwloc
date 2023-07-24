@@ -43,7 +43,7 @@ set -e
   $info --if synthetic --input "node:2 core:3 pu:4"
   echo
   echo "# --topology --verbose"
-  $info --if synthetic --input "node:2 core:3 pu:4" --topology --verbose
+  $info --if synthetic --input "node:2 core:3 pu:4" --topology --verbose | grep -v hwlocVersion | grep -v ProcessName
   echo
   echo "# --support"
   $info --if synthetic --input "node:2 core:3 pu:4" --support

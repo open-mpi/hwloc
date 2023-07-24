@@ -8,13 +8,6 @@
     <info name="DMIBIOSVersion" value="SGI UV 2000 series BIOS"/>
     <info name="DMIBIOSDate" value="02/12/2013"/>
     <info name="DMISysVendor" value="Silicon Graphics International Corp."/>
-    <info name="Backend" value="Linux"/>
-    <info name="LinuxCgroup" value="/"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="3.0.58-0.6.6-default"/>
-    <info name="OSVersion" value="#1 SMP Tue Feb 19 11:07:00 UTC 2013 (1576ecd)"/>
-    <info name="HostName" value="uv2000"/>
-    <info name="Architecture" value="x86_64"/>
     <object type="Group" cpuset="0x0000ffff,,,,,,0x0000ffff" complete_cpuset="0x0000ffff,,,,,,0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="2" id="obj2" kind="1" subkind="0">
       <object type="Package" os_index="0" cpuset="0x000000ff,,,,,,0x000000ff" complete_cpuset="0x000000ff,,,,,,0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
@@ -2415,4 +2408,11 @@
   <support name="membind.migrate_membind"/>
   <support name="membind.get_area_memlocation"/>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="LinuxCgroup" value="/"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="3.0.58-0.6.6-default"/>
+  <info name="OSVersion" value="#1 SMP Tue Feb 19 11:07:00 UTC 2013 (1576ecd)"/>
+  <info name="HostName" value="uv2000"/>
+  <info name="Architecture" value="x86_64"/>
 </topology>

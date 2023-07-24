@@ -2,10 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x000000ff" nodeset="0x0000000f" complete_nodeset="0x0000000f" allowed_nodeset="0x0000000f" gp_index="1" id="obj1">
-    <info name="Backend" value="Synthetic"/>
-    <info name="SyntheticDescription" value="node:4 pu:2"/>
-    <info name="hwlocVersion" value="2.2.0a1-git"/>
-    <info name="ProcessName" value="memattrs"/>
     <object type="Group" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5" kind="1001" subkind="0">
       <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4" local_memory="1073741824">
         <page_type size="4096" count="262144"/>
@@ -60,4 +56,6 @@
     <memattr_value target_obj_type="Group" target_obj_gp_index="17" value="789"/>
   </memattr>
   <memattr name="coincoin" flags="5"/>
+  <info name="Backend" value="Synthetic"/>
+  <info name="SyntheticDescription" value="node:4 pu:2"/>
 </topology>

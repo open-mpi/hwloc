@@ -2023,7 +2023,7 @@ See doc/examples/get-knl-modes.c in the source directory for an example of retri
 \endhtmlonly
 \subsection attributes_info_os Operating System Information
 
-These info attributes are attached to the root object (Machine).
+These info attributes are attached to the topology itself.
 
 <dl>
 <dt>OSName, OSRelease, OSVersion, HostName, Architecture</dt>
@@ -2043,12 +2043,12 @@ placed.
 \htmlonly
 </div><div class="subsection" id="attributes_info_hwloc">
 \endhtmlonly
-\subsection attributes_info_hwloc hwloc Information
+\subsection attributes_info_hwloc hwloc Topology Information
 
-Unless specified, these info attributes are attached to the root object (Machine).
+These info attributes are attached to the topology itself.
 
 <dl>
-<dt>Backend (topology root object)</dt>
+<dt>Backend</dt>
 <dd>The name of a hwloc backend/component that added objects in the topology.
 If several components were combined, multiple Backend pairs may exist,
 with different values, for instance <tt>x86</tt>, <tt>Linux</tt> and

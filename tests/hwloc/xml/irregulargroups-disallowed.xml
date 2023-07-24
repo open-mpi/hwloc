@@ -16,15 +16,6 @@
     <info name="DMIBIOSVersion" value="SGI UV 2000/3000 series BIOS"/>
     <info name="DMIBIOSDate" value="01/15/2013"/>
     <info name="DMISysVendor" value="SGI"/>
-    <info name="Backend" value="Linux"/>
-    <info name="LinuxCgroup" value="/boot"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="3.0.80-0.7-default"/>
-    <info name="OSVersion" value="#1 SMP Tue Jun 25 18:32:49 UTC 2013 (25740f8)"/>
-    <info name="HostName" value="condor"/>
-    <info name="Architecture" value="x86_64"/>
-    <info name="hwlocVersion" value="2.0.0a1-git"/>
-    <info name="ProcessName" value="lstopo-no-graphics"/>
     <object type="Group" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="2" id="obj2" kind="1" subkind="0">
       <object type="Package" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4">
         <info name="CPUVendor" value="GenuineIntel"/>
@@ -808,4 +799,11 @@
     <u64values length="12">65 79 79 10 </u64values>
   </distances2>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="LinuxCgroup" value="/boot"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="3.0.80-0.7-default"/>
+  <info name="OSVersion" value="#1 SMP Tue Jun 25 18:32:49 UTC 2013 (25740f8)"/>
+  <info name="HostName" value="condor"/>
+  <info name="Architecture" value="x86_64"/>
 </topology>

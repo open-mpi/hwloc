@@ -16,12 +16,6 @@
     <info name="DMIBIOSVersion" value="-[A3E164AUS-1.11]-"/>
     <info name="DMIBIOSDate" value="04/01/2009"/>
     <info name="DMISysVendor" value="IBM"/>
-    <info name="Backend" value="Linux"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="2.6.32-5-amd64"/>
-    <info name="OSVersion" value="#1 SMP Tue Jun 14 09:42:28 UTC 2011"/>
-    <info name="HostName" value="bertha"/>
-    <info name="Architecture" value="x86_64"/>
     <object type="Group" cpuset="0x00ffffff" complete_cpuset="0x00ffffff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="418" id="obj418" kind="1001" subkind="0">
       <object type="NUMANode" os_index="0" cpuset="0x00ffffff" complete_cpuset="0x00ffffff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2" local_memory="51269931008">
         <page_type size="4096" count="12517073"/>
@@ -836,4 +830,10 @@
     <u64values length="18">10 26 26 26 26 10 </u64values>
   </distances2>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="2.6.32-5-amd64"/>
+  <info name="OSVersion" value="#1 SMP Tue Jun 14 09:42:28 UTC 2011"/>
+  <info name="HostName" value="bertha"/>
+  <info name="Architecture" value="x86_64"/>
 </topology>

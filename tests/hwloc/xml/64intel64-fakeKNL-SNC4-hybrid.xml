@@ -4,14 +4,6 @@
   <object type="Machine" os_index="0" cpuset="0xffffffff,0xffffffff" complete_cpuset="0xffffffff,0xffffffff" allowed_cpuset="0xffffffff,0xffffffff" nodeset="0x000000ff" complete_nodeset="0x000000ff" allowed_nodeset="0x000000ff" gp_index="1" id="obj1">
     <info name="ClusterMode" value="SNC4"/>
     <info name="MemoryMode" value="Hybrid50"/>
-    <info name="Backend" value="Linux"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="3.10.0-327.el7.x86_64"/>
-    <info name="OSVersion" value="#1 SMP Thu Oct 29 17:29:29 EDT 2015"/>
-    <info name="HostName" value="localhost.localdomain"/>
-    <info name="Architecture" value="x86_64"/>
-    <info name="hwlocVersion" value="2.0.0a1-git"/>
-    <info name="ProcessName" value="lstopo"/>
     <object type="Package" os_index="0" cpuset="0xffffffff,0xffffffff" complete_cpuset="0xffffffff,0xffffffff" nodeset="0x000000ff" complete_nodeset="0x000000ff" gp_index="26" id="obj26">
       <info name="CPUVendor" value="GenuineIntel"/>
       <info name="CPUFamilyNumber" value="6"/>
@@ -227,4 +219,10 @@
     <memattr_value target_obj_type="NUMANode" target_obj_gp_index="5" value="22500" initiator_cpuset="0xf000f000,0xf000f000"/>
     <memattr_value target_obj_type="NUMANode" target_obj_gp_index="8" value="90000" initiator_cpuset="0xf000f000,0xf000f000"/>
   </memattr>
+  <info name="Backend" value="Linux"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="3.10.0-327.el7.x86_64"/>
+  <info name="OSVersion" value="#1 SMP Thu Oct 29 17:29:29 EDT 2015"/>
+  <info name="HostName" value="localhost.localdomain"/>
+  <info name="Architecture" value="x86_64"/>
 </topology>

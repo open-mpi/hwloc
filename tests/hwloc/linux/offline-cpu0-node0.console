@@ -1,4 +1,4 @@
-Machine (P#0 total=64GiB LinuxCgroup=/ DMIProductName="PowerEdge R630" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0CNCJW DMIBoardVersion=A17 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.12.1 DMIBIOSDate=12/04/2020 DMISysVendor="Dell Inc." Backend=Linux OSName=Linux OSRelease=3.10.0-957.el7.x86_64 OSVersion="#1 SMP Thu Nov 8 23:39:32 UTC 2018" HostName=miriel023.plafrim.cluster Architecture=x86_64)
+Machine (P#0 total=64GiB DMIProductName="PowerEdge R630" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0CNCJW DMIBoardVersion=A17 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.12.1 DMIBIOSDate=12/04/2020 DMISysVendor="Dell Inc.")
   Package L#0 (P#0 CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=63 CPUModel="Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz" CPUStepping=2)
     L3Cache L#0 (P#0 size=30MiB linesize=64 ways=20)
       L2Cache L#0 (P#2 size=256KiB linesize=64 ways=8)
@@ -99,4 +99,5 @@ depth 0:           1 Machine (type #0)
        depth 7:    17 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
 7 processors not represented in topology: 0x00e0000f
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=3.10.0-957.el7.x86_64 OSVersion="#1 SMP Thu Nov 8 23:39:32 UTC 2018" HostName=miriel023.plafrim.cluster Architecture=x86_64
 Topology not from this system

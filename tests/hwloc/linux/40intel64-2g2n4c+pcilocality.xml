@@ -2,7 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x000000ff,0xffffffff" complete_cpuset="0x000000ff,0xffffffff" allowed_cpuset="0x000000ff,0xffffffff" nodeset="0x0000000f" complete_nodeset="0x0000000f" allowed_nodeset="0x0000000f">
-    <info name="LinuxCgroup" value="/torque/513099.master.cm.cluster"/>
     <info name="DMIProductName" value="PowerEdge R910"/>
     <info name="DMIProductVersion" value=""/>
     <info name="DMIBoardVendor" value="Dell Inc."/>
@@ -17,7 +16,6 @@
     <info name="DMIBIOSVersion" value="2.5.0"/>
     <info name="DMIBIOSDate" value="10/26/2011"/>
     <info name="DMISysVendor" value="Dell Inc."/>
-    <info name="Backend" value="Linux"/>
     <object type="Group" cpuset="0x00000055,0x55555555" complete_cpuset="0x00000055,0x55555555" nodeset="0x00000005" complete_nodeset="0x00000005" kind="1000" subkind="0">
       <object type="Package" os_index="0" cpuset="0x00000011,0x11111111" complete_cpuset="0x00000011,0x11111111" nodeset="0x00000001" complete_nodeset="0x00000001">
         <info name="CPUModel" value="Intel(R) Xeon(R) CPU E7- 4870  @ 2.40GHz"/>
@@ -511,4 +509,6 @@
     <u64values length="30">10 20 20 20 20 10 20 20 20 20 </u64values>
     <u64values length="18">10 20 20 20 20 10 </u64values>
   </distances2>
+  <info name="LinuxCgroup" value="/torque/513099.master.cm.cluster"/>
+  <info name="Backend" value="Linux"/>
 </topology>

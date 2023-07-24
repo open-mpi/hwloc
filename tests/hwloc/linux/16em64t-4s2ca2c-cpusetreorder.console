@@ -1,4 +1,4 @@
-Machine (P#0 total=16GiB LinuxCgroup=/prout Backend=Linux)
+Machine (P#0 total=16GiB)
   NUMANode L#0 (P#0 local=16GiB total=16GiB)
   Package L#0 (P#0 CPUModel="Intel(R) Xeon(TM) CPU 2.60GHz")
     L3Cache L#0 (size=4096KiB linesize=64 ways=16)
@@ -58,4 +58,5 @@ depth 0:           1 Machine (type #0)
       depth 6:     11 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
 5 processors not represented in topology: 0x0000d003
+Topology infos: LinuxCgroup=/prout Backend=Linux
 Topology not from this system

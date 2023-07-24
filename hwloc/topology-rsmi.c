@@ -418,7 +418,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   free(xgmi_hops);
 
   if (added)
-    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "RSMI");
+    hwloc_modify_infos(hwloc_topology_get_infos(topology), HWLOC_MODIFY_INFOS_OP_ADD, "Backend", "RSMI");
   return 0;
 }
 

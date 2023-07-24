@@ -1,4 +1,4 @@
-Machine (P#0 total=128GiB Architecture=x86_64 hwlocVersion=2.0.0a1-git ProcessName=lt-lstopo-no-graphics)
+Machine (P#0 total=128GiB)
   Package L#0 (P#0 total=64GiB)
     NUMANode L#0 (P#0 local=64GiB total=64GiB)
     L3Cache L#0 (size=20MiB linesize=64 ways=20)
@@ -139,4 +139,5 @@ Special depth -3:  2 NUMANode (type #13)
 Special depth -4:  15 Bridge (type #14)
 Special depth -5:  18 PCIDev (type #15)
 Special depth -6:  9 OSDev (type #16)
+Topology infos: Architecture=x86_64
 Topology not from this system

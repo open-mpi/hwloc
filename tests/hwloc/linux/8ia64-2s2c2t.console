@@ -1,4 +1,4 @@
-Machine (P#0 total=16GiB Backend=Linux)
+Machine (P#0 total=16GiB)
   NUMANode L#0 (P#0 local=16GiB total=16GiB)
   Package L#0 (P#0)
     L3Cache L#0 (size=9216KiB linesize=128 ways=9)
@@ -46,4 +46,5 @@ depth 0:            1 Machine (type #0)
 Special depth -3:   1 NUMANode (type #13)
 CPU kind #0 efficiency 0 cpuset 0x000000ff
   FrequencyMaxMHz = 1594
+Topology infos: Backend=Linux
 Topology not from this system

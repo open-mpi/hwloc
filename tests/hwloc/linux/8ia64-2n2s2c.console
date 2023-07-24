@@ -1,4 +1,4 @@
-Machine (P#0 total=32GiB Backend=Linux)
+Machine (P#0 total=32GiB)
   Group0 L#0 (total=16GiB)
     NUMANode L#0 (P#0 local=16GiB total=16GiB)
     Package L#0 (P#0)
@@ -78,4 +78,5 @@ Relative latency matrix (name NUMALatency kind 5) between 2 NUMANodes (depth -3)
  index     0     1
      0    10    15
      1    15    10
+Topology infos: Backend=Linux
 Topology not from this system

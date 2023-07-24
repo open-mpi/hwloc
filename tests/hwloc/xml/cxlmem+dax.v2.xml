@@ -14,15 +14,6 @@
     <info name="DMIBIOSVersion" value="0.0.0"/>
     <info name="DMIBIOSDate" value="02/06/2015"/>
     <info name="DMISysVendor" value="QEMU"/>
-    <info name="Backend" value="Linux"/>
-    <info name="LinuxCgroup" value="/"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="6.1.0-rc4+"/>
-    <info name="OSVersion" value="#1 SMP PREEMPT_DYNAMIC Thu Dec  1 15:21:30 CET 2022"/>
-    <info name="HostName" value="efi"/>
-    <info name="Architecture" value="x86_64"/>
-    <info name="hwlocVersion" value="3.0.0a1-git"/>
-    <info name="ProcessName" value="lstopo"/>
     <object type="Package" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3">
       <info name="CPUVendor" value="GenuineIntel"/>
       <info name="CPUFamilyNumber" value="15"/>
@@ -179,4 +170,11 @@
   <support name="discovery.disallowed_pu"/>
   <support name="discovery.disallowed_numa"/>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="LinuxCgroup" value="/"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="6.1.0-rc4+"/>
+  <info name="OSVersion" value="#1 SMP PREEMPT_DYNAMIC Thu Dec  1 15:21:30 CET 2022"/>
+  <info name="HostName" value="efi"/>
+  <info name="Architecture" value="x86_64"/>
 </topology>

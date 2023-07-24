@@ -1,4 +1,4 @@
-Machine (P#0 total=1861GiB LinuxCgroup=/ Backend=Linux)
+Machine (P#0 total=1861GiB)
   Package L#0 (P#0 total=929GiB CPUModel="Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz")
     NUMANode(NVM) L#2 (P#7 local=742GiB total=742GiB DAXDevice=dax0.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region0/dax0.1)
     Group0 L#0 (total=93GiB)
@@ -83,4 +83,5 @@ Memory attribute #7 name `WriteLatency' flags 6
   NUMANode L#3 = 26 from cpuset 0x0000000c (Group0 L#2)
   NUMANode L#4 = 26 from cpuset 0x000000c0 (Group0 L#3)
   NUMANode L#5 = 77 from cpuset 0x000000cc (Package L#1)
+Topology infos: LinuxCgroup=/ Backend=Linux
 Topology not from this system

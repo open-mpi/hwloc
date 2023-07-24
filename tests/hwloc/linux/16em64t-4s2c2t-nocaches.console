@@ -1,4 +1,4 @@
-Machine (P#0 total=16GiB Backend=Linux)
+Machine (P#0 total=16GiB)
   NUMANode L#0 (P#0 local=16GiB total=16GiB)
   Package L#0 (P#0 CPUModel="Intel(R) Xeon(TM) CPU 2.60GHz")
     Core L#0 (P#0)
@@ -33,4 +33,5 @@ depth 0:           1 Machine (type #0)
   depth 2:         8 Core (type #2)
    depth 3:        16 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
+Topology infos: Backend=Linux
 Topology not from this system

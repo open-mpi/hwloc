@@ -2,8 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x555500ff" complete_cpuset="0x555500ff" allowed_cpuset="0x555500ff" nodeset="0x0000000d" complete_nodeset="0x0000000d" allowed_nodeset="0x0000000d" gp_index="1" id="obj1">
-    <info name="Backend" value="Synthetic"/>
-    <info name="SyntheticDescription" value="pack:2 [numa(memory=100GiB)] [numa(memory=10GiB)] core:8 pu:2"/>
     <object type="Package" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="26" id="obj26">
       <object type="NUMANode" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="27" id="obj27" subtype="DRAM" local_memory="214748364800">
         <page_type size="4096" count="26214400"/>
@@ -73,4 +71,6 @@
   <cpukind cpuset="0x000000ff" forced_efficiency="1">
     <info name="CoreType" value="Big"/>
   </cpukind>
+  <info name="Backend" value="Synthetic"/>
+  <info name="SyntheticDescription" value="pack:2 [numa(memory=100GiB)] [numa(memory=10GiB)] core:8 pu:2"/>
 </topology>

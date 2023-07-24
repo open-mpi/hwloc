@@ -1,4 +1,4 @@
-Machine (P#0 total=120GiB DMIProductName="PowerEdge C6145 " DMIProductVersion="        " DMIBoardVendor="Dell                            " DMIBoardName=040N24 DMIBoardVersion="A01                   " DMIBoardAssetTag=".2                       " DMIChassisVendor="Dell Inc.                       " DMIChassisType=23 DMIChassisVersion="   " DMIChassisAssetTag="        " DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.5.91 DMIBIOSDate=11/04/2011 DMISysVendor="Dell                            " Backend=Linux Architecture=x86_64)
+Machine (P#0 total=120GiB DMIProductName="PowerEdge C6145 " DMIProductVersion="        " DMIBoardVendor="Dell                            " DMIBoardName=040N24 DMIBoardVersion="A01                   " DMIBoardAssetTag=".2                       " DMIChassisVendor="Dell Inc.                       " DMIChassisType=23 DMIChassisVersion="   " DMIChassisAssetTag="        " DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.5.91 DMIBIOSDate=11/04/2011 DMISysVendor="Dell                            ")
   Package L#0 (P#0 total=32GiB CPUVendor=AuthenticAMD CPUFamilyNumber=21 CPUModelNumber=1 CPUModel="AMD Opteron(TM) Processor 6276                 " CPUStepping=2)
     L3Cache L#0 (total=16GiB size=6144KiB linesize=64 ways=64)
       NUMANode L#0 (P#0 local=16GiB total=16GiB)
@@ -294,4 +294,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      5    22    22    16    16    16    10    22    16
      6    16    22    16    22    16    22    10    16
      7    22    16    16    22    22    16    16    10
+Topology infos: Backend=Linux Architecture=x86_64
 Topology not from this system

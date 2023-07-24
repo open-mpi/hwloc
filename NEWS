@@ -39,6 +39,10 @@ Version 3.0.0
     - hwloc_infos_s structures may be modified with hwloc_modify_infos().
     - hwloc_topology_get_infos() returns the new topology-global array
       of info attributes.
+      . Several info attributes previously stored in the root object are
+        now topology attributes (e.g. information about hwloc, about the
+        discovery, operating system information returned by uname).
+        See "Custom string infos" in the documentation for details.
     - hwloc_cpukinds_get_info() and hwloc_cpukinds_register() now manipulate
       infos as such a structure.
 * Tools

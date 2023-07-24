@@ -1,4 +1,4 @@
-Machine (P#0 total=512GiB LinuxCgroup=/torque/513099.master.cm.cluster Backend=Linux)
+Machine (P#0 total=512GiB)
   Package L#0 (P#0 total=128GiB CPUModel="Intel(R) Xeon(R) CPU E7- 4870  @ 2.40GHz")
     NUMANode L#0 (P#0 local=128GiB total=128GiB)
     L3Cache L#0 (size=30MiB linesize=64 ways=24)
@@ -231,4 +231,5 @@ Relative latency matrix (name NUMALatency kind 5) between 4 NUMANodes (depth -3)
      1    20    10    20    20
      2    20    20    10    20
      3    20    20    20    10
+Topology infos: LinuxCgroup=/torque/513099.master.cm.cluster Backend=Linux
 Topology not from this system

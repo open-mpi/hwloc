@@ -1,4 +1,4 @@
-Machine (P#0 total=3767MiB LinuxCgroup=/ DMIProductName="LakeField Client Platform" DMIProductVersion=0.1 DMIProductSerial=fzlf933000en DMIBoardVendor="Intel Corporation" DMIBoardName="Lakefield LPDDR4x T4 RVP2" DMIBoardVersion=1 DMIBoardSerial=fzlf933000en DMIBoardAssetTag="Base Board Asset Tag" DMIChassisVendor="Intel Corporation" DMIChassisType=9 DMIChassisVersion=0.1 DMIChassisSerial="Chassis Serial Number" DMIChassisAssetTag="Chassis Asset Tag" DMIBIOSVendor="Intel Corporation" DMIBIOSVersion=LKFSFWR1.R00.4082.A00.2002190224 DMIBIOSDate=02/19/2020 DMISysVendor="Intel Corporation" Backend=Linux OSName=Linux OSRelease=5.3.0-28-generic OSVersion="#30~18.04.1-Ubuntu SMP Fri Jan 17 06:14:09 UTC 2020" HostName=jf1lkf Architecture=x86_64)
+Machine (P#0 total=3767MiB DMIProductName="LakeField Client Platform" DMIProductVersion=0.1 DMIProductSerial=fzlf933000en DMIBoardVendor="Intel Corporation" DMIBoardName="Lakefield LPDDR4x T4 RVP2" DMIBoardVersion=1 DMIBoardSerial=fzlf933000en DMIBoardAssetTag="Base Board Asset Tag" DMIChassisVendor="Intel Corporation" DMIChassisType=9 DMIChassisVersion=0.1 DMIChassisSerial="Chassis Serial Number" DMIChassisAssetTag="Chassis Asset Tag" DMIBIOSVendor="Intel Corporation" DMIBIOSVersion=LKFSFWR1.R00.4082.A00.2002190224 DMIBIOSDate=02/19/2020 DMISysVendor="Intel Corporation")
   Package L#0 (P#0 total=3767MiB CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=138 CPUModel="Intel(R) Core(TM) i5-L16G7 CPU @ 1.40GHz" CPUStepping=1)
     NUMANode L#0 (P#0 local=3767MiB total=3767MiB)
     L3Cache L#0 (P#0 size=4096KiB linesize=64 ways=16 Inclusive=1)
@@ -41,4 +41,5 @@ CPU kind #1 efficiency 1 cpuset 0x00000010
   FrequencyMaxMHz = 3000
   FrequencyBaseMHz = 2000
   CoreType = IntelCore
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.3.0-28-generic OSVersion="#30~18.04.1-Ubuntu SMP Fri Jan 17 06:14:09 UTC 2020" HostName=jf1lkf Architecture=x86_64
 Topology not from this system

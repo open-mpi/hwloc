@@ -1,4 +1,4 @@
-Machine (P#0 total=46GiB Backend=Linux Architecture=ia64)
+Machine (P#0 total=46GiB)
   Group0 L#0 (total=23GiB)
     Group1 L#0 (total=5904MiB)
       NUMANode L#0 (P#0 local=5904MiB total=5904MiB)
@@ -150,4 +150,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      5    29    29    29    29    25    10    25    25
      6    29    29    29    29    25    25    10    25
      7    29    29    29    29    25    25    25    10
+Topology infos: Backend=Linux Architecture=ia64
 Topology not from this system

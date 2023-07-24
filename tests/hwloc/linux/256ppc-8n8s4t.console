@@ -1,4 +1,4 @@
-Machine (P#0 total=493GiB PlatformName=pSeries PlatformModel="CHRP IBM,9179-MHB" Backend=Linux Architecture=ppc)
+Machine (P#0 total=493GiB PlatformName=pSeries PlatformModel="CHRP IBM,9179-MHB")
   Group0 L#0 (total=119GiB)
     Group1 L#0 (total=56GiB)
       NUMANode L#0 (P#0 local=56GiB total=56GiB)
@@ -680,4 +680,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      5    40    40    40    40    20    10    40    40
      6    40    40    40    40    40    40    10    20
      7    40    40    40    40    40    40    20    10
+Topology infos: Backend=Linux Architecture=ppc
 Topology not from this system

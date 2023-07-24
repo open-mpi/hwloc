@@ -1063,8 +1063,8 @@ hwloc_look_synthetic(struct hwloc_backend *backend, struct hwloc_disc_status *ds
 
   hwloc_bitmap_free(cpuset);
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "Synthetic");
-  hwloc_obj_add_info(topology->levels[0][0], "SyntheticDescription", data->string);
+  hwloc__add_info(&topology->infos, "Backend", "Synthetic");
+  hwloc__add_info(&topology->infos, "SyntheticDescription", data->string);
   return 0;
 }
 

@@ -1,4 +1,4 @@
-Machine (P#0 total=2006MiB Backend=Linux OSName=Linux OSRelease=dummy OSVersion=dummy HostName=dummy Architecture=s390x)
+Machine (P#0 total=2006MiB)
   NUMANode L#0 (P#0 local=2006MiB total=2006MiB)
   Group0(Drawer) L#0 (P#4)
     Group1(Book) L#0 (P#0)
@@ -61,4 +61,5 @@ depth 0:           1 Machine (type #0)
     depth 4:       20 Core (type #2)
      depth 5:      20 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
+Topology infos: Backend=Linux OSName=Linux OSRelease=dummy OSVersion=dummy HostName=dummy Architecture=s390x
 Topology not from this system

@@ -163,7 +163,7 @@ hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
     topology->machine_memory.local_memory = memsize;;
 
   /* Add NetBSD specific information */
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "NetBSD");
+  hwloc__add_info(&topology->infos, "Backend", "NetBSD");
   hwloc_add_uname_info(topology, NULL);
   return 0;
 }

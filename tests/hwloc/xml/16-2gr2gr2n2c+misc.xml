@@ -2,9 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x000000ff" complete_nodeset="0x000000ff" allowed_nodeset="0x000000ff" gp_index="1" id="obj1">
-    <info name="Backend" value="Synthetic"/>
-    <info name="SyntheticDescription" value="group:2 group:2 node:2 core:2 1"/>
-    <info name="hwlocVersion" value="1.10.1"/>
     <userdata name="MyName" length="16">0000000000000001</userdata>
     <userdata name="MyName0" length="0"/>
     <userdata name="EncodedShort0" length="0" encoding="base64"/>
@@ -140,4 +137,6 @@
   <support name="membind.migrate_membind"/>
   <support name="membind.get_area_memlocation"/>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Synthetic"/>
+  <info name="SyntheticDescription" value="group:2 group:2 node:2 core:2 1"/>
 </topology>
