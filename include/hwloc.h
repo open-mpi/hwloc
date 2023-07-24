@@ -1162,6 +1162,8 @@ hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name) __hwloc_at
  *
  * The input strings are copied before being added in the object infos.
  *
+ * \p name and \p value must be non \c NULL.
+ *
  * \return \c 0 on success, \c -1 on error.
  *
  * \note This function may be used to enforce object colors in the lstopo

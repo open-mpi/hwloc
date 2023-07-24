@@ -496,6 +496,11 @@ int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *v
   unsigned count;
   struct hwloc_info_s *array;
 
+  if (!name || !value) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (hwloc__realloc_infos(infos, 1) < 0)
     return -1;
 
@@ -525,6 +530,12 @@ int hwloc__add_info_nodup(struct hwloc_infos_s *infos,
   struct hwloc_info_s *array = infos->array;
   unsigned count = infos->count;
   unsigned i;
+
+  if (!name || !value) {
+    errno = EINVAL;
+    return -1;
+  }
+
   for(i=0; i<count; i++) {
     if (!strcmp(array[i].name, name)) {
       if (replace) {
