@@ -602,7 +602,7 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
 
-  struct hwloc_info_s *infos;		/**< \brief Array of stringified info type=name. */
+  struct hwloc_info_s *infos;		/**< \brief Array of info attributes (name and value strings). */
   unsigned infos_count;			/**< \brief Size of infos array. */
 
   /* misc */
@@ -687,7 +687,7 @@ union hwloc_obj_attr_u {
   } osdev;
 };
 
-/** \brief Object info
+/** \brief Object info attribute (name and value strings)
  *
  * \sa hwlocality_info_attr
  */
@@ -1121,26 +1121,26 @@ HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
 
 
 
-/** \defgroup hwlocality_info_attr Consulting and Adding Key-Value Info Attributes
+/** \defgroup hwlocality_info_attr Consulting and Adding Info Attributes
  *
  * @{
  */
 
-/** \brief Search the given key name in object infos and return the corresponding value.
+/** \brief Search the given name in object infos and return the corresponding value.
  *
- * If multiple keys match the given name, only the first one is returned.
+ * If multiple info attributes match the given name, only the first one is returned.
  *
  * \return A pointer to the value string if it exists.
- * \return \c NULL if no such key exists.
+ * \return \c NULL if no such info attribute exists.
  *
  * \note The string should not be freed by the caller, it belongs to the hwloc library.
  */
 static __hwloc_inline const char *
 hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_pure;
 
-/** \brief Add the given info name and value pair to the given object.
+/** \brief Add the given name and value pair to the given object info attributes.
  *
- * The info is appended to the existing info array even if another key
+ * The info pair is appended to the existing info array even if another pair
  * with the same name already exists.
  *
  * The input strings are copied before being added in the object infos.
@@ -1148,7 +1148,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
  * \return \c 0 on success, \c -1 on error.
  *
  * \note This function may be used to enforce object colors in the lstopo
- * graphical output by using "lstopoStyle" as a name and "Background=#rrggbb"
+ * graphical output by adding "lstopoStyle" as a name and "Background=#rrggbb"
  * as a value. See CUSTOM COLORS in the lstopo(1) manpage for details.
  *
  * \note If \p name or \p value contain some non-printable characters, they will
@@ -2666,7 +2666,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * The \p subtype object attribute may be defined (to a dynamically
  * allocated string) to display something else than "Group" as the
  * type name for this object in lstopo.
- * Custom name/value info pairs may be added with hwloc_obj_add_info() after
+ * Custom name-value info pairs may be added with hwloc_obj_add_info() after
  * insertion.
  *
  * The group \p dont_merge attribute may be set to \c 1 to prevent
