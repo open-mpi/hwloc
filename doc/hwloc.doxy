@@ -1873,12 +1873,11 @@ See ::hwloc_obj_attr_u for details.
 \section attributes_info Custom string infos
 
 Aside os these generic attribute fields, hwloc annotates
-many objects with string attributes that are made of a key and a
-value.
+many objects with info attributes made of name and value strings.
 Each object contains a list of such pairs that may be consulted
 manually (looking at the object <tt>infos</tt> array field)
 or using the hwloc_obj_get_info_by_name().
-The user may additionally add new key-value pairs to any object using
+The user may additionally add new name-value pairs to any object using
 hwloc_obj_add_info() or the \ref cli_hwloc_annotate program.
 
 Here is a non-exhaustive list of attributes that may be automatically
@@ -1956,7 +1955,7 @@ Unless specified, these info attributes are attached to the root object (Machine
 <dl>
 <dt>Backend (topology root, or specific object added by that backend)</dt>
 <dd>The name of the hwloc backend/component that filled the topology.
-If several components were combined, multiple Backend keys may exist,
+If several components were combined, multiple Backend pairs may exist,
 with different values, for instance <tt>x86</tt> and <tt>Linux</tt> in the root
 object and <tt>CUDA</tt> in CUDA OS device objects.
 </dd>
@@ -3872,13 +3871,13 @@ with <tt>hwloc_topology_set_userdata_export_callback()</tt>
 and <tt>hwloc_topology_set_userdata_import_callback()</tt>.
 
 Each object may also contain some <em>info</em> attributes
-(key name and value) that are setup by hwloc during discovery
+(name and value strings) that are setup by hwloc during discovery
 and that may be extended by the user with
 <tt>hwloc_obj_add_info()</tt> (see also \ref attributes).
 Contrary to the <tt>userdata</tt> field which is unique, multiple info
 attributes may exist for each object, even with the same name.
 These attributes are always exported to XML.
-However, only character strings may be used as key names and values.
+However, only character strings may be used as names and values.
 
 It is also possible to insert Misc objects with a custom name
 anywhere as a leaf of the topology (see \ref miscobjs).
@@ -3963,7 +3962,7 @@ but not in the other.
 
 More changes may obviously be performed by manually modifying the XML export file.
 Simple operations such as modifying object attributes (cache size, memory size
-info keypairs, etc.), moving I/O subtrees, moving Misc objects, or removing
+name-value info attributes, etc.), moving I/O subtrees, moving Misc objects, or removing
 objects are easy to perform.
 
 However, modifying CPU and Memory objects requires care since cpusets and nodesets
