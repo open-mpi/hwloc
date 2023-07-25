@@ -1151,7 +1151,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
  * graphical output by using "lstopoStyle" as a name and "Background=#rrggbb"
  * as a value. See CUSTOM COLORS in the lstopo(1) manpage for details.
  *
- * \note If \p value contains some non-printable characters, they will
+ * \note If \p name or \p value contain some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
  */
 HWLOC_DECLSPEC int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
