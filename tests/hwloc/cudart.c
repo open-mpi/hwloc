@@ -19,7 +19,7 @@ static int check_cuda_backend(hwloc_topology_t topology)
   unsigned i;
   for(i=0; i<root->infos.count; i++)
     if (!strcmp(root->infos.array[i].name, "Backend")
-        || !strcmp(root->infos.array[i].value, "CUDA"))
+        && !strcmp(root->infos.array[i].value, "CUDA"))
       return 1;
   return 0;
 }

@@ -18,7 +18,7 @@ static int check_nvml_backend(hwloc_topology_t topology)
   unsigned i;
   for(i=0; i<root->infos.count; i++)
     if (!strcmp(root->infos.array[i].name, "Backend")
-        || !strcmp(root->infos.array[i].value, "NVML"))
+        && !strcmp(root->infos.array[i].value, "NVML"))
       return 1;
   return 0;
 }

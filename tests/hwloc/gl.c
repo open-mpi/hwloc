@@ -19,7 +19,7 @@ static int check_gl_backend(hwloc_topology_t topology)
   unsigned i;
   for(i=0; i<root->infos.count; i++)
     if (!strcmp(root->infos.array[i].name, "Backend")
-        || !strcmp(root->infos.array[i].value, "GL"))
+        && !strcmp(root->infos.array[i].value, "GL"))
       return 1;
   return 0;
 }
