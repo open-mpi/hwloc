@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2021 Inria.  All rights reserved.
+.\" Copyright © 2010-2023 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-PS "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -27,6 +27,10 @@ specific part of the machine.
 \fB\-\-pid <pid>\fR
 Only show process of PID \fI<pid>\fR,
 even if it is not bound to any specific part of the machine.
+.TP
+\fB\-\-children\-of\-pid <pid>\fR
+Only show process of PID \fI<pid>\fR and its hierarchy of children,
+even if they are not bound to any specific part of the machine.
 .TP
 \fB\-\-name <name>\fR
 Only show processes whose name contains \fI<name>\fR,

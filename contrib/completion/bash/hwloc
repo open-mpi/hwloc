@@ -1,5 +1,5 @@
 #
-# Copyright © 2018-2022 Inria.  All rights reserved.
+# Copyright © 2018-2023 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -480,6 +480,7 @@ complete -F _hwloc_distrib hwloc-distrib
 _hwloc_ps(){
     local OPTIONS=(-a
 		   --pid
+		   --children-of-pid
 		   --name
 		   --uid
 		   -l --logical
@@ -510,7 +511,7 @@ _hwloc_ps(){
 	--uid)
 	    COMPREPLY=( "<uid>" "all" "" )
 	    ;;
-	--pid)
+	--pid|--children-of-pid)
 	    COMPREPLY=( "<pid>" "" )
 	    ;;
 	--pid-cmd)
