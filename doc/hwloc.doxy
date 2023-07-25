@@ -3885,7 +3885,7 @@ but not in the other.
 <br/>
 
 More changes may obviously be performed by manually modifying the XML export file.
-Simple operations such as modifying object attributes (cache size, memory size
+Simple operations such as modifying object attributes (cache size, memory size,
 name-value info attributes, etc.), moving I/O subtrees, moving Misc objects, or removing
 objects are easy to perform.
 
