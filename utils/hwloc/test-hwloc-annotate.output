@@ -170,6 +170,8 @@
   <cpukind cpuset="0x00000008" forced_efficiency="7">
     <info name="foo" value="bar"/>
     <info name="foo2" value="bar3"/>
+    <info name="foo3" value="bar4"/>
+    <info name="foo4" value="bar5"/>
   </cpukind>
   <cpukind cpuset="0x00000001" forced_efficiency="4">
     <info name="foo2" value="bar2"/>

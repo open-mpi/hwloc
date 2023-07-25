@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2018 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -108,15 +108,27 @@ hwloc_get_root_obj (hwloc_topology_t topology)
 }
 
 static __hwloc_inline const char *
-hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
+hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name)
 {
   unsigned i;
-  for(i=0; i<obj->infos_count; i++) {
-    struct hwloc_info_s *info = &obj->infos[i];
+  for(i=0; i<infos->count; i++) {
+    struct hwloc_info_s *info = &infos->array[i];
     if (!strcmp(info->name, name))
       return info->value;
   }
   return NULL;
+}
+
+static __hwloc_inline const char *
+hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
+{
+  return hwloc_get_info_by_name(&obj->infos, name);
+}
+
+static __hwloc_inline int
+hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
+{
+  return hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, name, value);
 }
 
 static __hwloc_inline void *

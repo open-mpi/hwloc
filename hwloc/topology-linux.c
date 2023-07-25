@@ -2163,8 +2163,8 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 
   hwloc_linux__get_allowed_resources(topology, fsroot_path, root_fd, &cpuset_name);
   if (cpuset_name) {
-    hwloc__add_info_nodup(&topology->levels[0][0]->infos, &topology->levels[0][0]->infos_count,
-			  "LinuxCgroup", cpuset_name, 1 /* replace */);
+    hwloc__replace_infos(&topology->levels[0][0]->infos,
+                         "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
   if (root_fd != -1)
@@ -2227,8 +2227,7 @@ struct hwloc_linux_cpuinfo_proc {
   unsigned long Pproc;
 
   /* custom info, set during hwloc_linux_parse_cpuinfo */
-  struct hwloc_info_s *infos;
-  unsigned infos_count;
+  struct hwloc_infos_s infos;
 };
 
 enum hwloc_linux_cgroup_type_e {
@@ -4429,14 +4428,18 @@ hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
 
   for(i=0; i<cpukinds->nr_sets; i++) {
     struct hwloc_info_s infoattr;
+    struct hwloc_infos_s infos;
     char value[32];
     infoattr.name = (char *) name;
     infoattr.value = value;
+    infos.array = &infoattr;
+    infos.count = 1;
+    infos.allocated = 0;
     snprintf(value, sizeof(value), "%lu", cpukinds->sets[i].value);
     /* value (at least cpu_capacity) may be > INT_MAX, too large for a forced_efficiency, hence use i instead */
     hwloc_internal_cpukinds_register(topology, cpukinds->sets[i].cpuset,
                                      forced_efficiency ? (int) i : HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
-                                     &infoattr, 1, 0);
+                                     &infos, 0);
     /* the cpuset is given to the callee */
     cpukinds->sets[i].cpuset = NULL;
   }
@@ -4616,19 +4619,27 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   atom_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_atom/cpus", data->root_fd);
   core_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_core/cpus", data->root_fd);
   if (atom_pmu_set) {
+    struct hwloc_infos_s infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "IntelAtom";
-    hwloc_internal_cpukinds_register(topology, atom_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    infos.array = &infoattr;
+    infos.count = 1;
+    infos.allocated = 0;
+    hwloc_internal_cpukinds_register(topology, atom_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infos, 0);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(atom_pmu_set);
   }
   if (core_pmu_set) {
+    struct hwloc_infos_s infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "IntelCore";
-    hwloc_internal_cpukinds_register(topology, core_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    infos.array = &infoattr;
+    infos.count = 1;
+    infos.allocated = 0;
+    hwloc_internal_cpukinds_register(topology, core_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infos, 0);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(core_pmu_set);
@@ -4884,8 +4895,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  if (cpuinfo_Lprocs) {
 	    for(j=0; j<(int) cpuinfo_numprocs; j++)
 	      if ((int) cpuinfo_Lprocs[j].Pproc == i) {
-		hwloc__move_infos(&package->infos, &package->infos_count,
-				  &cpuinfo_Lprocs[j].infos, &cpuinfo_Lprocs[j].infos_count);
+		hwloc__move_infos(&package->infos,
+				  &cpuinfo_Lprocs[j].infos);
 	      }
 	  }
 	  hwloc__insert_object_by_cpuset(topology, NULL, package, "linux:sysfs:package");
@@ -5133,124 +5144,124 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 static int
 hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
-			      struct hwloc_info_s **infos, unsigned *infos_count,
+			      struct hwloc_infos_s *infos,
 			      int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("vendor_id", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUVendor", value);
+      hwloc__add_info(infos, "CPUVendor", value);
   } else if (!strcmp("model name", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUModel", value);
+      hwloc__add_info(infos, "CPUModel", value);
   } else if (!strcmp("model", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
+      hwloc__add_info(infos, "CPUModelNumber", value);
   } else if (!strcmp("cpu family", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+      hwloc__add_info(infos, "CPUFamilyNumber", value);
   } else if (!strcmp("stepping", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUStepping", value);
+      hwloc__add_info(infos, "CPUStepping", value);
   }
   return 0;
 }
 
 static int
 hwloc_linux_parse_cpuinfo_ia64(const char *prefix, const char *value,
-			       struct hwloc_info_s **infos, unsigned *infos_count,
+			       struct hwloc_infos_s *infos,
 			       int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("vendor", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUVendor", value);
+      hwloc__add_info(infos, "CPUVendor", value);
   } else if (!strcmp("model name", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUModel", value);
+      hwloc__add_info(infos, "CPUModel", value);
   } else if (!strcmp("model", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
+      hwloc__add_info(infos, "CPUModelNumber", value);
   } else if (!strcmp("family", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+      hwloc__add_info(infos, "CPUFamilyNumber", value);
   }
   return 0;
 }
 
 static int
 hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
-			      struct hwloc_info_s **infos, unsigned *infos_count,
+			      struct hwloc_infos_s *infos,
 			      int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
       || !strcmp("model name", prefix) /* new kernels with one model name per core */) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUModel", value);
+      hwloc__add_info(infos, "CPUModel", value);
   } else if (!strcmp("CPU implementer", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUImplementer", value);
+      hwloc__add_info(infos, "CPUImplementer", value);
   } else if (!strcmp("CPU architecture", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUArchitecture", value);
+      hwloc__add_info(infos, "CPUArchitecture", value);
   } else if (!strcmp("CPU variant", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUVariant", value);
+      hwloc__add_info(infos, "CPUVariant", value);
   } else if (!strcmp("CPU part", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUPart", value);
+      hwloc__add_info(infos, "CPUPart", value);
   } else if (!strcmp("CPU revision", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPURevision", value);
+      hwloc__add_info(infos, "CPURevision", value);
   } else if (!strcmp("Hardware", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "HardwareName", value);
+      hwloc__add_info(infos, "HardwareName", value);
   } else if (!strcmp("Revision", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "HardwareRevision", value);
+      hwloc__add_info(infos, "HardwareRevision", value);
   } else if (!strcmp("Serial", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "HardwareSerial", value);
+      hwloc__add_info(infos, "HardwareSerial", value);
   }
   return 0;
 }
 
 static int
 hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
-			      struct hwloc_info_s **infos, unsigned *infos_count,
+			      struct hwloc_infos_s *infos,
 			      int is_global)
 {
   /* common fields */
   if (!strcmp("cpu", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "CPUModel", value);
+      hwloc__add_info(infos, "CPUModel", value);
   } else if (!strcmp("platform", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "PlatformName", value);
+      hwloc__add_info(infos, "PlatformName", value);
   } else if (!strcmp("model", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "PlatformModel", value);
+      hwloc__replace_infos(infos, "PlatformModel", value);
   }
   /* platform-specific fields */
   else if (!strcasecmp("vendor", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "PlatformVendor", value);
+      hwloc__add_info(infos, "PlatformVendor", value);
   } else if (!strcmp("Board ID", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "PlatformBoardID", value);
+      hwloc__add_info(infos, "PlatformBoardID", value);
   } else if (!strcmp("Board", prefix)
 	     || !strcasecmp("Machine", prefix)) {
     /* machine and board are similar (and often more precise) than model above */
     if (value[0])
-      hwloc__add_info_nodup(infos, infos_count, "PlatformModel", value, 1);
+      hwloc__replace_infos(infos, "PlatformModel", value);
   } else if (!strcasecmp("Revision", prefix)
 	     || !strcmp("Hardware rev", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, is_global ? "PlatformRevision" : "CPURevision", value);
+      hwloc__add_info(infos, is_global ? "PlatformRevision" : "CPURevision", value);
   } else if (!strcmp("SVR", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "SystemVersionRegister", value);
+      hwloc__add_info(infos, "SystemVersionRegister", value);
   } else if (!strcmp("PVR", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, infos_count, "ProcessorVersionRegister", value);
+      hwloc__add_info(infos, "ProcessorVersionRegister", value);
   }
   /* don't match 'board*' because there's also "board l2" on some platforms */
   return 0;
@@ -5280,7 +5291,7 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
  */
 static int
 hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
-				  struct hwloc_info_s **infos, unsigned *infos_count,
+				  struct hwloc_infos_s *infos,
 				  int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("model name", prefix)
@@ -5292,7 +5303,7 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
      * we should have the Architecture keypair for basic information anyway.
      */
     if (value[0])
-      hwloc__add_info_nodup(infos, infos_count, "CPUModel", value, 1);
+      hwloc__replace_infos(infos, "CPUModel", value);
   }
   return 0;
 }
@@ -5302,7 +5313,7 @@ static int
 hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 			  const char *path,
 			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p,
-			  struct hwloc_info_s **global_infos, unsigned *global_infos_count)
+			  struct hwloc_infos_s *global_infos)
 {
   /* FIXME: only parse once per package and once for globals? */
   FILE *fd;
@@ -5312,7 +5323,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
   int curproc = -1;
-  int (*parse_cpuinfo_func)(const char *, const char *, struct hwloc_info_s **, unsigned *, int) = NULL;
+  int (*parse_cpuinfo_func)(const char *, const char *, struct hwloc_infos_s *, int) = NULL;
 
   if (!(fd=hwloc_fopen(path,"r", data->root_fd)))
     {
@@ -5384,8 +5395,9 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       Lprocs = tmp;
     }
     Lprocs[curproc].Pproc = Pproc;
-    Lprocs[curproc].infos = NULL;
-    Lprocs[curproc].infos_count = 0;
+    Lprocs[curproc].infos.array = NULL;
+    Lprocs[curproc].infos.count = 0;
+    Lprocs[curproc].infos.allocated = 0;
     getprocnb_end() else {
 
       /* architecture specific or default routine for parsing cpumodel */
@@ -5412,7 +5424,6 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
        */
       parse_cpuinfo_func(prefix, value,
 			 curproc >= 0 ? &Lprocs[curproc].infos : global_infos,
-			 curproc >= 0 ? &Lprocs[curproc].infos_count : global_infos_count,
 			 curproc < 0);
     }
 
@@ -5437,16 +5448,16 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 
 static void
 hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs,
-			 struct hwloc_info_s *global_infos, unsigned global_infos_count)
+			 struct hwloc_infos_s *global_infos)
 {
   if (Lprocs) {
     unsigned i;
     for(i=0; i<numprocs; i++) {
-      hwloc__free_infos(Lprocs[i].infos, Lprocs[i].infos_count);
+      hwloc__free_infos(&Lprocs[i].infos);
     }
     free(Lprocs);
   }
-  hwloc__free_infos(global_infos, global_infos_count);
+  hwloc__free_infos(global_infos);
 }
 
 
@@ -5735,8 +5746,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   unsigned nbnodes;
   char *cpuset_name = NULL;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-  struct hwloc_info_s *global_infos = NULL;
-  unsigned global_infos_count = 0;
+  struct hwloc_infos_s global_infos;
   int numprocs;
   int already_pus;
   int already_numanodes;
@@ -5772,7 +5782,10 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   /**********************
    * /proc/cpuinfo
    */
-  numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
+  global_infos.array = NULL;
+  global_infos.count = 0;
+  global_infos.allocated = 0;
+  numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos);
   if (numprocs < 0)
     numprocs = 0;
 
@@ -5782,13 +5795,13 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   if (data->arch == HWLOC_LINUX_ARCH_X86 && numprocs > 0) {
       unsigned i;
       const char *cpuvendor = NULL, *cpufamilynumber = NULL, *cpumodelnumber = NULL;
-      for(i=0; i<Lprocs[0].infos_count; i++) {
-	if (!strcmp(Lprocs[0].infos[i].name, "CPUVendor")) {
-	  cpuvendor = Lprocs[0].infos[i].value;
-	} else if (!strcmp(Lprocs[0].infos[i].name, "CPUFamilyNumber")) {
-	  cpufamilynumber = Lprocs[0].infos[i].value;
-	} else if (!strcmp(Lprocs[0].infos[i].name, "CPUModelNumber")) {
-	  cpumodelnumber = Lprocs[0].infos[i].value;
+      for(i=0; i<Lprocs[0].infos.count; i++) {
+	if (!strcmp(Lprocs[0].infos.array[i].name, "CPUVendor")) {
+	  cpuvendor = Lprocs[0].infos.array[i].value;
+	} else if (!strcmp(Lprocs[0].infos.array[i].name, "CPUFamilyNumber")) {
+	  cpufamilynumber = Lprocs[0].infos.array[i].value;
+	} else if (!strcmp(Lprocs[0].infos.array[i].name, "CPUModelNumber")) {
+	  cpumodelnumber = Lprocs[0].infos.array[i].value;
 	}
       }
       if (cpuvendor && !strcmp(cpuvendor, "GenuineIntel")
@@ -5825,8 +5838,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     goto cpudone;
 
   /* setup root info */
-  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
-		    &global_infos, &global_infos_count);
+  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos,
+		    &global_infos);
 
   /* sysfs */
   if (look_sysfscpu(topology, data, old_siblings_filenames, Lprocs, numprocs) < 0)
@@ -5858,7 +5871,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     free(cpuset_name);
   }
 
-  hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
+  hwloc_linux_free_cpuinfo(Lprocs, numprocs, &global_infos);
   return 0;
 }
 
@@ -6901,10 +6914,13 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
   unsigned foff; /* offset in raw file */
   unsigned boff; /* offset in buffer read from raw file */
   unsigned i;
-  struct hwloc_info_s *infos = NULL;
-  unsigned infos_count = 0;
+  struct hwloc_infos_s infos;
   hwloc_obj_t misc;
   int foundinfo = 0;
+
+  infos.array = NULL;
+  infos.count = 0;
+  infos.allocated = 0;
 
   /* start after the header */
   foff = header->length;
@@ -6928,32 +6944,32 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
       /* string didn't get truncated, should be OK */
       if (i == header->manuf_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
-	  hwloc__add_info(&infos, &infos_count, "Vendor", buffer+boff);
+	  hwloc__add_info(&infos, "Vendor", buffer+boff);
 	  foundinfo = 1;
 	}
       }	else if (i == header->serial_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
-	  hwloc__add_info(&infos, &infos_count, "SerialNumber", buffer+boff);
+	  hwloc__add_info(&infos, "SerialNumber", buffer+boff);
 	  foundinfo = 1;
 	}
       } else if (i == header->asset_tag_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
-	  hwloc__add_info(&infos, &infos_count, "AssetTag", buffer+boff);
+	  hwloc__add_info(&infos, "AssetTag", buffer+boff);
 	  foundinfo = 1;
 	}
       } else if (i == header->part_num_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
-	  hwloc__add_info(&infos, &infos_count, "PartNumber", buffer+boff);
+	  hwloc__add_info(&infos, "PartNumber", buffer+boff);
 	  foundinfo = 1;
 	}
       } else if (i == header->dev_loc_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
-	  hwloc__add_info(&infos, &infos_count, "DeviceLocation", buffer+boff);
+	  hwloc__add_info(&infos, "DeviceLocation", buffer+boff);
 	  /* only a location, not an actual info about the device */
 	}
       } else if (i == header->bank_loc_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
-	  hwloc__add_info(&infos, &infos_count, "BankLocation", buffer+boff);
+	  hwloc__add_info(&infos, "BankLocation", buffer+boff);
 	  /* only a location, not an actual info about the device */
 	}
       } else {
@@ -6986,7 +7002,7 @@ done:
 
   misc->subtype = strdup("MemoryModule");
 
-  hwloc__move_infos(&misc->infos, &misc->infos_count, &infos, &infos_count);
+  hwloc__move_infos(&misc->infos, &infos);
   /* FIXME: find a way to identify the corresponding NUMA node and attach these objects there.
    * but it means we need to parse DeviceLocation=DIMM_B4 but these vary significantly
    * with the vendor, and it's hard to be 100% sure 'B' is second socket.
@@ -6997,7 +7013,7 @@ done:
   return 1;
 
  out_with_infos:
-  hwloc__free_infos(infos, infos_count);
+  hwloc__free_infos(&infos);
   return 0;
 }
 

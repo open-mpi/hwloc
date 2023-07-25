@@ -1824,10 +1824,10 @@ output_draw(struct lstopo_output *loutput)
 
     if (loutput->show_legend != LSTOPO_SHOW_LEGEND_NONE) {
       /* look at custom legend lines in root info attr and --append-legend */
-      for(i=0; i<root->infos_count; i++) {
-        if (!strcmp(root->infos[i].name, "lstopoLegend")) {
+      for(i=0; i<root->infos.count; i++) {
+        if (!strcmp(root->infos.array[i].name, "lstopoLegend")) {
           infocount++;
-          textwidth = get_textwidth(loutput, root->infos[i].value, (unsigned) strlen(root->infos[i].value), fontsize);
+          textwidth = get_textwidth(loutput, root->infos.array[i].value, (unsigned) strlen(root->infos.array[i].value), fontsize);
           if (textwidth > maxtextwidth)
             maxtextwidth = textwidth;
         }
@@ -1887,9 +1887,9 @@ output_draw(struct lstopo_output *loutput)
                    NULL, 0);
       for(i=0; i<loutput->legend_default_lines_nr; i++, offset += linespacing + fontsize)
 	methods->text(loutput, &loutput->palette->black, fontsize, depth, gridsize, offset, loutput->legend_default_lines[i], NULL, i);
-      for(i=0, j=0; i<root->infos_count; i++) {
-        if (!strcmp(root->infos[i].name, "lstopoLegend")) {
-          methods->text(loutput, &loutput->palette->black, fontsize, depth, gridsize, offset, root->infos[i].value, NULL, j+loutput->legend_default_lines_nr);
+      for(i=0, j=0; i<root->infos.count; i++) {
+        if (!strcmp(root->infos.array[i].name, "lstopoLegend")) {
+          methods->text(loutput, &loutput->palette->black, fontsize, depth, gridsize, offset, root->infos.array[i].value, NULL, j+loutput->legend_default_lines_nr);
           j++;
           offset += linespacing + fontsize;
         }

@@ -1459,9 +1459,12 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
 {
   hwloc_bitmap_t cpuset = NULL;
   int forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
-  unsigned nr_infos = 0;
-  struct hwloc_info_s *infos = NULL;
+  struct hwloc_infos_s infos;
   int ret;
+
+  infos.array = NULL;
+  infos.count = 0;
+  infos.allocated = 0;
 
   while (1) {
     char *attrname, *attrvalue;
@@ -1495,7 +1498,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
       char *infovalue = NULL;
       ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
       if (!ret && infoname && infovalue)
-        hwloc__add_info(&infos, &nr_infos, infoname, infovalue);
+        hwloc__add_info(&infos, infoname, infovalue);
     } else {
       if (hwloc__xml_verbose())
         fprintf(stderr, "%s: cpukind with unrecognized child %s\n",
@@ -1517,17 +1520,17 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
   }
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
-    hwloc__free_infos(infos, nr_infos);
+    hwloc__free_infos(&infos);
     hwloc_bitmap_free(cpuset);
   } else {
-    hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
-    hwloc__free_infos(infos, nr_infos);
+    hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, &infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc__free_infos(&infos);
   }
 
   return state->global->close_tag(state);
 
  error:
-  hwloc__free_infos(infos, nr_infos);
+  hwloc__free_infos(&infos);
   hwloc_bitmap_free(cpuset);
   return -1;
 }
@@ -1832,19 +1835,19 @@ done:
   if (data->version_major <= 2) {
     unsigned i;
     /* check if root already has some backend info */
-    for(i=0; i<root->infos_count; i++)
-      if (!strcmp(root->infos[i].name, "Backend")) {
-        if (!strcmp(root->infos[i].value, "CUDA"))
+    for(i=0; i<root->infos.count; i++)
+      if (!strcmp(root->infos.array[i].name, "Backend")) {
+        if (!strcmp(root->infos.array[i].value, "CUDA"))
           data->need_cuda_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "NVML"))
+        if (!strcmp(root->infos.array[i].value, "NVML"))
           data->need_nvml_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "RSMI"))
+        if (!strcmp(root->infos.array[i].value, "RSMI"))
           data->need_rsmi_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "LevelZero"))
+        if (!strcmp(root->infos.array[i].value, "LevelZero"))
           data->need_levelzero_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "OpenCL"))
+        if (!strcmp(root->infos.array[i].value, "OpenCL"))
           data->need_opencl_backend_info = 0;
-        if (!strcmp(root->infos[i].value, "GL"))
+        if (!strcmp(root->infos.array[i].value, "GL"))
           data->need_gl_backend_info = 0;
       }
     /* add missing backend info */
@@ -2197,8 +2200,8 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     break;
   }
 
-  for(i=0; i<obj->infos_count; i++)
-    hwloc__xml_export_info_attr(state, obj->infos[i].name, obj->infos[i].value);
+  for(i=0; i<obj->infos.count; i++)
+    hwloc__xml_export_info_attr(state, obj->infos.array[i].name, obj->infos.array[i].value);
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
     /* v2 gpus had Backend inside the object itself */
@@ -2508,8 +2511,8 @@ hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t top
       cstate.new_prop(&cstate, "forced_efficiency", tmp);
     }
 
-    for(j=0; j<kind->nr_infos; j++)
-      hwloc__xml_export_info_attr(&cstate, kind->infos[j].name, kind->infos[j].value);
+    for(j=0; j<kind->infos.count; j++)
+      hwloc__xml_export_info_attr(&cstate, kind->infos.array[j].name, kind->infos.array[j].value);
 
     cstate.end_object(&cstate, "cpukind");
   }

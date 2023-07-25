@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
   }
   if (cpukind_index >= 0) {
     cpukind_cpuset = hwloc_bitmap_alloc();
-    err = hwloc_cpukinds_get_info(topology, cpukind_index, cpukind_cpuset, NULL, NULL, NULL, 0);
+    err = hwloc_cpukinds_get_info(topology, cpukind_index, cpukind_cpuset, NULL, NULL, 0);
     if (err < 0) {
       fprintf(stderr, "Couldn't find CPU kind #%d, keeping no PU.\n", cpukind_index);
       /* FALLTHRU */
@@ -456,11 +456,11 @@ int main(int argc, char *argv[])
     int nr = hwloc_cpukinds_get_nr(topology, 0);
     cpukind_cpuset = hwloc_bitmap_alloc();
     for(i=0; i<nr; i++) {
-      struct hwloc_info_s *infos;
-      unsigned nr_infos, j;
-      hwloc_cpukinds_get_info(topology, i, cpuset, NULL, &nr_infos, &infos, 0);
-      for(j=0; j<nr_infos; j++)
-        if (!strcmp(infos[j].name, cpukind_infoname) && !strcmp(infos[j].value, cpukind_infovalue)) {
+      struct hwloc_infos_s *infosp;
+      unsigned j;
+      hwloc_cpukinds_get_info(topology, i, cpuset, NULL, &infosp, 0);
+      for(j=0; j<infosp->count; j++)
+        if (!strcmp(infosp->array[j].name, cpukind_infoname) && !strcmp(infosp->array[j].value, cpukind_infovalue)) {
           hwloc_bitmap_or(cpukind_cpuset, cpukind_cpuset, cpuset);
           break;
         }

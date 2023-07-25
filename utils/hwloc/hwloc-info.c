@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -210,8 +210,8 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
 
   printf("%s symmetric subtree = %d\n", prefix, obj->symmetric_subtree);
 
-  for(i=0; i<obj->infos_count; i++) {
-    struct hwloc_info_s *info = &obj->infos[i];
+  for(i=0; i<obj->infos.count; i++) {
+    struct hwloc_info_s *info = &obj->infos.array[i];
     printf("%s info %s = %s\n", prefix, info->name, info->value);
   }
 
@@ -220,10 +220,10 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
     for(i=0; i<nr; i++) {
       int efficiency;
-      struct hwloc_info_s *infos;
-      unsigned nr_infos, j;
+      struct hwloc_infos_s *infosp;
+      unsigned j;
       int partial;
-      hwloc_cpukinds_get_info(topology, i, cpuset, &efficiency, &nr_infos, &infos, 0);
+      hwloc_cpukinds_get_info(topology, i, cpuset, &efficiency, &infosp, 0);
       if (hwloc_bitmap_isincluded(obj->cpuset, cpuset))
         partial = 0;
       else if (hwloc_bitmap_intersects(obj->cpuset, cpuset))
@@ -235,9 +235,9 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
       if (efficiency != -1)
         printf("%s cpukind efficiency = %d\n",
                prefix, efficiency);
-      for(j=0; j<nr_infos; j++)
+      for(j=0; j<infosp->count; j++)
         printf("%s cpukind info %s = %s\n",
-               prefix, infos[j].name, infos[j].value);
+               prefix, infosp->array[j].name, infosp->array[j].value);
     }
     hwloc_bitmap_free(cpuset);
   }

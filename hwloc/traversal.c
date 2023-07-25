@@ -705,8 +705,8 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   /* printf infos */
   if (verbose) {
     unsigned i;
-    for(i=0; i<obj->infos_count; i++) {
-      struct hwloc_info_s *info = &obj->infos[i];
+    for(i=0; i<obj->infos.count; i++) {
+      struct hwloc_info_s *info = &obj->infos.array[i];
       const char *quote;
       if (strchr(info->value, ' '))
         quote = "\"";

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2022 Inria.  All rights reserved.
+ * Copyright © 2020-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -28,7 +28,7 @@ hwloc_internal_cpukinds_destroy(struct hwloc_topology *topology)
   for(i=0; i<topology->nr_cpukinds; i++) {
     struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
     hwloc_bitmap_free(kind->cpuset);
-    hwloc__free_infos(kind->infos, kind->nr_infos);
+    hwloc__free_infos(&kind->infos);
   }
   free(topology->cpukinds);
   topology->cpukinds = NULL;
@@ -59,8 +59,8 @@ hwloc_internal_cpukinds_dup(hwloc_topology_t new, hwloc_topology_t old)
       goto failed;
     }
     if (hwloc__tma_dup_infos(tma,
-                             &kinds[i].infos, &kinds[i].nr_infos,
-                             old->cpukinds[i].infos, old->cpukinds[i].nr_infos) < 0) {
+                             &kinds[i].infos,
+                             &old->cpukinds[i].infos) < 0) {
       assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
       hwloc_bitmap_free(kinds[i].cpuset);
       new->nr_cpukinds = i;
@@ -85,7 +85,7 @@ hwloc_internal_cpukinds_restrict(hwloc_topology_t topology)
     hwloc_bitmap_and(kind->cpuset, kind->cpuset, hwloc_get_root_obj(topology)->cpuset);
     if (hwloc_bitmap_iszero(kind->cpuset)) {
       hwloc_bitmap_free(kind->cpuset);
-      hwloc__free_infos(kind->infos, kind->nr_infos);
+      hwloc__free_infos(&kind->infos);
       memmove(kind, kind+1, (topology->nr_cpukinds - i - 1)*sizeof(*kind));
       i--;
       topology->nr_cpukinds--;
@@ -106,29 +106,29 @@ hwloc__cpukind_check_duplicate_info(struct hwloc_internal_cpukind_s *kind,
                                     const char *name, const char *value)
 {
   unsigned i;
-  for(i=0; i<kind->nr_infos; i++)
-    if (!strcmp(kind->infos[i].name, name)
-        && !strcmp(kind->infos[i].value, value))
+  for(i=0; i<kind->infos.count; i++)
+    if (!strcmp(kind->infos.array[i].name, name)
+        && !strcmp(kind->infos.array[i].value, value))
       return 1;
   return 0;
 }
 
 static __hwloc_inline void
 hwloc__cpukind_add_infos(struct hwloc_internal_cpukind_s *kind,
-                         const struct hwloc_info_s *infos, unsigned nr_infos)
+                         const struct hwloc_infos_s *infos)
 {
   unsigned i;
-  for(i=0; i<nr_infos; i++) {
-    if (hwloc__cpukind_check_duplicate_info(kind, infos[i].name, infos[i].value))
+  for(i=0; i<infos->count; i++) {
+    if (hwloc__cpukind_check_duplicate_info(kind, infos->array[i].name, infos->array[i].value))
       continue;
-    hwloc__add_info(&kind->infos, &kind->nr_infos, infos[i].name, infos[i].value);
+    hwloc__add_info(&kind->infos, infos->array[i].name, infos->array[i].value);
   }
 }
 
 int
 hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
                                  int forced_efficiency,
-                                 const struct hwloc_info_s *infos, unsigned nr_infos,
+                                 const struct hwloc_infos_s *infos,
                                  unsigned long flags)
 {
   struct hwloc_internal_cpukind_s *kinds;
@@ -184,8 +184,9 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
       kinds[newnr].efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
       kinds[newnr].forced_efficiency = forced_efficiency;
       hwloc_bitmap_and(kinds[newnr].cpuset, cpuset, kinds[i].cpuset);
-      hwloc__cpukind_add_infos(&kinds[newnr], kinds[i].infos, kinds[i].nr_infos);
-      hwloc__cpukind_add_infos(&kinds[newnr], infos, nr_infos);
+      hwloc__cpukind_add_infos(&kinds[newnr], &kinds[i].infos);
+      if (infos)
+        hwloc__cpukind_add_infos(&kinds[newnr], infos);
       /* remove cpuset PUs from the existing kind that we just split */
       hwloc_bitmap_andnot(kinds[i].cpuset, kinds[i].cpuset, kinds[newnr].cpuset);
       /* clear cpuset PUs that were taken care of */
@@ -196,7 +197,8 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
     } else if (res == HWLOC_BITMAP_CONTAINS
                || res == HWLOC_BITMAP_EQUAL) {
       /* append new info to existing smaller (or equal) kind */
-      hwloc__cpukind_add_infos(&kinds[i], infos, nr_infos);
+      if (infos)
+        hwloc__cpukind_add_infos(&kinds[i], infos);
       if ((flags & HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY)
           || kinds[i].forced_efficiency == HWLOC_CPUKIND_EFFICIENCY_UNKNOWN)
         kinds[i].forced_efficiency = forced_efficiency;
@@ -218,7 +220,8 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
     kinds[newnr].cpuset = cpuset;
     kinds[newnr].efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
     kinds[newnr].forced_efficiency = forced_efficiency;
-    hwloc__cpukind_add_infos(&kinds[newnr], infos, nr_infos);
+    if (infos)
+      hwloc__cpukind_add_infos(&kinds[newnr], infos);
     newnr++;
   } else {
     hwloc_bitmap_free(cpuset);
@@ -231,7 +234,7 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
 int
 hwloc_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t _cpuset,
                         int forced_efficiency,
-                        unsigned nr_infos, struct hwloc_info_s *infos,
+                        struct hwloc_infos_s *infos,
                         unsigned long flags)
 {
   hwloc_bitmap_t cpuset;
@@ -254,7 +257,7 @@ hwloc_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t _cpuset,
   if (forced_efficiency < 0)
     forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
 
-  err = hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, nr_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+  err = hwloc_internal_cpukinds_register(topology, cpuset, forced_efficiency, infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
   if (err < 0)
     return err;
 
@@ -317,8 +320,8 @@ hwloc__cpukinds_summarize_info(struct hwloc_topology *topology,
 
   for(i=0; i<topology->nr_cpukinds; i++) {
     struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
-    for(j=0; j<kind->nr_infos; j++) {
-      struct hwloc_info_s *info = &kind->infos[j];
+    for(j=0; j<kind->infos.count; j++) {
+      struct hwloc_info_s *info = &kind->infos.array[j];
       if (!strcmp(info->name, "FrequencyMaxMHz")) {
         summary->summaries[i].max_freq = atoi(info->value);
       } else if (!strcmp(info->name, "FrequencyBaseMHz")) {
@@ -598,7 +601,7 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
                         unsigned id,
                         hwloc_bitmap_t cpuset,
                         int *efficiencyp,
-                        unsigned *nr_infosp, struct hwloc_info_s **infosp,
+                        struct hwloc_infos_s **infosp,
                         unsigned long flags)
 {
   struct hwloc_internal_cpukind_s *kind;
@@ -621,10 +624,8 @@ hwloc_cpukinds_get_info(hwloc_topology_t topology,
   if (efficiencyp)
     *efficiencyp = kind->efficiency;
 
-  if (nr_infosp && infosp) {
-    *nr_infosp = kind->nr_infos;
-    *infosp = kind->infos;
-  }
+  if (infosp)
+    *infosp = &kind->infos;
   return 0;
 }
 

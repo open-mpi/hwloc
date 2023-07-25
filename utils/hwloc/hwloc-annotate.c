@@ -79,51 +79,29 @@ static char *distances_transform_removeobj = NULL;
 static char *distances_transform_replace_oldtype = NULL;
 static char *distances_transform_replace_newtype = NULL;
 
+static void apply_infos(struct hwloc_infos_s *infos)
+{
+  if (clearinfos) {
+    hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_REMOVE, NULL, NULL);
+  }
+  if (infoname) {
+    if (replaceinfos) {
+      if (infovalue)
+        hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_REPLACE, infoname, infovalue);
+      else
+        hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_REMOVE, infoname, NULL);
+    } else
+      hwloc_modify_infos(infos, HWLOC_MODIFY_INFOS_OP_ADD, infoname, infovalue);
+  }
+}
+
 static void apply(hwloc_topology_t topology, hwloc_obj_t obj)
 {
-	unsigned i,j;
-	if (clearinfos) {
-		/* this may be considered dangerous, applications should not modify objects directly */
-		for(i=0; i<obj->infos_count; i++) {
-			struct hwloc_info_s *info = &obj->infos[i];
-			free(info->name);
-			free(info->value);
-		}
-		free(obj->infos);
-		obj->infos = NULL;
-		obj->infos_count = 0;
-	}
 	if (clearuserdata) {
 		hwloc_utils_userdata_free(obj);
 	}
-	if (infoname) {
-		if (replaceinfos) {
-			/* this may be considered dangerous, applications should not modify objects directly */
-			for(i=0, j=0; i<obj->infos_count; i++) {
-				struct hwloc_info_s *info = &obj->infos[i];
-				if (!strcmp(infoname, info->name)) {
-					/* remove info */
-					free(info->name);
-					info->name = NULL;
-					free(info->value);
-				} else {
-					if (i != j) {
-						/* shift info to where it belongs */
-						obj->infos[j].name = info->name;
-						obj->infos[j].value = info->value;
-					}
-					j++;
-				}
-			}
-			obj->infos_count = j;
-			if (!j) {
-				free(obj->infos);
-				obj->infos = NULL;
-			}
-		}
-		if (infovalue)
-			hwloc_obj_add_info(obj, infoname, infovalue);
-	}
+        if (infoname || clearinfos)
+          apply_infos(&obj->infos);
 	if (subtype) {
 		if (obj->subtype)
 			free(obj->subtype);
@@ -768,11 +746,15 @@ int main(int argc, char *argv[])
           }
 
         } else if (ckcpuset) {
+          struct hwloc_infos_s infos;
           struct hwloc_info_s info;
           info.name = ckiname;
           info.value = ckivalue;
+          infos.count = 1;
+          infos.array = &info;
+          infos.allocated = 0;
           if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
-                                      ckiname ? 1 : 0, ckiname ? &info : NULL,
+                                      ckiname ? &infos : NULL,
                                       ckflags) < 0) {
             fprintf(stderr, "Failed to register CPU kind (%s)\n", strerror(errno));
           }
@@ -804,7 +786,22 @@ int main(int argc, char *argv[])
 
 	  for(i=0; i<nr_locations; i++) {
 	    char *location = locations[i];
-	    if (!strcmp(location, "all")) {
+            if (!strncmp(location, "cpukind#", 8) && (infoname || clearinfos)) {
+              struct hwloc_infos_s *infos;
+              int num;
+              if (location[8] < '0' || location[8] > '9') {
+                fprintf(stderr, "Failed to recognize number after cpukind# in location %s\n", location);
+                goto out_with_topology;
+              }
+              num = atoi(location+8);
+              err = hwloc_cpukinds_get_info(topology, num, NULL, NULL, &infos, 0);
+              if (err < 0) {
+                fprintf(stderr, "Failed to find cpukind#%d\n", num);
+                goto out_with_topology;
+              } else {
+                apply_infos(infos);
+              }
+            } else if (!strcmp(location, "all")) {
 	      apply_recursive(topology, hwloc_get_root_obj(topology));
 	    } else if (!strcmp(location, "root")) {
 	      apply(topology, hwloc_get_root_obj(topology));

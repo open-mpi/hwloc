@@ -3,7 +3,7 @@ foreach(t api_version backends bind
   distances get_area_memlocation get_cache_covering_cpuset get_closest_objs get_largest_objs_inside_cpuset
   get_last_cpu_location get_next_obj_covering_cpuset get_obj_below_array_by_type get_obj_covering_cpuset
   get_obj_inside_cpuset get_obj_with_same_locality get_shared_cache_covering_obj
-  groups insert_misc iodevs is_thissystem list_components obj_infos object_userdata pci_backend synthetic
+  groups insert_misc iodevs is_thissystem list_components object_userdata pci_backend synthetic
   topology_abi topology_allow topology_diff topology_dup topology_restrict type_depth type_sscanf
 )
   add_executable(hwloc_${t} hwloc_${t}.c)
@@ -13,7 +13,7 @@ foreach(t api_version backends bind
   set_tests_properties(${t} PROPERTIES TIMEOUT 10)
 endforeach()
 
-foreach(t cpuset_nodeset memattrs cpukinds gl windows_processor_groups)
+foreach(t cpuset_nodeset memattrs cpukinds infos gl windows_processor_groups)
   add_executable(${t} ${t}.c)
   target_link_libraries(${t} PRIVATE hwloc)
 

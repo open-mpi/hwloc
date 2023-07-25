@@ -224,8 +224,7 @@ struct hwloc_topology {
     int efficiency;
     int forced_efficiency; /* returned by the hardware or OS if any */
     hwloc_uint64_t ranking_value; /* internal value for ranking */
-    unsigned nr_infos;
-    struct hwloc_info_s *infos;
+    struct hwloc_infos_s infos;
   } *cpukinds;
 
   int grouping;
@@ -326,11 +325,11 @@ extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
  */
 extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
 
-extern int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value);
-extern int hwloc__add_info_nodup(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value, int replace);
-extern int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_info_s **src_infosp, unsigned *src_countp);
-extern int hwloc__tma_dup_infos(struct hwloc_tma *tma, struct hwloc_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_info_s *src_infos, unsigned src_count);
-extern void hwloc__free_infos(struct hwloc_info_s *infos, unsigned count);
+extern int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value);
+extern int hwloc__replace_infos(struct hwloc_infos_s *infos, const char *name, const char *value);
+extern int hwloc__move_infos(struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
+extern int hwloc__tma_dup_infos(struct hwloc_tma *tma, struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
+extern void hwloc__free_infos(struct hwloc_infos_s *infos);
 
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);
@@ -437,7 +436,7 @@ extern int hwloc_internal_cpukinds_rank(hwloc_topology_t topology);
 extern void hwloc_internal_cpukinds_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_cpukinds_dup(hwloc_topology_t new, hwloc_topology_t old);
 #define HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY (1<<0)
-extern int hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuset, int forced_efficiency, const struct hwloc_info_s *infos, unsigned nr_infos, unsigned long flags);
+extern int hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuset, int forced_efficiency, const struct hwloc_infos_s *infos, unsigned long flags);
 extern void hwloc_internal_cpukinds_restrict(hwloc_topology_t topology);
 
 /* encode src buffer into target buffer.

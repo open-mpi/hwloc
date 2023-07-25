@@ -320,17 +320,20 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
   int got_efficiency = kinds->nr ? 1 : 0;
 
   for(i=0; i<kinds->nr; i++) {
+    struct hwloc_infos_s infos;
     struct hwloc_info_s infoattr;
-    unsigned nr_info = 0;
     int efficiency;
     hwloc_debug_2args_bitmap("building cpukind with perflevel %u compatible `%s' and cpuset %s\n",
                              kinds->kinds[i].perflevel,
                              kinds->kinds[i].compatible,
                              kinds->kinds[i].cpuset);
+    infos.count = 0;
     if (kinds->kinds[i].compatible) {
       infoattr.name = (char *) "DarwinCompatible";
       infoattr.value = kinds->kinds[i].compatible;
-      nr_info = 1;
+      infos.array = &infoattr;
+      infos.count = 1;
+      infos.allocated = 0;
     }
     if (kinds->kinds[i].perflevel >= 0) {
       /* perflevel0 always refers to the highest performance core type in the system. */
@@ -339,7 +342,7 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
       efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
       got_efficiency = 0;
     }
-    hwloc_internal_cpukinds_register(topology, kinds->kinds[i].cpuset, efficiency, &infoattr, nr_info, 0);
+    hwloc_internal_cpukinds_register(topology, kinds->kinds[i].cpuset, efficiency, &infos, 0);
     free(kinds->kinds[i].compatible);
     /* the cpuset is given to the callee */
   }
