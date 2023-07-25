@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -35,6 +35,7 @@ static int logical = 1;
 static int single_ancestor = 0;
 #define NO_ONLY_PID -1
 static long only_pid = NO_ONLY_PID;
+static long children_of_pid = NO_ONLY_PID;
 static long only_uid;
 static int json_server = 0;
 static int json_port = JSON_PORT;
@@ -47,6 +48,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Options:\n");
   fprintf (where, "  -a                 Show all processes, including those that are not bound\n");
   fprintf (where, "  --pid <pid>        Only show process of pid number <pid>\n");
+  fprintf (where, "  --children-of-pid <pid> Only show process of pid number <pid> and its children\n");
   fprintf (where, "  --name <name>      Only show processes whose name contains <name>\n");
 #ifdef HWLOC_LINUX_SYS
   fprintf (where, "  --uid <uid>        Only show processes of the user with the given uid\n");
@@ -197,7 +199,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
   const char *pidcmd = cbdata;
 
   /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
-  if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && !only_name)
+  if (!proc->bound && (!proc->nthreads || !proc->nboundthreads) && !show_all && !only_name && children_of_pid == NO_ONLY_PID)
     return;
 
   if (pidcmd)
@@ -212,7 +214,11 @@ static void foreach_process_cb(hwloc_topology_t topology,
 static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 	       unsigned long psflags, char *pidcmd)
 {
-  if (only_pid == NO_ONLY_PID) {
+  if (children_of_pid != NO_ONLY_PID) {
+    /* show children */
+    return hwloc_ps_foreach_child(topology, topocpuset, children_of_pid, foreach_process_cb, pidcmd, psflags, only_name, only_uid);
+
+  } else if (only_pid == NO_ONLY_PID) {
     /* show all */
     return hwloc_ps_foreach_process(topology, topocpuset, foreach_process_cb, pidcmd, psflags, only_name, only_uid);
 
@@ -317,6 +323,7 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
 
       only_name = NULL;
       only_pid = NO_ONLY_PID;
+      children_of_pid = NO_ONLY_PID;
       current = req;
       while (*current) {
 	if (!strncmp(current, "lastcpulocation ", 16)) {
@@ -336,6 +343,10 @@ run_json_server(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset)
 	} else if (!strncmp(current, "pid=", 4)) {
 	  only_pid = atoi(current+4);
 	  psflags |= HWLOC_PS_FLAG_THREADS;
+	  show_all = 1;
+	  break;
+	} else if (!strncmp(current, "childrenofpid=", 14)) {
+	  children_of_pid = atoi(current+14);
 	  show_all = 1;
 	  break;
 	} else if (!strncmp(current, "name=", 5)) {
@@ -417,6 +428,13 @@ int main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
       }
       only_pid = strtol(argv[1], NULL, 10);
+      opt = 1;
+    } else if (!strcmp(argv[0], "--children-of-pid")) {
+      if (argc < 2) {
+	usage(callname, stderr);
+	exit(EXIT_FAILURE);
+      }
+      children_of_pid = strtol(argv[1], NULL, 10);
       opt = 1;
     } else if (!strcmp(argv[0], "--name")) {
       if (argc < 2) {
