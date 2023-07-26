@@ -6,7 +6,7 @@ foreach(t api_version backends bind
   groups insert_misc iodevs is_thissystem list_components object_userdata pci_backend synthetic
   topology_abi topology_allow topology_diff topology_dup topology_restrict type_depth type_sscanf
 )
-  add_executable(hwloc_${t} hwloc_${t}.c)
+  add_executable(hwloc_${t} ${TOPDIR}/tests/hwloc/hwloc_${t}.c)
   target_link_libraries(hwloc_${t} PRIVATE hwloc)
 
   add_test(NAME ${t} COMMAND hwloc_${t} WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -14,14 +14,14 @@ foreach(t api_version backends bind
 endforeach()
 
 foreach(t cpuset_nodeset memattrs cpukinds infos gl windows_processor_groups)
-  add_executable(${t} ${t}.c)
+  add_executable(${t} ${TOPDIR}/tests/hwloc/${t}.c)
   target_link_libraries(${t} PRIVATE hwloc)
 
   add_test(NAME ${t} COMMAND ${t} WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
   set_tests_properties(${t} PROPERTIES TIMEOUT 10)
 endforeach()
 
-add_executable(xmlbuffer xmlbuffer.c)
+add_executable(xmlbuffer ${TOPDIR}/tests/hwloc/xmlbuffer.c)
 target_link_libraries(xmlbuffer PRIVATE hwloc)
 add_test(NAME xmlbuffer00 COMMAND xmlbuffer 0 0 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 add_test(NAME xmlbuffer01 COMMAND xmlbuffer 0 1 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
