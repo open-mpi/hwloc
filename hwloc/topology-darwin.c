@@ -497,7 +497,7 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
       snprintf(name, sizeof(name), "hw.perflevel%u.l2perflevels", level);
       if (!sysctlbyname(name, NULL, &s, NULL, 0))
         if (HWLOC_SHOW_ALL_ERRORS())
-          fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, s);
+          fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, (unsigned long) s);
     }
 
     /* assume PUs are contigous for now. */
@@ -528,7 +528,7 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
       snprintf(name, sizeof(name), "hw.perflevel%u.l3perflevels", level);
       if (!sysctlbyname(name, NULL, &s, NULL, 0))
         if (HWLOC_SHOW_ALL_ERRORS())
-          fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, s);
+          fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, (unsigned long) s);
     }
 
     hwloc__darwin_build_perflevel_cache_level(topology, cpuset, cpus, HWLOC_OBJ_L3CACHE, 3, size, linesize);
