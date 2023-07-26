@@ -354,8 +354,16 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long f
     snprintf(umntcmd, sizeof(umntcmd), "umount -l %s", mntpath);
 
     /* enter the mount point and stay there so that we can umount+rmdir immediately but still use it later */
-    chdir(mntpath);
-    system(umntcmd);
+    if (chdir(mntpath) < 0) {
+      perror("Entering the archivemount'ed archive");
+      if (system(umntcmd) < 0)
+        perror("Unmounting the archivemount'ed archive (ignored)");
+      rmdir(mntpath);
+      close(sub_input_format.oldworkdir);
+      return EXIT_FAILURE;
+    }
+    if (system(umntcmd) < 0)
+      perror("Unmounting the archivemount'ed archive (ignored)");
     rmdir(mntpath);
 
     /* there should be a single subdirectory in the archive */
