@@ -2688,6 +2688,10 @@ enum hwloc_allow_flags_e {
  *
  * \return 0 on success, -1 on error.
  *
+ * \note This function is allowed on an adopted topology (see \ref hwlocality_shmem).
+ * The flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED is required on the original
+ * topology (before sharing).
+ *
  * \note Removing objects from a topology should rather be performed with
  * hwloc_topology_restrict().
  */

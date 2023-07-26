@@ -98,6 +98,9 @@ HWLOC_DECLSPEC int hwloc_shmem_topology_write(hwloc_topology_t topology,
  * However the topology is read-only.
  * For instance, it cannot be modified with hwloc_topology_restrict()
  * and object userdata pointers cannot be changed.
+ * The only exception is hwloc_topology_allow() which may be used to expose
+ * a different set of allowed CPUs and memory. This requires that the original
+ * topology (before sharing) was loaded with flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED.
  *
  * The segment of the file pointed by descriptor \p fd,
  * starting at offset \p fileoffset, and of length \p length (in bytes),

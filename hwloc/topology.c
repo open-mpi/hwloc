@@ -4588,11 +4588,6 @@ hwloc_topology_allow(struct hwloc_topology *topology,
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED))
     goto einval;
 
-  if (topology->adopted_shmem_addr) {
-    errno = EPERM;
-    goto error;
-  }
-
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED))
     goto einval;
 
