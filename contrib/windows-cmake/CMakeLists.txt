@@ -245,5 +245,5 @@ endif()
 # Testing
 
 if(HWLOC_ENABLE_TESTING)
-    add_subdirectory(${TOPDIR}/tests/hwloc ${CMAKE_CURRENT_BINARY_DIR}/tests/hwloc)
+    add_subdirectory(tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
 endif()
