@@ -2,9 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x0000747e" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000747e" nodeset="0x00000006" complete_nodeset="0x0000000f" allowed_nodeset="0x00000006">
-    <info name="Backend" value="Synthetic"/>
-    <info name="SyntheticDescription" value="numa:4 core:2 pu:2"/>
-    <info name="LinuxCgroup" value="/dummy"/>
     <object type="Group" cpuset="0x0000000e" complete_cpuset="0x0000000f" nodeset="0x0" complete_nodeset="0x00000001" kind="1001" subkind="0">
       <object type="Core" os_index="0" cpuset="0x00000002" complete_cpuset="0x00000003" nodeset="0x0" complete_nodeset="0x00000001">
         <object type="PU" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x0" complete_nodeset="0x00000001"/>
@@ -44,4 +41,7 @@
       </object>
     </object>
   </object>
+  <info name="Backend" value="Synthetic"/>
+  <info name="SyntheticDescription" value="numa:4 core:2 pu:2"/>
+  <info name="LinuxCgroup" value="/dummy"/>
 </topology>

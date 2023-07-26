@@ -2163,7 +2163,7 @@ static int hwloc_linux_get_allowed_resources_hook(hwloc_topology_t topology)
 
   hwloc_linux__get_allowed_resources(topology, fsroot_path, root_fd, &cpuset_name);
   if (cpuset_name) {
-    hwloc__replace_infos(&topology->levels[0][0]->infos,
+    hwloc__replace_infos(&topology->infos,
                          "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
@@ -5869,7 +5869,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     nbnodes = 0;
 
   if (cpuset_name) {
-    hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    hwloc__add_info(&topology->infos, "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
 
@@ -7360,7 +7360,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
  out:
   if (data->need_global_infos) {
     hwloc__get_dmi_id_info(data, topology->levels[0][0]);
-    hwloc_obj_add_info(topology->levels[0][0], "Backend", "Linux");
+    hwloc__add_info(&topology->infos, "Backend", "Linux");
     /* data->utsname was filled with real uname or \0, we can safely pass it */
     hwloc_add_uname_info(topology, &data->utsname);
     data->need_global_infos = 0;

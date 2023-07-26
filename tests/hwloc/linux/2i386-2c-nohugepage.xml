@@ -16,7 +16,6 @@
     <info name="DMIBIOSVersion" value="1.2.0"/>
     <info name="DMIBIOSDate" value="10/18/2006"/>
     <info name="DMISysVendor" value="Dell Inc."/>
-    <info name="Backend" value="Linux"/>
     <object type="Package" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU            5130  @ 2.00GHz"/>
       <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" local_memory="2125238272">
@@ -36,4 +35,5 @@
       </object>
     </object>
   </object>
+  <info name="Backend" value="Linux"/>
 </topology>

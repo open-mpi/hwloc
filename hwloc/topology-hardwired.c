@@ -73,7 +73,7 @@ int hwloc_look_hardwired_fujitsu_k(struct hwloc_topology *topology)
   topology->support.discovery->pu = 1;
   hwloc_setup_pu_level(topology, 8);
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "hardwired:K-computer");
+  hwloc__add_info(&topology->infos, "Backend", "hardwired:K-computer");
   return 0;
 }
 
@@ -143,7 +143,7 @@ int hwloc_look_hardwired_fujitsu_fx10(struct hwloc_topology *topology)
   topology->support.discovery->pu = 1;
   hwloc_setup_pu_level(topology, 16);
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "hardwired:FX10");
+  hwloc__add_info(&topology->infos, "Backend", "hardwired:FX10");
   return 0;
 }
 
@@ -223,6 +223,6 @@ int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology)
   topology->support.discovery->pu = 1;
   hwloc_setup_pu_level(topology, 34);
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "hardwired:FX100");
+  hwloc__add_info(&topology->infos, "Backend", "hardwired:FX100");
   return 0;
 }

@@ -185,7 +185,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
   free(platform_ids);
 
   if (added)
-    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "OpenCL");
+    hwloc_modify_infos(hwloc_topology_get_infos(topology), HWLOC_MODIFY_INFOS_OP_ADD, "Backend", "OpenCL");
   return 0;
 }
 

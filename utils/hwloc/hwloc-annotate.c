@@ -801,6 +801,8 @@ int main(int argc, char *argv[])
               } else {
                 apply_infos(infos);
               }
+            } else if (!strcmp(location, "topology") && (infoname || clearinfos)) {
+              apply_infos(hwloc_topology_get_infos(topology));
             } else if (!strcmp(location, "all")) {
 	      apply_recursive(topology, hwloc_get_root_obj(topology));
 	    } else if (!strcmp(location, "root")) {

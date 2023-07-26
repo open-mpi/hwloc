@@ -16,12 +16,6 @@
     <info name="DMIBIOSVersion" value="1.0c"/>
     <info name="DMIBIOSDate" value="08/22/2012"/>
     <info name="DMISysVendor" value="Supermicro"/>
-    <info name="Backend" value="Linux"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="3.2.0-4-amd64"/>
-    <info name="OSVersion" value="#1 SMP Debian 3.2.32-1"/>
-    <info name="HostName" value="conan"/>
-    <info name="Architecture" value="x86_64"/>
     <object type="Package" os_index="0" cpuset="0x00ff00ff" complete_cpuset="0x00ff00ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3" id="obj3">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-2650 0 @ 2.00GHz"/>
       <info name="CPUType" value="x86_64"/>
@@ -176,4 +170,12 @@
     <u64values length="12">10 20 20 10 </u64values>
   </distances2>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="3.2.0-4-amd64"/>
+  <info name="OSVersion" value="#1 SMP Debian 3.2.32-1"/>
+  <info name="HostName" value="conan"/>
+  <info name="Architecture" value="x86_64"/>
+  <info name="Backend" value="CUDA"/>
+  <info name="Backend" value="OpenCL"/>
 </topology>

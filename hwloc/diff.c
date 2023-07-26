@@ -66,7 +66,8 @@ static int hwloc_append_diff_too_complex(hwloc_obj_t obj1,
 	return 0;
 }
 
-static int hwloc_append_diff_obj_attr_string(hwloc_obj_t obj,
+static int hwloc_append_diff_obj_attr_string(hwloc_topology_t topology,
+                                             hwloc_obj_t obj,
 					     hwloc_topology_diff_obj_attr_type_t type,
 					     const char *name,
 					     const char *oldvalue,
@@ -80,8 +81,8 @@ static int hwloc_append_diff_obj_attr_string(hwloc_obj_t obj,
 		return -1;
 
 	newdiff->obj_attr.type = HWLOC_TOPOLOGY_DIFF_OBJ_ATTR;
-	newdiff->obj_attr.obj_depth = obj->depth;
-	newdiff->obj_attr.obj_index = obj->logical_index;
+	newdiff->obj_attr.obj_depth = obj ? obj->depth : (int) topology->nb_levels;
+	newdiff->obj_attr.obj_index = obj ? obj->logical_index : 0;
 	newdiff->obj_attr.diff.string.type = type;
 	newdiff->obj_attr.diff.string.name = name ? strdup(name) : NULL;
 	newdiff->obj_attr.diff.string.oldvalue = oldvalue ? strdup(oldvalue) : NULL;
@@ -155,7 +156,7 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 
 	if ((!obj1->name) != (!obj2->name)
 	    || (obj1->name && strcmp(obj1->name, obj2->name))) {
-		err = hwloc_append_diff_obj_attr_string(obj1,
+                err = hwloc_append_diff_obj_attr_string(topo1, obj1,
 						       HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME,
 						       NULL,
 						       obj1->name,
@@ -219,7 +220,7 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 		if (strcmp(info1->name, info2->name))
 			goto out_too_complex;
 		if (strcmp(info1->value, info2->value)) {
-			err = hwloc_append_diff_obj_attr_string(obj1,
+                        err = hwloc_append_diff_obj_attr_string(topo1, obj1,
 								HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO,
 								info1->name,
 								info1->value,
@@ -336,6 +337,27 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
 		if (SETS_DIFFERENT(allowed_cpuset, topo1, topo2)
 		    || SETS_DIFFERENT(allowed_nodeset, topo1, topo2))
                   goto roottoocomplex;
+	}
+
+        /* topology infos */
+        if (!err) {
+          if (topo1->infos.count != topo2->infos.count)
+            goto roottoocomplex;
+          for(i=0; i<topo1->infos.count; i++) {
+            struct hwloc_info_s *info1 = &topo1->infos.array[i], *info2 = &topo2->infos.array[i];
+            if (strcmp(info1->name, info2->name))
+              goto roottoocomplex;
+            if (strcmp(info1->value, info2->value)) {
+              err = hwloc_append_diff_obj_attr_string(topo1, NULL,
+                                                      HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO,
+                                                      info1->name,
+                                                      info1->value,
+                                                      info2->value,
+                                                      diffp, &lastdiff);
+              if (err < 0)
+                return err;
+            }
+          }
 	}
 
 	if (!err) {
@@ -458,8 +480,13 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 	case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR: {
 		struct hwloc_topology_diff_obj_attr_s *obj_attr = &diff->obj_attr;
 		hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, obj_attr->obj_depth, obj_attr->obj_index);
-		if (!obj)
-			return -1;
+                struct hwloc_infos_s *infos;
+                if (obj)
+                  infos = &obj->infos;
+                else if (obj_attr->obj_depth == (int) topology->nb_levels)
+                  infos = &topology->infos;
+                else
+                  return -1;
 
 		switch (obj_attr->diff.generic.type) {
 		case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE: {
@@ -467,6 +494,8 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 			hwloc_uint64_t oldvalue = reverse ? obj_attr->diff.uint64.newvalue : obj_attr->diff.uint64.oldvalue;
 			hwloc_uint64_t newvalue = reverse ? obj_attr->diff.uint64.oldvalue : obj_attr->diff.uint64.newvalue;
 			hwloc_uint64_t valuediff = newvalue - oldvalue;
+                        if (!obj)
+                          return -1;
 			if (obj->type != HWLOC_OBJ_NUMANODE)
 				return -1;
 			if (obj->attr->numanode.local_memory != oldvalue)
@@ -482,7 +511,9 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 		case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME: {
 			const char *oldvalue = reverse ? obj_attr->diff.string.newvalue : obj_attr->diff.string.oldvalue;
 			const char *newvalue = reverse ? obj_attr->diff.string.oldvalue : obj_attr->diff.string.newvalue;
-			if (!obj->name || strcmp(obj->name, oldvalue))
+                        if (!obj)
+                          return -1;
+                        if (!obj->name || strcmp(obj->name, oldvalue))
 				return -1;
 			free(obj->name);
 			obj->name = strdup(newvalue);
@@ -494,8 +525,8 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 			const char *newvalue = reverse ? obj_attr->diff.string.oldvalue : obj_attr->diff.string.newvalue;
 			unsigned i;
 			int found = 0;
-			for(i=0; i<obj->infos.count; i++) {
-				struct hwloc_info_s *info = &obj->infos.array[i];
+			for(i=0; i<infos->count; i++) {
+				struct hwloc_info_s *info = &infos->array[i];
 				if (!strcmp(info->name, name)
 				    && !strcmp(info->value, oldvalue)) {
 					free(info->value);

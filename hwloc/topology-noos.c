@@ -35,7 +35,7 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
       nbprocs = 1;
     hwloc_alloc_root_sets(topology->levels[0][0]);
     hwloc_setup_pu_level(topology, nbprocs);
-    hwloc_obj_add_info(topology->levels[0][0], "Backend", "noOS");
+    hwloc__add_info(&topology->infos, "Backend", "noOS");
   }
 
   memsize = hwloc_fallback_memsize();

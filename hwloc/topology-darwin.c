@@ -903,7 +903,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   else
     hwloc__darwin_cpukinds_register(topology, &kinds);
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
+  hwloc__add_info(&topology->infos, "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);
   return 0;
 }

@@ -16,12 +16,6 @@
     <info name="DMIBIOSVersion" value="1.0c"/>
     <info name="DMIBIOSDate" value="08/22/2012"/>
     <info name="DMISysVendor" value="Supermicro"/>
-    <info name="Backend" value="Linux"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="3.2.0-4-amd64"/>
-    <info name="OSVersion" value="#1 SMP Debian 3.2.32-1"/>
-    <info name="HostName" value="conan"/>
-    <info name="Architecture" value="x86_64"/>
     <object type="Package" os_index="0" cpuset="0x00ff00ff" complete_cpuset="0x00ff00ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3" id="obj3">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-2650 0 @ 2.00GHz"/>
       <info name="CPUType" value="x86_64"/>
@@ -234,7 +228,6 @@
             <info name="PCIVendor" value="NVIDIA Corporation"/>
             <info name="PCIDevice" value="Tesla M2075 Dual-Slot Computing Processor Module"/>
             <object type="OSDev" gp_index="136" id="obj136" name="cuda0" subtype="CUDA" osdev_type="5">
-              <info name="Backend" value="CUDA"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla K40m"/>
               <info name="CUDAGlobalMemorySize" value="11796032"/>
@@ -249,7 +242,6 @@
             <info name="PCIVendor" value="Advanced Micro Devices, Inc. [AMD/ATI]"/>
             <info name="PCIDevice" value="Tahiti XT [Radeon HD 7970/8970 OEM / R9 280X]"/>
             <object type="OSDev" gp_index="139" id="obj139" name="opencl0d1" subtype="OpenCL" osdev_type="5">
-              <info name="Backend" value="OpenCL"/>
               <info name="OpenCLDeviceType" value="GPU"/>
               <info name="GPUVendor" value="Advanced Micro Devices, Inc."/>
               <info name="GPUModel" value="AMD Radeon R9 200 / HD 7900 Series"/>
@@ -291,4 +283,12 @@
     <u64values length="12">10 20 20 10 </u64values>
   </distances2>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="3.2.0-4-amd64"/>
+  <info name="OSVersion" value="#1 SMP Debian 3.2.32-1"/>
+  <info name="HostName" value="conan"/>
+  <info name="Architecture" value="x86_64"/>
+  <info name="Backend" value="CUDA"/>
+  <info name="Backend" value="OpenCL"/>
 </topology>

@@ -16,12 +16,6 @@
     <info name="DMIBIOSVersion" value="A12"/>
     <info name="DMIBIOSDate" value="05/09/2012"/>
     <info name="DMISysVendor" value="Dell Inc."/>
-    <info name="Backend" value="Linux"/>
-    <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="3.2.0-3-amd64"/>
-    <info name="OSVersion" value="#1 SMP Thu Jun 28 09:07:26 UTC 2012"/>
-    <info name="HostName" value="rhododendron"/>
-    <info name="Architecture" value="x86_64"/>
     <info name="Foo" value="Bar"/>
     <object type="NUMANode" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2" local_memory="4014030848">
       <page_type size="4096" count="979988"/>
@@ -180,4 +174,11 @@
     <info name="foo" value="bar"/>
     <info name="foo2" value="bar2"/>
   </cpukind>
+  <info name="Backend" value="Linux"/>
+  <info name="OSName" value="Linux"/>
+  <info name="OSRelease" value="3.2.0-3-amd64"/>
+  <info name="OSVersion" value="#1 SMP Thu Jun 28 09:07:26 UTC 2012"/>
+  <info name="HostName" value="rhododendron"/>
+  <info name="Architecture" value="x86_64"/>
+  <info name="Foooo" value="Barrr"/>
 </topology>

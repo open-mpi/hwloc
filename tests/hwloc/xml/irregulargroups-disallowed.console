@@ -1,4 +1,4 @@
-Machine (P#0 total=248GiB DMIProductName=UV2000 DMIProductVersion=SGI DMIBoardVendor="Intel Corp." DMIBoardName=ROMLEY DMIBoardVersion=E63448-400 DMIBoardAssetTag="Base Board Asset Tag" DMIChassisVendor="Intel Corporation" DMIChassisType=23 DMIChassisVersion=0.1 DMIChassisAssetTag="Chassis Asset Tag" DMIBIOSVendor="Silicon Graphics International Corp." DMIBIOSVersion="SGI UV 2000/3000 series BIOS" DMIBIOSDate=01/15/2013 DMISysVendor=SGI Backend=Linux LinuxCgroup=/boot OSName=Linux OSRelease=3.0.80-0.7-default OSVersion="#1 SMP Tue Jun 25 18:32:49 UTC 2013 (25740f8)" HostName=condor Architecture=x86_64 hwlocVersion=2.0.0a1-git ProcessName=lstopo-no-graphics)
+Machine (P#0 total=248GiB DMIProductName=UV2000 DMIProductVersion=SGI DMIBoardVendor="Intel Corp." DMIBoardName=ROMLEY DMIBoardVersion=E63448-400 DMIBoardAssetTag="Base Board Asset Tag" DMIChassisVendor="Intel Corporation" DMIChassisType=23 DMIChassisVersion=0.1 DMIChassisAssetTag="Chassis Asset Tag" DMIBIOSVendor="Silicon Graphics International Corp." DMIBIOSVersion="SGI UV 2000/3000 series BIOS" DMIBIOSDate=01/15/2013 DMISysVendor=SGI)
   Group0 L#0 (total=62GiB)
     Package L#0 (P#0 total=31GiB CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=45 CPUModel="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz" CPUStepping=7)
       NUMANode L#0 (P#0 local=31GiB total=31GiB)
@@ -395,4 +395,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      6    65    65    65    65    65    50    10    79
      7    65    65    79    79    65    79    79    10
 48 processors represented but not allowed: 0xffffffff,0xffff0000
+Topology infos: Backend=Linux LinuxCgroup=/boot OSName=Linux OSRelease=3.0.80-0.7-default OSVersion="#1 SMP Tue Jun 25 18:32:49 UTC 2013 (25740f8)" HostName=condor Architecture=x86_64
 Topology not from this system

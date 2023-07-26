@@ -1,4 +1,4 @@
-Machine (P#0 total=64GiB LinuxCgroup=/dummy DMIBoardVendor="TYAN Computer Corp" DMIBoardName="S4881 " DMIBoardVersion=S4881 DMIBoardAssetTag= Backend=Linux)
+Machine (P#0 total=64GiB DMIBoardVendor="TYAN Computer Corp" DMIBoardName="S4881 " DMIBoardVersion=S4881 DMIBoardAssetTag=)
   Package L#0 (P#0 total=8190MiB CPUModel="Dual Core AMD Opteron(tm) Processor 865")
     NUMANode L#0 (P#0 local=8190MiB total=8190MiB) (disallowed)
     L2Cache L#0 (size=1024KiB linesize=64 ways=16)
@@ -110,4 +110,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      7    20    20    20    20    20    20    20    10
 1 processors not represented in topology: 0x00000010
 5 processors represented but not allowed: 0x00000f80
+Topology infos: LinuxCgroup=/dummy Backend=Linux
 Topology not from this system

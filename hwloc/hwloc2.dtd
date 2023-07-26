@@ -1,13 +1,13 @@
 <!--
   Copyright © 2009      CNRS
-  Copyright © 2009-2022 Inria.  All rights reserved.
+  Copyright © 2009-2023 Inria.  All rights reserved.
   Copyright © 2009-2011 Université Bordeaux.
   See COPYING in top-level directory.
 
   This is the DTD for hwloc v2.x XMLs.
  -->
 
-<!ELEMENT topology (object+,distances2*,distances2hetero*,support*,memattr*,cpukind*)>
+<!ELEMENT topology (object+,distances2*,distances2hetero*,support*,memattr*,cpukind*,info*)>
 <!ATTLIST topology version CDATA "">
 
 <!ELEMENT object (page_type*,info*,userdata*,object*)>

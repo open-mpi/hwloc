@@ -1,4 +1,4 @@
-Machine (P#0 total=504GiB Backend=Linux)
+Machine (P#0 total=504GiB)
   Group0 L#0 (total=126GiB)
     NUMANode L#0 (P#0 local=126GiB total=126GiB)
     Package L#0 (P#1 CPUModel="Genuine Intel(R) CPU                  @ 2.66GHz")
@@ -487,4 +487,5 @@ Relative latency matrix (name NUMALatency kind 5) between 4 NUMANodes (depth -3)
      1    26    10    26    26
      2    26    26    10    26
      3    26    26    26    10
+Topology infos: Backend=Linux
 Topology not from this system

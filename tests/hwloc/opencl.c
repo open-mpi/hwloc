@@ -19,11 +19,11 @@
 
 static int check_opencl_backend(hwloc_topology_t topology)
 {
-  hwloc_obj_t root = hwloc_get_root_obj(topology);
+  struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
   unsigned i;
-  for(i=0; i<root->infos.count; i++)
-    if (!strcmp(root->infos.array[i].name, "Backend")
-        && !strcmp(root->infos.array[i].value, "OpenCL"))
+  for(i=0; i<infos->count; i++)
+    if (!strcmp(infos->array[i].name, "Backend")
+        && !strcmp(infos->array[i].value, "OpenCL"))
       return 1;
   return 0;
 }

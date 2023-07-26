@@ -16,7 +16,6 @@
     <info name="DMIBIOSVersion" value="1.0.30"/>
     <info name="DMIBIOSDate" value="08/06/2012"/>
     <info name="DMISysVendor" value="Dell"/>
-    <info name="Backend" value="Linux"/>
     <object type="Package" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-2680 0 @ 2.70GHz"/>
       <object type="NUMANode" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" local_memory="17149054976">
@@ -505,4 +504,5 @@
   <cpukind cpuset="0x0000ffff">
     <info name="FrequencyMaxMHz" value="2701"/>
   </cpukind>
+  <info name="Backend" value="Linux"/>
 </topology>

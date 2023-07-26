@@ -1,4 +1,4 @@
-Machine (P#0 total=16GiB DMIProductName="PowerEdge 2950" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 DMIBoardVersion=A00 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.3.1 DMIBIOSDate=04/29/2008 DMISysVendor="Dell Inc." Backend=Linux)
+Machine (P#0 total=16GiB DMIProductName="PowerEdge 2950" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 DMIBoardVersion=A00 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor="Dell Inc." DMIBIOSVersion=2.3.1 DMIBIOSDate=04/29/2008 DMISysVendor="Dell Inc.")
   NUMANode L#0 (P#0 local=16GiB total=16GiB)
   Package L#0 (P#0 CPUModel="Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz")
     L1dCache L#0 (size=32KiB linesize=64 ways=8)
@@ -39,4 +39,5 @@ depth 0:           1 Machine (type #0)
      depth 5:      8 Core (type #2)
       depth 6:     8 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
+Topology infos: Backend=Linux
 Topology not from this system

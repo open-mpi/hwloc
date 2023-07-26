@@ -46,6 +46,7 @@ $annotate $srcdir/test-hwloc-annotate.input $file pu:0 misc pumisc
 $annotate $file $file root misc rootmisc
 $annotate $file $file misc:0 misc miscmisc1
 $annotate $file $file all info Foo Bar
+$annotate $file $file topology info Foooo Barrr
 $annotate --ci $file $file -- Core:all L3:all -- info Foo2 Bar2
 $annotate --ci $file $file L2Cache:0 none
 $annotate --ri $file $file pack:all info Foo

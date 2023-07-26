@@ -39,8 +39,7 @@ static inline int mkstemp(char *name)
 
 static const char *get_backend_name(hwloc_topology_t topo)
 {
-  hwloc_obj_t root = hwloc_get_root_obj(topo);
-  return hwloc_obj_get_info_by_name(root, "Backend");
+  return hwloc_get_info_by_name(hwloc_topology_get_infos(topo), "Backend");
 }
 
 static void assert_backend_name(hwloc_topology_t topo, const char *wanted)

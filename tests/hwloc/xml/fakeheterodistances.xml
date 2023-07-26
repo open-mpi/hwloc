@@ -20,9 +20,6 @@
     <info name="DMIBIOSVersion" value="PDPAX1-6"/>
     <info name="DMIBIOSDate" value="12/15/2009"/>
     <info name="DMISysVendor" value="AMD"/>
-    <info name="Backend" value="Linux"/>
-    <info name="hwlocVersion" value="2.1.0a1-git"/>
-    <info name="ProcessName" value="lstopo"/>
     <object type="Group" cpuset="0x41041041" complete_cpuset="0x41041041" nodeset="0x0000003f" complete_nodeset="0x0000003f" gp_index="500" id="obj500" kind="0" subkind="0">
       <object type="Group" cpuset="0x00041041" complete_cpuset="0x00041041" nodeset="0x0000000f" complete_nodeset="0x0000000f" gp_index="501" id="obj501" kind="0" subkind="0">
         <object type="Package" os_index="0" cpuset="0x00000041" complete_cpuset="0x00000041" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="3" id="obj3">
@@ -124,4 +121,5 @@
     <u64values length="3">22 </u64values>
   </distances2hetero>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
 </topology>

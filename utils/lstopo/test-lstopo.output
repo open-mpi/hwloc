@@ -36,7 +36,7 @@ Machine (2048MiB total)
       PU P#7
 ** Logical-index verbose output...
 assuming `pa:1 no:2 co:1 l2:2 2' is a synthetic topology description
-Machine (total=2048MiB Backend=Synthetic SyntheticDescription="pa:1 no:2 co:1 l2:2 2")
+Machine (total=2048MiB)
   Package L#0 (total=2048MiB)
     Core L#0 (total=1024MiB)
       NUMANode L#0 (local=1024MiB total=1024MiB)
@@ -72,6 +72,7 @@ Memory attribute #5 name `WriteBandwidth' flags 5
 Memory attribute #3 name `Latency' flags 6
 Memory attribute #6 name `ReadLatency' flags 6
 Memory attribute #7 name `WriteLatency' flags 6
+Topology infos: Backend=Synthetic SyntheticDescription="pa:1 no:2 co:1 l2:2 2"
 Topology not from this system
 ** Export to synthetic...
 Package:1 Core:2 [NUMANode(memory=1073741824)] L2Cache:2(size=4194304) PU:2
@@ -80,8 +81,6 @@ Package:1 Core:2 [NUMANode(memory=1073741824)] L2Cache:2(size=4194304) PU:2
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" allowed_cpuset="0x00000030" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000002" gp_index="1" id="obj1">
-    <info name="Backend" value="Synthetic"/>
-    <info name="SyntheticDescription" value="pa:1 no:2 co:1 l2:2 2"/>
     <object type="Package" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="18" id="obj18">
       <object type="Core" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="8" id="obj8">
         <object type="NUMANode" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="9" id="obj9" local_memory="1073741824">
@@ -115,6 +114,8 @@ Package:1 Core:2 [NUMANode(memory=1073741824)] L2Cache:2(size=4194304) PU:2
   <support name="discovery.numa"/>
   <support name="discovery.numa_memory"/>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Synthetic"/>
+  <info name="SyntheticDescription" value="pa:1 no:2 co:1 l2:2 2"/>
 </topology>
 ** Restrict flag cpuless...
 Machine (1024MiB total)
@@ -202,7 +203,7 @@ Group:4 NUMANode:1 PU:4
 </topology>
 ** Topology flag disallowed...
 assuming `node:4 pu:4' is a synthetic topology description
-Machine (P#0 total=4096MiB Backend=Synthetic SyntheticDescription="node:4 pu:4")
+Machine (P#0 total=4096MiB)
   Group0 L#0 (total=1024MiB)
     NUMANode L#0 (P#0 local=1024MiB total=1024MiB)
     PU L#0 (P#0)
@@ -232,4 +233,5 @@ depth 0:           1 Machine (type #0)
   depth 2:         16 PU (type #3)
 Special depth -3:  4 NUMANode (type #13)
 12 processors represented but not allowed: 0x0000fff0
+Topology infos: Backend=Synthetic SyntheticDescription="node:4 pu:4"
 Topology not from this system

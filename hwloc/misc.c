@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -86,7 +86,7 @@ void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unus
 #ifdef HAVE_UNAME
   struct utsname _utsname, *utsname;
 
-  if (hwloc_obj_get_info_by_name(topology->levels[0][0], "OSName"))
+  if (hwloc_get_info_by_name(&topology->infos, "OSName"))
     /* don't annotate twice */
     return;
 
@@ -99,15 +99,15 @@ void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unus
   }
 
   if (*utsname->sysname)
-    hwloc_obj_add_info(topology->levels[0][0], "OSName", utsname->sysname);
+    hwloc__add_info(&topology->infos, "OSName", utsname->sysname);
   if (*utsname->release)
-    hwloc_obj_add_info(topology->levels[0][0], "OSRelease", utsname->release);
+    hwloc__add_info(&topology->infos, "OSRelease", utsname->release);
   if (*utsname->version)
-    hwloc_obj_add_info(topology->levels[0][0], "OSVersion", utsname->version);
+    hwloc__add_info(&topology->infos, "OSVersion", utsname->version);
   if (*utsname->nodename)
-    hwloc_obj_add_info(topology->levels[0][0], "HostName", utsname->nodename);
+    hwloc__add_info(&topology->infos, "HostName", utsname->nodename);
   if (*utsname->machine)
-    hwloc_obj_add_info(topology->levels[0][0], "Architecture", utsname->machine);
+    hwloc__add_info(&topology->infos, "Architecture", utsname->machine);
 #endif /* HAVE_UNAME */
 }
 

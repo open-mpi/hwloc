@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017-2022 Inria.  All rights reserved.
+ * Copyright © 2017-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -60,13 +60,18 @@ int main(void)
     offset = offsetof(struct hwloc_topology, support);
     assert(offset == 656);
 
+    offset = offsetof(struct hwloc_topology, infos);
+    assert(offset == 688);
+    size = sizeof(struct hwloc_infos_s);
+    assert(size == 16);
+
     offset = offsetof(struct hwloc_topology, first_dist);
-    assert(offset == 712);
+    assert(offset == 728);
     size = sizeof(struct hwloc_internal_distances_s);
     assert(size == 88);
 
     offset = offsetof(struct hwloc_topology, memattrs);
-    assert(offset == 736);
+    assert(offset == 752);
     size = sizeof(struct hwloc_internal_memattr_s);
     assert(size == 32);
     size = sizeof(struct hwloc_internal_memattr_target_s);
@@ -77,12 +82,12 @@ int main(void)
     assert(size == 32);
 
     offset = offsetof(struct hwloc_topology, cpukinds);
-    assert(offset == 752);
+    assert(offset == 768);
     size = sizeof(struct hwloc_internal_cpukind_s);
     assert(size == 40);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 792);
+    assert(offset == 808);
 
     /* fields after this one aren't needed after discovery */
 

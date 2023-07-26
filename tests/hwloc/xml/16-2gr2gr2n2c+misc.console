@@ -1,4 +1,4 @@
-Machine (P#0 total=8192MiB Backend=Synthetic SyntheticDescription="group:2 group:2 node:2 core:2 1" hwlocVersion=1.10.1)
+Machine (P#0 total=8192MiB)
   Group0(MyBigGroup) L#0 (P#0 total=4096MiB)
     Group1(MySmallGroup) L#0 (P#0 total=2048MiB)
       Group2 L#0 (total=1024MiB)
@@ -63,4 +63,5 @@ depth 0:           1 Machine (type #0)
      depth 5:      16 PU (type #3)
 Special depth -3:  8 NUMANode (type #13)
 Special depth -7:  2 Misc (type #17)
+Topology infos: Backend=Synthetic SyntheticDescription="group:2 group:2 node:2 core:2 1"
 Topology not from this system

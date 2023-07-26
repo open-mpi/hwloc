@@ -271,7 +271,7 @@ hwloc_look_hpux(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
     topology->support.discovery->numa = 1;
   /* don't set disallowed_{pu,numa} since we don't set the allowed sets */
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "HP-UX");
+  hwloc__add_info(&topology->infos, "Backend", "HP-UX");
   hwloc_add_uname_info(topology, NULL);
 
   free(nodes);

@@ -553,7 +553,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
   if (data->need_global_infos) {
-    hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
+    hwloc__add_info(&topology->infos, "Backend", "FreeBSD");
     hwloc_add_uname_info(topology, NULL);
     data->need_global_infos = 0;
   }

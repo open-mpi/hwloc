@@ -138,7 +138,7 @@ typedef union hwloc_topology_diff_u {
     hwloc_topology_diff_type_t type; /* must be ::HWLOC_TOPOLOGY_DIFF_OBJ_ATTR */
     union hwloc_topology_diff_u * next;
     /* List of attribute differences for a single object */
-    int obj_depth;
+    int obj_depth; /* topology depth if topology attribute instead of object attribute */
     unsigned obj_index;
     union hwloc_topology_diff_obj_attr_u diff;
   } obj_attr;

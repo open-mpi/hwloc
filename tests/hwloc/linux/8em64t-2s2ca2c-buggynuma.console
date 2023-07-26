@@ -1,4 +1,4 @@
-Machine (P#0 total=2048MiB LinuxCgroup=/ DMIProductName=AltixXE320 DMIProductVersion=AltixXE DMIBoardVendor=SM DMIBoardName=X7DWT-INF DMIBoardVersion=1.01 DMIBoardAssetTag= DMIChassisVendor=SGI.COM DMIChassisType=1 DMIChassisVersion=013-5556-002 DMIChassisAssetTag=" " DMIBIOSVendor="Phoenix Technologies LTD" DMIBIOSVersion=.0b DMIBIOSDate=03/24/2008 DMISysVendor=SGI.COM Backend=Linux)
+Machine (P#0 total=2048MiB DMIProductName=AltixXE320 DMIProductVersion=AltixXE DMIBoardVendor=SM DMIBoardName=X7DWT-INF DMIBoardVersion=1.01 DMIBoardAssetTag= DMIChassisVendor=SGI.COM DMIChassisType=1 DMIChassisVersion=013-5556-002 DMIChassisAssetTag=" " DMIBIOSVendor="Phoenix Technologies LTD" DMIBIOSVersion=.0b DMIBIOSDate=03/24/2008 DMISysVendor=SGI.COM)
   NUMANode L#0 (P#0 local=2048MiB total=2048MiB)
   Package L#0 (P#0 CPUModel="Intel(R) Xeon(R) CPU           E5472  @ 3.00GHz")
     L2Cache L#0 (size=6144KiB linesize=64 ways=24)
@@ -46,4 +46,5 @@ depth 0:           1 Machine (type #0)
      depth 5:      8 Core (type #2)
       depth 6:     8 PU (type #3)
 Special depth -3:  1 NUMANode (type #13)
+Topology infos: LinuxCgroup=/ Backend=Linux
 Topology not from this system

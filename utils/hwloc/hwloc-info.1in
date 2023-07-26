@@ -37,6 +37,7 @@ This is the default if some objects are given on the command-line.
 \fB\-\-topology\fR
 Report a summary of the topology instead of about some specific objects.
 This is the default if no object is given on the command-line.
+If \-v is also given, topology info attributes are also shown.
 .TP
 \fB\-\-support\fR
 Report the features that are supported by hwloc on the topology.
@@ -265,6 +266,19 @@ To show the best-bandwidth node among NUMA nodes local to a PU:
     NUMANode L#7 = local memory #1 of PU L#25
      type = NUMANode
     ...
+
+To see info attributes of the topology:
+
+    $ hwloc-info --topology --verbose
+    depth 0:           1 Machine (type #0)
+     depth 1:          1 Package (type #1)
+      depth 2:         2 Core (type #2)
+       depth 3:        4 PU (type #3)
+    Special depth -3:  1 NUMANode (type #13)
+    info Backend = Linux
+    info LinuxCgroup = /user/622
+    info Architecture = x86_64
+    info hwlocVersion = 3.0.0a1-git
 
 .
 .\" **************************

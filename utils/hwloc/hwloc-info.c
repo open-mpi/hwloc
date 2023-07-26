@@ -817,6 +817,12 @@ main (int argc, char *argv[])
 
   if (mode == HWLOC_INFO_MODE_TOPOLOGY) {
     hwloc_lstopo_show_summary(stdout, topology);
+    if (verbose_mode > 0) {
+      struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
+      unsigned i;
+      for(i=0; i<infos->count; i++)
+        printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
+    }
 
   } else if (mode == HWLOC_INFO_MODE_SUPPORT) {
     const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);

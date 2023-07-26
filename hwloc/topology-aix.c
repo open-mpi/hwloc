@@ -817,7 +817,7 @@ hwloc_look_aix(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	}
     }
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "AIX");
+  hwloc__add_info(&topology->infos, "Backend", "AIX");
   hwloc_add_uname_info(topology, NULL);
   return 0;
 }

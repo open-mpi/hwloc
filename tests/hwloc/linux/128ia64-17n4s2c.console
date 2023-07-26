@@ -1,4 +1,4 @@
-Machine (P#0 total=1535GiB Backend=Linux)
+Machine (P#0 total=1535GiB)
   Group0 L#0 (total=95GiB)
     NUMANode L#0 (P#0 local=95GiB total=95GiB)
     Package L#0 (P#0 CPUModel="Dual-Core Intel(R) Itanium(R) Processor 9140N")
@@ -380,4 +380,5 @@ Relative latency matrix (name NUMALatency kind 5) between 17 NUMANodes (depth -3
     16    14    14    14    14    14    14    14    14    14    14    14    14    14    14    14    14    10
 CPU kind #0 efficiency 0 cpuset 0xffffffff,0xffffffff,0xffffffff,0xffffffff
   FrequencyMaxMHz = 1598
+Topology infos: Backend=Linux
 Topology not from this system

@@ -80,8 +80,12 @@ This is specified by the \fImode\fR:
 .B info <name> <value>
 Specifies a new string info attribute whose name is \fIname\fR and
 value is \fIvalue\fR.
+
 If \fBlocation\fR is \fIcpukind#<N>\fR, operate on the info attributes
 of the N-th cpukind.
+
+If \fBlocation\fR is \fItopology\fR, operate on the topology info
+attributes instead of on objects.
 .TP
 .B subtype <subtype>
 Specifies that the subtype attribute of the object should now be \fIsubtype\fR.
@@ -227,6 +231,10 @@ Only add to all Core objects:
 Remove all info attributes from the first cpukind:
 
     $ hwloc-annotate --ci input.xml output.xml -- cpukind#0 -- none
+
+Add an info attribute to the topology:
+
+    $ hwloc-annotate input.xml output.xml -- topology -- info GotThisTopology FromMyGreatServerYesterday
 
 Add a Misc object named "foobar" under the root object of the topology
 and modify the input XML directly:

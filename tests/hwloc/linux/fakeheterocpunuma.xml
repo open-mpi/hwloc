@@ -2,7 +2,6 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x00ffffff" complete_cpuset="0x00ffffff" allowed_cpuset="0x00ffffff" nodeset="0x0000003f" complete_nodeset="0x0000003f" allowed_nodeset="0x0000003f">
-    <info name="Backend" value="Linux"/>
     <object type="Package" os_index="0" cpuset="0x00000fff" complete_cpuset="0x00000fff" nodeset="0x00000007" complete_nodeset="0x00000007">
       <object type="Group" cpuset="0x00000f0f" complete_cpuset="0x00000f0f" nodeset="0x00000007" complete_nodeset="0x00000007" kind="1001" subkind="0">
         <object type="NUMANode" os_index="2" cpuset="0x00000f0f" complete_cpuset="0x00000f0f" nodeset="0x00000004" complete_nodeset="0x00000004" local_memory="1073741824">
@@ -106,4 +105,5 @@
     <info name="FrequencyBaseMHz" value="1200"/>
     <info name="LinuxCapacity" value="234"/>
   </cpukind>
+  <info name="Backend" value="Linux"/>
 </topology>

@@ -1,4 +1,4 @@
-Machine (P#0 total=503GiB LinuxCgroup=/ DMIProductName="XA320 V2 " DMIProductVersion="To be filled by O.E.M." DMIProductSerial=2102312MEA10K9000003 DMIProductUUID=76cfcdd4-c8a7-9486-e911-c1d00a756a75 DMIBoardVendor=Huawei DMIBoardName=BC82HPNBB DMIBoardVersion=V200R002C00 DMIBoardSerial=026MGF10K8000012 DMIBoardAssetTag="To be filled by O.E.M." DMIChassisVendor=Huawei DMIChassisType=17 DMIChassisVersion="To be filled by O.E.M." DMIChassisSerial="To be filled by O.E.M." DMIChassisAssetTag="To be filled by O.E.M." DMIBIOSVendor="Huawei Corp." DMIBIOSVersion=0.86 DMIBIOSDate=07/19/2019 DMISysVendor=Huawei Backend=Linux OSName=Linux OSRelease=5.15.0-rc1-00005-g4c1b4a4d90b6-dirty OSVersion="#313 SMP PREEMPT Sun Nov 7 14:18:05 EST 2021" HostName=ubuntu Architecture=aarch64)
+Machine (P#0 total=503GiB DMIProductName="XA320 V2 " DMIProductVersion="To be filled by O.E.M." DMIProductSerial=2102312MEA10K9000003 DMIProductUUID=76cfcdd4-c8a7-9486-e911-c1d00a756a75 DMIBoardVendor=Huawei DMIBoardName=BC82HPNBB DMIBoardVersion=V200R002C00 DMIBoardSerial=026MGF10K8000012 DMIBoardAssetTag="To be filled by O.E.M." DMIChassisVendor=Huawei DMIChassisType=17 DMIChassisVersion="To be filled by O.E.M." DMIChassisSerial="To be filled by O.E.M." DMIChassisAssetTag="To be filled by O.E.M." DMIBIOSVendor="Huawei Corp." DMIBIOSVersion=0.86 DMIBIOSDate=07/19/2019 DMISysVendor=Huawei)
   Package L#0 (P#36 total=252GiB)
     L3Cache L#0 (total=126GiB size=32MiB linesize=128 ways=128)
       NUMANode L#0 (P#0 local=126GiB total=126GiB)
@@ -699,4 +699,5 @@ Relative latency matrix (name NUMALatency kind 5) between 4 NUMANodes (depth -3)
      3    33    32    16    10
 CPU kind #0 efficiency 0 cpuset 0xffffffff,0xffffffff,0xffffffff,0xffffffff
   LinuxCapacity = 1024
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.15.0-rc1-00005-g4c1b4a4d90b6-dirty OSVersion="#313 SMP PREEMPT Sun Nov 7 14:18:05 EST 2021" HostName=ubuntu Architecture=aarch64
 Topology not from this system

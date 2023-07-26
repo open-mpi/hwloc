@@ -1,4 +1,4 @@
-Machine (P#0 total=96GiB DMIProductName=DRACHMA DMIProductVersion="Rev 2" DMIProductSerial=0123456789 DMIProductUUID=008844D0-2214-DF11-B89F-F50F715B14E8 DMIBoardVendor=AMD DMIBoardName=DRACHMA DMIBoardVersion="Rev 2" DMIBoardSerial=0123456789 DMIBoardAssetTag= DMIChassisVendor=AMD DMIChassisType=23 DMIChassisVersion= DMIChassisSerial= DMIChassisAssetTag= DMIBIOSVendor="Phoenix Technologies Ltd." DMIBIOSVersion=PDPAX1-6 DMIBIOSDate=12/15/2009 DMISysVendor=AMD Backend=Linux)
+Machine (P#0 total=96GiB DMIProductName=DRACHMA DMIProductVersion="Rev 2" DMIProductSerial=0123456789 DMIProductUUID=008844D0-2214-DF11-B89F-F50F715B14E8 DMIBoardVendor=AMD DMIBoardName=DRACHMA DMIBoardVersion="Rev 2" DMIBoardSerial=0123456789 DMIBoardAssetTag= DMIChassisVendor=AMD DMIChassisType=23 DMIChassisVersion= DMIChassisSerial= DMIChassisAssetTag= DMIBIOSVendor="Phoenix Technologies Ltd." DMIBIOSVersion=PDPAX1-6 DMIBIOSDate=12/15/2009 DMISysVendor=AMD)
   Package L#0 (P#0 total=24GiB CPUModel="AMD Engineering Sample")
     L3Cache L#0 (total=8190MiB size=5118KiB linesize=64 ways=48)
       NUMANode L#0 (P#0 local=8190MiB total=8190MiB)
@@ -280,4 +280,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      7    22    16    16    22    22    16    16    10
 CPU kind #0 efficiency 0 cpuset 0x0000ffff,0xffffffff
   FrequencyMaxMHz = 1700
+Topology infos: Backend=Linux
 Topology not from this system

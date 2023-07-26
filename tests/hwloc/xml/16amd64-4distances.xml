@@ -6,10 +6,6 @@
     <info name="DMIBoardName" value="S4881 "/>
     <info name="DMIBoardVersion" value="S4881"/>
     <info name="DMIBoardAssetTag" value=""/>
-    <info name="Backend" value="Linux"/>
-    <info name="Architecture" value="x86_64"/>
-    <info name="hwlocVersion" value="1.11.4"/>
-    <info name="ProcessName" value="lstopo"/>
     <object type="Group" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000027" complete_nodeset="0x00000027" gp_index="2" id="obj2" kind="1" subkind="0">
       <object type="Package" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="4" id="obj4">
         <info name="CPUVendor" value="AuthenticAMD"/>
@@ -259,4 +255,6 @@
     <u64values length="12">40 40 20 10 </u64values>
   </distances2>
   <support name="custom.exported_support"/>
+  <info name="Backend" value="Linux"/>
+  <info name="Architecture" value="x86_64"/>
 </topology>

@@ -142,7 +142,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   }
 
   if (added > 0)
-    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "CUDA");
+    hwloc_modify_infos(hwloc_topology_get_infos(topology), HWLOC_MODIFY_INFOS_OP_ADD, "Backend", "CUDA");
   return 0;
 }
 

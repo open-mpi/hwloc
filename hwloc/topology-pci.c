@@ -379,7 +379,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   backend->phases &= HWLOC_DISC_PHASE_ANNOTATE;
 
   if (added)
-    hwloc_obj_add_info(hwloc_get_root_obj(topology), "Backend", "PCI");
+    hwloc_modify_infos(hwloc_topology_get_infos(topology), HWLOC_MODIFY_INFOS_OP_ADD, "Backend", "PCI");
   return 0;
 }
 

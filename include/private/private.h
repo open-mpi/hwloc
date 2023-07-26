@@ -145,6 +145,8 @@ struct hwloc_topology {
 
   struct hwloc_topology_support support;
 
+  struct hwloc_infos_s infos;
+
   void (*userdata_export_cb)(void *reserved, struct hwloc_topology *topology, struct hwloc_obj *obj);
   void (*userdata_import_cb)(struct hwloc_topology *topology, struct hwloc_obj *obj, const char *name, const void *buffer, size_t length);
   int userdata_not_decoded;

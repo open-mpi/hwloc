@@ -1771,7 +1771,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     /* several object types were added, we can't easily complete, just do partial discovery */
     ret = hwloc_look_x86(backend, flags);
     if (ret)
-      hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
+      hwloc__add_info(&topology->infos, "Backend", "x86");
     return 0;
   } else {
     /* topology is empty, initialize it */
@@ -1785,7 +1785,7 @@ fulldiscovery:
       hwloc_setup_pu_level(topology, data->nbprocs);
   }
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
+  hwloc__add_info(&topology->infos, "Backend", "x86");
 
   if (!data->src_cpuiddump_path) { /* CPUID dump works for both x86 and x86_64 */
 #ifdef HAVE_UNAME

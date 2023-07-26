@@ -1,4 +1,4 @@
-Machine (P#0 total=4096MiB Backend=Linux)
+Machine (P#0 total=4096MiB)
   Group0 L#0 (total=1024MiB)
     NUMANode L#0 (P#0 local=1024MiB total=1024MiB)
     Package L#0 (P#0)
@@ -209,4 +209,5 @@ depth 0:            1 Machine (type #0)
        depth 7:     32 Core (type #2)
         depth 8:    64 PU (type #3)
 Special depth -3:   4 NUMANode (type #13)
+Topology infos: Backend=Linux
 Topology not from this system

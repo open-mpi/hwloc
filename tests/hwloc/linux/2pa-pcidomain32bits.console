@@ -1,4 +1,4 @@
-Machine (P#0 total=2004MiB LinuxCgroup=/ DMIProductName="CloudStack KVM Hypervisor" DMIProductVersion="RHEL 7.0.0 PC (i440FX + PIIX, 1996)" DMIChassisVendor=Bochs DMIChassisType=1 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor=Seabios DMIBIOSVersion=0.5.1 DMIBIOSDate=01/01/2011 DMISysVendor="Apache Software Foundation" Backend=Linux OSName=Linux OSRelease=4.9.0-3-amd64 OSVersion="#1 SMP Debian 4.9.30-2+deb9u2 (2017-06-26)" HostName=hwloc-debian9amd64 Architecture=x86_64)
+Machine (P#0 total=2004MiB DMIProductName="CloudStack KVM Hypervisor" DMIProductVersion="RHEL 7.0.0 PC (i440FX + PIIX, 1996)" DMIChassisVendor=Bochs DMIChassisType=1 DMIChassisVersion= DMIChassisAssetTag= DMIBIOSVendor=Seabios DMIBIOSVersion=0.5.1 DMIBIOSDate=01/01/2011 DMISysVendor="Apache Software Foundation")
   NUMANode L#0 (P#0 local=2004MiB total=2004MiB)
   Package L#0 (P#0 CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=94 CPUModel="Intel Core Processor (Skylake, IBRS)" CPUStepping=3)
     L2Cache L#0 (size=4096KiB linesize=64 ways=16)
@@ -32,4 +32,5 @@ Special depth -3:  1 NUMANode (type #13)
 Special depth -4:  2 Bridge (type #14)
 Special depth -5:  4 PCIDev (type #15)
 Special depth -6:  3 OSDev (type #16)
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=4.9.0-3-amd64 OSVersion="#1 SMP Debian 4.9.30-2+deb9u2 (2017-06-26)" HostName=hwloc-debian9amd64 Architecture=x86_64
 Topology not from this system
