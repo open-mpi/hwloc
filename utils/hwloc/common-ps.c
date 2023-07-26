@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -115,12 +115,13 @@ int hwloc_ps_read_process(hwloc_topology_t topology, hwloc_const_bitmap_t topocp
     if (fd >= 0) {
       char status[1024];
       char *uid;
-      (void) read(fd, &status, sizeof(status));
-      status[1023] = '\0';
-      uid = strstr(status, "Uid:");
-      if (uid)
-	proc->uid = strtoul(uid+4, NULL, 0);
-      close(fd);
+      if (read(fd, &status, sizeof(status)) > 0) {
+        status[1023] = '\0';
+        uid = strstr(status, "Uid:");
+        if (uid)
+          proc->uid = strtoul(uid+4, NULL, 0);
+        close(fd);
+      }
     }
     free(path);
 #endif
