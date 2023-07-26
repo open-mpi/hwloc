@@ -2190,7 +2190,8 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
         ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
         if (ret < 0)
           goto failed;
-        /* ignored */
+        /* move 3.x topology info back to the root object */
+        hwloc_obj_add_info(topology->levels[0][0], infoname, infovalue);
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
