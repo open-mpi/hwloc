@@ -5697,7 +5697,8 @@ hwloc_linuxfs_check_kernel_cmdline(struct hwloc_linux_backend_data_s *data)
     return;
 
   cmdline[0] = 0;
-  fgets(cmdline, sizeof(cmdline), file);
+  if (!fgets(cmdline, sizeof(cmdline), file))
+    goto out;
 
   fakenuma = strstr(cmdline, "numa=fake=");
   if (fakenuma) {
@@ -5716,6 +5717,7 @@ hwloc_linuxfs_check_kernel_cmdline(struct hwloc_linux_backend_data_s *data)
     hwloc_debug("Found fake numa %d\n", data->is_fake_numa_uniform);
   }
 
+ out:
   fclose(file);
 }
 
