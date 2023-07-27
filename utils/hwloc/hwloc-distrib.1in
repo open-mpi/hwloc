@@ -84,11 +84,17 @@ and singlify CPU sets by keeping the last bit (instead of the first bit).
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
 This removes some PUs and their now-child-less parents.
+
+Beware that restricting the PUs in a topology may change the
+logical indexes of many objects, including NUMA nodes.
 .TP
 \fB\-\-restrict\fR nodeset=<nodeset>
 Restrict the topology to the given nodeset
 (unless \fB\-\-restrict\-flags\fR specifies something different).
 This removes some NUMA nodes and their now-child-less parents.
+
+Beware that restricting the NUMA nodes in a topology may change the
+logical indexes of many objects, including PUs.
 .TP
 \fB\-\-restrict\-flags\fR <flags>
 Enforce flags when restricting the topology.

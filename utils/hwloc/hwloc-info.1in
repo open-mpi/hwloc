@@ -129,17 +129,26 @@ Include objects disallowed by administrative limitations.
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
 This removes some PUs and their now-child-less parents.
+
+Beware that restricting the PUs in a topology may change the
+logical indexes of many objects, including NUMA nodes.
 .TP
 \fB\-\-restrict\fR nodeset=<nodeset>
 Restrict the topology to the given nodeset
 (unless \fB\-\-restrict\-flags\fR specifies something different).
 This removes some NUMA nodes and their now-child-less parents.
+
+Beware that restricting the NUMA nodes in a topology may change the
+logical indexes of many objects, including PUs.
 .TP
 \fB\-\-restrict\fR binding
 Restrict the topology to the current process binding.
 This option requires the use of the actual current machine topology
 (or any other topology with \fB\-\-thissystem\fR or with
 HWLOC_THISSYSTEM set to 1 in the environment).
+
+Beware that restricting the topology may change the
+logical indexes of many objects, including PUs and NUMA nodes.
 .TP
 \fB\-\-restrict\-flags\fR <flags>
 Enforce flags when restricting the topology.
