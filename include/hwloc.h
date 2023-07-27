@@ -2637,6 +2637,10 @@ enum hwloc_restrict_flags_e {
  *
  * \p flags is a OR'ed set of ::hwloc_restrict_flags_e.
  *
+ * \note Restricting the topology removes some locality information,
+ * hence the remaining objects may get reordered (including PUs and NUMA nodes),
+ * and their logical indexes may change.
+ *
  * \note This call may not be reverted by restricting back to a larger
  * set. Once dropped during restriction, objects may not be brought
  * back, except by loading another topology with hwloc_topology_load().
@@ -2764,6 +2768,10 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * The group \p kind attribute may be set to a high value such
  * as \c 0xffffffff to tell hwloc that this new Group should always
  * be discarded in favor of any existing Group with the same locality.
+ *
+ * \note Inserting a group adds some locality information to the topology,
+ * hence the existing objects may get reordered (including PUs and NUMA nodes),
+ * and their logical indexes may change.
  *
  * \return The inserted object if it was properly inserted.
  *
