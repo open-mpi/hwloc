@@ -2527,8 +2527,15 @@ enum hwloc_restrict_flags_e {
  * are not included (or partially included) in the CPU set \p set.
  * All objects CPU and node sets are restricted accordingly.
  *
+ * By default, \p set is a CPU set. It means that the set of PUs in
+ * the topology is restricted. Once some PUs got removed, their parents
+ * may also get removed recursively if they became child-less.
+ *
  * If ::HWLOC_RESTRICT_FLAG_BYNODESET is passed in \p flags,
  * \p set is considered a nodeset instead of a CPU set.
+ * It means that the set of NUMA nodes in the topology is restricted
+ * (instead of PUs). Once some NUMA nodes got removed, their parents
+ * may also get removed recursively if they became child-less.
  *
  * \p flags is a OR'ed set of ::hwloc_restrict_flags_e.
  *
