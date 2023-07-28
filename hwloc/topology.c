@@ -519,7 +519,7 @@ int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *v
   if (!array[count].value)
     goto out_with_name;
   infos->count = count+1;
-  return 0;
+  return 1;
 
  out_with_name:
   free(array[count].name);
@@ -582,7 +582,7 @@ int hwloc__replace_infos(struct hwloc_infos_s *infos,
   if (found) {
     if (found > 1)
       infos->count -= found-1;
-    return 0;
+    return 1+found;
   } else {
     /* no match, just add */
     return hwloc__add_info(infos, name, value);
@@ -590,7 +590,7 @@ int hwloc__replace_infos(struct hwloc_infos_s *infos,
 }
 
 static int hwloc__remove_infos(struct hwloc_infos_s *infos,
-                        const char *name, const char *value)
+                               const char *name, const char *value)
 {
   struct hwloc_info_s *array = infos->array;
   unsigned count = infos->count;
@@ -611,7 +611,7 @@ static int hwloc__remove_infos(struct hwloc_infos_s *infos,
     }
   }
   infos->count -= found;
-  return 0;
+  return found;
 }
 
 int hwloc_modify_infos(struct hwloc_infos_s *infos, unsigned long op, const char *name, const char *value)

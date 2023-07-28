@@ -48,7 +48,7 @@ int main(void)
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REMOVE, NULL, NAME2); /* no match */
   assert(!err);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REMOVE, NULL, NULL); /* remove all */
-  assert(!err);
+  assert(err >= 2);
   assert(obj->infos.count == 0);
 
   /* invalid add */
@@ -56,31 +56,31 @@ int main(void)
   assert(err == -1);
   /* 9 interleaved duplicates */
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin1", "foo1");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 1);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin2", "foo1");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 2);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin3", "foo1");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 3);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin1", "foo2");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 4);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin2", "foo2");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 5);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin3", "foo2");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 6);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin1", "foo3");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 7);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin2", "foo3");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 8);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, "coin3", "foo3");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 9);
 
   /* invalid replace */
@@ -88,21 +88,21 @@ int main(void)
   assert(err == -1);
   /* replace the third set of duplicates */
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REPLACE, "coin3", "foo4");
-  assert(!err);
+  assert(err == 3+1);
   assert(obj->infos.count == 7);
   assert(!strcmp(obj->infos.array[2].name, "coin3"));
   assert(!strcmp(obj->infos.array[2].value, "foo4"));
   /* remove second set of duplicates */
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REMOVE, "coin2", NULL);
-  assert(!err);
+  assert(err == 3);
   assert(obj->infos.count == 4);
   /* remove second instance of first duplicates */
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REMOVE, "coin1", "foo2");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 3);
   /* replace reminder of the first set of duplicates */
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REPLACE, "coin1", "foo5");
-  assert(!err);
+  assert(err == 2+1);
   assert(obj->infos.count == 2);
   assert(!strcmp(obj->infos.array[0].name, "coin1"));
   assert(!strcmp(obj->infos.array[0].value, "foo5"));
@@ -112,10 +112,10 @@ int main(void)
 
   /* check add_unique */
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE, "coin1", "foo5");
-  assert(!err);
+  assert(err == 0);
   assert(obj->infos.count == 2);
   err = hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE, "coin1", "foo4");
-  assert(!err);
+  assert(err == 1);
   assert(obj->infos.count == 3);
   assert(!strcmp(obj->infos.array[2].name, "coin1"));
   assert(!strcmp(obj->infos.array[2].value, "foo4"));

@@ -1169,7 +1169,10 @@ hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name) __hwloc_at
  * \p name and/or \p value may be non \c NULL to specify which pair(s) to remove.
  * If both \p name and \p value are \c NULL, all pairs are removed.
  *
- * \return \c 0 on success, \c -1 on error.
+ * \return a positive value if some info attributes were added/modified/removed
+ * (see the documentation of each operation).
+ * \return \c 0 if the request was valid but no change was applied.
+ * \return \c -1 on error.
  *
  * \note If \p value contains some non-printable characters, they will
  * be dropped when exporting to XML, see hwloc_topology_export_xml() in hwloc/export.h.
@@ -1181,12 +1184,15 @@ HWLOC_DECLSPEC int hwloc_modify_infos(struct hwloc_infos_s *infos,
 /** \brief Operations given to hwloc_modify_infos(). */
 enum hwloc_modify_infos_op_e {
   /** \brief Add a new info attribute with the given name and value.
+   * \return \c 1 if the pair was successfully added.
    * \hideinitializer
    */
   HWLOC_MODIFY_INFOS_OP_ADD = 1UL<<0,
 
   /** \brief Add a new info attribute with the given name and value
    * only if that pair doesn't exist yet.
+   * \return \c 1 if the pair was successfully added.
+   * \return \c 0 if the pair already existed.
    * \hideinitializer
    */
   HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE = 1UL<<1,
@@ -1195,12 +1201,16 @@ enum hwloc_modify_infos_op_e {
    * with a single attribute with the given name and value.
    * If no existing pair matches, add a new one.
    * If multiple pairs match, only one remains.
+   * \return \c 1 if the pair was added.
+   * \return \c N+1 if N existing pairs were replaced by one.
    * \hideinitializer
    */
   HWLOC_MODIFY_INFOS_OP_REPLACE = 1UL<<2,
 
   /** \brief Remove existing info attributes that matches the given
    * name and/or value if not \c NULL.
+   * \return \c N if N existing pairs were removed.
+   * \return \c 0 if no matching pair was found and removed.
    * \hideinitializer
    */
   HWLOC_MODIFY_INFOS_OP_REMOVE = 1UL<<3

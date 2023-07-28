@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
   err = hwloc_topology_load(orig);
   assert(!err);
   err = hwloc_obj_add_info(hwloc_get_root_obj(orig), "ShmemSyntheticWithDistances", "1");
-  assert(!err);
+  assert(err == 1);
 
   printf("adding distance matrix\n");
   for(i=0; i<3; i++) {
