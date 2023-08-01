@@ -79,6 +79,7 @@ _lstopo() {
 		   --export-xml-flags
 		   --export-synthetic-flags
 		   --ps --top
+		   --misc-from
 		   --version
 		   -h --help
 		  )
