@@ -6904,6 +6904,8 @@ struct hwloc_firmware_dmi_mem_device_header {
    * Anything below (SMBIOS 2.6+) is optional for hwloc,
    * we must to check header->length before reading them.
    */
+  unsigned char attributes;
+  unsigned char extended_size[4];
 };
 
 static int check_dmi_entry(const char *buffer)
@@ -6917,6 +6919,114 @@ static int check_dmi_entry(const char *buffer)
   return 1;
 }
 
+static const char *dmi_memory_device_form_factor(uint8_t code)
+{
+  static const char *form_factor[] = {
+    "Other", /* 0x01 */
+    "Unknown",
+    "SIMM",
+    "SIP",
+    "Chip",
+    "DIP",
+    "ZIP",
+    "Proprietary Card",
+    "DIMM",
+    "TSOP",
+    "Row Of Chips",
+    "RIMM",
+    "SODIMM",
+    "SRIMM",
+    "FB-DIMM",
+    "Die", /* 0x10 */
+    /* updated for SMBIOS 3.7.0 20230721 */
+  };
+
+  if (code >= 1 && code <= sizeof(form_factor)/sizeof(form_factor[0]))
+    return form_factor[code - 1];
+  return NULL; /* return NULL to distinguish unsupported values from the official "Unknown" value above */
+}
+
+static const char *dmi_memory_device_type(uint8_t code)
+{
+  static const char *type[] = {
+    "Other", /* 0x01 */
+    "Unknown",
+    "DRAM",
+    "EDRAM",
+    "VRAM",
+    "SRAM",
+    "RAM",
+    "ROM",
+    "Flash",
+    "EEPROM",
+    "FEPROM",
+    "EPROM",
+    "CDRAM",
+    "3DRAM",
+    "SDRAM",
+    "SGRAM",
+    "RDRAM",
+    "DDR",
+    "DDR2",
+    "DDR2 FB-DIMM",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "DDR3",
+    "FBD2",
+    "DDR4",
+    "LPDDR",
+    "LPDDR2",
+    "LPDDR3",
+    "LPDDR4",
+    "Logical non-volatile device",
+    "HBM",
+    "HBM2",
+    "DDR5",
+    "LPDDR5",
+    "HBM3" /* 0x24 */
+    /* updated for SMBIOS 3.7.0 20230721 */
+  };
+
+  if (code >= 1 && code <= sizeof(type)/sizeof(type[0]))
+    return type[code - 1];
+  return NULL; /* return NULL to distinguish unsupported values from the official "Unknown" value above */
+}
+
+static int dmi_memory_device_size(char *buffer, size_t len,
+                                  const struct hwloc_firmware_dmi_mem_device_header *header)
+{
+  uint64_t memory_size = 0;
+  uint16_t code = *(uint16_t *)(header->size);
+
+  if (code == 0xFFFF)
+    return -1;
+
+  if (header->length >= offsetof(struct hwloc_firmware_dmi_mem_device_header, extended_size) + sizeof(header->extended_size) && code == 0x7FFF) {
+    memory_size = *(uint32_t *)(header->extended_size) & 0x7FFFFFFF; /* MiB */
+    memory_size <<= 10;
+  } else {
+    memory_size = code & 0x7FFF;
+    if (!(code & 0x8000)) /* MiB (otherwise KiB) */
+      memory_size <<= 10;
+  }
+  snprintf(buffer, len, "%llu", (unsigned long long) memory_size);
+  return 0;
+}
+
+static int dmi_memory_device_rank(char *buffer, size_t len,
+                                  const struct hwloc_firmware_dmi_mem_device_header *header)
+{
+  uint8_t code;
+  if (header->length < offsetof(struct hwloc_firmware_dmi_mem_device_header, attributes) + sizeof(header->attributes))
+    return -1;
+  code = header->attributes;
+  if (!code)
+    return -1;
+  snprintf(buffer, len, "%u", code & 0x0F);
+  return 0;
+}
+
 static int
 hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
 					unsigned idx, const char *path, FILE *fd,
@@ -6924,6 +7034,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
 {
   unsigned slen;
   char buffer[256]; /* enough for memory device strings, or at least for each of them */
+  const char *retbuf;
   unsigned foff; /* offset in raw file */
   unsigned boff; /* offset in buffer read from raw file */
   unsigned i;
@@ -7008,6 +7119,17 @@ done:
     /* found no actual info about the device. if there's only location info, the slot may be empty */
     goto out_with_infos;
   }
+
+  retbuf = dmi_memory_device_form_factor(header->ff);
+  if (retbuf)
+    hwloc__add_info(&infos, "FormFactor", retbuf);
+  retbuf = dmi_memory_device_type(header->mem_type);
+  if (retbuf)
+    hwloc__add_info(&infos, "Type", retbuf);
+  if (!dmi_memory_device_size(buffer, sizeof(buffer), header))
+    hwloc__add_info(&infos, "Size", buffer);
+  if (!dmi_memory_device_rank(buffer, sizeof(buffer), header))
+    hwloc__add_info(&infos, "Rank", buffer);
 
   misc = hwloc_alloc_setup_object(topology, HWLOC_OBJ_MISC, idx);
   if (!misc)
