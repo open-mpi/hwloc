@@ -330,6 +330,18 @@ cluttering the output, only processes that are restricted to some part of the
 machine are shown.  On Linux, kernel threads are not shown.
 If many processes appear, the output may become hard to read anyway,
 making the hwloc-ps program more practical.
+
+.TP
+\fB\-\-misc\-from\fR <file>
+Add Misc objects as described in <file> containing entries such as:
+
+    name=myMisc1
+    cpuset=0x5
+
+    name=myMisc2
+    cpuset=0x7
+    subtype=myOptionalSubtype
+
 .TP
 \fB\-\-children\-order\fR <order>
 Change the order of the different kinds of children with respect to
