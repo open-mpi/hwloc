@@ -78,7 +78,7 @@ FILE *open_output(const char *filename, int overwrite)
   return fopen(filename, "w");
 }
 
-static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name, int thread)
+static hwloc_obj_t insert_misc(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char *subtype, const char * name)
 {
   hwloc_obj_t group, obj;
 
@@ -99,16 +99,16 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
     hwloc_bitmap_asprintf(&s, cpuset);
     group = hwloc_get_obj_covering_cpuset(topology, cpuset);
     hwloc_bitmap_asprintf(&gs, group->cpuset);
-    fprintf(stderr, "%s `%s' binding %s doesn't match any object, extended to %s before inserting the %s in the topology.\n",
-	    thread ? "Thread" : "Process", name, s, gs, thread ? "thread" : "process");
+    fprintf(stderr, "%s `%s' binding %s doesn't match any object, extended to %s before inserting the object.\n",
+	    subtype, name, s, gs);
     free(s);
     free(gs);
   }
   obj = hwloc_topology_insert_misc_object(topology, group, name);
   if (!obj)
     fprintf(stderr, "Failed to insert process `%s'\n", name);
-  else
-    obj->subtype = strdup("Process");
+  else if (subtype)
+    obj->subtype = strdup(subtype);
 
   return obj;
 }
@@ -125,7 +125,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
     snprintf(name, sizeof(name), "%ld %s", proc->pid, proc->name);
 
   if (proc->bound)
-    insert_task(topology, proc->cpuset, name, 0);
+    insert_misc(topology, proc->cpuset, "Process", name);
 
   if (proc->nthreads)
     for(i=0; i<proc->nthreads; i++)
@@ -137,7 +137,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
 	else
 	  snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
 
-	insert_task(topology, proc->threads[i].cpuset, task_name, 1);
+	insert_misc(topology, proc->threads[i].cpuset, "Thread", task_name);
       }
 }
 
