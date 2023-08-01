@@ -41,6 +41,7 @@ static int json_server = 0;
 static int json_port = JSON_PORT;
 static FILE *json_output = NULL;
 static int verbose = 0;
+static FILE *lstopo_misc_output = NULL;
 
 void usage(const char *name, FILE *where)
 {
@@ -66,6 +67,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --pid-cmd <cmd>    Append the output of <cmd> <pid> to each PID line\n");
   fprintf (where, "  --short-name       Show only the process short name instead of the path\n");
   fprintf (where, "  --disallowed       Include objects disallowed by administrative limitations\n");
+  fprintf (where, "  --lstopo-misc <file>  Output Misc object to be given to lstopo --misc-from <file>\n");
   fprintf (where, "  --json-server      Run as a JSON server\n");
   fprintf (where, "  --json-port <n>    Use port <n> for JSON server (default is %d)\n", JSON_PORT);
   fprintf (where, "  -v --verbose       Increase verbosity\n");
@@ -133,6 +135,45 @@ static void print_process(hwloc_topology_t topology,
     for(i=0; i<proc->nthreads; i++)
       if (proc->threads[i].cpuset)
 	print_task(topology, proc->threads[i].tid, proc->threads[i].name, proc->threads[i].cpuset, NULL, 1);
+}
+
+static void print_process_lstopo_misc(hwloc_topology_t topology __hwloc_attribute_unused,
+                                      struct hwloc_ps_process *proc)
+{
+  /* sort of similar to foreach_process_cb() in lstopo.c */
+  char name[100];
+  char *s;
+  unsigned i;
+
+  snprintf(name, sizeof(name), "%ld", proc->pid);
+  if (*proc->name)
+    snprintf(name, sizeof(name), "%ld %s", proc->pid, proc->name);
+  hwloc_bitmap_asprintf(&s, proc->cpuset);
+  fprintf(lstopo_misc_output,
+          "name=%s\n"
+          "cpuset=%s\n"
+          "subtype=Process\n"
+          "\n",
+          name, s);
+  free(s);
+
+  if (proc->nthreads)
+    for(i=0; i<proc->nthreads; i++)
+      if (proc->threads[i].cpuset) {
+	char task_name[150];
+	if (*proc->threads[i].name)
+	  snprintf(task_name, sizeof(task_name), "%s %li %s", name, proc->threads[i].tid, proc->threads[i].name);
+	else
+	  snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
+        hwloc_bitmap_asprintf(&s, proc->threads[i].cpuset);
+        fprintf(lstopo_misc_output,
+                "name=%s\n"
+                "cpuset=%s\n"
+                "subtype=Thread\n"
+                "\n",
+                task_name, s);
+        free(s);
+      }
 }
 
 static void print_process_json(hwloc_topology_t topology,
@@ -207,6 +248,8 @@ static void foreach_process_cb(hwloc_topology_t topology,
 
   if (json_output)
     print_process_json(topology, proc);
+  else if (lstopo_misc_output)
+    print_process_lstopo_misc(topology, proc);
   else
     print_process(topology, proc);
 }
@@ -241,6 +284,8 @@ static int run(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
 
       if (json_output)
 	print_process_json(topology, &proc);
+      else if (lstopo_misc_output)
+        print_process_lstopo_misc(topology, &proc);
       else
 	print_process(topology, &proc);
     }
@@ -467,6 +512,21 @@ int main(int argc, char *argv[])
       pidcmd = argv[1];
       opt = 1;
 
+    } else if (!strcmp (argv[0], "--lstopo-misc")) {
+      if (argc < 2) {
+	usage(callname, stderr);
+	exit(EXIT_FAILURE);
+      }
+      if (!strcmp(argv[1], "-"))
+        lstopo_misc_output = stdout;
+      else
+        lstopo_misc_output = fopen(argv[1], "w");
+      if (!lstopo_misc_output) {
+        fprintf(stderr, "Failed to open --lstopo-misc output `%s' for writing (%s)\n", argv[1], strerror(errno));
+        exit(EXIT_FAILURE);
+      }
+      opt = 1;
+
     } else if (!strcmp (argv[0], "--json-server")) {
       json_server = 1;
     } else if (!strcmp (argv[0], "--json-port")) {
@@ -540,5 +600,7 @@ int main(int argc, char *argv[])
  out_with_topology:
   hwloc_topology_destroy(topology);
  out:
+  if (lstopo_misc_output && lstopo_misc_output != stdout)
+    fclose(lstopo_misc_output);
   return err;
 }

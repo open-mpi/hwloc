@@ -117,6 +117,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
 			       struct hwloc_ps_process *proc,
 			       void *cbdata __hwloc_attribute_unused)
 {
+  /* sort of similar to print_process_lstopo_misc() in hwloc-ps.c */
   char name[100];
   unsigned i;
 
