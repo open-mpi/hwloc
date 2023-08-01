@@ -1137,7 +1137,8 @@ lstopo_set_object_color(struct lstopo_output *loutput,
   }
 
   case HWLOC_OBJ_MISC:
-    if (loutput->show_process_color && obj->subtype && !strcmp(obj->subtype, "Process"))
+    if (loutput->show_process_color && obj->subtype &&
+        (!strcmp(obj->subtype, "Process") || !strcmp(obj->subtype, "Thread")))
       s->bg = &loutput->palette->process;
     else
       s->bg = &loutput->palette->misc;
