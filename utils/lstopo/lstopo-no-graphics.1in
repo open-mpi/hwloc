@@ -330,6 +330,21 @@ cluttering the output, only processes that are restricted to some part of the
 machine are shown.  On Linux, kernel threads are not shown.
 If many processes appear, the output may become hard to read anyway,
 making the hwloc-ps program more practical.
+
+See \fB\-\-misc\-from\fR for a customizable variant using \fBhwloc-ps\fR.
+.TP
+\fB\-\-misc\-from\fR <file>
+Add Misc objects as described in <file> containing entries such as:
+
+    name=myMisc1
+    cpuset=0x5
+
+    name=myMisc2
+    cpuset=0x7
+    subtype=myOptionalSubtype
+
+This is useful for combining with \fBhwloc-ps --lstopo-misc\fR (see EXAMPLES below)
+because hwloc-ps is far more customizable than lstopo's \fB\-\-top\fR option.
 .TP
 \fB\-\-children\-order\fR <order>
 Change the order of the different kinds of children with respect to
@@ -493,6 +508,7 @@ Or change the color to the given 3x8bit hexadecimal RGB combination (e.g. \fI#00
 \fB\-\-top\-color\fR <none|#rrggbb>
 Do not colorize task objects in the graphical output when \-\-top is given.
 Or change the color to the given 3x8bit hexadecimal RGB combination (e.g. \fI#0000ff\fR is blue).
+This is actually applied to Misc objects of subtype \fIProcess\fR or \fIThread\fR.
 .TP
 \fB\-\-version\fR
 Report version and exit.
@@ -881,6 +897,11 @@ To count the number of logical processors in the system
 To append the kernel release and version to the graphical legend:
 
    lstopo --append-legend "Kernel release: $(uname -r)" --append-legend "Kernel version: $(uname -v)"
+
+To show where a process and its children are bound by combining with hwloc-ps:
+
+   hwloc-ps --pid-children 23 --lstopo-misc - | lstopo --misc-from -
+
 .
 .\" **************************
 .\"    Notes Section

@@ -393,3 +393,63 @@ int hwloc_ps_foreach_process(hwloc_topology_t topology, hwloc_const_bitmap_t top
   return -1;
 #endif /* HAVE_DIRENT_H */
 }
+
+int hwloc_ps_foreach_child(hwloc_topology_t topology, hwloc_const_bitmap_t topocpuset,
+                           long pid,
+                           void (*callback)(hwloc_topology_t topology, struct hwloc_ps_process *proc, void *cbdata),
+                           void *cbdata,
+                           unsigned long flags, const char *only_name, long uid)
+{
+#ifdef HAVE_DIRENT_H
+  struct hwloc_ps_process proc;
+  DIR *taskdir;
+  char path[512];
+
+  proc.pid = pid;
+  proc.cpuset = NULL;
+  proc.nthreads = 0;
+  proc.nboundthreads = 0;
+  proc.threads = NULL;
+  if (hwloc_ps_read_process(topology, topocpuset, &proc, flags) < 0)
+    goto next;
+  if (only_name && !strstr(proc.name, only_name))
+    goto next;
+  if (uid != HWLOC_PS_ALL_UIDS && proc.uid != HWLOC_PS_ALL_UIDS && proc.uid != uid)
+    goto next;
+  callback(topology, &proc, cbdata);
+ next:
+  hwloc_ps_free_process(&proc);
+
+  snprintf(path, sizeof(path), "/proc/%ld/task", proc.pid);
+  taskdir = opendir(path); /* should be enough for the vast majority of cases */
+  if (taskdir) {
+    struct dirent *taskdirent;
+    while ((taskdirent = readdir(taskdir))) {
+      char pidline[4096];
+      FILE *file;
+      char *begin;
+      size_t len;
+      snprintf(path, sizeof(path), "/proc/%ld/task/%s/children", proc.pid, taskdirent->d_name);
+      file = fopen(path, "r");
+      if (!file)
+        continue;
+      len = fread(pidline, 1, sizeof(pidline)-1, file);
+      fclose(file);
+      pidline[len] = '\0';
+      begin = pidline;
+      while (1) {
+        char *end;
+        long childpid = strtoul(begin, &end, 10);
+        if (end == begin)
+          break;
+        hwloc_ps_foreach_child(topology, topocpuset, childpid, callback, cbdata, flags, only_name, uid);
+        begin = end;
+      }
+    }
+    closedir(taskdir);
+  }
+  return 0;
+#else /* HAVE_DIRENT_H */
+  return -1;
+#endif /* HAVE_DIRENT_H */
+}

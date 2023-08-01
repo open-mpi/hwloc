@@ -78,7 +78,7 @@ FILE *open_output(const char *filename, int overwrite)
   return fopen(filename, "w");
 }
 
-static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name, int thread)
+static hwloc_obj_t insert_misc(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char *subtype, const char * name)
 {
   hwloc_obj_t group, obj;
 
@@ -99,16 +99,16 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
     hwloc_bitmap_asprintf(&s, cpuset);
     group = hwloc_get_obj_covering_cpuset(topology, cpuset);
     hwloc_bitmap_asprintf(&gs, group->cpuset);
-    fprintf(stderr, "%s `%s' binding %s doesn't match any object, extended to %s before inserting the %s in the topology.\n",
-	    thread ? "Thread" : "Process", name, s, gs, thread ? "thread" : "process");
+    fprintf(stderr, "%s `%s' binding %s doesn't match any object, extended to %s before inserting the object.\n",
+	    subtype, name, s, gs);
     free(s);
     free(gs);
   }
   obj = hwloc_topology_insert_misc_object(topology, group, name);
   if (!obj)
     fprintf(stderr, "Failed to insert process `%s'\n", name);
-  else
-    obj->subtype = strdup("Process");
+  else if (subtype)
+    obj->subtype = strdup(subtype);
 
   return obj;
 }
@@ -117,6 +117,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
 			       struct hwloc_ps_process *proc,
 			       void *cbdata __hwloc_attribute_unused)
 {
+  /* sort of similar to print_process_lstopo_misc() in hwloc-ps.c */
   char name[100];
   unsigned i;
 
@@ -125,7 +126,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
     snprintf(name, sizeof(name), "%ld %s", proc->pid, proc->name);
 
   if (proc->bound)
-    insert_task(topology, proc->cpuset, name, 0);
+    insert_misc(topology, proc->cpuset, "Process", name);
 
   if (proc->nthreads)
     for(i=0; i<proc->nthreads; i++)
@@ -137,7 +138,7 @@ static void foreach_process_cb(hwloc_topology_t topology,
 	else
 	  snprintf(task_name, sizeof(task_name), "%s %li", name, proc->threads[i].tid);
 
-	insert_task(topology, proc->threads[i].cpuset, task_name, 1);
+	insert_misc(topology, proc->threads[i].cpuset, "Thread", task_name);
       }
 }
 
@@ -152,6 +153,77 @@ static void add_process_objects(hwloc_topology_t topology)
   hwloc_ps_foreach_process(topology, root->cpuset,
 			   foreach_process_cb, NULL,
 			   HWLOC_PS_FLAG_THREADS | HWLOC_PS_FLAG_SHORTNAME, NULL, HWLOC_PS_ALL_UIDS);
+}
+
+static void add_one_misc_object_from(hwloc_topology_t topology,
+                                     char *subtype, char *name, hwloc_bitmap_t cpuset)
+{
+  if (!hwloc_bitmap_iszero(cpuset) && subtype && name) {
+    insert_misc(topology, cpuset, subtype, name);
+  } else {
+    char *s;
+    hwloc_bitmap_asprintf(&s, cpuset);
+    fprintf(stderr, "Ignoring misc object subtype %s name %s cpuset %s\n", subtype, name, s);
+    free(s);
+  }
+}
+
+/* reads Misc description from the FILE*
+ * entries must look like:
+ * name=... (must be first)
+ * cpuset=... (cannot be 0)
+ * subtype=... (optional)
+ */
+static void add_misc_objects_from(hwloc_topology_t topology, FILE *from)
+{
+  char line[256];
+  hwloc_bitmap_t cpuset;
+  char *subtype = NULL;
+  char *name = NULL;
+  cpuset = hwloc_bitmap_alloc();
+  if (!cpuset)
+    return;
+
+  while (fgets(line, sizeof line, from)) {
+    char *end;
+
+    /* remove ending \n */
+    end = strchr(line, '\n');
+    if (end)
+      *end = '\0';
+    /* ignoring empty lines */
+    if (line[0] == '\0')
+      continue;
+
+    if (!strncmp(line, "name=", 5)) {
+      /* commit (or ignore) the previous entry */
+      if (name)
+        add_one_misc_object_from(topology, subtype, name, cpuset);
+      /* start a new entry */
+      free(subtype);
+      subtype = NULL;
+      free(name);
+      name = strdup(line+5);
+      hwloc_bitmap_zero(cpuset);
+
+    } else if (!strncmp(line, "cpuset=", 7)) {
+      hwloc_bitmap_sscanf(cpuset, line+7);
+
+    } else if (!strncmp(line, "subtype=", 8)) {
+      free(subtype);
+      subtype = strdup(line+8);
+
+    } else {
+      fprintf(stderr, "Unrecognized --misc-from line `%s', ignored\n", line);
+    }
+  }
+
+  /* commit (or ignore) the last entry */
+  if (name)
+    add_one_misc_object_from(topology, subtype, name, cpuset);
+  free(name);
+  free(subtype);
+  hwloc_bitmap_free(cpuset);
 }
 
 static __hwloc_inline void lstopo_update_factorize_bounds(unsigned min, unsigned *first, unsigned *last)
@@ -577,6 +649,7 @@ void usage(const char *name, FILE *where)
 		  "                        Set flags during the synthetic topology export\n");
   /* --shmem-output-addr is undocumented on purpose */
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
+  fprintf (where, "  --misc-from <file>    Create Misc objects as defined in <file>");
   fprintf (where, "  --version             Report version and exit\n");
   fprintf (where, "  -h --help             Show this usage\n");
 }
@@ -838,6 +911,7 @@ main (int argc, char *argv[])
 #endif
   char *env;
   int top = 0;
+  FILE * miscfrom = NULL;
   int opt;
   unsigned i;
 
@@ -1472,7 +1546,19 @@ main (int argc, char *argv[])
 	loutput.pid_number = atoi(argv[1]); opt = 1;
       } else if (!strcmp (argv[0], "--ps") || !strcmp (argv[0], "--top"))
         top = 1;
-      else if (!strcmp (argv[0], "--version")) {
+      else if (!strcmp (argv[0], "--misc-from")) {
+	if (argc < 2)
+	  goto out_usagefailure;
+        if (!strcmp(argv[1], "-"))
+          miscfrom = stdin;
+        else
+          miscfrom = fopen(argv[1], "r");
+        if (!miscfrom) {
+          fprintf(stderr, "Failed open --misc-from %s file for reading (%s)\n", argv[1], strerror(errno));
+          exit(EXIT_FAILURE);
+        }
+        opt = 1;
+      } else if (!strcmp (argv[0], "--version")) {
           printf("%s %s\n", callname, HWLOC_VERSION);
           exit(EXIT_SUCCESS);
       } else if (!strcmp (argv[0], "--output-format") || !strcmp (argv[0], "--of")) {
@@ -1815,6 +1901,8 @@ main (int argc, char *argv[])
 
   if (top)
     add_process_objects(topology);
+  if (miscfrom)
+    add_misc_objects_from(topology, miscfrom);
 
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
@@ -1900,5 +1988,7 @@ main (int argc, char *argv[])
   hwloc_bitmap_free(allow_nodeset);
   hwloc_bitmap_free(loutput.cpubind_set);
   hwloc_bitmap_free(loutput.membind_set);
+  if (miscfrom && miscfrom != stdin)
+    fclose(miscfrom);
   return EXIT_FAILURE;
 }
