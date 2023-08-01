@@ -492,6 +492,7 @@ _hwloc_ps(){
 		   --pid-cmd
 		   --short-name
 		   --disallowed --whole-system
+		   --lstopo-misc
 		   --json-server
 		   --json-port
 		   -v --verbose

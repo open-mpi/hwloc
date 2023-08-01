@@ -32,6 +32,8 @@ Version 2.10.0
   + Add --children-of-pid to hwloc-ps to show a hierarchy of processes.
     Thanks to Antoine Morvan for the suggestion.
   + Add --misc-from to lstopo to add Misc objects described in a file.
+    - To be combined with the new hwloc-ps --lstopo-misc for a customizable
+      lstopo --top replacement.
 * Misc
   + lstopo may now configure the layout of memory object placed above,
     for instance with --children-order memory:above:vert.
