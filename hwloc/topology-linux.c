@@ -6837,6 +6837,14 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
       hwloc_obj_add_info(obj, "CXLPMEMSize", tmp);
     }
   }
+
+  snprintf(path, sizeof(path), "%s/serial", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    char *end = strchr(tmp, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_obj_add_info(obj, "SerialNumber", tmp);
+  }
 }
 
 static int
