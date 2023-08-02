@@ -37,6 +37,7 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <mntent.h>
+#include <stddef.h>
 
 struct hwloc_linux_backend_data_s {
   char *root_path; /* NULL if unused */
@@ -6890,8 +6891,10 @@ struct hwloc_firmware_dmi_mem_device_header {
   unsigned char serial_str_num;
   unsigned char asset_tag_str_num;
   unsigned char part_num_str_num;
-  /* don't include the following fields since we don't need them,
-   * some old implementations may miss them.
+  /* Here is the end of SMBIOS 2.3 fields (27 bytes),
+   * those are required for hwloc.
+   * Anything below (SMBIOS 2.6+) is optional for hwloc,
+   * we must to check header->length before reading them.
    */
 };
 
@@ -7041,7 +7044,9 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
       fclose(fd);
       break;
     }
-    if (header.length < sizeof(header)) {
+
+    HWLOC_BUILD_ASSERT(offsetof(struct hwloc_firmware_dmi_mem_device_header, part_num_str_num) + sizeof(header.part_num_str_num) == 27);
+    if (header.length < 27) {
       /* invalid, or too old entry/spec that doesn't contain what we need */
       fclose(fd);
       break;
