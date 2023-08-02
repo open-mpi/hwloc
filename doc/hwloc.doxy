@@ -2118,7 +2118,7 @@ and SectorSize (in bytes).
 </dd>
 <dt>CXLRAMSize, CXLPMEMSize (CXL Memory OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
- in a CXL Type-3 device	     .
+ in a CXL Type-3 device.
  Sizes are in KiB (1024 bytes).
 </dd>
 <dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
