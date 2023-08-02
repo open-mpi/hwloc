@@ -1456,9 +1456,10 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
         }
       }
     }
+  } else {
+    hwloc_debug("x86 APIC IDs aren't unique, x86 discovery ignored.\n");
+    /* do nothing and return success, so that the caller does nothing either */
   }
-  /* if !data->apicid_unique, do nothing and return success, so that the caller does nothing either */
-
   return 0;
 }
 
