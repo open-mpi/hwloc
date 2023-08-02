@@ -679,7 +679,8 @@ unlink_and_free_object_and_children(hwloc_obj_t *pobj)
 void
 hwloc_free_object_and_children(hwloc_obj_t obj)
 {
-  unlink_and_free_object_and_children(&obj);
+  if (obj)
+    unlink_and_free_object_and_children(&obj);
 }
 
 /* Free an object, its next siblings and their children without unlinking from parent.
