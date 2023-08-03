@@ -6255,7 +6255,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
     unsigned long long value = strtoull(line, NULL, 10);
     /* linux always reports size in 512-byte units for blocks, we want kB */
-    snprintf(line, sizeof(line), "%llu", value / 2);
+    snprintf(line, sizeof(line), "%lluKiB", value / 2);
     hwloc_obj_add_info(obj, "Size", line);
   }
 
@@ -6465,7 +6465,7 @@ hwloc_linuxfs_dax_class_fillinfos(struct hwloc_backend *backend __hwloc_attribut
   if (hwloc_read_path_by_length(path, line, sizeof(line), root_fd) > 0) {
     unsigned long long value = strtoull(line, NULL, 10);
     /* linux always reports size in bytes for dax, we want kB */
-    snprintf(line, sizeof(line), "%llu", value >> 10);
+    snprintf(line, sizeof(line), "%lluKiB", value >> 10);
     hwloc_obj_add_info(obj, "Size", line);
   }
 
@@ -6825,13 +6825,19 @@ hwloc_linuxfs_ve_class_fillinfos(int root_fd,
 
   snprintf(path, sizeof(path), "%s/memory_size", osdevpath); /* in GB */
   if (!hwloc_read_path_as_uint(path, &val, root_fd)) {
-    snprintf(tmp, sizeof(tmp), "%llu", ((unsigned long long) val) * 1024*1024); /* convert from GB to kB */
+    snprintf(tmp, sizeof(tmp), "%lluKiB", ((unsigned long long) val) * 1024*1024); /* convert from GB to kB */
     hwloc_obj_add_info(obj, "VectorEngineMemorySize", tmp);
   }
   snprintf(path, sizeof(path), "%s/cache_llc", osdevpath); /* in kB */
   if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
     size_t len;
     len = strspn(tmp, "0123456789");
+    if (len < sizeof(tmp)-3) {
+      tmp[len] = 'K';
+      tmp[len+1] = 'i';
+      tmp[len+2] = 'B';
+      len += 3;
+    }
     tmp[len] = '\0';
     hwloc_obj_add_info(obj, "VectorEngineLLCSize", tmp);
   }
@@ -6839,6 +6845,12 @@ hwloc_linuxfs_ve_class_fillinfos(int root_fd,
   if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
     size_t len;
     len = strspn(tmp, "0123456789");
+    if (len < sizeof(tmp)-3) { /* shouldn't ever fail since sizeof = 64 */
+      tmp[len] = 'K';
+      tmp[len+1] = 'i';
+      tmp[len+2] = 'B';
+      len += 3;
+    }
     tmp[len] = '\0';
     hwloc_obj_add_info(obj, "VectorEngineL2Size", tmp);
   }
@@ -6846,6 +6858,12 @@ hwloc_linuxfs_ve_class_fillinfos(int root_fd,
   if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
     size_t len;
     len = strspn(tmp, "0123456789");
+    if (len < sizeof(tmp)-3) { /* shouldn't ever fail since sizeof = 64 */
+      tmp[len] = 'K';
+      tmp[len+1] = 'i';
+      tmp[len+2] = 'B';
+      len += 3;
+    }
     tmp[len] = '\0';
     hwloc_obj_add_info(obj, "VectorEngineL1dSize", tmp);
   }
@@ -6853,6 +6871,12 @@ hwloc_linuxfs_ve_class_fillinfos(int root_fd,
   if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
     size_t len;
     len = strspn(tmp, "0123456789");
+    if (len < sizeof(tmp)-3) { /* shouldn't ever fail since sizeof = 64 */
+      tmp[len] = 'K';
+      tmp[len+1] = 'i';
+      tmp[len+2] = 'B';
+      len += 3;
+    }
     tmp[len] = '\0';
     hwloc_obj_add_info(obj, "VectorEngineL1iSize", tmp);
   }
@@ -6997,7 +7021,7 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
   if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
     unsigned long long value = strtoull(tmp, NULL, 0);
     if (value)  {
-      snprintf(tmp, sizeof(tmp), "%llu", value / 1024);
+      snprintf(tmp, sizeof(tmp), "%lluKiB", value / 1024);
       hwloc_obj_add_info(obj, "CXLRAMSize", tmp);
     }
   }
@@ -7005,7 +7029,7 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
   if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
     unsigned long long value = strtoull(tmp, NULL, 0);
     if (value)  {
-      snprintf(tmp, sizeof(tmp), "%llu", value / 1024);
+      snprintf(tmp, sizeof(tmp), "%lluKiB", value / 1024);
       hwloc_obj_add_info(obj, "CXLPMEMSize", tmp);
     }
     obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
@@ -7189,7 +7213,7 @@ static int dmi_memory_device_size(char *buffer, size_t len,
     if (!(code & 0x8000)) /* MiB (otherwise KiB) */
       memory_size <<= 10;
   }
-  snprintf(buffer, len, "%llu", (unsigned long long) memory_size);
+  snprintf(buffer, len, "%lluKiB", (unsigned long long) memory_size);
   return 0;
 }
 

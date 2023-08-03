@@ -265,7 +265,7 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
           if (osdev != root_osdev) {
             /* set the subdevice memory immediately */
             snprintf(name, sizeof(name), "LevelZero%sSize", type);
-            snprintf(value, sizeof(value), "%llu", (unsigned long long) mprop.physicalSize >> 10);
+            snprintf(value, sizeof(value), "%lluKiB", (unsigned long long) mprop.physicalSize >> 10);
             hwloc_obj_add_info(osdev, name, value);
           }
         }
@@ -277,12 +277,12 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
   /* set the root device memory at the end, once subdevice memories were agregated */
   if (totalHBMkB) {
     char value[64];
-    snprintf(value, sizeof(value), "%llu", totalHBMkB);
+    snprintf(value, sizeof(value), "%lluKiB", totalHBMkB);
     hwloc_obj_add_info(root_osdev, "LevelZeroHBMSize", value);
   }
   if (totalDDRkB) {
     char value[64];
-    snprintf(value, sizeof(value), "%llu", totalDDRkB);
+    snprintf(value, sizeof(value), "%lluKiB", totalDDRkB);
     hwloc_obj_add_info(root_osdev, "LevelZeroDDRSize", value);
   }
 
@@ -325,7 +325,7 @@ hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
         if (!_name[0])
           _name = "Memory";
         snprintf(name, sizeof(name), "LevelZero%sSize", _name); /* HBM or DDR, or Memory if unknown */
-        snprintf(value, sizeof(value), "%llu", (unsigned long long) mh[m].totalSize >> 10);
+        snprintf(value, sizeof(value), "%lluKiB", (unsigned long long) mh[m].totalSize >> 10);
         hwloc_obj_add_info(osdev, name, value);
       }
     }

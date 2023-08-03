@@ -318,19 +318,19 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     ret = rsmi_dev_memory_total_get(i, RSMI_MEM_TYPE_VRAM, &memory);
     if (ret == RSMI_STATUS_SUCCESS) {
       char tmp[64];
-      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long)memory/1024);
+      snprintf(tmp, sizeof(tmp), "%lluKiB", (unsigned long long)memory/1024);
       hwloc_obj_add_info(osdev, "RSMIVRAMSize", tmp);
     }
     ret = rsmi_dev_memory_total_get(i, RSMI_MEM_TYPE_VIS_VRAM, &memory);
     if (ret == RSMI_STATUS_SUCCESS) {
       char tmp[64];
-      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long)memory/1024);
+      snprintf(tmp, sizeof(tmp), "%lluKiB", (unsigned long long)memory/1024);
       hwloc_obj_add_info(osdev, "RSMIVisibleVRAMSize", tmp);
     }
     ret = rsmi_dev_memory_total_get(i, RSMI_MEM_TYPE_GTT, &memory);
     if (ret == RSMI_STATUS_SUCCESS) {
       char tmp[64];
-      snprintf(tmp, sizeof(tmp), "%llu", (unsigned long long)memory/1024);
+      snprintf(tmp, sizeof(tmp), "%lluKiB", (unsigned long long)memory/1024);
       hwloc_obj_add_info(osdev, "RSMIGTTSize", tmp);
     }
     /* there's also rsmi_dev_memory_usage_get() to get what's currently used in these memories */

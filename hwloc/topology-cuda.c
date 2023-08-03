@@ -112,10 +112,10 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     if (!cures && prop.name[0] != '\0')
       hwloc_obj_add_info(cuda_device, "GPUModel", prop.name);
 
-    snprintf(number, sizeof(number), "%llu", ((unsigned long long) prop.totalGlobalMem) >> 10);
+    snprintf(number, sizeof(number), "%lluKiB", ((unsigned long long) prop.totalGlobalMem) >> 10);
     hwloc_obj_add_info(cuda_device, "CUDAGlobalMemorySize", number);
 
-    snprintf(number, sizeof(number), "%llu", ((unsigned long long) prop.l2CacheSize) >> 10);
+    snprintf(number, sizeof(number), "%lluKiB", ((unsigned long long) prop.l2CacheSize) >> 10);
     hwloc_obj_add_info(cuda_device, "CUDAL2CacheSize", number);
 
     snprintf(number, sizeof(number), "%d", prop.multiProcessorCount);
@@ -127,7 +127,7 @@ hwloc_cuda_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
       hwloc_obj_add_info(cuda_device, "CUDACoresPerMP", number);
     }
 
-    snprintf(number, sizeof(number), "%llu", ((unsigned long long) prop.sharedMemPerBlock) >> 10);
+    snprintf(number, sizeof(number), "%lluKiB", ((unsigned long long) prop.sharedMemPerBlock) >> 10);
     hwloc_obj_add_info(cuda_device, "CUDASharedMemorySizePerMP", number);
 
     parent = NULL;

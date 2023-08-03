@@ -169,7 +169,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
       hwloc_obj_add_info(osdev, "OpenCLComputeUnits", buffer);
 
       clGetDeviceInfo(device_ids[i], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(globalmemsize), &globalmemsize, NULL);
-      snprintf(buffer, sizeof(buffer), "%llu", (unsigned long long) globalmemsize / 1024);
+      snprintf(buffer, sizeof(buffer), "%lluKiB", (unsigned long long) globalmemsize / 1024);
       hwloc_obj_add_info(osdev, "OpenCLGlobalMemorySize", buffer);
 
       parent = NULL;
