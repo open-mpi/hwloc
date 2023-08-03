@@ -435,6 +435,7 @@ hwloc___xml_import_info(char **infonamep, char **infovaluep,
 
 static int
 hwloc__xml_import_obj_info(hwloc_topology_t topology,
+                           struct hwloc_xml_backend_data_s *data,
                            hwloc_obj_t obj,
                            hwloc__xml_import_state_t state)
 {
@@ -449,27 +450,31 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
   if (infoname) {
     /* empty strings are ignored by libxml */
     if (infovalue) {
-      if (!obj->parent && (
-            !strcmp(infoname, "Backend")
-            || !strcmp(infoname, "SyntheticDescription")
-            || !strcmp(infoname, "LinuxCgroup")
-            || !strcmp(infoname, "WindowsBuildEnvironment")
-            || !strcmp(infoname, "OSName")
-            || !strcmp(infoname, "OSRelease")
-            || !strcmp(infoname, "OSVersion")
-            || !strcmp(infoname, "HostName")
-            || !strcmp(infoname, "Architecture")
-            || !strcmp(infoname, "hwlocVersion")
-            || !strcmp(infoname, "ProcessName"))) {
-        /* topo infos were in root in v2 */
-        hwloc__add_info(&topology->infos, infoname, infovalue);
-      } else {
-        hwloc_obj_add_info(obj, infoname, infovalue);
+      if (data->version_major <= 2) {
+        /* v2 info tweaks */
+        if (!obj->parent) {
+          /* these v2 root infos must move to topo infos */
+          if (!strcmp(infoname, "Backend")
+              || !strcmp(infoname, "SyntheticDescription")
+              || !strcmp(infoname, "LinuxCgroup")
+              || !strcmp(infoname, "WindowsBuildEnvironment")
+              || !strcmp(infoname, "OSName")
+              || !strcmp(infoname, "OSRelease")
+              || !strcmp(infoname, "OSVersion")
+              || !strcmp(infoname, "HostName")
+              || !strcmp(infoname, "Architecture")
+              || !strcmp(infoname, "hwlocVersion")
+              || !strcmp(infoname, "ProcessName")) {
+            hwloc__add_info(&topology->infos, infoname, infovalue);
+            return 0;
+          }
+        }
       }
+      hwloc_obj_add_info(obj, infoname, infovalue);
     }
   }
 
-  return err;
+  return 0;
 }
 
 static int
@@ -717,7 +722,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       }
 
     } else if (!strcmp(tag, "info")) {
-      ret = hwloc__xml_import_obj_info(topology, obj, &childstate);
+      ret = hwloc__xml_import_obj_info(topology, data, obj, &childstate);
     } else if (!strcmp(tag, "userdata")) {
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
