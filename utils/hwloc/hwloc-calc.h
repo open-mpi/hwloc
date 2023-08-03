@@ -86,7 +86,7 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
   hwloc_obj_t obj = NULL;
   unsigned n = 0;
   while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
-    if (!hwloc_bitmap_isincluded(obj->cpuset, cpuset))
+    if (!hwloc_bitmap_iszero(obj->cpuset) && !hwloc_bitmap_intersects(obj->cpuset, cpuset))
       continue;
     if (!hwloc_bitmap_iszero(obj->nodeset) && !hwloc_bitmap_intersects(obj->nodeset, nodeset))
       continue;
@@ -115,7 +115,7 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
   hwloc_obj_t obj = NULL;
   unsigned i = 0;
   while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
-    if (!hwloc_bitmap_isincluded(obj->cpuset, cpuset))
+    if (!hwloc_bitmap_iszero(obj->cpuset) && !hwloc_bitmap_intersects(obj->cpuset, cpuset))
       continue;
     if (!hwloc_bitmap_iszero(obj->nodeset) && !hwloc_bitmap_intersects(obj->nodeset, nodeset))
       continue;
