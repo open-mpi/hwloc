@@ -445,6 +445,8 @@ HWLOC_DECLSPEC int hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t bi
 /** \brief Test whether bitmaps \p bitmap1 and \p bitmap2 intersects.
  *
  * \return 1 if bitmaps intersect, 0 otherwise.
+ *
+ * \note The empty bitmap does not intersect any other bitmap.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_intersects (hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) __hwloc_attribute_pure;
 
