@@ -181,6 +181,10 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" --ni 0x5 -I node --po
   echo
 
+  echo "# Search cores within single NUMA when they have multiple local NUMA nodes"
+  $calc --if synthetic --input "pack:2 [numa] [numa] core:4 pu:1" sock:1.numa:1.core:1-2
+  echo
+
   echo "# Physical output of NUMA Nodes when out-of-order in the topology"
   $calc --if synthetic --input "node:4(indexes=3,2,1,0) pu:2" node:1-2 --po -I node
   echo

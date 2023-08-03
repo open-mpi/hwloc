@@ -130,6 +130,9 @@ PU:22_PU:23_Core:6_Core:7_Group0:2
 # Converting NUMA Nodes from logical to physical
 0,2
 
+# Search cores within single NUMA when they have multiple local NUMA nodes
+0x00000060
+
 # Physical output of NUMA Nodes when out-of-order in the topology
 2,1
 
