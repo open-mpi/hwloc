@@ -946,8 +946,8 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 }
 
 static int
-hwloc__xml_v2import_support(hwloc_topology_t topology,
-                            hwloc__xml_import_state_t state)
+hwloc__xml_import_support(hwloc_topology_t topology,
+                          hwloc__xml_import_state_t state)
 {
   char *name = NULL;
   int value = 1; /* value is optional */
@@ -1020,9 +1020,9 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
 }
 
 static int
-hwloc__xml_v2import_distances(hwloc_topology_t topology,
-			      hwloc__xml_import_state_t state,
-			      int heterotypes)
+hwloc__xml_import_distances(hwloc_topology_t topology,
+                            hwloc__xml_import_state_t state,
+                            int heterotypes)
 {
   hwloc_obj_type_t unique_type = HWLOC_OBJ_TYPE_NONE;
   hwloc_obj_type_t *different_types = NULL;
@@ -1776,15 +1776,15 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       if (!ret)
 	break;
       if (!strcmp(tag, "distances2")) {
-	ret = hwloc__xml_v2import_distances(topology, &childstate, 0);
+	ret = hwloc__xml_import_distances(topology, &childstate, 0);
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "distances2hetero")) {
-	ret = hwloc__xml_v2import_distances(topology, &childstate, 1);
+	ret = hwloc__xml_import_distances(topology, &childstate, 1);
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "support")) {
-	ret = hwloc__xml_v2import_support(topology, &childstate);
+	ret = hwloc__xml_import_support(topology, &childstate);
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "memattr")) {
