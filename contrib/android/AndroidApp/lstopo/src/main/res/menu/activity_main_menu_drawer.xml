@@ -23,7 +23,7 @@
                     android:id="@+id/activity_main_drawer_MyPhone"
                     android:title="My Phone" />
                  <item
-                    android:id="@+id/activity_main_drawer_API"
+                    android:id="@+id/activity_main_drawer_database"
                     android:title="Platforms database" />
                 <item
                     android:id="@+id/activity_main_drawer_LocalXML"
