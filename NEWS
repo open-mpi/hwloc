@@ -31,6 +31,8 @@ Version 2.10.0
     of Core Complex and Die on Zen4 processors.
   + Improve Zhaoxin topology detection in the x86 backend.
 * Tools
+  + Add --object-output to hwloc-calc to report the type as a prefix to
+    object indexes, e.g. Core:2 instead of 2 in the output of -I.
   + Add --children-of-pid to hwloc-ps to show a hierarchy of processes.
     Thanks to Antoine Morvan for the suggestion.
   + Add --misc-from to lstopo to add Misc objects described in a file.

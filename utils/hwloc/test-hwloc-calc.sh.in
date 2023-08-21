@@ -128,7 +128,7 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" core:4-7 -I NUMANode
   echo
   echo "# List of NUMA Nodes in a range of Cores (again)"
-  $calc --if synthetic --input "node:4 core:4 pu:4" core:10-15 -I NUMANode
+  $calc --if synthetic --input "node:4 core:4 pu:4" core:10-15 -I NUMANode --oo
   echo
 
   echo "# Hierarchical spec for a range of PUs"
@@ -199,10 +199,10 @@ set -e
   $calc --if synthetic --input "[numa] pack:2 [numa] die:2 [numa] pu:2" --local-memory package:1
   echo
   echo "# 2 local nodes larger or equal to a Package (node:2@Package + node:6@Machine), with space separator"
-  $calc --if synthetic --input "[numa] pack:2 [numa] die:2 [numa] pu:2" --local-memory-flags 1 --sep " " pack:0
+  $calc --if synthetic --input "[numa] pack:2 [numa] die:2 [numa] pu:2" --local-memory-flags 1 --sep " " pack:0 --oo
   echo
   echo "# Best-locality local node near a PU (node:1@Die)"
-  $calc --if synthetic --input "[numa] pack:2 [numa] die:2 [numa] pu:2" --best-memattr locality pu:3
+  $calc --if synthetic --input "[numa] pack:2 [numa] die:2 [numa] pu:2" --best-memattr locality pu:3 --oo
   echo
   echo "# Best-capacity local node near a PU (node:6@Machine)"
   $calc --if synthetic --input "[numa(memory=1000000)] pack:2 [numa(memory=100000)] die:2 [numa(memory=1000)] pu:2" --best-memattr capacity pu:4
