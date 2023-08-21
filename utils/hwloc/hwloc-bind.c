@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -374,6 +374,11 @@ int main(int argc, char *argv[])
     /* doesn't work because get_binding/get_last_cpu_location overwrites cpubind_set */
     fprintf(stderr, "Cannot display and set binding at the same time.\n");
     return EXIT_FAILURE;
+  }
+
+  if (!got_cpubind && !got_membind && !get_binding && !get_last_cpu_location) {
+    if (verbose >= 0)
+      fprintf(stderr, "got neither CPU nor memory binding locations.\n");
   }
 
   if (get_binding || get_last_cpu_location) {
