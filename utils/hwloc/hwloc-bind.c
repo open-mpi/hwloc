@@ -337,8 +337,7 @@ int main(int argc, char *argv[])
     scontext.output_set = working_on_cpubind ? cpubind_set : membind_set;
     ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, location);
     if (ret < 0) {
-      if (verbose > 0)
-	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
+      fprintf(stderr, "argument `%s' unrecognized, assuming this is the executable.\n", argv[0]);
       break;
     }
     if (working_on_cpubind)
