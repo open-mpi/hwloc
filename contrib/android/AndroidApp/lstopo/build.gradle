@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.hwloc.lstopo"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 33
         // Increase versionCode whenever you publish a new Android release
         versionCode 264
         // Official hwloc version - snapshot number - android apk version
