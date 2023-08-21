@@ -33,14 +33,14 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   hwloc_utils_input_format_usage(where, 10);
   fprintf(where, "Conversion options:\n");
   fprintf(where, "  [default]                 Report the combined input locations as a CPU set\n");
-  fprintf(where, "  --number-of <type|depth>\n"
-                 "  -N <type|depth>           Report the number of objects intersecting the CPU set\n");
-  fprintf(where, "  --intersect <type|depth>\n"
-		 "  -I <type|depth>           Report the indexes of object intersecting the CPU set\n");
-  fprintf(where, "  --hierarchical <type1>.<type2>...\n"
-		 "  -H <type1>.<type2>...     Find the list of objects intersecting the CPU set and\n"
-		 "                            display them as hierarchical combinations such as\n"
-		 "                            type1:index1.type2:index2...\n");
+  fprintf(where, "  --number-of <type|depth>\n");
+  fprintf(where, "  -N <type|depth>           Report the number of objects intersecting the CPU set\n");
+  fprintf(where, "  --intersect <type|depth>\n");
+  fprintf(where, "  -I <type|depth>           Report the indexes of object intersecting the CPU set\n");
+  fprintf(where, "  --hierarchical <type1>.<type2>...\n");
+  fprintf(where, "  -H <type1>.<type2>...     Find the list of objects intersecting the CPU set and\n");
+  fprintf(where, "                            display them as hierarchical combinations such as\n");
+  fprintf(where, "                            type1:index1.type2:index2...\n");
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
   fprintf(where, "  --local-memory            Report the memory nodes that are local to the CPU set\n");
   fprintf(where, "  --local-memory flags <x>  Change flags for selecting local memory nodes\n");
@@ -211,7 +211,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
           && intersectattr.osdev.type != obj->attr->osdev.type)
         continue;
       if (!first)
-	printf("%s", sep);
+        printf("%s", sep);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned)-1)
         printf("-1");
@@ -361,31 +361,13 @@ int main(int argc, char *argv[])
   while (argc >= 1) {
     opt = 0;
 
-    if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
-      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
+    /* Topology */
+    if (!strcmp (argv[0], "--no-smt")) {
+      no_smt = 0;
       goto next_config;
     }
-    if (!strcmp (argv[0], "--restrict")) {
-      if (argc < 2) {
-	usage (callname, stderr);
-	exit(EXIT_FAILURE);
-      }
-      if(strncmp(argv[1], "nodeset=", 7))
-        restrictstring = strdup(argv[1]);
-      else {
-        restrictstring = strdup(argv[1]+8);
-        restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
-      }
-      opt = 1;
-      goto next_config;
-    }
-    if (!strcmp (argv[0], "--restrict-flags")) {
-      if (argc < 2) {
-	usage (callname, stderr);
-	exit(EXIT_FAILURE);
-      }
-      restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
-      opt = 1;
+    if (!strncmp(argv[0], "--no-smt=", 9)) {
+      no_smt = atoi(argv[0] + 9);
       goto next_config;
     }
     if (!strcmp(argv[0], "--cpukind")) {
@@ -406,6 +388,33 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
       }
       opt = 1;
+      goto next_config;
+    }
+    if (!strcmp (argv[0], "--restrict")) {
+      if (argc < 2) {
+        usage (callname, stderr);
+        exit(EXIT_FAILURE);
+      }
+      if(strncmp(argv[1], "nodeset=", 7))
+        restrictstring = strdup(argv[1]);
+      else {
+        restrictstring = strdup(argv[1]+8);
+        restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
+      }
+      opt = 1;
+      goto next_config;
+    }
+    if (!strcmp (argv[0], "--restrict-flags")) {
+      if (argc < 2) {
+        usage (callname, stderr);
+        exit(EXIT_FAILURE);
+      }
+      restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
+      opt = 1;
+      goto next_config;
+    }
+    if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+      flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
       goto next_config;
     }
     if (hwloc_utils_lookup_input_option(argv, argc, &opt,
@@ -479,56 +488,37 @@ int main(int argc, char *argv[])
     opt = 0;
 
     if (*argv[0] == '-') {
-      if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
-        usage(callname, stdout);
-        exit(EXIT_SUCCESS);
-      }
-      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
-        verbose++;
-        goto next;
-      }
-      if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
-        verbose--;
-        goto next;
-      }
-      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
-        fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
-	exit(EXIT_FAILURE);
-      }
-      if (!strcmp (argv[0], "--no-smt")) {
-	no_smt = 0;
-	goto next;
-      }
-      if (!strncmp(argv[0], "--no-smt=", 9)) {
-	no_smt = atoi(argv[0] + 9);
-	goto next;
-      }
+      /* Conversion options */
       if (!strcmp(argv[0], "--number-of") || !strcmp(argv[0], "-N")) {
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  return EXIT_FAILURE;
-	}
-	numberoftype = argv[1];
-	opt = 1;
-	goto next;
+        if (argc < 2) {
+          usage(callname, stderr);
+          return EXIT_FAILURE;
+        }
+        numberoftype = argv[1];
+        opt = 1;
+        goto next;
       }
       if (!strcmp(argv[0], "--intersect") || !strcmp(argv[0], "-I")) {
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  return EXIT_FAILURE;
-	}
-	intersecttype = argv[1];
-	opt = 1;
-	goto next;
+        if (argc < 2) {
+          usage(callname, stderr);
+          return EXIT_FAILURE;
+        }
+        intersecttype = argv[1];
+        opt = 1;
+        goto next;
       }
       if (!strcmp(argv[0], "--hierarchical") || !strcmp(argv[0], "-H")) {
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  return EXIT_FAILURE;
-	}
-	hiertype = argv[1];
-	opt = 1;
-	goto next;
+        if (argc < 2) {
+          usage(callname, stderr);
+          return EXIT_FAILURE;
+        }
+        hiertype = argv[1];
+        opt = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--largest")) {
+        showobjs = 1;
+        goto next;
       }
       if (!strcmp(argv[0], "--local-memory")) {
         local_numanodes = 1;
@@ -554,71 +544,86 @@ int main(int argc, char *argv[])
         opt = 1;
         goto next;
       }
-      if (!strcmp(argv[0], "--largest")) {
-	showobjs = 1;
+      /* Formatting options */
+      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
+        logicali = 1;
+        logicalo = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--li") || !strcmp(argv[0], "--logical-input")) {
+        logicali = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--lo") || !strcmp(argv[0], "--logical-output")) {
+        logicalo = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
+        logicali = 0;
+        logicalo = 0;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--pi") || !strcmp(argv[0], "--physical-input")) {
+        logicali = 0;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--po") || !strcmp(argv[0], "--physical-output")) {
+        logicalo = 0;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-n") || !strcmp(argv[0], "--nodeset")) {
+        nodeseti = 1;
+        nodeseto = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--ni") || !strcmp(argv[0], "--nodeset-input")) {
+        nodeseti = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--no") || !strcmp(argv[0], "--nodeset-output")) {
+        nodeseto = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--sep")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        outsep = argv[1];
+        opt = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--taskset")) {
+        taskset = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--single")) {
+        singlify = 1;
+        goto next;
+      }
+      /* Misc */
+      if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
+        verbose--;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
+        verbose++;
         goto next;
       }
       if (!strcmp(argv[0], "--version")) {
         printf("%s %s\n", callname, HWLOC_VERSION);
         exit(EXIT_SUCCESS);
       }
-      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
-	logicali = 1;
-	logicalo = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--li") || !strcmp(argv[0], "--logical-input")) {
-	logicali = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--lo") || !strcmp(argv[0], "--logical-output")) {
-	logicalo = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
-	logicali = 0;
-	logicalo = 0;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--pi") || !strcmp(argv[0], "--physical-input")) {
-	logicali = 0;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--po") || !strcmp(argv[0], "--physical-output")) {
-	logicalo = 0;
-	goto next;
-      }
-      if (!strcmp(argv[0], "-n") || !strcmp(argv[0], "--nodeset")) {
-	nodeseti = 1;
-	nodeseto = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--ni") || !strcmp(argv[0], "--nodeset-input")) {
-	nodeseti = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--no") || !strcmp(argv[0], "--nodeset-output")) {
-	nodeseto = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--sep")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	outsep = argv[1];
-	opt = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--single")) {
-	singlify = 1;
-	goto next;
-      }
-      if (!strcmp(argv[0], "--taskset")) {
-	taskset = 1;
-	goto next;
+      if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
+        usage(callname, stdout);
+        exit(EXIT_SUCCESS);
       }
 
+      /* Errors */
+      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+        fprintf(stderr, "Input option %s disallowed after options using the topology\n", argv[0]);
+        exit(EXIT_FAILURE);
+      }
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(callname, stderr);
       return EXIT_FAILURE;
@@ -660,7 +665,7 @@ int main(int argc, char *argv[])
     while (1) {
       tmp = strchr(tmp, '.');
       if (!tmp)
-	break;
+        break;
       tmp++;
       hiernblevels++;
     }
@@ -669,12 +674,12 @@ int main(int argc, char *argv[])
     for(i=0; i<hiernblevels; i++) {
       next = strchr(tmp, '.');
       if (next)
-	*next = '\0';
+        *next = '\0';
       if (hwloc_calc_type_depth(topology, tmp, &hierdepth[i], NULL, "--hierarchical") < 0)
-	goto out;
+        goto out;
       if (hierdepth[i] < 0 && hierdepth[i] != HWLOC_TYPE_DEPTH_NUMANODE) {
-	fprintf(stderr, "unsupported (non-normal) --hierarchical type %s\n", tmp);
-	goto out;
+        fprintf(stderr, "unsupported (non-normal) --hierarchical type %s\n", tmp);
+        goto out;
       }
       tmp = next+1;
     }
@@ -708,38 +713,38 @@ int main(int argc, char *argv[])
       /* keep reading until we get EOL */
       tmpline = line;
       while (!strchr(tmpline, '\n')) {
-	char *tmp;
-	tmp = realloc(line, len*2);
-	if (!tmp) {
-	  /* failed to allocate, ignore that line */
-	  fprintf(stderr, "Failed to allocate line buffer, line ignored.\n");
-	  free(line);
-	  goto out;
-	}
-	line = tmp;
-	tmpline = line + len-1;
-	if (!fgets(tmpline, (int)(len+1), stdin))
-	  break;
-	len *= 2;
+        char *tmp;
+        tmp = realloc(line, len*2);
+        if (!tmp) {
+          /* failed to allocate, ignore that line */
+          fprintf(stderr, "Failed to allocate line buffer, line ignored.\n");
+          free(line);
+          goto out;
+        }
+        line = tmp;
+        tmpline = line + len-1;
+        if (!fgets(tmpline, (int)(len+1), stdin))
+          break;
+        len *= 2;
       }
       /* parse now that we got everything */
       current = line;
       hwloc_bitmap_zero(set);
       while (1) {
-	char *token = strtok(current, " \n");
-	if (!token)
-	  break;
-	current = NULL;
-	lcontext.topology = topology;
-	lcontext.topodepth = depth;
-	lcontext.only_hbm = -1;
-	lcontext.logical = logicali;
-	lcontext.verbose = verbose;
-	scontext.output_set = set;
-	scontext.nodeset_input = nodeseti;
-	scontext.nodeset_output = nodeseto;
-	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
-	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
+        char *token = strtok(current, " \n");
+        if (!token)
+          break;
+        current = NULL;
+        lcontext.topology = topology;
+        lcontext.topodepth = depth;
+        lcontext.only_hbm = -1;
+        lcontext.logical = logicali;
+        lcontext.verbose = verbose;
+        scontext.output_set = set;
+        scontext.nodeset_input = nodeseti;
+        scontext.nodeset_output = nodeseto;
+        if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
+          fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }
       hwloc_calc_output(topology, outsep, set);
     }

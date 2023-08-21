@@ -38,10 +38,10 @@ hwloc_utils_check_api_version(const char *callname)
   unsigned version = hwloc_get_api_version();
   if ((version >> 16) != (HWLOC_API_VERSION >> 16)) {
     fprintf(stderr,
-	    "%s compiled for hwloc API 0x%x but running on library API 0x%x.\n"
-	    "You may need to point LD_LIBRARY_PATH to the right hwloc library.\n"
-	    "Aborting since the new ABI is not backward compatible.\n",
-	    callname, (unsigned) HWLOC_API_VERSION, version);
+            "%s compiled for hwloc API 0x%x but running on library API 0x%x.\n"
+            "You may need to point LD_LIBRARY_PATH to the right hwloc library.\n"
+            "Aborting since the new ABI is not backward compatible.\n",
+            callname, (unsigned) HWLOC_API_VERSION, version);
     exit(EXIT_FAILURE);
   }
 }
@@ -51,35 +51,35 @@ hwloc_utils_input_format_usage(FILE *where, int addspaces)
 {
   fprintf (where, "  --input <XML file>\n");
   fprintf (where, "  -i <XML file>   %*sRead topology from XML file <path>\n",
-	   addspaces, " ");
+           addspaces, " ");
 #ifdef HWLOC_LINUX_SYS
   fprintf (where, "  --input <directory>\n");
   fprintf (where, "  -i <directory>  %*sRead topology from chroot containing the /proc and /sys\n",
-	   addspaces, " ");
+           addspaces, " ");
   fprintf (where, "                  %*sof another system\n",
-	   addspaces, " ");
+           addspaces, " ");
 #endif
 #ifdef HWLOC_HAVE_X86_CPUID
   fprintf (where, "  --input <directory>\n");
   fprintf (where, "  -i <directory>  %*sRead topology from directory containing a CPUID dump\n",
-	   addspaces, " ");
+           addspaces, " ");
 #endif
   fprintf (where, "  --input \"node:2 2\"\n");
   fprintf (where, "  -i \"node:2 2\"   %*sSimulate a fake hierarchy, here with 2 NUMA nodes of 2\n",
-	   addspaces, " ");
+           addspaces, " ");
   fprintf (where, "                  %*sprocessors\n",
-	   addspaces, " ");
+           addspaces, " ");
   fprintf (where, "  --input-format <format>\n");
   fprintf (where, "  --if <format>   %*sEnforce input format among "
-	   "xml, "
+           "xml, "
 #ifdef HWLOC_LINUX_SYS
-	   "fsroot, "
+           "fsroot, "
 #endif
 #ifdef HWLOC_HAVE_X86_CPUID
-	   "cpuid, "
+           "cpuid, "
 #endif
-	   "synthetic\n",
-	   addspaces, " ");
+           "synthetic\n",
+           addspaces, " ");
 }
 
 struct hwloc_utils_input_format_s {
@@ -121,11 +121,11 @@ hwloc_utils_parse_input_format(const char *name, const char *callname)
 
 static __hwloc_inline int
 hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
-				char **inputp, struct hwloc_utils_input_format_s *input_formatp,
-				const char *callname)
+                                char **inputp, struct hwloc_utils_input_format_s *input_formatp,
+                                const char *callname)
 {
   if (!strcmp (argv[0], "--input")
-	       || !strcmp (argv[0], "-i")) {
+      || !strcmp (argv[0], "-i")) {
     if (argc <= 1) {
       usage (callname, stderr);
       exit(EXIT_FAILURE);
@@ -138,7 +138,7 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
     return 1;
   }
   else if (!strcmp (argv[0], "--input-format")
-	   || !strcmp (argv[0], "--if")) {
+           || !strcmp (argv[0], "--if")) {
     if (argc <= 1) {
       usage (callname, stderr);
       exit(EXIT_FAILURE);
@@ -167,13 +167,13 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
     size_t len = strlen(input);
     if (len >= 6 && !strcmp(input+len-6, ".shmem")) {
       if (verbose > 0)
-	printf("assuming `%s' is a shmem topology file\n", input);
+        printf("assuming `%s' is a shmem topology file\n", input);
       return HWLOC_UTILS_INPUT_SHMEM;
     }
     if ((len >= 7 && !strcmp(input+len-7, ".tar.gz"))
         || (len >= 8 && !strcmp(input+len-8, ".tar.bz2"))) {
       if (verbose > 0)
-	printf("assuming `%s' is an archive topology file\n", input);
+        printf("assuming `%s' is an archive topology file\n", input);
       return HWLOC_UTILS_INPUT_ARCHIVE;
     }
     if (verbose > 0)
@@ -187,17 +187,17 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
     if (childpath) {
       snprintf(childpath, strlen(input) + 10, "%s/pu0", input);
       if (stat(childpath, &childst) == 0 && S_ISREG(childst.st_mode)) {
-	if (verbose > 0)
-	  printf("assuming `%s' is a cpuid dump\n", input);
-	free(childpath);
-	return HWLOC_UTILS_INPUT_CPUID;
+        if (verbose > 0)
+          printf("assuming `%s' is a cpuid dump\n", input);
+        free(childpath);
+        return HWLOC_UTILS_INPUT_CPUID;
       }
       snprintf(childpath, strlen(input) + 10, "%s/proc", input);
       if (stat(childpath, &childst) == 0 && S_ISDIR(childst.st_mode)) {
-	if (verbose > 0)
-	  printf("assuming `%s' is a file-system root\n", input);
-	free(childpath);
-	return HWLOC_UTILS_INPUT_FSROOT;
+        if (verbose > 0)
+          printf("assuming `%s' is a file-system root\n", input);
+        free(childpath);
+        return HWLOC_UTILS_INPUT_FSROOT;
       }
     }
     free(childpath);
@@ -208,9 +208,9 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
 
 static __hwloc_inline int
 hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long flags,
-				const char *input,
-				struct hwloc_utils_input_format_s *input_formatp,
-				int verbose, const char *callname)
+                                const char *input,
+                                struct hwloc_utils_input_format_s *input_formatp,
+                                int verbose, const char *callname)
 {
   enum hwloc_utils_input_format *input_format = &input_formatp->format;
   if (*input_format == HWLOC_UTILS_INPUT_DEFAULT && !strcmp(input, "-.xml")) {
@@ -492,7 +492,7 @@ hwloc_pid_from_number(hwloc_pid_t *pidp, int pid_number, int set_info __hwloc_at
       DWORD error = GetLastError();
       char *message;
       FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		    NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (char *)&message, 0, NULL);
+                    NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (char *)&message, 0, NULL);
       fprintf(stderr, "OpenProcess %d failed %lu: %s\n", pid_number, (unsigned long) error, message);
     }
     return -1;
@@ -529,8 +529,8 @@ hwloc_lstopo_show_summary_depth(FILE *output, size_t prefixmaxlen, hwloc_topolog
     }
 
     fprintf(output, "%*s%u %s (type #%d)\n",
-	    (int)(prefixmaxlen-prefixlen), "",
-	    nbobjs, types, (int) type);
+            (int)(prefixmaxlen-prefixlen), "",
+            nbobjs, types, (int) type);
   }
 }
 

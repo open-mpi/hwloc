@@ -47,13 +47,7 @@ int main(int argc, char *argv[])
 
     argv++; argc--;
     while (argc) {
-      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
-        usage(callname, stdout);
-        exit(EXIT_SUCCESS);
-      } else if (!strcmp (argv[0], "--version")) {
-        printf("%s %s\n", callname, HWLOC_VERSION);
-        exit(EXIT_SUCCESS);
-      } else if (!strcmp(argv[0], "-o")) {
+      if (!strcmp(argv[0], "-o")) {
         if (argc == 1) {
           fprintf(stderr, "Missing output directory name.\n");
           usage(callname, stderr);
@@ -62,7 +56,17 @@ int main(int argc, char *argv[])
         dirname = argv[1];
         argc -= 2;
         argv += 2;
-      } else {
+      }
+      /* Misc */
+      else if (!strcmp (argv[0], "--version")) {
+        printf("%s %s\n", callname, HWLOC_VERSION);
+        exit(EXIT_SUCCESS);
+      } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
+        usage(callname, stdout);
+        exit(EXIT_SUCCESS);
+      }
+      /* Errors */
+      else {
         fprintf(stderr, "Unknown option: %s\n", argv[0]);
         usage(callname, stderr);
         exit(EXIT_FAILURE);

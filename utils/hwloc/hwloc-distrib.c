@@ -87,104 +87,109 @@ int main(int argc, char *argv[])
     opt = 0;
 
     if (*argv[0] == '-') {
-      if (!strcmp(argv[0], "--single")) {
-	singlify = 1;
-	goto next;
+      /* Distribution options */
+      if (!strcmp (argv[0], "--ignore")) {
+        hwloc_obj_type_t type;
+        if (argc < 2) {
+          usage(callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0)
+          fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
+        else
+          hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
+        opt = 1;
+        goto next;
       }
-      if (!strcmp(argv[0], "--taskset")) {
-	taskset = 1;
-	goto next;
+      if (!strcmp (argv[0], "--from")) {
+        if (argc < 2) {
+          usage(callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        from_type = argv[1];
+        opt = 1;
+        goto next;
       }
-      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
-	verbose = 1;
-	goto next;
+      if (!strcmp (argv[0], "--to")) {
+        if (argc < 2) {
+          usage(callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        to_type = argv[1];
+        opt = 1;
+        goto next;
       }
-      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
-	flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
-	goto next;
+      if (!strcmp (argv[0], "--at")) {
+        if (argc < 2) {
+          usage(callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        from_type = to_type = argv[1];
+        opt = 1;
+        goto next;
       }
-      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
-	usage(callname, stdout);
-	return EXIT_SUCCESS;
+      if (!strcmp (argv[0], "--reverse")) {
+        dflags |= HWLOC_DISTRIB_FLAG_REVERSE;
+        goto next;
       }
-      if (hwloc_utils_lookup_input_option(argv, argc, &opt,
-					  &input, &input_format,
-					  callname)) {
-	opt = 1;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--ignore")) {
-	hwloc_obj_type_t type;
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	if (hwloc_type_sscanf(argv[1], &type, NULL, 0) < 0)
-	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
-	else
-	  hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
-	opt = 1;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--from")) {
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	from_type = argv[1];
-	opt = 1;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--to")) {
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	to_type = argv[1];
-	opt = 1;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--at")) {
-	if (argc < 2) {
-	  usage(callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	from_type = to_type = argv[1];
-	opt = 1;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--reverse")) {
-	dflags |= HWLOC_DISTRIB_FLAG_REVERSE;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--restrict")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
+      /* Input topology options */
+      if (!strcmp (argv[0], "--restrict")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
         if(strncmp(argv[1], "nodeset=", 8)) {
           restrictstring = strdup(argv[1]);
         } else {
           restrictstring = strdup(argv[1]+8);
           restrict_flags |= HWLOC_RESTRICT_FLAG_BYNODESET;
         }
-	opt = 1;
-	goto next;
-      }
-      else if (!strcmp (argv[0], "--restrict-flags")) {
-	if (argc < 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-        }
-	restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
         opt = 1;
-	goto next;
+        goto next;
       }
-      else if (!strcmp (argv[0], "--version")) {
-          printf("%s %s\n", callname, HWLOC_VERSION);
-          exit(EXIT_SUCCESS);
+      if (!strcmp (argv[0], "--restrict-flags")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        restrict_flags = hwloc_utils_parse_restrict_flags(argv[1]);
+        opt = 1;
+        goto next;
+      }
+      if (!strcmp (argv[0], "--disallowed") || !strcmp (argv[0], "--whole-system")) {
+        flags |= HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED;
+        goto next;
+      }
+      if (hwloc_utils_lookup_input_option(argv, argc, &opt,
+            &input, &input_format,
+            callname)) {
+        opt = 1;
+        goto next;
+      }
+      /* Formatting options */
+      if (!strcmp(argv[0], "--single")) {
+        singlify = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "--taskset")) {
+        taskset = 1;
+        goto next;
+      }
+      /* Misc */
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
+        verbose = 1;
+        goto next;
+      }
+      if (!strcmp (argv[0], "--version")) {
+        printf("%s %s\n", callname, HWLOC_VERSION);
+        exit(EXIT_SUCCESS);
+      }
+      if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
+        usage(callname, stdout);
+        return EXIT_SUCCESS;
       }
 
+      /* Errors */
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(callname, stderr);
       return EXIT_FAILURE;
@@ -222,8 +227,8 @@ int main(int argc, char *argv[])
     if (input) {
       err = hwloc_utils_enable_input_format(topology, flags, input, &input_format, verbose, callname);
       if (err) {
-	free(cpuset);
-	return EXIT_FAILURE;
+        free(cpuset);
+        return EXIT_FAILURE;
       }
     }
     hwloc_topology_set_flags(topology, flags);
@@ -242,8 +247,8 @@ int main(int argc, char *argv[])
       hwloc_bitmap_sscanf(restrictset, restrictstring);
       err = hwloc_topology_restrict (topology, restrictset, restrict_flags);
       if (err) {
-	perror("Restricting the topology");
-	/* FALLTHRU */
+        perror("Restricting the topology");
+        /* FALLTHRU */
       }
       hwloc_bitmap_free(restrictset);
       free(restrictstring);
@@ -255,8 +260,8 @@ int main(int argc, char *argv[])
       union hwloc_obj_attr_u attr;
       if (hwloc_type_sscanf(from_type, &type, &attr, sizeof(attr)) < 0
           || (from_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr))) < 0) {
-	fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", from_type);
-	return EXIT_FAILURE;
+        fprintf(stderr, "Unsupported or unavailable type `%s' passed to --from, ignoring.\n", from_type);
+        return EXIT_FAILURE;
       }
     }
 
@@ -266,7 +271,7 @@ int main(int argc, char *argv[])
       union hwloc_obj_attr_u attr;
       if (hwloc_type_sscanf(to_type, &type, &attr, sizeof(attr)) < 0
           || (to_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr))) < 0) {
-	return EXIT_FAILURE;
+        return EXIT_FAILURE;
       }
     }
 
@@ -282,22 +287,22 @@ int main(int argc, char *argv[])
       hwloc_distrib(topology, roots, chunks, cpuset, n, to_depth, dflags);
 
       for (i = 0; (long) i < n; i++) {
-	char *str = NULL;
-	if (singlify) {
-	  if (dflags & HWLOC_DISTRIB_FLAG_REVERSE) {
-	    unsigned last = hwloc_bitmap_last(cpuset[i]);
-	    hwloc_bitmap_only(cpuset[i], last);
-	  } else {
-	    hwloc_bitmap_singlify(cpuset[i]);
-	  }
-	}
-	if (taskset)
-	  hwloc_bitmap_taskset_asprintf(&str, cpuset[i]);
-	else
-	  hwloc_bitmap_asprintf(&str, cpuset[i]);
-	printf("%s\n", str);
-	free(str);
-	hwloc_bitmap_free(cpuset[i]);
+        char *str = NULL;
+        if (singlify) {
+          if (dflags & HWLOC_DISTRIB_FLAG_REVERSE) {
+            unsigned last = hwloc_bitmap_last(cpuset[i]);
+            hwloc_bitmap_only(cpuset[i], last);
+          } else {
+            hwloc_bitmap_singlify(cpuset[i]);
+          }
+        }
+        if (taskset)
+          hwloc_bitmap_taskset_asprintf(&str, cpuset[i]);
+        else
+          hwloc_bitmap_asprintf(&str, cpuset[i]);
+        printf("%s\n", str);
+        free(str);
+        hwloc_bitmap_free(cpuset[i]);
       }
 
       free(roots);

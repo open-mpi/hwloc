@@ -594,13 +594,17 @@ int main(int argc, const char * const argv[])
       verbose--;
       argc--;
       argv++;
-    } else if (!strcmp (argv[0], "--version")) {
+    }
+    /* Misc */
+    else if (!strcmp (argv[0], "--version")) {
       printf("%s %s\n", callname, HWLOC_VERSION);
       exit(EXIT_SUCCESS);
     } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
       usage(callname, stdout);
       goto out;
-    } else {
+    }
+    /* Errors */
+    else {
       usage(callname, stderr);
       ret = EXIT_FAILURE;
       goto out;
@@ -646,9 +650,9 @@ int main(int argc, const char * const argv[])
     err = mkdir(basedir, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
     if (err < 0) {
       if (access(basedir, X_OK|W_OK) < 0) {
-	fprintf(stderr, "Could not create/open destination directory %s\n", basedir);
-	ret = EXIT_FAILURE;
-	goto out_with_topo;
+        fprintf(stderr, "Could not create/open destination directory %s\n", basedir);
+        ret = EXIT_FAILURE;
+        goto out_with_topo;
       }
     }
     if (verbose)
@@ -664,7 +668,7 @@ int main(int argc, const char * const argv[])
     while ((pu = hwloc_get_next_obj_by_type(topo, HWLOC_OBJ_PU, pu)) != NULL) {
       idx = pu->os_index;
       if (path)
-	snprintf(path, pathlen, "%s/pu%u", basedir, idx);
+        snprintf(path, pathlen, "%s/pu%u", basedir, idx);
       dump_one_proc(topo, pu, path);
     }
 
@@ -674,7 +678,7 @@ int main(int argc, const char * const argv[])
       fprintf(file, "Architecture: x86\n");
       fclose(file);
       if (verbose)
-	printf("Summary written to %s\n", path);
+        printf("Summary written to %s\n", path);
     } else {
       fprintf(stderr, "Failed to open summary file '%s' for writing: %s\n", path, strerror(errno));
     }
@@ -693,8 +697,8 @@ int main(int argc, const char * const argv[])
 
   if (verbose)
     printf("\n"
-	   "WARNING: Do not post these files on a public list or website unless you\n"
-	   "WARNING: are sure that no information about this platform is sensitive.\n");
+           "WARNING: Do not post these files on a public list or website unless you\n"
+           "WARNING: are sure that no information about this platform is sensitive.\n");
 
  out_with_path:
   free(path);

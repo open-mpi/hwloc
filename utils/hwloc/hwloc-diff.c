@@ -15,7 +15,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "  --refname <name>  Change the XML reference identifier to <name> in the output\n");
 	fprintf(where, "                    (default is the filename of the first topology\n");
 	fprintf(where, "  --version         Report version and exit\n");
-        fprintf(where, "  -h --help         Show this usage\n");
+	fprintf(where, "  -h --help         Show this usage\n");
 }
 
 int main(int argc, char *argv[])
@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
 	unsigned i, j;
 	int err;
 
-        callname = strrchr(argv[0], '/');
-        if (!callname)
-          callname = argv[0];
-        else
-          callname++;
+	callname = strrchr(argv[0], '/');
+	if (!callname)
+		callname = argv[0];
+	else
+		callname++;
 
 	/* skip argv[0], handle options */
 	argc--;
