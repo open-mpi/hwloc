@@ -55,6 +55,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  -n --nodeset              Manipulate nodesets instead of cpusets\n");
   fprintf(where, "  --ni --nodeset-input      Manipulate nodesets instead of cpusets for inputs\n");
   fprintf(where, "  --no --nodeset-output     Manipulate nodesets instead of cpusets for outputs\n");
+  fprintf(where, "  --oo --object-output      Report objects instead of object indexes\n");
   fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
   fprintf(where, "  --taskset                 Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
@@ -70,6 +71,7 @@ static int logicali = 1;
 static int logicalo = 1;
 static int nodeseti = 0;
 static int nodeseto = 0;
+static int objecto = 0;
 static int numberofdepth = -1;
 static union hwloc_obj_attr_u numberofattr;
 static int intersectdepth = -1;
@@ -212,6 +214,11 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
         continue;
       if (!first)
 	printf("%s", sep);
+      if (objecto) {
+        char types[64];
+        hwloc_obj_type_snprintf(types, sizeof(types), obj, 0);
+        printf("%s:", types);
+      }
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned)-1)
         printf("-1");
@@ -257,7 +264,14 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
           unsigned idx;
           hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
           idx = logicalo ? nodes[i]->logical_index : nodes[i]->os_index;
-          printf("%s%u", i==0 ? (const char *) "" : sep, idx);
+          if (i>0)
+            printf("%s", sep);
+          if (objecto) {
+            char types[64];
+            hwloc_obj_type_snprintf(types, sizeof(types), nodes[i], 0);
+            printf("%s:", types);
+          }
+          printf("%u", idx);
         }
       }
       free(nodes);
@@ -599,6 +613,10 @@ int main(int argc, char *argv[])
       }
       if (!strcmp(argv[0], "--no") || !strcmp(argv[0], "--nodeset-output")) {
 	nodeseto = 1;
+	goto next;
+      }
+      if (!strcmp(argv[0], "--oo") || !strcmp(argv[0], "--object-output")) {
+	objecto = 1;
 	goto next;
       }
       if (!strcmp(argv[0], "--sep")) {

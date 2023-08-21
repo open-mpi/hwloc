@@ -151,6 +151,10 @@ as well as NUMA-nodes that are local to multiple CPUs.
 \fB\-\-ni\fR \fB\-\-nodeset\-input\fR
 Interpret input sets as nodesets instead of CPU sets.
 .TP
+\fB\-\-oo\fR \fB\-\-object\-output\fR
+When reporting object indexes (e.g. with \fB\-I\fR or \fB\-\-local\-memory\fR),
+this option prefixes these indexes with types (e.g. \fICore:0\fR instead of \fI0\fR).
+.TP
 \fB\-N \-\-number\-of <type|depth>\fR
 Report the number of objects of the given type or depth that intersect the CPU set.
 This is convenient for finding how many cores, NUMA nodes or PUs are available
@@ -180,6 +184,9 @@ This is useful when reporting the output as a number or set of NUMA nodes.
 
 If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
 only the os devices of that subtype will be returned.
+
+If combined with \fB\-\-object\-output\fR, object indexes are prefixed
+with types (e.g. \fICore:0\fR instead of \fI0\fR).
 .TP
 \fB\-H \-\-hierarchical <type1>.<type2>...\fR
 Find the list of objects of type <type2> that intersect the CPU set and
@@ -214,6 +221,9 @@ The selection performed by \fB\-\-local\-memory\fR may be precisely
 configured with \fB\-\-local\-memory\-flags\fR,
 while \fB\-I numa\fR just selects all nodes that are somehow local to
 any of the input objects.
+
+If combined with \fB\-\-object\-output\fR, object indexes are prefixed
+with types (e.g. \fINUMANode:0\fR instead of \fI0\fR).
 .TP
 \fB\-\-local\-memory\-flags\fR
 Change the flags used to select local NUMA nodes.
@@ -241,6 +251,8 @@ All existing attributes in the current topology may be listed with
 
     $ lstopo --memattrs
 
+If combined with \fB\-\-object\-output\fR, the object index is prefixed
+with its type (e.g. \fINUMANode:0\fR instead of \fI0\fR).
 .TP
 \fB\-\-sep <sep>\fR
 Change the field separator in the output.

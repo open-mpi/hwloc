@@ -308,6 +308,7 @@ _hwloc_calc(){
 		   -n --nodeset
 		   --ni --nodeset-input
 		   --no --nodeset-output
+                   --oo --object-output
 		   --sep
 		   --taskset
 		   --single
