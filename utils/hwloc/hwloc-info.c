@@ -326,6 +326,21 @@ hwloc_info_show_ancestor(hwloc_topology_t topology, hwloc_obj_t ancestor,
 }
 
 static void
+hwloc_info_show_descendant(hwloc_topology_t topology, hwloc_obj_t descendant,
+                           hwloc_obj_t obj, const char *objs,
+                           int number, const char *prefix, int verbose)
+{
+  char descendants[128];
+  hwloc_obj_type_snprintf(descendants, sizeof(descendants), descendant, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  if (verbose < 0)
+    printf("%s%s:%u\n", prefix, descendants, descendant->logical_index);
+  else
+    printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+           prefix, descendants, descendant->logical_index, number, objs, obj->logical_index);
+  hwloc_info_show_obj(topology, descendant, descendants, prefix, verbose);
+}
+
+static void
 hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lcontext,
 				    void *_data __hwloc_attribute_unused,
 				    hwloc_obj_t obj)
@@ -383,23 +398,15 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       unsigned n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth);
       for(i=0; i<n; i++) {
 	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth, i);
-	char childs[128];
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-	if (verbose < 0)
-	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
-	else
-	  printf("%s%s L#%u = descendant #%u of %s L#%u\n",
-		 prefix, childs, child->logical_index, i, objs, obj->logical_index);
-	hwloc_info_show_obj(topology, child, childs, prefix, verbose);
+        hwloc_info_show_descendant(topology, child, obj, objs, i, prefix, verbose);
       }
     } else {
       /* custom level */
       unsigned i = 0;
       hwloc_obj_t child = NULL;
       while ((child = hwloc_get_next_obj_by_depth(topology, show_descendants_depth, child)) != NULL) {
-	char childs[128];
 	hwloc_obj_t parent = child->parent;
 	if (obj->cpuset) {
 	  while (parent && !parent->cpuset)
@@ -417,13 +424,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	}
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-	hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-	if (verbose < 0)
-	  printf("%s%s:%u\n", prefix, childs, child->logical_index);
-	else
-	  printf("%s%s L#%u = descendant #%u of %s L#%u\n",
-		 prefix, childs, child->logical_index, i, objs, obj->logical_index);
-	hwloc_info_show_obj(topology, child, childs, prefix, verbose);
+        hwloc_info_show_descendant(topology, child, obj, objs, i, prefix, verbose);
 	i++;
       }
     }
