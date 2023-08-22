@@ -305,6 +305,27 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
 }
 
 static void
+hwloc_info_show_ancestor(hwloc_topology_t topology, hwloc_obj_t ancestor,
+                         hwloc_obj_t obj, const char *objs,
+                         int level, const char *prefix, int verbose)
+{
+  char ancestors[128];
+  hwloc_obj_type_snprintf(ancestors, sizeof(ancestors), ancestor, 1);
+  if (verbose < 0)
+    printf("%s%s:%u\n", prefix, ancestors, ancestor->logical_index);
+  else if (level > 0)
+    printf("%s%s L#%u = parent #%u of %s L#%u\n",
+           prefix, ancestors, ancestor->logical_index, level, objs, obj->logical_index);
+  else if (level == 0) /* the object itself, don't show it twice */
+    printf("%s%s L#%u\n",
+           prefix, ancestors, ancestor->logical_index);
+  else /* single ancestor */
+    printf("%s%s L#%u = parent of %s L#%u\n",
+           prefix, ancestors, ancestor->logical_index, objs, obj->logical_index);
+  hwloc_info_show_obj(topology, ancestor, ancestors, prefix, verbose);
+}
+
+static void
 hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lcontext,
 				    void *_data __hwloc_attribute_unused,
 				    hwloc_obj_t obj)
@@ -321,36 +342,20 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   hwloc_obj_type_snprintf(objs, sizeof(objs), obj, 1);
 
   if (show_ancestors) {
-    char parents[128];
     unsigned level = 0;
     hwloc_obj_t parent = obj;
     while (parent) {
       if (show_index_prefix)
-	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
-      hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
-      if (verbose < 0)
-	printf("%s%s:%u\n", prefix, parents, parent->logical_index);
-      else if (level)
-	printf("%s%s L#%u = parent #%u of %s L#%u\n",
-	       prefix, parents, parent->logical_index, level, objs, obj->logical_index);
-      else
-	printf("%s%s L#%u\n", prefix, parents, parent->logical_index);
-      hwloc_info_show_obj(topology, parent, parents, prefix, verbose);
+        snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
+      hwloc_info_show_ancestor(topology, parent, obj, objs, level, prefix, verbose);
       parent = parent->parent;
       level++;
     }
   } else if (show_ancestor_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
-    char parents[128];
     hwloc_obj_t parent = obj;
     while (parent) {
       if (parent->depth == show_ancestor_depth) {
-	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
-	if (verbose < 0)
-	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
-	else
-	  printf("%s%s L#%u = parent of %s L#%u\n",
-		 prefix, parents, parent->logical_index, objs, obj->logical_index);
-	hwloc_info_show_obj(topology, parent, parents, prefix, verbose);
+        hwloc_info_show_ancestor(topology, parent, obj, objs, -1, prefix, verbose);
 	break;
       }
       parent = parent->parent;
