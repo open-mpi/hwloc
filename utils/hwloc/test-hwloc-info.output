@@ -397,6 +397,10 @@ L1dCache:5
 1.0: NUMANode:17
 1.1: NUMANode:18
 
+# Where a NUMA is attached
+L3Cache:1
+Package:2
+
 # Children of L2 and Core of Node, silent
 L1dCache:2
 L1dCache:3
