@@ -341,6 +341,48 @@ hwloc_info_show_descendant(hwloc_topology_t topology, hwloc_obj_t descendant,
 }
 
 static void
+hwloc_info_show_child(hwloc_topology_t topology, hwloc_obj_t child,
+                      hwloc_obj_t obj, const char *objs,
+                      int number, const char *prefix, int verbose)
+{
+  char childs[128];
+  hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  if (verbose < 0)
+    printf("%s%s:%u\n", prefix, childs, child->logical_index);
+  else
+    printf("%s%s L#%u = child #%u of %s L#%u\n",
+           prefix, childs, child->logical_index, number, objs, obj->logical_index);
+  hwloc_info_show_obj(topology, child, childs, prefix, verbose);
+}
+
+static void
+hwloc_info_show_local_memory(hwloc_topology_t topology, hwloc_obj_t node,
+                             hwloc_obj_t obj, const char *objs,
+                             int number, const char *prefix, int verbose)
+{
+  char nodes[128];
+  hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  if (verbose < 0)
+    printf("%s%s:%u\n", prefix, nodes, node->logical_index);
+  else
+    printf("%s%s L#%u = local memory #%u of %s L#%u\n",
+           prefix, nodes, node->logical_index, number, objs, obj->logical_index);
+  hwloc_info_show_obj(topology, node, nodes, prefix, verbose);
+}
+
+static void
+hwloc_info_show_single_obj(hwloc_topology_t topology,
+                           hwloc_obj_t obj, const char *objs,
+                           const char *prefix, int verbose)
+{
+  if (verbose < 0)
+    printf("%s%s:%u\n", prefix, objs, obj->logical_index);
+  else
+    printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+  hwloc_info_show_obj(topology, obj, objs, prefix, verbose);
+}
+
+static void
 hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lcontext,
 				    void *_data __hwloc_attribute_unused,
 				    hwloc_obj_t obj)
@@ -379,16 +421,9 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     unsigned i = 0;
     hwloc_obj_t child = NULL;
     while ((child = hwloc_get_next_child(topology, obj, child)) != NULL) {
-      char childs[128];
       if (show_index_prefix)
 	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-      hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-      if (verbose < 0)
-	printf("%s%s:%u\n", prefix, childs, child->logical_index);
-      else
-	printf("%s%s L#%u = child #%u of %s L#%u\n",
-	       prefix, childs, child->logical_index, i, objs, obj->logical_index);
-      hwloc_info_show_obj(topology, child, childs, prefix, verbose);
+      hwloc_info_show_child(topology, child, obj, objs, i, prefix, verbose);
       i++;
     }
   } else if (show_descendants_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
@@ -463,18 +498,11 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
           }
         }
         for(i=0; i<nrnodes; i++) {
-          char nodestr[128];
           if (!nodes[i])
             continue;
           if (show_index_prefix)
 	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-          hwloc_obj_type_snprintf(nodestr, sizeof(nodestr), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-          if (verbose < 0)
-            printf("%s%s:%u\n", prefix, nodestr, nodes[i]->logical_index);
-          else
-            printf("%s%s L#%u = local memory #%u of %s L#%u\n",
-                   prefix, nodestr, nodes[i]->logical_index, i, objs, obj->logical_index);
-          hwloc_info_show_obj(topology, nodes[i], nodestr, prefix, verbose);
+          hwloc_info_show_local_memory(topology, nodes[i], obj, objs, i, prefix, verbose);
         }
       }
     } else {
@@ -482,11 +510,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     }
     free(nodes);
   } else {
-    if (verbose < 0)
-      printf("%s%s:%u\n", prefix, objs, obj->logical_index);
-    else
-      printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
-    hwloc_info_show_obj(topology, obj, objs, prefix, verbose);
+    hwloc_info_show_single_obj(topology, obj, objs, prefix, verbose);
   }
 
   current_obj++;
