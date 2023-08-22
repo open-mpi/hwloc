@@ -582,9 +582,9 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
   if (prev) {
     if (prev->type == HWLOC_OBJ_MISC)
       state = 3;
-    else if (prev->type == HWLOC_OBJ_BRIDGE || prev->type == HWLOC_OBJ_PCI_DEVICE || prev->type == HWLOC_OBJ_OS_DEVICE)
+    else if (hwloc_obj_type_is_io(prev->type))
       state = 2;
-    else if (prev->type == HWLOC_OBJ_NUMANODE || prev->type == HWLOC_OBJ_MEMCACHE)
+    else if (hwloc_obj_type_is_memory(prev->type))
       state = 1;
     obj = prev->next_sibling;
   } else {
