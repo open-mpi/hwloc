@@ -218,7 +218,7 @@ _hwloc_info(){
 		COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
 		;;
 	    --ancestor | --descendants)
-		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` )
+		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` kind=normal kind=cpu kind=cache kind=memory kind=io kind=all )
 		;;
 	    --local-memory-flags)
 		COMPREPLY=( "<flags>" "" )

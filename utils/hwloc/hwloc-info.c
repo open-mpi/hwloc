@@ -20,14 +20,64 @@
 #include "misc.h"
 #include "hwloc-calc.h"
 
+enum kind_e {
+  KIND_ALL,
+  KIND_NORMAL,
+  KIND_CACHE,
+  KIND_CPU,
+  KIND_MEMORY,
+  KIND_IO,
+  KIND_NONE
+};
+
+static enum kind_e parse_kind(const char *name)
+{
+  if (!strcmp(name, "all"))
+    return KIND_ALL;
+  if (!strcmp(name, "normal"))
+    return KIND_NORMAL;
+  if (!strcmp(name, "cache"))
+    return KIND_CACHE;
+  if (!strcmp(name, "cpu"))
+    return KIND_CPU;
+  if (!strcmp(name, "memory"))
+    return KIND_MEMORY;
+  if (!strcmp(name, "io"))
+    return KIND_IO;
+  return KIND_NONE;
+}
+
+static int match_kind(hwloc_obj_t obj, enum kind_e kind)
+{
+  switch (kind) {
+  case KIND_ALL:
+    return 1;
+  case KIND_NORMAL:
+    return hwloc_obj_type_is_normal(obj->type);
+  case KIND_CACHE:
+    return hwloc_obj_type_is_cache(obj->type);
+  case KIND_CPU:
+    return hwloc_obj_type_is_normal(obj->type) && !hwloc_obj_type_is_cache(obj->type);
+  case KIND_MEMORY:
+    return hwloc_obj_type_is_memory(obj->type);
+  case KIND_IO:
+    return hwloc_obj_type_is_io(obj->type);
+  case KIND_NONE:
+    abort();
+  }
+  return 0;
+}
+
 static int pid_number = -1;
 static hwloc_pid_t pid;
 static int verbose_mode = 0;
 static int logical = 1;
 static int show_ancestors = 0;
 static int show_ancestor_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+static int show_ancestor_kind = KIND_NONE;
 static int show_children = 0;
 static int show_descendants_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+static int show_descendants_kind = KIND_NONE;
 static int show_index_prefix = 0;
 static int show_local_memory = 0;
 static int show_local_memory_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
@@ -383,6 +433,35 @@ hwloc_info_show_single_obj(hwloc_topology_t topology,
 }
 
 static void
+hwloc_info_recurse_descendants(hwloc_topology_t topology,
+                               hwloc_obj_t obj, const char *objs, /* where we started */
+                               hwloc_obj_t root, /* current recursion root */
+                               int *number,
+                               int verbose)
+{
+  /* process the current object before recursing, so that we traverse special objects
+   * as hwloc_list_special_objects() lists them on special levels.
+   */
+  hwloc_obj_t child;
+
+  if (show_first_only && *number)
+    return;
+
+  if (root != obj /* don't show ourself */
+      && match_kind(root, show_descendants_kind)) {
+    char prefix[32] = "";
+    if (show_index_prefix)
+      snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, *number);
+    hwloc_info_show_descendant(topology, root, obj, objs, *number, prefix, verbose);
+    (*number)++;
+  }
+
+  child = NULL;
+  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
+    hwloc_info_recurse_descendants(topology, obj, objs, child, number, verbose);
+}
+
+static void
 hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lcontext,
 				    void *_data __hwloc_attribute_unused,
 				    hwloc_obj_t obj)
@@ -414,6 +493,18 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       if (parent->depth == show_ancestor_depth) {
         hwloc_info_show_ancestor(topology, parent, obj, objs, -1, prefix, verbose);
 	break;
+      }
+      parent = parent->parent;
+    }
+  } else if (show_ancestor_kind != KIND_NONE) {
+    hwloc_obj_t parent = obj->parent; /* don't show ourself */
+    unsigned level = 0;
+    while (parent) {
+      if (match_kind(parent, show_ancestor_kind)) {
+        if (show_index_prefix)
+          snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
+        hwloc_info_show_ancestor(topology, parent, obj, objs, level, prefix, verbose);
+        level++;
       }
       parent = parent->parent;
     }
@@ -463,6 +554,10 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	i++;
       }
     }
+  } else if (show_descendants_kind != KIND_NONE) {
+    /* recurse in all children. */
+    int number = 0;
+    hwloc_info_recurse_descendants(topology, obj, objs, obj, &number, verbose);
   } else if (show_local_memory) {
     unsigned nrnodes;
     hwloc_obj_t *nodes;
@@ -774,39 +869,51 @@ main (int argc, char *argv[])
   if (show_ancestor_type) {
     hwloc_obj_type_t type;
     union hwloc_obj_attr_u attr;
-    err = hwloc_type_sscanf(show_ancestor_type, &type, &attr, sizeof(attr));
-    if (err < 0) {
-      fprintf(stderr, "unrecognized --ancestor type %s\n", show_ancestor_type);
-      usage(callname, stderr);
-      return EXIT_FAILURE;
-    }
-    show_ancestor_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
-    if (show_ancestor_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "unavailable --ancestor type %s\n", show_ancestor_type);
-      return EXIT_FAILURE;
-    }
-    if (show_ancestor_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "multiple --ancestor type %s\n", show_ancestor_type);
-      return EXIT_FAILURE;
+    if (!strncmp(show_ancestor_type, "kind=", 5))
+      show_ancestor_kind = parse_kind(show_ancestor_type+5);
+    else
+      show_ancestor_kind = parse_kind(show_ancestor_type);
+    if (show_ancestor_kind == KIND_NONE) {
+      err = hwloc_type_sscanf(show_ancestor_type, &type, &attr, sizeof(attr));
+      if (err < 0) {
+        fprintf(stderr, "unrecognized --ancestor type %s\n", show_ancestor_type);
+        usage(callname, stderr);
+        return EXIT_FAILURE;
+      }
+      show_ancestor_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
+      if (show_ancestor_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+        fprintf(stderr, "unavailable --ancestor type %s\n", show_ancestor_type);
+        return EXIT_FAILURE;
+      }
+      if (show_ancestor_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+        fprintf(stderr, "multiple --ancestor type %s\n", show_ancestor_type);
+        return EXIT_FAILURE;
+      }
     }
   }
   if (show_descendants_type) {
     hwloc_obj_type_t type;
     union hwloc_obj_attr_u attr;
-    err = hwloc_type_sscanf(show_descendants_type, &type, &attr, sizeof(attr));
-    if (err < 0) {
-      fprintf(stderr, "unrecognized --descendants type %s\n", show_descendants_type);
-      usage(callname, stderr);
-      return EXIT_FAILURE;
-    }
-    show_descendants_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
-    if (show_descendants_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "unavailable --descendants type %s\n", show_descendants_type);
-      return EXIT_FAILURE;
-    }
-    if (show_descendants_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "multiple --descendants type %s\n", show_descendants_type);
-      return EXIT_FAILURE;
+    if (!strncmp(show_descendants_type, "kind=", 5))
+      show_descendants_kind = parse_kind(show_descendants_type+5);
+    else
+      show_descendants_kind = parse_kind(show_descendants_type);
+    if (show_descendants_kind == KIND_NONE) {
+      err = hwloc_type_sscanf(show_descendants_type, &type, &attr, sizeof(attr));
+      if (err < 0) {
+        fprintf(stderr, "unrecognized --descendants type %s\n", show_descendants_type);
+        usage(callname, stderr);
+        return EXIT_FAILURE;
+      }
+      show_descendants_depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
+      if (show_descendants_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+        fprintf(stderr, "unavailable --descendants type %s\n", show_descendants_type);
+        return EXIT_FAILURE;
+      }
+      if (show_descendants_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+        fprintf(stderr, "multiple --descendants type %s\n", show_descendants_type);
+        return EXIT_FAILURE;
+      }
     }
   }
 
