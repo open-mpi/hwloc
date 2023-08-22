@@ -79,6 +79,7 @@ static int show_children = 0;
 static int show_descendants_depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 static int show_descendants_kind = KIND_NONE;
 static int show_index_prefix = 0;
+static int show_first_only = 0;
 static int show_local_memory = 0;
 static int show_local_memory_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
@@ -100,6 +101,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --local-memory        Only display the local memory nodes\n");
   fprintf (where, "  --local-memory-flags <x>   Change flags for selecting local memory nodes\n");
   fprintf (where, "  --best-memattr <attr> Only display the best target among the local nodes\n");
+  fprintf (where, "  --first               Only report the first matching object\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict [nodeset=]<bitmap>\n");
@@ -444,12 +446,17 @@ hwloc_info_recurse_descendants(hwloc_topology_t topology,
    */
   hwloc_obj_t child;
 
+  if (show_first_only && *number)
+    return;
+
   if (root != obj /* don't show ourself */
       && match_kind(root, show_descendants_kind)) {
     char prefix[32] = "";
     if (show_index_prefix)
       snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, *number);
     hwloc_info_show_descendant(topology, root, obj, objs, *number, prefix, verbose);
+    if (show_first_only)
+      return;
     (*number)++;
   }
 
@@ -481,6 +488,8 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       if (show_index_prefix)
         snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
       hwloc_info_show_ancestor(topology, parent, obj, objs, level, prefix, verbose);
+      if (show_first_only)
+        break;
       parent = parent->parent;
       level++;
     }
@@ -501,6 +510,8 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
         if (show_index_prefix)
           snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
         hwloc_info_show_ancestor(topology, parent, obj, objs, level, prefix, verbose);
+        if (show_first_only)
+          break;
         level++;
       }
       parent = parent->parent;
@@ -512,6 +523,8 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       if (show_index_prefix)
 	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
       hwloc_info_show_child(topology, child, obj, objs, i, prefix, verbose);
+      if (show_first_only)
+        break;
       i++;
     }
   } else if (show_descendants_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
@@ -524,6 +537,8 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
         hwloc_info_show_descendant(topology, child, obj, objs, i, prefix, verbose);
+        if (show_first_only)
+          break;
       }
     } else {
       /* custom level */
@@ -548,6 +563,8 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
         hwloc_info_show_descendant(topology, child, obj, objs, i, prefix, verbose);
+        if (show_first_only)
+          break;
 	i++;
       }
     }
@@ -595,6 +612,8 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
           if (show_index_prefix)
 	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
           hwloc_info_show_local_memory(topology, nodes[i], obj, objs, i, prefix, verbose);
+          if (show_first_only)
+            break;
         }
       }
     } else {
@@ -710,6 +729,9 @@ main (int argc, char *argv[])
         show_local_memory = 1;
         best_memattr_str = argv[1];
         opt = 1;
+      }
+      else if (!strcmp (argv[0], "--first")) {
+        show_first_only = 1;
       }
       else if (!strcmp (argv[0], "--filter")) {
         hwloc_obj_type_t type;

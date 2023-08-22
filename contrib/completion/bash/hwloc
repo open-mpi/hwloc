@@ -169,6 +169,7 @@ _hwloc_info(){
 		   --local-memory
 		   --local-memory-flags
 		   --best-memattr
+		   --first
 		   -n
 		   --restrict
 		   --restrict-flags
