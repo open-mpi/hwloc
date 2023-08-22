@@ -26,6 +26,84 @@ extern "C" {
 #endif
 
 
+/** \defgroup hwlocality_helper_types Kinds of object Type
+ * @{
+ *
+ * Each object type is
+ * either Normal (i.e. hwloc_obj_type_is_normal() returns 1),
+ * or Memory (i.e. hwloc_obj_type_is_memory() returns 1)
+ * or I/O (i.e. hwloc_obj_type_is_io() returns 1)
+ * or Misc (i.e. equal to ::HWLOC_OBJ_MISC).
+ * It cannot be of more than one of these kinds.
+ */
+
+/** \brief Check whether an object type is Normal.
+ *
+ * Normal objects are objects of the main CPU hierarchy
+ * (Machine, Package, Core, PU, CPU caches, etc.),
+ * but they are not NUMA nodes, I/O devices or Misc objects.
+ *
+ * They are attached to parent as Normal children,
+ * not as Memory, I/O or Misc children.
+ *
+ * \return 1 if an object of type \p type is a Normal object, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_normal(hwloc_obj_type_t type);
+
+/** \brief Check whether an object type is I/O.
+ *
+ * I/O objects are objects attached to their parents
+ * in the I/O children list.
+ * This current includes Bridges, PCI and OS devices.
+ *
+ * \return 1 if an object of type \p type is a I/O object, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_io(hwloc_obj_type_t type);
+
+/** \brief Check whether an object type is Memory.
+ *
+ * Memory objects are objects attached to their parents
+ * in the Memory children list.
+ * This current includes NUMA nodes and Memory-side caches.
+ *
+ * \return 1 if an object of type \p type is a Memory object, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_memory(hwloc_obj_type_t type);
+
+/** \brief Check whether an object type is a CPU Cache (Data, Unified or Instruction).
+ *
+ * Memory-side caches are not CPU caches.
+ *
+ * \return 1 if an object of type \p type is a Cache, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_cache(hwloc_obj_type_t type);
+
+/** \brief Check whether an object type is a CPU Data or Unified Cache.
+ *
+ * Memory-side caches are not CPU caches.
+ *
+ * \return 1 if an object of type \p type is a CPU Data or Unified Cache, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_dcache(hwloc_obj_type_t type);
+
+/** \brief Check whether an object type is a CPU Instruction Cache,
+ *
+ * Memory-side caches are not CPU caches.
+ *
+ * \return 1 if an object of type \p type is a CPU Instruction Cache, 0 otherwise.
+ */
+HWLOC_DECLSPEC int
+hwloc_obj_type_is_icache(hwloc_obj_type_t type);
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_helper_find_inside Finding Objects inside a CPU set
  * @{
  */
@@ -526,84 +604,6 @@ hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
   }
   return obj;
 }
-
-/** @} */
-
-
-
-/** \defgroup hwlocality_helper_types Kinds of object Type
- * @{
- *
- * Each object type is
- * either Normal (i.e. hwloc_obj_type_is_normal() returns 1),
- * or Memory (i.e. hwloc_obj_type_is_memory() returns 1)
- * or I/O (i.e. hwloc_obj_type_is_io() returns 1)
- * or Misc (i.e. equal to ::HWLOC_OBJ_MISC).
- * It cannot be of more than one of these kinds.
- */
-
-/** \brief Check whether an object type is Normal.
- *
- * Normal objects are objects of the main CPU hierarchy
- * (Machine, Package, Core, PU, CPU caches, etc.),
- * but they are not NUMA nodes, I/O devices or Misc objects.
- *
- * They are attached to parent as Normal children,
- * not as Memory, I/O or Misc children.
- *
- * \return 1 if an object of type \p type is a Normal object, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_normal(hwloc_obj_type_t type);
-
-/** \brief Check whether an object type is I/O.
- *
- * I/O objects are objects attached to their parents
- * in the I/O children list.
- * This current includes Bridges, PCI and OS devices.
- *
- * \return 1 if an object of type \p type is a I/O object, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_io(hwloc_obj_type_t type);
-
-/** \brief Check whether an object type is Memory.
- *
- * Memory objects are objects attached to their parents
- * in the Memory children list.
- * This current includes NUMA nodes and Memory-side caches.
- *
- * \return 1 if an object of type \p type is a Memory object, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_memory(hwloc_obj_type_t type);
-
-/** \brief Check whether an object type is a CPU Cache (Data, Unified or Instruction).
- *
- * Memory-side caches are not CPU caches.
- *
- * \return 1 if an object of type \p type is a Cache, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_cache(hwloc_obj_type_t type);
-
-/** \brief Check whether an object type is a CPU Data or Unified Cache.
- *
- * Memory-side caches are not CPU caches.
- *
- * \return 1 if an object of type \p type is a CPU Data or Unified Cache, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_dcache(hwloc_obj_type_t type);
-
-/** \brief Check whether an object type is a CPU Instruction Cache,
- *
- * Memory-side caches are not CPU caches.
- *
- * \return 1 if an object of type \p type is a CPU Instruction Cache, 0 otherwise.
- */
-HWLOC_DECLSPEC int
-hwloc_obj_type_is_icache(hwloc_obj_type_t type);
 
 /** @} */
 
