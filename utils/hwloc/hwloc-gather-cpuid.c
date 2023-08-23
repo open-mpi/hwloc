@@ -551,10 +551,10 @@ void usage(const char *callname, FILE *where)
   fprintf(where, "Usage : %s [ options ] ... [ outdir ]\n", callname);
   fprintf(where, "  outdir is an optional output directory instead of cpuid/\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -c <n>       Only gather for logical processor with logical index <n>\n");
-  fprintf(where, "  -s --silent  Do not show verbose messages\n");
-  fprintf(where, "  --version    Report version and exit\n");
-  fprintf(where, "  -h --help    Show this usage\n");
+  fprintf(where, "  -c <n>          Only gather for logical processor with logical index <n>\n");
+  fprintf(where, "  -q --quiet -s   Do not show verbose messages\n");
+  fprintf(where, "  --version       Report version and exit\n");
+  fprintf(where, "  -h --help       Show this usage\n");
 }
 
 int main(int argc, const char * const argv[])
@@ -590,7 +590,8 @@ int main(int argc, const char * const argv[])
       idx = atoi(argv[1]);
       argc -= 2;
       argv += 2;
-    } else if (argc >= 1 && (!strcmp(argv[0], "-s") || !strcmp(argv[0], "--silent"))) {
+    } else if (argc >= 1 && (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")
+                             || !strcmp(argv[0], "-s") || !strcmp(argv[0], "--silent"))) {
       verbose--;
       argc--;
       argv++;

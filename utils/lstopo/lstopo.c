@@ -562,7 +562,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Textual output options:\n");
   fprintf (where, "  --only <type>         Only show objects of the given type in the textual output\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
-  fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
+  fprintf (where, "  -q --quiet -s         Reduce the amount of details to show\n");
   fprintf (where, "  --distances           Only show distance matrices\n");
   fprintf (where, "  --distances-transform <links|merge-switch-ports|transitive-closure>\n");
   fprintf (where, "                        Transform distances before displaying them\n");
@@ -1023,7 +1023,8 @@ main (int argc, char *argv[])
       opt = 0;
       if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose")) {
 	loutput.verbose_mode++;
-      } else if (!strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent")) {
+      } else if (!strcmp (argv[0], "-q") || !strcmp (argv[0], "--quiet")
+                 || !strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent")) {
 	loutput.verbose_mode--;
       } else if (!strcmp (argv[0], "--distances")) {
 	loutput.show_distances_only = 1;
