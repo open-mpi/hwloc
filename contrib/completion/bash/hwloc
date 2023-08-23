@@ -24,7 +24,7 @@ _lstopo() {
 		   -f --force
 		   --only
 		   -v --verbose
-		   -s --silent
+		   -q --quiet -s --silent
 		   --distances
 		   --distances-transform
 		   --memattrs
@@ -162,7 +162,7 @@ _hwloc_info(){
 		   --topology
 		   --support
 		   -v --verbose
-		   -s --silent
+		   -q --quiet -s --silent
 		   --ancestors
 		   --ancestor
 		   --children
@@ -531,7 +531,7 @@ complete -F _hwloc_ps hwloc-ps
 
 _hwloc_gather_cpuid(){
     local OPTIONS=(-c
-		   -s --silent
+		   -q --quiet -s --silent
 		   --version
 		   -h --help
 		   )

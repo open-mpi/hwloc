@@ -42,7 +42,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --topology            Report information the topology\n");
   fprintf (where, "  --support             Report information about supported features\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
-  fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
+  fprintf (where, "  -q --quiet -s         Reduce the amount of details to show\n");
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
   fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
   fprintf (where, "  --children            Display all children\n");
@@ -540,7 +540,8 @@ main (int argc, char *argv[])
 	mode = HWLOC_INFO_MODE_SUPPORT;
       else if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose"))
         verbose_mode++;
-      else if (!strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent"))
+      else if (!strcmp (argv[0], "-q") || !strcmp (argv[0], "--quiet")
+               || !strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent"))
         verbose_mode--;
       else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
