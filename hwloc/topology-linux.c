@@ -877,6 +877,8 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   setsize = CPU_ALLOC_SIZE(last+1);
   plinux_set = CPU_ALLOC(last+1);
+  if (!plinux_set)
+    return -1;
 
   CPU_ZERO_S(setsize, plinux_set);
   hwloc_bitmap_foreach_begin(cpu, hwloc_set)
@@ -957,7 +959,10 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
   while (1) {
     cpu_set_t *set = CPU_ALLOC(nr_cpus);
     size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
-    int err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
+    int err;
+    if (!set)
+      return -1; /* caller will return an error, and we'll try again later */
+    err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
     CPU_FREE(set);
     nr_cpus = setsize * 8; /* that's the value that was actually tested */
     if (!err)
@@ -985,8 +990,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   /* find the kernel nr_cpus so as to use a large enough cpu_set size */
   kernel_nr_cpus = hwloc_linux_find_kernel_nr_cpus(topology);
+  if (kernel_nr_cpus < 0)
+    return -1;
   setsize = CPU_ALLOC_SIZE(kernel_nr_cpus);
   plinux_set = CPU_ALLOC(kernel_nr_cpus);
+  if (!plinux_set)
+    return -1;
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -1340,6 +1349,8 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 
      setsize = CPU_ALLOC_SIZE(last+1);
      plinux_set = CPU_ALLOC(last+1);
+     if (!plinux_set)
+       return -1;
 
      CPU_ZERO_S(setsize, plinux_set);
      hwloc_bitmap_foreach_begin(cpu, hwloc_set)
@@ -1431,6 +1442,8 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 
      setsize = CPU_ALLOC_SIZE(last+1);
      plinux_set = CPU_ALLOC(last+1);
+     if (!plinux_set)
+       return -1;
 
      err = pthread_getaffinity_np(tid, setsize, plinux_set);
      if (err) {
