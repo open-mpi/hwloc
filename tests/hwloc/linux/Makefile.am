@@ -55,6 +55,7 @@ sysfs_tests = \
 	fakeheterocpunuma.test \
 	fakeheteromemtiers.test \
 	fakememinitiators-1np2c+1npp+gi.test \
+	memorysidecaches.test \
 	nvidiagpunumanodes.test \
 	nvidiagpunumanodes-kept.test \
 	offline-cpu0-node0.test
@@ -101,6 +102,7 @@ sysfs_tarballs = \
 	fakeheterocpunuma.tar.bz2 \
 	fakeheteromemtiers.tar.bz2 \
 	fakememinitiators-1np2c+1npp+gi.tar.bz2 \
+	memorysidecaches.tar.bz2 \
 	nvidiagpunumanodes.tar.bz2 \
 	offline-cpu0-node0.tar.bz2
 
@@ -143,6 +145,7 @@ sysfs_console_outputs = \
 	fakecpuid1f-64intel64-2p4d2n2c2t.console \
 	fakeheteromemtiers.console \
 	fakememinitiators-1np2c+1npp+gi.console \
+	memorysidecaches.console \
 	nvidiagpunumanodes.console \
 	nvidiagpunumanodes-kept.console \
 	offline-cpu0-node0.console
