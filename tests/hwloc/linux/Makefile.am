@@ -1,4 +1,4 @@
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2023 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -65,6 +65,7 @@ sysfs_outputs = \
 		fakecpuid1f-64intel64-2p4d2n2c2t.output \
 		fakeheterocpunuma.output \
 		fakeheteromemtiers.output \
+		memorysidecaches.output \
 		offline-cpu0-node0.output
 
 if HWLOC_HAVE_32BITS_PCI_DOMAIN
@@ -137,6 +138,7 @@ sysfs_tarballs = \
 		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
 		fakeheterocpunuma.tar.bz2 \
 		fakeheteromemtiers.tar.bz2 \
+		memorysidecaches.tar.bz2 \
 		offline-cpu0-node0.tar.bz2
 
 # Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
