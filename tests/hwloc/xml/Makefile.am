@@ -35,6 +35,7 @@ xml_outputs = \
         power8gpudistances.xml \
         fakeheterodistances.xml \
         fakecpukinds.xml \
+        memorysidecaches.xml \
         8em64t-2p2ca2co-nonodesets.v1tov2.xml \
         8ia64-2n2s2c+1n.v1tov2.xml \
         16amd64-4distances.v1tov2.xml \
