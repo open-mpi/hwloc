@@ -1,0 +1,5 @@
+# dual CascadeLake with DDR as Cache in front of Optane (2LM), SNC2
+# L1i and L1d ignored
+# 80intel64-2p2n20c2t
+source:  memorysidecaches.xml
+target:  memorysidecaches.xml

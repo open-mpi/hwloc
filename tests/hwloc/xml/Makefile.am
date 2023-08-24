@@ -34,6 +34,7 @@ xml_tests = \
         power8gpudistances.test \
         fakeheterodistances.test \
         fakecpukinds.test \
+        memorysidecaches.test \
         cxlmem+dax.v2tov3.test \
         cxlmem+dax.v3tov2.test
 
@@ -58,6 +59,7 @@ xml_xml_outputs = \
         power8gpudistances.xml \
         fakeheterodistances.xml \
         fakecpukinds.xml \
+        memorysidecaches.xml \
         cxlmem+dax.v2.xml \
         cxlmem+dax.v3.xml
 
