@@ -68,6 +68,18 @@ set -e
   echo "# L1 ancestor of PU range"
   $info --if synthetic --input "node:2 core:2 l2:2 l1d:2 pu:2" --ancestor l1 -s pu:7-10
   echo
+  echo "# Ancestor caches above L1d"
+  $info --if synthetic --input "node:2 l4:2 l3:2 core:2 l2:2 l1d:2 pu:2" --ancestor kind=cache -n -s l1d:4 l1d:8
+  echo
+  echo "# Descendant CPU objects below L4"
+  $info --if synthetic --input "node:2 l4:2 l3:2 core:2 l2:1 pu:2" --descendants kind=cpu -n -s l4:0 l4:3
+  echo
+  echo "# Descendant Memory objects below L3"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] [numa] core:4 pu:2" --descendants kind=memory -n -s l3:1 l3:7
+  echo
+  echo "# Where a NUMA is attached"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] [numa] core:4 pu:2" --ancestor kind=normal --first -s numa:3 numa:14
+  echo
 
   echo "# Children of L2 and Core of Node, silent"
   $info --if synthetic --input "node:2 core:2 l2:2 l1d:2 pu:2" --children -s l2:1 node:1.core:1

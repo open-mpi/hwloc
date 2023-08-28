@@ -35,6 +35,8 @@ extern "C" {
  * or I/O (i.e. hwloc_obj_type_is_io() returns 1)
  * or Misc (i.e. equal to ::HWLOC_OBJ_MISC).
  * It cannot be of more than one of these kinds.
+ *
+ * See also Object Kind in \ref termsanddefs.
  */
 
 /** \brief Check whether an object type is Normal.

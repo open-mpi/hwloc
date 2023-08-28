@@ -81,15 +81,44 @@ A single summary line per object is displayed.
 \fB\-\-ancestors\fR
 Display information about the object as well as
 about all its ancestors up to the root of the topology.
+This is identical to \fB\-\-ancestor all\fR
 .TP
 \fB\-\-ancestor\fR <type>
 Only display the object ancestors that match the given type.
+
+Some special values matching multiple types may also be given:
+\fIkind=normal\fR (CPU objects, including caches),
+\fIkind=cpu\fR (CPU objects, excluding caches),
+\fIkind=cache\fR (all caches, including memory-side caches),
+\fIkind=memory\fR (NUMA nodes or memory-side caches),
+\fIkind=io\fR (IO objects),
+\fIkind=all\fR (all objects).
+See also \fIObject Kind\fR in Terms and Definitions in the documentation.
+The prefix \fIkind=\fR may be omitted if there is no ambiguity.
+
+If multiple ancestors match, they are reported from the deepest
+to the highest in the topology.
+Adding \fB\-\-first\fR will only show the first one.
 .TP
 \fB\-\-children\fR
 Display information about the object children.
 .TP
 \fB\-\-descendants\fR <type>
 Display information about the object descendants that match the given type.
+
+Some special values matching multiple types may also be given:
+\fIkind=normal\fR (CPU objects, including caches),
+\fIkind=cpu\fR (CPU objects, excluding caches),
+\fIkind=cache\fR (all caches, including memory-side caches),
+\fIkind=memory\fR (NUMA nodes or memory-side caches),
+\fIkind=io\fR (IO objects),
+\fIkind=all\fR (all objects).
+See also \fIObject Kind\fR in Terms and Definitions in the documentation.
+The prefix \fIkind=\fR may be omitted if there is no ambiguity.
+
+If multiple objects match, they are reported in a depth-first order
+(first child, then its children, etc., then second child, etc.).
+Adding \fB\-\-first\fR will only show the first one.
 .TP
 \fB\-\-local\-memory\fR
 Display information about the NUMA nodes that are local to the given object.
@@ -112,6 +141,10 @@ but only display the local node that has the best value for the memory
 attribute given by \fI<name>\fR (or as an index).
 If the memory attribute values depend on the initiator, the object given
 to hwloc-info is used as the initiator.
+.TP
+\fB\-\-first\fR
+For each input object, only report the first matching output object
+(first ancestor, first child, etc.).
 .TP
 \fB\-n\fR
 When outputting object information, prefix each line with the index
@@ -278,6 +311,11 @@ To show the best-bandwidth node among NUMA nodes local to a PU:
     NUMANode L#7 = local memory #1 of PU L#25
      type = NUMANode
     ...
+
+to find where a NUMA node is attached in the hierarchy of CPU cores:
+
+    $ hwloc-info --ancestor kind=normal --first -s numa:1
+    Package:0
 
 To see info attributes of the topology:
 
