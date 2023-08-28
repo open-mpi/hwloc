@@ -604,12 +604,17 @@ or GNU Autotools.
   a NUMA memory node, etc. The different types detected by hwloc are
   detailed in the ::hwloc_obj_type_t enumeration.
 
+  Objects are topologically sorted by locality (CPU and node sets)
+  into a tree (see \ref termsanddefs_tree).
+  </dd>
+
+<dt>Object Kind</dt>
+  <dd>
   There are four kinds of Objects: Memory (NUMA nodes and Memory-side caches), I/O (Bridges, PCI and OS devices),
   Misc, and Normal (everything else, including Machine, Package, Die, Core, PU, CPU Caches, etc.).
   Normal and Memory objects have (non-NULL) CPU sets and nodesets, while I/O and Misc don't.
 
-  Objects are topologically sorted by locality (CPU and node sets)
-  into a tree (see \ref termsanddefs_tree).
+  \sa hwlocality_helper_types.
   </dd>
 
 <dt>Processing Unit (PU)</dt>
