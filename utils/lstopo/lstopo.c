@@ -559,7 +559,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
   fprintf (where, "  --obj-snprintf-flags <n>\n"
-                  "  --osflags <n>         Change object type and attribute printing flags\n");
+                  "  --osf <n>             Change object type and attribute printing flags\n");
   fprintf (where, "  -f --force            Overwrite the output file if it exists\n");
   fprintf (where, "Textual output options:\n");
   fprintf (where, "  --only <type>         Only show objects of the given type in the textual output\n");
