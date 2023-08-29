@@ -1066,6 +1066,9 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
+ *
+ * \note By default the output string is reasonably short without being ambiguous
+ * so that hwloc_type_sscanf() may parse it back.
  */
 HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj, const char * __hwloc_restrict separator,
@@ -1078,22 +1081,29 @@ enum hwloc_obj_snprintf_flag_e {
    */
   HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES = 1ULL<<1,
 
+  /** \brief Reduce the name even if it may become ambiguous,
+   * for instance by removing the OS device prefix.
+   * hwloc_type_sscanf() might not be able to parse it back exactly anymore.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES = 1ULL<<2,
+
   /** \brief Display additional attributes such as
    * cache associativity, PCI link speed, and total memory.
    * \hideinitializer
    */
-  HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS =1ULL<<2,
+  HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS =1ULL<<3,
 
   /** \brief Display memory sizes in bytes without units.
    * \hideinitializer
    */
-  HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS = 1ULL<<3,
+  HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS = 1ULL<<4,
 
   /** \brief Display memory sizes in KB, MB, GB, etc
    * i.e. divide by 1000 instead of 1024 for KiB, MiB, GiB, etc.
    * \hideinitializer
    */
-  HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000 = 1ULL<<4,
+  HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000 = 1ULL<<5,
 
   /** \brief Backward compatibility with hwloc 2.x verbose mode,
    * shows additional attributes,
@@ -1122,7 +1132,8 @@ enum hwloc_obj_snprintf_flag_e {
  * \return 0 if a type was correctly identified, otherwise -1.
  *
  * \note This function is guaranteed to match any string returned by
- * hwloc_obj_type_string() or hwloc_obj_type_snprintf().
+ * hwloc_obj_type_string() or hwloc_obj_type_snprintf() except if
+ * ::HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES was given.
  */
 HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
 				     hwloc_obj_type_t *typep,

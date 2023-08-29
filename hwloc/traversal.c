@@ -327,6 +327,37 @@ hwloc__type_match(const char *string,
   return NULL;
 }
 
+static int
+hwloc__osdev_type_sscanf(const char *string, hwloc_obj_osdev_type_t *ostype)
+{
+  if (hwloc__type_match(string, "storage", 4)
+      || hwloc__type_match(string, "block", 4)) { /* backward compat with v2.x */
+    *ostype = HWLOC_OBJ_OSDEV_STORAGE;
+    return 1;
+  } else if (hwloc__type_match(string, "memory", 3)) {
+    *ostype = HWLOC_OBJ_OSDEV_MEMORY;
+    return 1;
+  } else if (hwloc__type_match(string, "network", 3)) {
+    *ostype = HWLOC_OBJ_OSDEV_NETWORK;
+    return 1;
+  } else if (hwloc__type_match(string, "ofed", 4)
+             || hwloc__type_match(string, "openfabrics", 7)) {
+    *ostype = HWLOC_OBJ_OSDEV_OPENFABRICS;
+    return 1;
+  } else if (hwloc__type_match(string, "dma", 3)) {
+    *ostype = HWLOC_OBJ_OSDEV_DMA;
+    return 1;
+  } else if (hwloc__type_match(string, "gpu", 3)) {
+    *ostype = HWLOC_OBJ_OSDEV_GPU;
+    return 1;
+  } else if (hwloc__type_match(string, "coproc", 5)
+	     || hwloc__type_match(string, "co-processor", 6)) {
+    *ostype = HWLOC_OBJ_OSDEV_COPROC;
+    return 1;
+  }
+  return 0;
+}
+
 int
 hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 		  union hwloc_obj_attr_u *attrp, size_t attrsize)
@@ -344,32 +375,20 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 
   /* types without a custom depth */
 
-  /* osdev subtype first to avoid conflicts coproc/core etc */
-  if (hwloc__type_match(string, "osdev", 2)) {
+  if (!hwloc_strncasecmp(string, "osdev[", 6)) {
+    /* proper "OSDev[type]" */
     type = HWLOC_OBJ_OS_DEVICE;
-  } else if (hwloc__type_match(string, "storage", 4)
-             || hwloc__type_match(string, "block", 4)) { /* backward compat with v2.x */
+    hwloc__osdev_type_sscanf(string+6, &ostype);
+  } else if (!hwloc_strncasecmp(string, "os[", 3)) {
+    /* shorter "OS[type]" */
     type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_STORAGE;
-  } else if (hwloc__type_match(string, "memory", 3)) {
+    hwloc__osdev_type_sscanf(string+3, &ostype);
+  } else if (hwloc__type_match(string, "osdev", 2)) {
+    /* basic "OSDev" without type */
     type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_MEMORY;
-  } else if (hwloc__type_match(string, "network", 3)) {
+  } else if (hwloc__osdev_type_sscanf(string, &ostype)) {
+    /* ugly osdev type without "osdev" prefix, parsed here to avoid conflicts coproc/core/etc below */
     type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_NETWORK;
-  } else if (hwloc__type_match(string, "openfabrics", 7)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_OPENFABRICS;
-  } else if (hwloc__type_match(string, "dma", 3)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_DMA;
-  } else if (hwloc__type_match(string, "gpu", 3)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_GPU;
-  } else if (hwloc__type_match(string, "coproc", 5)
-	     || hwloc__type_match(string, "co-processor", 6)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-    ostype = HWLOC_OBJ_OSDEV_COPROC;
 
   } else if (hwloc__type_match(string, "machine", 2)) {
     type = HWLOC_OBJ_MACHINE;
@@ -524,6 +543,7 @@ int
 hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, unsigned long flags)
 {
   int longnames = (flags & (HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE|HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES));
+  int shortnames = (flags & HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
   hwloc_obj_type_t type = obj->type;
   switch (type) {
   case HWLOC_OBJ_MISC:
@@ -558,21 +578,29 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
   case HWLOC_OBJ_PCI_DEVICE:
     return hwloc_snprintf(string, size, "PCI");
-  case HWLOC_OBJ_OS_DEVICE:
+  case HWLOC_OBJ_OS_DEVICE: {
+    const char *prefix = shortnames ? "" : longnames ? "OSDev" : "OS";
+    const char *middle;
     switch (obj->attr->osdev.type) {
-    case HWLOC_OBJ_OSDEV_STORAGE: return hwloc_snprintf(string, size, "Storage");
-    case HWLOC_OBJ_OSDEV_MEMORY: return hwloc_snprintf(string, size, longnames ? "Memory" : "Mem");
-    case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, longnames ? "Network" : "Net");
-    case HWLOC_OBJ_OSDEV_OPENFABRICS: return hwloc_snprintf(string, size, "OpenFabrics");
-    case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
-    case HWLOC_OBJ_OSDEV_GPU: return hwloc_snprintf(string, size, "GPU");
-    case HWLOC_OBJ_OSDEV_COPROC: return hwloc_snprintf(string, size, longnames ? "Co-Processor" : "CoProc");
+    case HWLOC_OBJ_OSDEV_STORAGE: middle = "Storage"; break;
+    case HWLOC_OBJ_OSDEV_MEMORY: middle = longnames ? "Memory" : "Mem"; break;
+    case HWLOC_OBJ_OSDEV_NETWORK: middle = longnames ? "Network" : "Net"; break;
+    case HWLOC_OBJ_OSDEV_OPENFABRICS: middle = longnames ? "OpenFabrics" : "OFED"; break;
+    case HWLOC_OBJ_OSDEV_DMA: middle = "DMA"; break;
+    case HWLOC_OBJ_OSDEV_GPU: middle = "GPU"; break;
+    case HWLOC_OBJ_OSDEV_COPROC: middle = longnames ? "Co-Processor" : "CoProc"; break;
     default:
-      if (size > 0)
-	*string = '\0';
-      return 0;
+      middle = NULL;
     }
-    break;
+    if (middle) {
+      if (shortnames)
+        return hwloc_snprintf(string, size, "%s", middle);
+      else
+        return hwloc_snprintf(string, size, "%s[%s]", prefix, middle);
+    } else
+      return hwloc_snprintf(string, size, "%s", prefix);
+  }
+    /* fallthrough */
   default:
     if (size > 0)
       *string = '\0';

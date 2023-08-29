@@ -46,9 +46,9 @@ Machine (P#0 total=248GiB DMIProductName=UV2000 DMIProductVersion=SGI DMIBoardVe
       HostBridge L#0 (buses=0000:[00-0a])
         PCIBridge L#1 (busid=0000:00:03.0 id=8086:3c08 class=0604(PCIBridge) buses=0000:[01-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
           PCI L#0 (busid=0000:01:00.0 id=8086:1521 class=0200(Ethernet) PCIVendor="Intel Corporation" PCIDevice="I350 Gigabit Network Connection")
-            Network L#0 (Address=08:00:69:16:d0:b9) "eth0"
+            OSDev[Network] L#0 (Address=08:00:69:16:d0:b9) "eth0"
           PCI L#1 (busid=0000:01:00.1 id=8086:1521 class=0200(Ethernet) PCIVendor="Intel Corporation" PCIDevice="I350 Gigabit Network Connection")
-            Network L#1 (Address=08:00:69:16:d0:ba) "eth1"
+            OSDev[Network] L#1 (Address=08:00:69:16:d0:ba) "eth1"
         PCIBridge L#2 (busid=0000:00:1c.0 id=8086:1d1e class=0604(PCIBridge) buses=0000:[05-09] PCIVendor="Intel Corporation" PCIDevice="Patsburg PCI Express Root Port 8")
           PCIBridge L#3 (busid=0000:05:00.0 id=1912:0013 class=0604(PCIBridge) buses=0000:[06-09] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe Switch [PS]")
             PCIBridge L#4 (busid=0000:06:00.0 id=1912:0013 class=0604(PCIBridge) buses=0000:[07-08] PCIVendor="Renesas Technology Corp." PCIDevice="SH7757 PCIe Switch [PS]")
@@ -101,7 +101,7 @@ Machine (P#0 total=248GiB DMIProductName=UV2000 DMIProductVersion=SGI DMIBoardVe
       HostBridge L#6 (buses=0001:[00-02])
         PCIBridge L#7 (busid=0001:00:03.0 id=8086:3c08 class=0604(PCIBridge) buses=0001:[02-02] PCIVendor="Intel Corporation" PCIDevice="Sandy Bridge IIO PCI Express Root Port 3a in PCI Express Mode")
           PCI L#4 (busid=0001:02:00.0 id=1000:0079 class=0104(RAID) PCIVendor="LSI Logic / Symbios Logic" PCIDevice="MegaRAID SAS 2108 [Liberator]")
-            Storage L#2 (LinuxDeviceID=8:0) "sda"
+            OSDev[Storage] L#2 (LinuxDeviceID=8:0) "sda"
   Group0 L#1 (total=62GiB)
     Package L#2 (P#2 total=31GiB CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=45 CPUModel="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz" CPUStepping=7)
       NUMANode L#2 (P#2 local=31GiB total=31GiB) (disallowed)
