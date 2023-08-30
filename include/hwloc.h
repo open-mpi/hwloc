@@ -1158,7 +1158,7 @@ hwloc_get_info_by_name(struct hwloc_infos_s *infos, const char *name) __hwloc_at
 
 /** \brief Modify an array of info attributes.
  *
- * \p operation is a single value among enum hwloc_modify_infos_op_e.
+ * \p operation is a single value among ::hwloc_modify_infos_op_e.
  *
  * If adding (::HWLOC_MODIFY_INFOS_OP_ADD or ::HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE)
  * or replacing (::HWLOC_MODIFY_INFOS_OP_REPLACE) an info attribute,
