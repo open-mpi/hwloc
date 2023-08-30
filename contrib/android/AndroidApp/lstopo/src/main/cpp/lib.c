@@ -163,7 +163,7 @@ void JNIbox(int r, int g, int b, int x, int y, int width, int height, unsigned s
     (*tools.jni)->DeleteLocalRef(tools.jni, class);
 }
 
-void JNItext(char *text, int gp_index, int x, int y, int fontsize, int bold) {
+void JNItext(char *text, int gp_index, int x, int y, int fontsize, int bold, int outside) {
     size_t length = strlen(text);
     jbyteArray array = (*tools.jni)->NewByteArray(tools.jni, length);
     (*tools.jni)->SetByteArrayRegion(tools.jni, array, 0, length, (const jbyte *) text);
@@ -172,7 +172,7 @@ void JNItext(char *text, int gp_index, int x, int y, int fontsize, int bold) {
     jmethodID ctor = (*tools.jni)->GetMethodID(tools.jni, class, "<init>", "([BLjava/lang/String;)V");
     jstring str = (jstring) (*tools.jni)->NewObject(tools.jni, class, ctor, array, strEncode);
 
-    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.text, str, x, y, fontsize, bold, gp_index);
+    (*tools.jni)->CallVoidMethod(tools.jni, tools.lstopo, tools.methods.text, str, x, y, fontsize, bold, outside, gp_index);
     (*tools.jni)->DeleteLocalRef(tools.jni, str);
     (*tools.jni)->DeleteLocalRef(tools.jni, array);
     (*tools.jni)->DeleteLocalRef(tools.jni, strEncode);
@@ -207,7 +207,7 @@ void JNIDebug(char *text) {
 void setJNIEnv() {
     tools.methods.lstopo_android = (*tools.jni)->GetObjectClass(tools.jni, tools.lstopo);
     tools.methods.box = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "box", "(IIIIIIIIILjava/lang/String;)V");
-    tools.methods.text = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "text", "(Ljava/lang/String;IIIII)V");
+    tools.methods.text = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "text", "(Ljava/lang/String;IIIIII)V");
     tools.methods.line = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "line", "(IIII)V");
     tools.methods.debug = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "writeDebugFile", "(Ljava/lang/String;)V");
     tools.methods.clearDebug = (*tools.jni)->GetMethodID(tools.jni, tools.methods.lstopo_android, "clearDebugFile", "()V");

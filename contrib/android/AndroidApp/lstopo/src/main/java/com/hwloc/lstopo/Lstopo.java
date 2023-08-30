@@ -133,7 +133,7 @@ public class Lstopo extends AppCompatActivity {
     /**
      * Draw topology text
      */
-    public void text(String text, int x, int y, int fontsize, int bold, int id){
+    public void text(String text, int x, int y, int fontsize, int bold, int outside, int id){
         currentContent = text;
 
         TextView tv = new TextView(activity);
@@ -155,16 +155,23 @@ public class Lstopo extends AppCompatActivity {
         } else {
             tv.setClickable(false);
             LinearLayout viewGroup = layout.findViewById(id);
-
-            viewGroup.addView(tv);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            params.setMargins((int) (10 * xscale), (int) (2 * yscale), 0, 0);
-            tv.setLayoutParams(params);
-
-
+	    if (outside != 0) {
+		/* Text outside the box (PCI speed or factorization) cannot be in the box view,
+		 * or it wouldn't appear. So put it in the entire layout.
+		 * We won't be able to hide it on click, but there's nothing to show there on click anyway.
+		 */
+		layout.addView(tv);
+		tv.setX(x * xscale);
+		tv.setY(y * yscale);
+	    } else {
+		viewGroup.addView(tv);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+			LinearLayout.LayoutParams.WRAP_CONTENT,
+			LinearLayout.LayoutParams.WRAP_CONTENT
+		);
+		params.setMargins((int) (10 * xscale), (int) (2 * yscale), 0, 0);
+		tv.setLayoutParams(params);
+	    }
         }
 	if(bold != 0){
 	    tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
