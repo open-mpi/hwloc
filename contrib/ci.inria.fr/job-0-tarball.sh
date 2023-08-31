@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2021 Inria.  All rights reserved.
+# Copyright © 2012-2023 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -47,7 +47,7 @@ libtool --version | head -1
 autoconf --version | head -1
 
 # better version string
-snapshot=$branch-`date +%Y%m%d.%H%M`.git`git show --format=format:%h -s`
+snapshot=$branch-`date --utc +%Y%m%d.%H%M`.git`git show --format=format:%h -s`
 sed	-e 's/^snapshot_version=.*/snapshot_version='$snapshot/ \
 	-e 's/^snapshot=.*/snapshot=1/' \
 	-i VERSION
