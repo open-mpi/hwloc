@@ -91,8 +91,10 @@ public class Options extends Activity {
                 else if(ioObjectsWhole.isChecked())
                     options.add("--whole-io");
 
-                if(noFactorize.isChecked())
+                if(noFactorize.isChecked()){
                     options.add("--no-factorize");
+                    options.add("--no-collapse");
+		}
                 if(includeDisallowed.isChecked())
                     options.add("--disallowed");
                 if(noLegend.isChecked())
