@@ -184,8 +184,25 @@ public class Lstopo extends AppCompatActivity {
      * Draw topology line
      */
     public void line(int x1, int y1, int x2, int y2){
-        MyCanvas canvas = new MyCanvas(activity,x1 * xscale,x2 * xscale,y1 * yscale,y2 * yscale);
-        layout.addView(canvas);
+	int width = x2-x1;
+	int height = y2-y1;
+	if (width != 0 && height != 0)
+	    return; /* not supported yet */
+        LinearLayout view = new LinearLayout(activity);
+        view.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(view);
+	if (width == 0)
+	    width = 2;
+	if (height == 0)
+	    height = 2;
+        view.setX((int)(xscale * x1)-1);
+        view.setY((int)(yscale * y1)-1);
+        GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.RECTANGLE);
+        shape.setColor(Color.rgb(0, 0, 0));
+        view.setBackground(shape);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int)(xscale * width)+2, (int)(yscale * height)+2);
+        view.setLayoutParams(params);
     }
 
     public void setScreenSize(){
