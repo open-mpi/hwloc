@@ -55,8 +55,8 @@ int main(void)
       os = hwloc_ibv_get_device_osdev(topology, dev);
       if (os) {
 	assert(os->type == HWLOC_OBJ_OS_DEVICE);
-	printf("found OS object subtype %u lindex %u name %s\n",
-	       (unsigned) os->attr->osdev.type, os->logical_index, os->name);
+	printf("found OS object subtype %lu lindex %u name %s\n",
+	       (unsigned long) os->attr->osdev.type, os->logical_index, os->name);
 	assert(os->attr->osdev.type == HWLOC_OBJ_OSDEV_OPENFABRICS);
 	if (strcmp(ibv_get_device_name(dev), os->name))
 	  assert(0);

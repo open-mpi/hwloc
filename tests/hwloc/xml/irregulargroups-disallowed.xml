@@ -108,14 +108,14 @@
             <object type="PCIDev" gp_index="48" id="obj48" pci_busid="0000:01:00.0" pci_type="0200 [8086:1521] [10a9:802a] 01 00" pci_link_speed="0.000000">
               <info name="PCIVendor" value="Intel Corporation"/>
               <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-              <object type="OSDev" gp_index="49" id="obj49" name="eth0" osdev_type="2">
+              <object type="OSDev" gp_index="49" id="obj49" name="eth0" osdev_type="16">
                 <info name="Address" value="08:00:69:16:d0:b9"/>
               </object>
             </object>
             <object type="PCIDev" gp_index="50" id="obj50" pci_busid="0000:01:00.1" pci_type="0200 [8086:1521] [10a9:802a] 01 00" pci_link_speed="0.000000">
               <info name="PCIVendor" value="Intel Corporation"/>
               <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-              <object type="OSDev" gp_index="51" id="obj51" name="eth1" osdev_type="2">
+              <object type="OSDev" gp_index="51" id="obj51" name="eth1" osdev_type="16">
                 <info name="Address" value="08:00:69:16:d0:ba"/>
               </object>
             </object>
@@ -237,7 +237,7 @@
             <object type="PCIDev" gp_index="103" id="obj103" pci_busid="0001:02:00.0" pci_type="0104 [1000:0079] [1000:9280] 05 00" pci_link_speed="0.000000">
               <info name="PCIVendor" value="LSI Logic / Symbios Logic"/>
               <info name="PCIDevice" value="MegaRAID SAS 2108 [Liberator]"/>
-              <object type="OSDev" gp_index="104" id="obj104" name="sda" osdev_type="0">
+              <object type="OSDev" gp_index="104" id="obj104" name="sda" osdev_type="1">
                 <info name="LinuxDeviceID" value="8:0"/>
               </object>
             </object>

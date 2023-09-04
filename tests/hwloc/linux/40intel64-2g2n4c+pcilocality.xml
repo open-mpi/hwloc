@@ -219,7 +219,7 @@
         <object type="PCIDev" pci_busid="0000:00:00.0" pci_type="0600 [8086:3407] [1028:02d3] 22 00" pci_link_speed="0.000000"/>
         <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:03.0" pci_type="0604 [8086:340a] [0000:0000] 22 00" pci_link_speed="0.000000">
           <object type="PCIDev" pci_busid="0000:01:00.0" pci_type="0104 [1000:0079] [1028:1f17] 05 00" pci_link_speed="0.000000">
-            <object type="OSDev" name="sda" osdev_type="0">
+            <object type="OSDev" name="sda" osdev_type="1">
               <info name="Size" value="1756495872"/>
               <info name="SectorSize" value="512"/>
               <info name="LinuxDeviceID" value="8:0"/>
@@ -228,24 +228,24 @@
         </object>
         <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[02-02]" pci_busid="0000:00:05.0" pci_type="0604 [8086:340c] [0000:0000] 22 00" pci_link_speed="0.000000">
           <object type="PCIDev" pci_busid="0000:02:00.0" pci_type="0200 [14e4:1639] [1028:02d3] 20 00" pci_link_speed="0.000000">
-            <object type="OSDev" name="eth0" osdev_type="2">
+            <object type="OSDev" name="eth0" osdev_type="16">
               <info name="Address" value="78:2b:cb:38:ac:1b"/>
             </object>
           </object>
           <object type="PCIDev" pci_busid="0000:02:00.1" pci_type="0200 [14e4:1639] [1028:02d3] 20 00" pci_link_speed="0.000000">
-            <object type="OSDev" name="eth1" osdev_type="2">
+            <object type="OSDev" name="eth1" osdev_type="16">
               <info name="Address" value="78:2b:cb:38:ac:1d"/>
             </object>
           </object>
         </object>
         <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[03-03]" pci_busid="0000:00:06.0" pci_type="0604 [8086:340d] [0000:0000] 22 00" pci_link_speed="0.000000">
           <object type="PCIDev" pci_busid="0000:03:00.0" pci_type="0200 [14e4:1639] [1028:02d3] 20 00" pci_link_speed="0.000000">
-            <object type="OSDev" name="eth2" osdev_type="2">
+            <object type="OSDev" name="eth2" osdev_type="16">
               <info name="Address" value="78:2b:cb:38:ac:1f"/>
             </object>
           </object>
           <object type="PCIDev" pci_busid="0000:03:00.1" pci_type="0200 [14e4:1639] [1028:02d3] 20 00" pci_link_speed="0.250000">
-            <object type="OSDev" name="eth3" osdev_type="2">
+            <object type="OSDev" name="eth3" osdev_type="16">
               <info name="Address" value="78:2b:cb:38:ac:21"/>
             </object>
           </object>
@@ -270,7 +270,7 @@
         </object>
         <object type="PCIDev" pci_busid="0000:00:1f.0" pci_type="0601 [8086:3a18] [1028:02d3] 00 00" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:00:1f.2" pci_type="0101 [8086:3a20] [1028:02d3] 00 8f" pci_link_speed="1.000000">
-          <object type="OSDev" name="sr0" osdev_type="0">
+          <object type="OSDev" name="sr0" osdev_type="1">
             <info name="Size" value="1048575"/>
             <info name="SectorSize" value="512"/>
             <info name="LinuxDeviceID" value="11:0"/>
@@ -481,11 +481,11 @@
         <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[42-42]" pci_busid="0000:40:01.0" pci_type="0604 [8086:3408] [0000:0000] 22 00" pci_link_speed="0.000000"/>
         <object type="Bridge" bridge_type="1-1" depth="1" bridge_pci="0000:[43-43]" pci_busid="0000:40:03.0" pci_type="0604 [8086:340a] [0000:0000] 22 00" pci_link_speed="0.000000">
           <object type="PCIDev" pci_busid="0000:43:00.0" pci_type="0c06 [1077:7322] [1077:7322] 02 00" pci_link_speed="3.938462">
-            <object type="OSDev" name="ib0" osdev_type="2">
+            <object type="OSDev" name="ib0" osdev_type="16">
               <info name="Address" value="80:00:00:03:fe:80:00:00:00:00:00:00:00:11:75:00:00:77:cf:c8"/>
               <info name="Port" value="1"/>
             </object>
-            <object type="OSDev" name="qib0" osdev_type="3">
+            <object type="OSDev" name="qib0" osdev_type="32">
               <info name="NodeGUID" value="0011:7500:0077:cfc8"/>
               <info name="SysImageGUID" value="0011:7500:0077:cfc8"/>
               <info name="Port1State" value="4"/>

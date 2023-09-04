@@ -366,7 +366,7 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   unsigned depthattr = (unsigned) -1;
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
   hwloc_obj_bridge_type_t ubtype = (hwloc_obj_bridge_type_t) -1;
-  hwloc_obj_osdev_type_t ostype = (hwloc_obj_osdev_type_t) -1;
+  hwloc_obj_osdev_type_t ostype = 0; /* none */
   char *end;
 
   /* Never match the ending \0 since we want to match things like core:2 too.
@@ -378,10 +378,12 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   if (!hwloc_strncasecmp(string, "osdev[", 6)) {
     /* proper "OSDev[type]" */
     type = HWLOC_OBJ_OS_DEVICE;
+    ostype = 0;
     hwloc__osdev_type_sscanf(string+6, &ostype);
   } else if (!hwloc_strncasecmp(string, "os[", 3)) {
     /* shorter "OS[type]" */
     type = HWLOC_OBJ_OS_DEVICE;
+    ostype = 0;
     hwloc__osdev_type_sscanf(string+3, &ostype);
   } else if (hwloc__type_match(string, "osdev", 2)) {
     /* basic "OSDev" without type */

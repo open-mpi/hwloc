@@ -67,13 +67,13 @@
       <object type="PCIDev" os_index="32" gp_index="18" id="obj18" name="Intel Corporation Core Processor Integrated Graphics Controller" pci_busid="0000:00:02.0" pci_type="0300 [8086:0046] [0028:000a] 02" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="Core Processor Integrated Graphics Controller"/>
-        <object type="OSDev" gp_index="19" id="obj19" name="controlD64" osdev_type="1"/>
-        <object type="OSDev" gp_index="20" id="obj20" name="card0" osdev_type="1"/>
+        <object type="OSDev" gp_index="19" id="obj19" name="controlD64" osdev_type="4"/>
+        <object type="OSDev" gp_index="20" id="obj20" name="card0" osdev_type="4"/>
       </object>
       <object type="PCIDev" os_index="400" gp_index="21" id="obj21" name="Intel Corporation 82577LM Gigabit Network Connection" pci_busid="0000:00:19.0" pci_type="0200 [8086:10ea] [0028:000a] 05" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="82577LM Gigabit Network Connection"/>
-        <object type="OSDev" gp_index="22" id="obj22" name="eth0" osdev_type="2">
+        <object type="OSDev" gp_index="22" id="obj22" name="eth0" osdev_type="16">
           <info name="Address" value="5c:26:0a:53:da:8c"/>
         </object>
       </object>
@@ -83,7 +83,7 @@
         <object type="PCIDev" os_index="8192" gp_index="24" id="obj24" name="Intel Corporation Centrino Ultimate-N 6300" pci_busid="0000:02:00.0" pci_type="0280 [8086:422b] [0086:0021] 35" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="Centrino Ultimate-N 6300"/>
-          <object type="OSDev" gp_index="25" id="obj25" name="wlan0" osdev_type="2">
+          <object type="OSDev" gp_index="25" id="obj25" name="wlan0" osdev_type="16">
             <info name="Address" value="00:24:d7:0f:bd:34"/>
           </object>
         </object>
@@ -91,8 +91,8 @@
       <object type="PCIDev" os_index="498" gp_index="26" id="obj26" name="Intel Corporation 5 Series/3400 Series Chipset 6 port SATA AHCI Controller" pci_busid="0000:00:1f.2" pci_type="0106 [8086:3b2f] [0028:000a] 05" pci_link_speed="0.000000">
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="5 Series/3400 Series Chipset 6 port SATA AHCI Controller"/>
-        <object type="OSDev" gp_index="27" id="obj27" name="sda" osdev_type="0"/>
-        <object type="OSDev" gp_index="28" id="obj28" name="sr0" osdev_type="0"/>
+        <object type="OSDev" gp_index="27" id="obj27" name="sda" osdev_type="1"/>
+        <object type="OSDev" gp_index="28" id="obj28" name="sr0" osdev_type="1"/>
       </object>
     </object>
   </object>

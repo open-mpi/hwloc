@@ -117,7 +117,7 @@
         <object type="PCIDev" gp_index="79" id="obj79" pci_busid="0000:00:1f.2" pci_type="0106 [8086:1d02] [00d9:0062] 06 00" pci_link_speed="0.000000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="C600/X79 series chipset 6-Port SATA AHCI Controller"/>
-          <object type="OSDev" gp_index="80" id="obj80" name="sda" subtype="Disk" osdev_type="0"/>
+          <object type="OSDev" gp_index="80" id="obj80" name="sda" subtype="Disk" osdev_type="1"/>
         </object>
       </object>
     </object>
@@ -201,14 +201,14 @@
           <object type="PCIDev" gp_index="128" id="obj128" pci_busid="0000:81:00.0" pci_type="0200 [8086:1521] [00d9:0021] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="129" id="obj129" name="eth0" osdev_type="2">
+            <object type="OSDev" gp_index="129" id="obj129" name="eth0" osdev_type="16">
               <info name="Address" value="00:25:90:95:71:12"/>
             </object>
           </object>
           <object type="PCIDev" gp_index="130" id="obj130" pci_busid="0000:81:00.1" pci_type="0200 [8086:1521] [00d9:0021] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="131" id="obj131" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="131" id="obj131" name="eth1" osdev_type="16">
               <info name="Address" value="00:25:90:95:71:13"/>
             </object>
           </object>
@@ -227,7 +227,7 @@
           <object type="PCIDev" gp_index="135" id="obj135" pci_busid="0000:84:00.0" pci_type="0302 [10de:1094] [00de:0088] a1 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="NVIDIA Corporation"/>
             <info name="PCIDevice" value="Tesla M2075 Dual-Slot Computing Processor Module"/>
-            <object type="OSDev" gp_index="136" id="obj136" name="cuda0" subtype="CUDA" osdev_type="5">
+            <object type="OSDev" gp_index="136" id="obj136" name="cuda0" subtype="CUDA" osdev_type="8">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla K40m"/>
               <info name="CUDAGlobalMemorySize" value="11796032"/>
@@ -236,12 +236,12 @@
               <info name="CUDACoresPerMP" value="192"/>
               <info name="CUDASharedMemorySizePerMP" value="48"/>
             </object>
-            <object type="OSDev" gp_index="137" id="obj137" name="card0" osdev_type="1"/>
+            <object type="OSDev" gp_index="137" id="obj137" name="card0" osdev_type="4"/>
           </object>
           <object type="PCIDev" gp_index="138" id="obj138" pci_busid="0000:84:00.1" pci_type="0300 [1002:6798] [174b:e208] 00 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Advanced Micro Devices, Inc. [AMD/ATI]"/>
             <info name="PCIDevice" value="Tahiti XT [Radeon HD 7970/8970 OEM / R9 280X]"/>
-            <object type="OSDev" gp_index="139" id="obj139" name="opencl0d1" subtype="OpenCL" osdev_type="5">
+            <object type="OSDev" gp_index="139" id="obj139" name="opencl0d1" subtype="OpenCL" osdev_type="8">
               <info name="OpenCLDeviceType" value="GPU"/>
               <info name="GPUVendor" value="Advanced Micro Devices, Inc."/>
               <info name="GPUModel" value="AMD Radeon R9 200 / HD 7900 Series"/>
@@ -255,11 +255,11 @@
           <object type="PCIDev" gp_index="140" id="obj140" pci_busid="0000:04:00.0" pci_type="0207 [15b3:1013] [15b3:0013] 00 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Mellanox Technologies"/>
             <info name="PCIDevice" value="MT27700 Family [ConnectX-4]"/>
-            <object type="OSDev" gp_index="141" id="obj141" name="ib0" osdev_type="2">
+            <object type="OSDev" gp_index="141" id="obj141" name="ib0" osdev_type="16">
               <info name="Address" value="80:00:00:26:fe:80:00:00:00:00:00:00:24:8a:07:03:00:1e:39:fe"/>
               <info name="Port" value="1"/>
             </object>
-            <object type="OSDev" gp_index="142" id="obj142" name="mlx5_0" osdev_type="3">
+            <object type="OSDev" gp_index="142" id="obj142" name="mlx5_0" osdev_type="32">
               <info name="NodeGUID" value="248a:0703:001e:39fe"/>
               <info name="SysImageGUID" value="248a:0703:001e:39fe"/>
               <info name="Port1State" value="4"/>

@@ -356,28 +356,48 @@ typedef enum hwloc_obj_bridge_type_e {
   HWLOC_OBJ_BRIDGE_PCI		/**< \brief PCI-side of a bridge. */
 } hwloc_obj_bridge_type_t;
 
-/** \brief Type of a OS device. */
-typedef enum hwloc_obj_osdev_type_e {
-  HWLOC_OBJ_OSDEV_STORAGE,	/**< \brief Operating system storage device (e.g. block),
-				  * For instance "sda" on Linux. */
-  HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
-				  * For instance ":0.0" for a GL display,
-				  * "card0" for a Linux DRM device. */
-  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
-				  * For instance the "eth0" interface on Linux. */
-  HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
-				  * For instance the "mlx4_0" InfiniBand HCA,
-				  * "hfi1_0" Omni-Path interface,
-				  * or "bxi0" Atos/Bull BXI HCA on Linux. */
-  HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
-				  * For instance the "dma0chan0" DMA channel on Linux. */
-  HWLOC_OBJ_OSDEV_COPROC,	/**< \brief Operating system co-processor device.
-				  * For instance "opencl0d0" for a OpenCL device,
-				  * "cuda0" for a CUDA device. */
-  HWLOC_OBJ_OSDEV_MEMORY	/**< \brief Operating system memory device
-                                 * (e.g. DAX file for non-volatile or high-bandwidth memory),
-				  * For instance "dax2.0" on Linux. */
-} hwloc_obj_osdev_type_t;
+/** \brief Single type of a OS device.
+ * Multiple of these may be combined for a single device.
+ */
+enum hwloc_obj_osdev_type_e {
+  HWLOC_OBJ_OSDEV_STORAGE = (1ULL<<0),     /**< \brief Operating system storage device (e.g. block).
+                                            * For instance "sda" on Linux.
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_MEMORY = (1ULL<<1),      /**< \brief Operating system memory device.
+                                             (e.g. DAX file for non-volatile or high-bandwidth memory).
+                                            * For instance "dax2.0" on Linux.
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_GPU = (1ULL<<2),         /**< \brief Operating system GPU device.
+                                            * For instance ":0.0" for a GL display,
+                                            * "card0" for a Linux DRM device.
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_COPROC = (1ULL<<3),      /**< \brief Operating system co-processor device.
+                                            * For instance "opencl0d0" for a OpenCL device,
+                                            * "cuda0", "ze0.0" for driver-specific GPU handles.
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_NETWORK = (1ULL<<4),     /**< \brief Operating system network device.
+                                            * For instance the "eth0" interface on Linux.
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_OPENFABRICS = (1ULL<<5), /**< \brief Operating system OpenFabrics device.
+                                            * For instance the "mlx4_0" InfiniBand HCA,
+                                            * or "hfi1_0" Omni-Path interface.
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_DMA = (1ULL<<6)	   /**< \brief Operating system dma engine device.
+                                            * For instance the "dma0chan0" DMA channel on Linux.
+                                            * \hideinitializer
+                                            */
+};
+
+/** \brief Type of a OS device.
+ * OR'ed set of ::hwloc_obj_osdev_type_e.
+ */
+typedef unsigned long hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types
  *
@@ -703,7 +723,7 @@ union hwloc_obj_attr_u {
   } bridge;
   /** \brief OS Device specific Object Attributes */
   struct hwloc_osdev_attr_s {
-    hwloc_obj_osdev_type_t type;
+    hwloc_obj_osdev_type_t type; /**< \brief OR'ed set of at least one ::hwloc_obj_osdev_type_e. */
   } osdev;
 };
 
@@ -1124,7 +1144,8 @@ enum hwloc_obj_snprintf_flag_e {
  * Type-specific attributes, for instance Cache type, Cache depth, Group depth,
  * Bridge type or OS Device type may be returned in \p attrp.
  * Attributes that are not specified in the string (for instance "Group"
- * without a depth, or "L2Cache" without a cache type) are set to -1.
+ * without a depth, or "L2Cache" without a cache type) are set to \c -1.
+ * The OS-device-specific type attribute is rather set to \c 0.
  *
  * \p attrp is only filled if not \c NULL and if its size specified in \p attrsize
  * is large enough. It should be at least as large as union hwloc_obj_attr_u.

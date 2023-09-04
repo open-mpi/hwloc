@@ -63,27 +63,27 @@
       <object type="Bridge" os_index="0" gp_index="25" id="obj25" bridge_type="0-1" depth="0" bridge_pci="0000:[00-05]">
         <object type="Bridge" os_index="80" gp_index="26" id="obj26" bridge_type="1-1" depth="1" bridge_pci="0000:[05-05]" pci_busid="0000:00:05.0" pci_type="0604 [8086:340c] [0000:0000] 13 00" pci_link_speed="0.000000">
           <object type="PCIDev" os_index="20480" gp_index="27" id="obj27" pci_busid="0000:05:00.0" pci_type="0200 [8086:10c9] [003c:003f] 01 00" pci_link_speed="0.000000">
-            <object type="OSDev" gp_index="28" id="obj28" name="eth0" osdev_type="2">
+            <object type="OSDev" gp_index="28" id="obj28" name="eth0" osdev_type="16">
               <info name="Address" value="18:a9:05:58:08:54"/>
             </object>
           </object>
           <object type="PCIDev" os_index="20481" gp_index="29" id="obj29" pci_busid="0000:05:00.1" pci_type="0200 [8086:10c9] [003c:003f] 01 00" pci_link_speed="0.000000">
-            <object type="OSDev" gp_index="30" id="obj30" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="30" id="obj30" name="eth1" osdev_type="16">
               <info name="Address" value="18:a9:05:58:08:55"/>
             </object>
           </object>
         </object>
         <object type="Bridge" os_index="112" gp_index="31" id="obj31" bridge_type="1-1" depth="1" bridge_pci="0000:[04-04]" pci_busid="0000:00:07.0" pci_type="0604 [8086:340e] [0000:0000] 13 00" pci_link_speed="0.000000">
           <object type="PCIDev" os_index="16384" gp_index="32" id="obj32" pci_busid="0000:04:00.0" pci_type="0c06 [15b3:673c] [00b3:003c] a0 00" pci_link_speed="0.000000">
-            <object type="OSDev" gp_index="33" id="obj33" name="ib0" osdev_type="2">
+            <object type="OSDev" gp_index="33" id="obj33" name="ib0" osdev_type="16">
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:06:dc:a5"/>
               <info name="Port" value="1"/>
             </object>
-            <object type="OSDev" gp_index="34" id="obj34" name="ib1" osdev_type="2">
+            <object type="OSDev" gp_index="34" id="obj34" name="ib1" osdev_type="16">
               <info name="Address" value="80:00:00:49:fe:80:00:00:00:00:00:00:00:02:c9:03:00:06:dc:a6"/>
               <info name="Port" value="2"/>
             </object>
-            <object type="OSDev" gp_index="35" id="obj35" name="mlx4_0" osdev_type="3">
+            <object type="OSDev" gp_index="35" id="obj35" name="mlx4_0" osdev_type="32">
               <info name="NodeGUID" value="0002:c903:0006:dca4"/>
               <info name="SysImageGUID" value="0002:c903:0006:dca7"/>
               <info name="Port1LID" value="0x5a"/>
@@ -99,10 +99,10 @@
           <object type="PCIDev" os_index="8192" gp_index="37" id="obj37" pci_busid="0000:02:00.0" pci_type="0300 [102b:0522] [003c:00fa] 02 00" pci_link_speed="0.000000"/>
         </object>
         <object type="PCIDev" os_index="498" gp_index="38" id="obj38" pci_busid="0000:00:1f.2" pci_type="0106 [8086:3a22] [0086:0022] 00 00" pci_link_speed="0.000000">
-          <object type="OSDev" gp_index="39" id="obj39" name="sda" osdev_type="0"/>
-          <object type="OSDev" gp_index="40" id="obj40" name="sdb" osdev_type="0"/>
-          <object type="OSDev" gp_index="41" id="obj41" name="sdc" osdev_type="0"/>
-          <object type="OSDev" gp_index="42" id="obj42" name="sdd" osdev_type="0"/>
+          <object type="OSDev" gp_index="39" id="obj39" name="sda" osdev_type="1"/>
+          <object type="OSDev" gp_index="40" id="obj40" name="sdb" osdev_type="1"/>
+          <object type="OSDev" gp_index="41" id="obj41" name="sdc" osdev_type="1"/>
+          <object type="OSDev" gp_index="42" id="obj42" name="sdd" osdev_type="1"/>
         </object>
       </object>
     </object>
