@@ -1660,12 +1660,12 @@ components when I/O discovery is enabled and supported.
  <ul>
  <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
  <li><em>hsn0</em> with "Slingshot" subtype for HPE Cray HSNs (Linux component).</li>
+ <li><em>bxi0</em> with "BXI" subtype for Atos/Bull BXI HCAs (Linux component).</li>
  </ul>
 </li>
 <li>OpenFabrics (InfiniBand, Omni-Path, usNIC, etc) HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS)
  <ul>
  <li><em>mlx5_0</em>, <em>hfi1_0</em>, <em>qib0</em>, <em>usnic_0</em> (Linux component)</li>
- <li><em>bxi0</em> with "BXI" subtype for Atos/Bull BXI HCAs (Linux component) even if those are not really OpenFabrics.</li>
  </ul>
 </li>
 <li>GPUs (::HWLOC_OBJ_OSDEV_GPU)
@@ -1935,8 +1935,7 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 <ul>
 <li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
 <li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
-<li>OpenFabrics: subtype <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
-<li>Network: subtype <tt>Slingshot</tt> (HPE Cray Slingshot Cassini HSN).</li>
+<li>Network: subtype <tt>Slingshot</tt> (HPE Cray Slingshot Cassini HSN) or <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
 <li>Storage: subtype <tt>Disk</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
 <li>Memory: <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory).</li>
 </ul>

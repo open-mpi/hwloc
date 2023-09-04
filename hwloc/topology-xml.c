@@ -860,7 +860,10 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
       break;
     case 3: /* v2 OFED */
+      /* BXI which became NET only */
       obj->attr->osdev.type = HWLOC_OBJ_OSDEV_OPENFABRICS;
+      if (obj->subtype && !strcmp(obj->subtype, "BXI"))
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
       break;
     case 4: /* v2 DMA */
       obj->attr->osdev.type = HWLOC_OBJ_OSDEV_DMA;
@@ -2247,7 +2250,10 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
       } else if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_OPENFABRICS) {
         state->new_prop(state, "osdev_type", "3"); /* v2 OFED */
       } else if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_NETWORK) {
-        state->new_prop(state, "osdev_type", "2"); /* v2 Net */
+        if (obj->subtype && !strcmp(obj->subtype, "BXI"))
+          state->new_prop(state, "osdev_type", "3"); /* v2 OFED */
+        else
+          state->new_prop(state, "osdev_type", "2"); /* v2 Net */
       } else if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_DMA) {
         state->new_prop(state, "osdev_type", "4"); /* v2 DMA */
       } else if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC) {

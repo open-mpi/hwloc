@@ -380,7 +380,8 @@ enum hwloc_obj_osdev_type_e {
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_NETWORK = (1ULL<<4),     /**< \brief Operating system network device.
-                                            * For instance the "eth0" interface on Linux.
+                                            * For instance the "eth0" interface,
+                                            * "bxi0" Atos/Bull BXI HCA.
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_OPENFABRICS = (1ULL<<5), /**< \brief Operating system OpenFabrics device.

@@ -6615,7 +6615,7 @@ hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_fla
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
 
     hwloc_linuxfs_bxi_class_fillinfos(root_fd, obj, path);
   }
