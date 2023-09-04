@@ -1872,7 +1872,7 @@ See ::hwloc_obj_attr_u for details.
 \endhtmlonly
 \section attributes_info Custom string infos
 
-Aside os these generic attribute fields, hwloc annotates
+Aside of these generic attribute fields, hwloc annotates
 many objects with info attributes made of name and value strings.
 Each object contains a list of such pairs that may be consulted
 manually (looking at the object <tt>infos</tt> array field)
