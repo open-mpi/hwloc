@@ -31,8 +31,15 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
       assert(attr.bridge.downstream_type == obj->attr->bridge.downstream_type);
       /* FIXME: if downstream_type can ever be non-PCI, we'll need to improve strings, or relax these checks */
     } else if (type == HWLOC_OBJ_OS_DEVICE) {
-      if (!shortnames)
+      if (shortnames) {
+        /* shortname single type must be non-0 and included in actual types, or both are 0 */
+        if (obj->attr->osdev.type)
+          assert(attr.osdev.type && (attr.osdev.type & obj->attr->osdev.type) == attr.osdev.type);
+        else
+          assert(!attr.osdev.type);
+      } else {
         assert(attr.osdev.type == obj->attr->osdev.type);
+      }
     }
   }
 
@@ -64,12 +71,12 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj)
 
   err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
   assert(err > 0);
-  printf("    parsing hwloc_obj_type_snprintf() verbose output = %s\n", buffer);
+  printf("    parsing hwloc_obj_type_snprintf() long output = %s\n", buffer);
   _check(topology, obj, buffer, 1, 0);
 
   err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
   assert(err > 0);
-  printf("    parsing hwloc_obj_type_snprintf() verbose output = %s\n", buffer);
+  printf("    parsing hwloc_obj_type_snprintf() short output = %s\n", buffer);
   _check(topology, obj, buffer, 1, 1);
 
   for_each_child(child, obj)
@@ -103,6 +110,8 @@ int main(void)
 {
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
+  struct hwloc_obj sobj;
+  char tmp[64];
   int err;
 
   printf("testing basic strings ...\n");
@@ -147,11 +156,61 @@ int main(void)
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.type == HWLOC_OBJ_OSDEV_DMA);
+  err = hwloc_type_sscanf("osdev[co-processor,net,gpu,foo]", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
   err = hwloc_type_sscanf("os-", &type, &attr, sizeof(attr));
   assert(err == -1);
   err = hwloc_type_sscanf("o1", &type, &attr, sizeof(attr));
   printf("err %d %s for type %s\n", errno, strerror(errno), hwloc_obj_type_string(type));
   assert(err == -1);
+
+  /* test snprintf followed by sscanf on osdevs */
+  sobj.attr = &attr;
+  sobj.type = HWLOC_OBJ_OS_DEVICE;
+  attr.osdev.type = 0;
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
+  assert(!strcmp(tmp, "OS"));
+  err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == 0);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0);
+  assert(!strcmp(tmp, "OS"));
+  err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == 0);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  assert(!strcmp(tmp, "OSDev"));
+  err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == 0);
+  attr.osdev.type = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
+  assert(!strcmp(tmp, "Net"));
+  err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == HWLOC_OBJ_OSDEV_NETWORK);
+  attr.osdev.type = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0);
+  assert(!strcmp(tmp, "OS[Net,CoProc,GPU]"));
+  err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  assert(!strcmp(tmp, "OSDev[Network,Co-Processor,GPU]"));
+  err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
+  err = hwloc_obj_type_snprintf(tmp, 20 /* truncate */, &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  assert(!strcmp(tmp, "OSDev[Network,Co-Pr"));
+  /* don't try to parse the truncated output */
 
   err = hwloc_type_sscanf("l3IcaChe", &type, &attr, sizeof(attr));
   assert(!err);

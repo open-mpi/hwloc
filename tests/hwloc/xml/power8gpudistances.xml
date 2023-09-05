@@ -35,7 +35,7 @@
       <object type="Bridge" gp_index="304" id="obj304" bridge_type="0-1" depth="0" bridge_pci="0002:[00-01]">
         <object type="Bridge" gp_index="287" id="obj287" bridge_type="1-1" depth="1" bridge_pci="0002:[01-01]" pci_busid="0002:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
           <object type="PCIDev" gp_index="282" id="obj282" pci_busid="0002:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
-            <object type="OSDev" gp_index="328" id="obj328" name="cuda0" subtype="CUDA" osdev_type="8">
+            <object type="OSDev" gp_index="328" id="obj328" name="cuda0" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="CUDAGlobalMemorySize" value="16671616"/>
@@ -44,7 +44,7 @@
               <info name="CUDACoresPerMP" value="64"/>
               <info name="CUDASharedMemorySizePerMP" value="48"/>
             </object>
-            <object type="OSDev" gp_index="324" id="obj324" name="opencl0d0" subtype="OpenCL" osdev_type="8">
+            <object type="OSDev" gp_index="324" id="obj324" name="opencl0d0" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
@@ -54,7 +54,7 @@
               <info name="OpenCLComputeUnits" value="56"/>
               <info name="OpenCLGlobalMemorySize" value="16671616"/>
             </object>
-            <object type="OSDev" gp_index="332" id="obj332" name="nvml0" subtype="NVML" osdev_type="4">
+            <object type="OSDev" gp_index="332" id="obj332" name="nvml0" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="NVIDIASerial" value="0322716104625"/>
@@ -66,7 +66,7 @@
       <object type="Bridge" gp_index="305" id="obj305" bridge_type="0-1" depth="0" bridge_pci="0003:[00-01]">
         <object type="Bridge" gp_index="271" id="obj271" bridge_type="1-1" depth="1" bridge_pci="0003:[01-01]" pci_busid="0003:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
           <object type="PCIDev" gp_index="268" id="obj268" pci_busid="0003:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
-            <object type="OSDev" gp_index="329" id="obj329" name="cuda1" subtype="CUDA" osdev_type="8">
+            <object type="OSDev" gp_index="329" id="obj329" name="cuda1" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="CUDAGlobalMemorySize" value="16671616"/>
@@ -75,7 +75,7 @@
               <info name="CUDACoresPerMP" value="64"/>
               <info name="CUDASharedMemorySizePerMP" value="48"/>
             </object>
-            <object type="OSDev" gp_index="325" id="obj325" name="opencl0d1" subtype="OpenCL" osdev_type="8">
+            <object type="OSDev" gp_index="325" id="obj325" name="opencl0d1" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
@@ -85,7 +85,7 @@
               <info name="OpenCLComputeUnits" value="56"/>
               <info name="OpenCLGlobalMemorySize" value="16671616"/>
             </object>
-            <object type="OSDev" gp_index="333" id="obj333" name="nvml1" subtype="NVML" osdev_type="4">
+            <object type="OSDev" gp_index="333" id="obj333" name="nvml1" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="NVIDIASerial" value="0322716103693"/>
@@ -126,7 +126,7 @@
       <object type="Bridge" gp_index="310" id="obj310" bridge_type="0-1" depth="0" bridge_pci="000a:[00-01]">
         <object type="Bridge" gp_index="294" id="obj294" bridge_type="1-1" depth="1" bridge_pci="000a:[01-01]" pci_busid="000a:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
           <object type="PCIDev" gp_index="289" id="obj289" pci_busid="000a:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
-            <object type="OSDev" gp_index="330" id="obj330" name="cuda2" subtype="CUDA" osdev_type="8">
+            <object type="OSDev" gp_index="330" id="obj330" name="cuda2" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="CUDAGlobalMemorySize" value="16671616"/>
@@ -135,7 +135,7 @@
               <info name="CUDACoresPerMP" value="64"/>
               <info name="CUDASharedMemorySizePerMP" value="48"/>
             </object>
-            <object type="OSDev" gp_index="326" id="obj326" name="opencl0d2" subtype="OpenCL" osdev_type="8">
+            <object type="OSDev" gp_index="326" id="obj326" name="opencl0d2" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
@@ -145,7 +145,7 @@
               <info name="OpenCLComputeUnits" value="56"/>
               <info name="OpenCLGlobalMemorySize" value="16671616"/>
             </object>
-            <object type="OSDev" gp_index="334" id="obj334" name="nvml2" subtype="NVML" osdev_type="4">
+            <object type="OSDev" gp_index="334" id="obj334" name="nvml2" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="NVIDIASerial" value="0322716104229"/>
@@ -157,7 +157,7 @@
       <object type="Bridge" gp_index="311" id="obj311" bridge_type="0-1" depth="0" bridge_pci="000b:[00-01]">
         <object type="Bridge" gp_index="279" id="obj279" bridge_type="1-1" depth="1" bridge_pci="000b:[01-01]" pci_busid="000b:00:00.0" pci_type="0604 [1014:03dc] [0000:0000] 00 00" pci_link_speed="7.876923">
           <object type="PCIDev" gp_index="273" id="obj273" pci_busid="000b:01:00.0" pci_type="0302 [10de:15f9] [10de:116b] a1 00" pci_link_speed="15.753846">
-            <object type="OSDev" gp_index="331" id="obj331" name="cuda3" subtype="CUDA" osdev_type="8">
+            <object type="OSDev" gp_index="331" id="obj331" name="cuda3" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="CUDAGlobalMemorySize" value="16671616"/>
@@ -166,7 +166,7 @@
               <info name="CUDACoresPerMP" value="64"/>
               <info name="CUDASharedMemorySizePerMP" value="48"/>
             </object>
-            <object type="OSDev" gp_index="327" id="obj327" name="opencl0d3" subtype="OpenCL" osdev_type="8">
+            <object type="OSDev" gp_index="327" id="obj327" name="opencl0d3" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
@@ -176,7 +176,7 @@
               <info name="OpenCLComputeUnits" value="56"/>
               <info name="OpenCLGlobalMemorySize" value="16671616"/>
             </object>
-            <object type="OSDev" gp_index="335" id="obj335" name="nvml3" subtype="NVML" osdev_type="4">
+            <object type="OSDev" gp_index="335" id="obj335" name="nvml3" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
               <info name="NVIDIASerial" value="0322816173796"/>

@@ -1652,7 +1652,7 @@ components when I/O discovery is enabled and supported.
  <li><em>sda</em> or <em>nvme0n1</em> (Linux component)</li>
  </ul>
 </li>
-<li>Non-volatile, special-purpose or CXL memory devices (::HWLOC_OBJ_OSDEV_MEMORY)
+<li>Non-volatile, high-bandwidth, or special-purpose or CXL memory devices (::HWLOC_OBJ_OSDEV_MEMORY, with also ::HWLOC_OBJ_OSDEV_STORAGE if non-volatile)
  <ul>
  <li><em>dax2.0</em> or <em>mem0</em> (Linux component)</li>
  </ul>
@@ -1661,26 +1661,24 @@ components when I/O discovery is enabled and supported.
  <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
  <li><em>hsn0</em> with "Slingshot" subtype for HPE Cray HSNs (Linux component).</li>
  <li><em>bxi0</em> with "BXI" subtype for Atos/Bull BXI HCAs (Linux component).</li>
+ <li>OpenFabrics devices as explained below.
  </ul>
 </li>
-<li>OpenFabrics (InfiniBand, Omni-Path, usNIC, etc) HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS)
+<li>OpenFabrics (InfiniBand, Omni-Path, usNIC, etc) HCAs (::HWLOC_OBJ_OSDEV_OPENFABRICS and ::HWLOC_OBJ_OSDEV_NETWORK)
  <ul>
  <li><em>mlx5_0</em>, <em>hfi1_0</em>, <em>qib0</em>, <em>usnic_0</em> (Linux component)</li>
  </ul>
 </li>
-<li>GPUs (::HWLOC_OBJ_OSDEV_GPU)
+<li>GPUs (::HWLOC_OBJ_OSDEV_GPU and possibly ::HWLOC_OBJ_OSDEV_COPROC)
  <ul>
- <li><em>rsmi0</em> for the first RSMI device
-  ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
- <li><em>nvml0</em> for the first NVML device
-  ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
   ("Display" subtype, from the GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
  <li><em>card0</em> and <em>renderD128</em> for DRM device files
   (from the Linux component, filtered-out by default because considered non-important)</li>
+ <li>Any GPU that may be used as a co-processor as explained below.
  </ul>
 </li>
-<li>Co-Processors (::HWLOC_OBJ_OSDEV_COPROC)
+<li>Co-Processors (::HWLOC_OBJ_OSDEV_COPROC and possibly ::HWLOC_OBJ_OSDEV_GPU)
  <ul>
  <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
   <em>opencl1d3</em> for the fourth device of the second OpenCL platform
@@ -1688,8 +1686,12 @@ components when I/O discovery is enabled and supported.
  <li><em>ze0</em> for the first Level Zero device
   ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library),
   and <em>ze0.1</em> for its second subdevice (if any).</li>
+ <li><em>rsmi0</em> for the first RSMI device
+  ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
+ <li><em>nvml0</em> for the first NVML device
+  ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>ve0</em> for the first NEC Vector Engine device
   ("VectorEngine" subtype, from the Linux component)</li>
  </ul>
@@ -1911,8 +1913,10 @@ for instance their <tt>logical_index</tt> or <tt>os_index</tt>
 
 The kind of object is first described by the <tt>obj->type</tt>
 generic attribute (an integer).
-OS devices also have a specific <tt>obj->attr->osdev.type</tt> integer
+OS devices also have a specific <tt>obj->attr->osdev.type</tt> bitmask
 for distinguishing between NICs, GPUs, etc.
+For instance a GPU coprocessor has both ::HWLOC_OBJ_OSDEV_COPROC and
+::HWLOC_OBJ_OSDEV_GPU bits in this bitmask (see also \ref iodevices_osdev).
 
 Objects may also have an optional <tt>obj->subtype</tt> pointing
 to a better description string (displayed by lstopo either
@@ -1933,8 +1937,8 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 </li>
 <li>OS devices (see also \ref iodevices_osdev):
 <ul>
-<li>Co-processor: subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, or <tt>VectorEngine</tt>.</li>
-<li>GPU: subtype <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU).</li>
+<li>subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, <tt>VectorEngine</tt>,
+    <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU) for GPU and/or CoProcessor OS devices.</li>
 <li>Network: subtype <tt>Slingshot</tt> (HPE Cray Slingshot Cassini HSN) or <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
 <li>Storage: subtype <tt>Disk</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
 <li>Memory: <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory).</li>
@@ -2128,7 +2132,7 @@ and SectorSize (in bytes).
  in a CXL Type-3 device.
  Sizes are in KiB (1024 bytes).
 </dd>
-<dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
+<dt>GPUVendor, GPUModel (GPU and/or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
 <dt>OpenCLDeviceType, OpenCLPlatformIndex,</dt>

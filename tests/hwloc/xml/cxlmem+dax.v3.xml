@@ -125,7 +125,7 @@
                 <object type="PCIDev" gp_index="25" id="obj25" pci_busid="0000:12:00.0" pci_type="0502 [8086:0d93] [1af4:1100] 01 10" pci_link_speed="0.250000">
                   <info name="PCISlot" value="5"/>
                   <info name="PCIVendor" value="Intel Corporation"/>
-                  <object type="OSDev" gp_index="51" id="obj51" name="mem0" subtype="CXLMem" osdev_type="2">
+                  <object type="OSDev" gp_index="51" id="obj51" name="mem0" subtype="CXLMem" osdev_type="3">
                     <info name="CXLPMEMSize" value="262144"/>
                   </object>
                 </object>
@@ -152,7 +152,7 @@
                 <object type="PCIDev" gp_index="36" id="obj36" pci_busid="0000:16:00.0" pci_type="0502 [8086:0d93] [1af4:1100] 01 10" pci_link_speed="0.250000">
                   <info name="PCISlot" value="7"/>
                   <info name="PCIVendor" value="Intel Corporation"/>
-                  <object type="OSDev" gp_index="50" id="obj50" name="mem1" subtype="CXLMem" osdev_type="2">
+                  <object type="OSDev" gp_index="50" id="obj50" name="mem1" subtype="CXLMem" osdev_type="3">
                     <info name="CXLRAMSize" value="262144"/>
                     <info name="CXLPMEMSize" value="262144"/>
                   </object>

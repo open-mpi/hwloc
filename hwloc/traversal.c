@@ -358,6 +358,26 @@ hwloc__osdev_type_sscanf(const char *string, hwloc_obj_osdev_type_t *ostype)
   return 0;
 }
 
+static int
+hwloc__osdev_types_sscanf(const char *string, unsigned long *ostype)
+{
+  while (1) {
+    unsigned long new;
+    const char *next;
+    if (hwloc__osdev_type_sscanf(string, &new))
+      *ostype |= new;
+    next = strchr(string, ',');
+    if (!next)
+      break;
+    string = next+1;
+    continue;
+  }
+  if (strchr(string, ']'))
+    return 0;
+  else
+    return -1;
+}
+
 int
 hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
 		  union hwloc_obj_attr_u *attrp, size_t attrsize)
@@ -379,12 +399,12 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
     /* proper "OSDev[type]" */
     type = HWLOC_OBJ_OS_DEVICE;
     ostype = 0;
-    hwloc__osdev_type_sscanf(string+6, &ostype);
+    hwloc__osdev_types_sscanf(string+6, &ostype);
   } else if (!hwloc_strncasecmp(string, "os[", 3)) {
     /* shorter "OS[type]" */
     type = HWLOC_OBJ_OS_DEVICE;
     ostype = 0;
-    hwloc__osdev_type_sscanf(string+3, &ostype);
+    hwloc__osdev_types_sscanf(string+3, &ostype);
   } else if (hwloc__type_match(string, "osdev", 2)) {
     /* basic "OSDev" without type */
     type = HWLOC_OBJ_OS_DEVICE;
@@ -541,6 +561,86 @@ static const char* hwloc_obj_cache_type_letter(hwloc_obj_cache_type_t type)
   }
 }
 
+struct _hwloc_osdev_type_names {
+  hwloc_obj_osdev_type_t type;
+  const char *name;
+  const char *longname;
+};
+#define _HWLOC_OSDEV_TYPE_NAMES_NR 7
+struct _hwloc_osdev_type_names names[_HWLOC_OSDEV_TYPE_NAMES_NR] = {
+  /* Memory before Storage so that Memory is kept in short mode, OFED before Net, CoProc before GPU. */
+  { HWLOC_OBJ_OSDEV_MEMORY, "Mem", "Memory" },
+  { HWLOC_OBJ_OSDEV_STORAGE, "Storage", "Storage" },
+  { HWLOC_OBJ_OSDEV_OPENFABRICS, "OFED", "OpenFabrics" },
+  { HWLOC_OBJ_OSDEV_NETWORK, "Net", "Network" },
+  { HWLOC_OBJ_OSDEV_COPROC, "CoProc", "Co-Processor" },
+  { HWLOC_OBJ_OSDEV_GPU, "GPU", "GPU" },
+  { HWLOC_OBJ_OSDEV_DMA, "DMA", "DMA" }
+};
+
+static int
+hwloc__osdev_type_snprintf_short(char * __hwloc_restrict string, size_t size,
+                                 hwloc_obj_osdev_type_t ostype, int longnames)
+{
+  unsigned i;
+  for(i=0; i<_HWLOC_OSDEV_TYPE_NAMES_NR; i++)
+    if (ostype & names[i].type)
+      return hwloc_snprintf(string, size, "%s", longnames ? names[i].longname : names[i].name); /* -Wformat-security and OSX want "%s" first because non-string-literal argument */
+  /* ostype==0 or unknown */
+  return hwloc_snprintf(string, size, longnames ? "OSDev" : "OS");
+}
+
+static int
+hwloc__osdev_type_snprintf_normal(char * __hwloc_restrict string, size_t size,
+                                  hwloc_obj_osdev_type_t ostype, int longnames)
+{
+  char prefix = '[';
+  char *tmp = string;
+  ssize_t tmplen = size;
+  int ret = 0, res;
+
+  res = hwloc_snprintf(tmp, tmplen, longnames ? "OSDev" : "OS");
+  if (res < 0)
+    return -1;
+  ret += res;
+  if (res >= tmplen)
+    res = tmplen>0 ? (int)tmplen - 1 : 0;
+  tmp += res;
+  tmplen -= res;
+
+  while (ostype) {
+    unsigned i;
+    for(i=0; i<_HWLOC_OSDEV_TYPE_NAMES_NR; i++) {
+      if (ostype & names[i].type) {
+        res = hwloc_snprintf(tmp, tmplen, "%c%s", prefix, longnames ? names[i].longname : names[i].name);
+        if (res < 0)
+          return -1;
+        ret += res;
+        if (res >= tmplen)
+          res = tmplen>0 ? (int)tmplen - 1 : 0;
+        tmp += res;
+        tmplen -= res;
+        prefix = ',';
+        ostype &= ~names[i].type;
+      }
+    }
+  }
+
+  if (prefix == ',') {
+    /* we printed something, we need a closing ']' */
+    res = hwloc_snprintf(tmp, tmplen, "]");
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? (int)tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+  }
+
+  return ret;
+}
+
 int
 hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, unsigned long flags)
 {
@@ -580,29 +680,11 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
   case HWLOC_OBJ_PCI_DEVICE:
     return hwloc_snprintf(string, size, "PCI");
-  case HWLOC_OBJ_OS_DEVICE: {
-    const char *prefix = shortnames ? "" : longnames ? "OSDev" : "OS";
-    const char *middle;
-    switch (obj->attr->osdev.type) {
-    case HWLOC_OBJ_OSDEV_STORAGE: middle = "Storage"; break;
-    case HWLOC_OBJ_OSDEV_MEMORY: middle = longnames ? "Memory" : "Mem"; break;
-    case HWLOC_OBJ_OSDEV_NETWORK: middle = longnames ? "Network" : "Net"; break;
-    case HWLOC_OBJ_OSDEV_OPENFABRICS: middle = longnames ? "OpenFabrics" : "OFED"; break;
-    case HWLOC_OBJ_OSDEV_DMA: middle = "DMA"; break;
-    case HWLOC_OBJ_OSDEV_GPU: middle = "GPU"; break;
-    case HWLOC_OBJ_OSDEV_COPROC: middle = longnames ? "Co-Processor" : "CoProc"; break;
-    default:
-      middle = NULL;
-    }
-    if (middle) {
-      if (shortnames)
-        return hwloc_snprintf(string, size, "%s", middle);
-      else
-        return hwloc_snprintf(string, size, "%s[%s]", prefix, middle);
-    } else
-      return hwloc_snprintf(string, size, "%s", prefix);
-  }
-    /* fallthrough */
+  case HWLOC_OBJ_OS_DEVICE:
+    if (shortnames)
+      return hwloc__osdev_type_snprintf_short(string, size, obj->attr->osdev.type, longnames);
+    else
+      return hwloc__osdev_type_snprintf_normal(string, size, obj->attr->osdev.type, longnames);
   default:
     if (size > 0)
       *string = '\0';

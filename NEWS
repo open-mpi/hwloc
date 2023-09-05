@@ -32,8 +32,12 @@ Version 3.0.0
     in PCI object attributes.
   + The OS device "type" attribute is now a bitmask.
     - "Block" OS devices are now "Storage" (for actual Block devices)
-      or "Memory" (for Linux DAX and CXL devices, etc).
+      and/or "Memory" (for Linux DAX and CXL devices, etc).
+    - Some "CoProcessors" are also "GPUs" (e.g. CUDA devices),
+      and some GPUs are also CoProcessors (e.g. RSMI).
+    - "OpenFabrics" devices are now also "Network".
     - BXI interfaces are now "Network" instead of "OpenFabrics".
+    - See "OS devices" in the documentation for details.
   + The "Backend" info attribute of OS devices is now in the topology
     root object together with other backends.
   + The array and count of info attributes are now embedded in the new

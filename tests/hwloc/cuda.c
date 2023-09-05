@@ -77,7 +77,7 @@ int main(void)
 
     assert(has_cuda_backend);
 
-    assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
+    assert(osdev->attr->osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
 
     value = osdev->subtype;
     assert(value);

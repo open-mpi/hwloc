@@ -101,7 +101,7 @@
             <object type="OSDev" gp_index="44" id="obj44" name="ib0" osdev_type="16">
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:78:e7:d1:03:00:21:55:35"/>
             </object>
-            <object type="OSDev" gp_index="45" id="obj45" name="mlx4_0" osdev_type="32"/>
+            <object type="OSDev" gp_index="45" id="obj45" name="mlx4_0" osdev_type="48"/>
           </object>
         </object>
         <object type="Bridge" gp_index="46" id="obj46" bridge_type="1-1" depth="1" bridge_pci="0000:[06-08]" pci_busid="0000:00:07.0" pci_type="0604 [8086:340e] [0000:0000] 13 00" pci_link_speed="4.000000">

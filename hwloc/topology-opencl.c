@@ -120,19 +120,23 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
       snprintf(buffer, sizeof(buffer), "opencl%ud%u", j, i);
       osdev->name = strdup(buffer);
       osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
-      osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
       osdev->subtype = strdup("OpenCL");
 
       /* in theory, we should handle cases such GPU|Accelerator|CPU for strange platforms/devices */
-      if (type & CL_DEVICE_TYPE_GPU)
+      if (type & CL_DEVICE_TYPE_GPU) {
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "GPU");
-      else if (type & CL_DEVICE_TYPE_ACCELERATOR)
+        osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC | HWLOC_OBJ_OSDEV_GPU;
+      } else if (type & CL_DEVICE_TYPE_ACCELERATOR) {
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Accelerator");
-      else if (type & HWLOC_CL_DEVICE_TYPE_CUSTOM)
+        osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+      } else if (type & HWLOC_CL_DEVICE_TYPE_CUSTOM) {
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Custom"); /* Custom cannot be combined with any other type */
-      else
+        osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+      } else {
 	hwloc_obj_add_info(osdev, "OpenCLDeviceType", "Unknown");
+        osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+      }
 
       buffer[0] = '\0';
       clGetDeviceInfo(device_ids[i], CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL);

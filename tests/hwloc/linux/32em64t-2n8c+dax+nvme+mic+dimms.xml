@@ -168,7 +168,7 @@
         </object>
         <object type="PCIDev" pci_busid="0000:00:1f.3" pci_type="0c05 [8086:1d22] [1028:0518] 06 00" pci_link_speed="0.000000"/>
       </object>
-      <object type="OSDev" name="dax0.0" subtype="NVM" osdev_type="2">
+      <object type="OSDev" name="dax0.0" subtype="NVM" osdev_type="3">
         <info name="DAXType" value="NVM"/>
         <info name="DAXParent" value="LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region0"/>
         <info name="Size" value="105281536"/>
@@ -279,7 +279,7 @@
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:f9:bf:a1"/>
               <info name="Port" value="1"/>
             </object>
-            <object type="OSDev" name="mlx4_0" osdev_type="32">
+            <object type="OSDev" name="mlx4_0" osdev_type="48">
               <info name="NodeGUID" value="0002:c903:00f9:bfa0"/>
               <info name="SysImageGUID" value="0002:c903:00f9:bfa3"/>
               <info name="Port1State" value="4"/>
@@ -322,7 +322,7 @@
         <object type="PCIDev" pci_busid="0000:80:05.2" pci_type="0880 [8086:3c2a] [1028:0518] 07 00" pci_link_speed="0.000000"/>
         <object type="PCIDev" pci_busid="0000:80:05.4" pci_type="0800 [8086:3c2c] [1028:0518] 07 20" pci_link_speed="0.000000"/>
       </object>
-      <object type="OSDev" name="dax1.3" subtype="NVM" osdev_type="2">
+      <object type="OSDev" name="dax1.3" subtype="NVM" osdev_type="3">
         <info name="DAXType" value="NVM"/>
         <info name="DAXParent" value="LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region1/dax1.0"/>
         <info name="Size" value="61929472"/>

@@ -361,32 +361,42 @@ typedef enum hwloc_obj_bridge_type_e {
  */
 enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_STORAGE = (1ULL<<0),     /**< \brief Operating system storage device (e.g. block).
-                                            * For instance "sda" on Linux.
+                                            * For instance "sda" or "pmem0" on Linux,
+                                            * or "dax0.0" if backed by non-volatile memory
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_MEMORY).
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_MEMORY = (1ULL<<1),      /**< \brief Operating system memory device.
-                                             (e.g. DAX file for non-volatile or high-bandwidth memory).
-                                            * For instance "dax2.0" on Linux.
+                                            * For instance "dax2.0" on Linux,
+                                            * either for normal DRAM when not exposed as a NUMA node (e.g. CXL),
+                                            * special-purpose memory (SPM), high-bandwidth memory (HBM),
+                                            * or non-volatile memory (may be combined with ::HWLOC_OBJ_OSDEV_STORAGE).
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_GPU = (1ULL<<2),         /**< \brief Operating system GPU device.
                                             * For instance ":0.0" for a GL display,
-                                            * "card0" for a Linux DRM device.
+                                            * "card0" for a Linux DRM device,
+                                            * "cuda0", "rsmi1", "ze0.0" for driver-specific GPU handles
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_COPROC).
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_COPROC = (1ULL<<3),      /**< \brief Operating system co-processor device.
                                             * For instance "opencl0d0" for a OpenCL device,
-                                            * "cuda0", "ze0.0" for driver-specific GPU handles.
+                                            * "cuda0", "rsmi1", "ze0.0" for driver-specific GPU handles.
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_GPU).
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_NETWORK = (1ULL<<4),     /**< \brief Operating system network device.
                                             * For instance the "eth0" interface,
-                                            * "bxi0" Atos/Bull BXI HCA.
+                                            * "bxi0" Atos/Bull BXI HCA,
+                                            * as well as OpenFabrics HCA.
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_OPENFABRICS).
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_OPENFABRICS = (1ULL<<5), /**< \brief Operating system OpenFabrics device.
                                             * For instance the "mlx4_0" InfiniBand HCA,
                                             * or "hfi1_0" Omni-Path interface.
+                                            * (usually combined with ::HWLOC_OBJ_OSDEV_NETWORK).
                                             * \hideinitializer
                                             */
   HWLOC_OBJ_OSDEV_DMA = (1ULL<<6)	   /**< \brief Operating system dma engine device.
@@ -1103,7 +1113,7 @@ enum hwloc_obj_snprintf_flag_e {
   HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES = 1ULL<<1,
 
   /** \brief Reduce the name even if it may become ambiguous,
-   * for instance by removing the OS device prefix.
+   * for instance by removing the OS device prefix and showing a single type.
    * hwloc_type_sscanf() might not be able to parse it back exactly anymore.
    * \hideinitializer
    */

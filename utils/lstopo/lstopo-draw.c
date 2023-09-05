@@ -1259,7 +1259,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 
   if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {
     if (HWLOC_OBJ_OS_DEVICE == obj->type) {
-      if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type && obj->subtype) {
+      if ((HWLOC_OBJ_OSDEV_COPROC & obj->attr->osdev.type) && obj->subtype) {
 	/* Coprocessor */
 	if (!strcmp(obj->subtype, "CUDA")) {
 	  /* CUDA */
@@ -1340,7 +1340,8 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
           }
         }
 
-      } else if (HWLOC_OBJ_OSDEV_STORAGE == obj->attr->osdev.type) {
+      }
+      if (HWLOC_OBJ_OSDEV_STORAGE & obj->attr->osdev.type) {
 	/* Storage */
 	const char *value;
 	value = hwloc_obj_get_info_by_name(obj, "Size");
@@ -1349,7 +1350,8 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	  hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
 	}
 
-      } else if (HWLOC_OBJ_OSDEV_MEMORY == obj->attr->osdev.type) {
+      }
+      if (HWLOC_OBJ_OSDEV_MEMORY & obj->attr->osdev.type) {
 	/* Memory */
 	const char *value;
 	value = hwloc_obj_get_info_by_name(obj, "Size");

@@ -523,7 +523,7 @@ hwloc_filter_check_pcidev_subtype_important(unsigned classid)
 static __hwloc_inline int
 hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_type_t subtype)
 {
-  return (subtype != HWLOC_OBJ_OSDEV_DMA);
+  return (subtype && subtype != HWLOC_OBJ_OSDEV_DMA);
 }
 
 /** \brief Check whether a non-I/O object type should be filtered-out.

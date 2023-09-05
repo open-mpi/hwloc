@@ -485,7 +485,7 @@
               <info name="Address" value="80:00:00:03:fe:80:00:00:00:00:00:00:00:11:75:00:00:77:cf:c8"/>
               <info name="Port" value="1"/>
             </object>
-            <object type="OSDev" name="qib0" osdev_type="32">
+            <object type="OSDev" name="qib0" osdev_type="48">
               <info name="NodeGUID" value="0011:7500:0077:cfc8"/>
               <info name="SysImageGUID" value="0011:7500:0077:cfc8"/>
               <info name="Port1State" value="4"/>

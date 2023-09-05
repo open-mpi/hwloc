@@ -43,7 +43,7 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
             L1iCache L#5 (P#5 size=32KiB linesize=64 ways=8)
               Core L#5 (P#5)
                 PU L#5 (P#5)
-        OSDev[Memory](NVM) L#2 (DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region6/dax6.1 Size=514048 LinuxDeviceID=253:6) "dax6.0"
+        OSDev[Memory,Storage](NVM) L#2 (DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region6/dax6.1 Size=514048 LinuxDeviceID=253:6) "dax6.0"
 depth 0:            1 Machine (type #0)
  depth 1:           1 Package (type #1)
   depth 2:          1 L3Cache (type #6)

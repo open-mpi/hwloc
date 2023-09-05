@@ -55,12 +55,12 @@ Machine (P#0 total=128GiB)
               PCIBridge L#6 (busid=0000:0a:00.0 id=1137:0041 class=0604(PCIBridge) buses=0000:[0b-0b] PCIVendor="Cisco Systems Inc" PCIDevice="VIC PCIe Downstream Port")
                 PCI L#2 (busid=0000:0b:00.0 id=1137:0043 class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Ethernet NIC")
                   OSDev[Network] L#2 (Address=24:57:20:04:20:00 Port=1) "eth4"
-                  OSDev[OpenFabrics] L#3 (NodeGUID=0200:00ff:fe00:0000 SysImageGUID=2657:20ff:fe04:2000 Port1State=4 Port1LID=0x0 Port1LMC=1 Port1GID0=fe80:0000:0a0a:0004:2657:20ff:fe04:2000) "usnic_0"
+                  OSDev[OpenFabrics,Network] L#3 (NodeGUID=0200:00ff:fe00:0000 SysImageGUID=2657:20ff:fe04:2000 Port1State=4 Port1LID=0x0 Port1LMC=1 Port1GID0=fe80:0000:0a0a:0004:2657:20ff:fe04:2000) "usnic_0"
                 3 x { PCI L#3-5 (busid=0b:00.1-3 id=1137:00cf class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Userspace NIC") }
               PCIBridge L#7 (busid=0000:0a:01.0 id=1137:0041 class=0604(PCIBridge) buses=0000:[0c-0c] PCIVendor="Cisco Systems Inc" PCIDevice="VIC PCIe Downstream Port")
                 PCI L#6 (busid=0000:0c:00.0 id=1137:0043 class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Ethernet NIC")
                   OSDev[Network] L#4 (Address=24:57:20:04:21:00 Port=1) "eth5"
-                  OSDev[OpenFabrics] L#5 (NodeGUID=0200:00ff:fe00:0000 SysImageGUID=2657:20ff:fe04:2100 Port1State=4 Port1LID=0x0 Port1LMC=1 Port1GID0=fe80:0000:0a02:0004:2657:20ff:fe04:2100) "usnic_1"
+                  OSDev[OpenFabrics,Network] L#5 (NodeGUID=0200:00ff:fe00:0000 SysImageGUID=2657:20ff:fe04:2100 Port1State=4 Port1LID=0x0 Port1LMC=1 Port1GID0=fe80:0000:0a02:0004:2657:20ff:fe04:2100) "usnic_1"
                 PCI L#7 (busid=0000:0c:00.1 id=1137:00cf class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Userspace NIC")
                 2 x { PCI L#8-9 (busid=0c:00.2-3 id=1138:00cf class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Userspace NIC") }
                 PCI L#10 (busid=0000:0c:00.4 id=1137:00cf class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Userspace NIC")
@@ -115,7 +115,7 @@ Machine (P#0 total=128GiB)
               PCIBridge L#13 (busid=0000:87:00.0 id=1137:0041 class=0604(PCIBridge) buses=0000:[88-88] PCIVendor="Cisco Systems Inc" PCIDevice="VIC PCIe Downstream Port")
                 PCI L#11 (busid=0000:88:00.0 id=1137:0043 class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Ethernet NIC")
                   OSDev[Network] L#6 (Address=24:57:20:04:50:00 Port=1) "eth6"
-                  OSDev[OpenFabrics] L#7 (NodeGUID=0200:00ff:fe00:0000 SysImageGUID=2657:20ff:fe04:5000 Port1State=4 Port1LID=0x0 Port1LMC=1 Port1GID0=fe80:0000:0a03:0004:2657:20ff:fe04:5000) "usnic_2"
+                  OSDev[OpenFabrics,Network] L#7 (NodeGUID=0200:00ff:fe00:0000 SysImageGUID=2657:20ff:fe04:5000 Port1State=4 Port1LID=0x0 Port1LMC=1 Port1GID0=fe80:0000:0a03:0004:2657:20ff:fe04:5000) "usnic_2"
                 5 x { PCI L#12-16 (busid=88:00.1-5 id=1137:00cf class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Userspace NIC") }
               PCIBridge L#14 (busid=0000:87:01.0 id=1137:0041 class=0604(PCIBridge) buses=0000:[89-89] PCIVendor="Cisco Systems Inc" PCIDevice="VIC PCIe Downstream Port")
                 PCI L#17 (busid=0000:89:00.0 id=1137:0043 class=0200(Ethernet) PCIVendor="Cisco Systems Inc" PCIDevice="VIC Ethernet NIC")

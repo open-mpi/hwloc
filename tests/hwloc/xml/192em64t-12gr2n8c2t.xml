@@ -766,7 +766,7 @@
                 <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:1b:b0:a1"/>
                 <info name="Port" value="1"/>
               </object>
-              <object type="OSDev" gp_index="401" id="obj401" name="mlx4_0" osdev_type="32">
+              <object type="OSDev" gp_index="401" id="obj401" name="mlx4_0" osdev_type="48">
                 <info name="NodeGUID" value="0002:c903:001b:b0a0"/>
                 <info name="SysImageGUID" value="0002:c903:001b:b0a3"/>
                 <info name="Port1LID" value="0x0"/>
