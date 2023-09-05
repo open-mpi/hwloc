@@ -843,6 +843,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
+    if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_STORAGE
+        && ((obj->name && !strncmp(obj->name, "dax", 3))
+            || (obj->subtype && !strcmp(obj->subtype, "CXLMem"))))
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
+  }
+
+  /* filter AFTER having updated the osdevice attribute from v2 */
   if (!hwloc_filter_check_keep_object(topology, obj)) {
     /* Ignore this object instead of inserting it.
      *
@@ -857,13 +865,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* root->parent is NULL, and root is already inserted */
     hwloc_insert_object_by_parent(topology, parent, obj);
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
-  }
-
-  if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
-    if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_STORAGE
-        && ((obj->name && !strncmp(obj->name, "dax", 3))
-            || (obj->subtype && !strcmp(obj->subtype, "CXLMem"))))
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
   }
 
   /* process object subnodes, if we found one win the above loop */
