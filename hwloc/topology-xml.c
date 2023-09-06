@@ -384,13 +384,14 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
   else if (!strcmp(name, "osdev_type")) {
     switch (obj->type) {
     case HWLOC_OBJ_OS_DEVICE: {
-      unsigned osdev_type;
-      if (sscanf(value, "%u", &osdev_type) != 1) {
+      unsigned long osdev_type;
+      if (sscanf(value, "%lu", &osdev_type) != 1) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring invalid osdev_type format string %s\n",
 		  state->global->msgprefix, value);
-      } else
-	obj->attr->osdev.type = (hwloc_obj_osdev_type_t) osdev_type;
+      } else {
+	obj->attr->osdev.type = osdev_type; /* v2 types will be updated later in hwloc__xml_import_object() */
+      }
       break;
     }
     default:
@@ -843,6 +844,64 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
+    unsigned long oldtype = obj->attr->osdev.type;
+    switch (oldtype) {
+    case 0: /* v2 Block */
+      if ((obj->name && !strncmp(obj->name, "dax", 3))) {
+        /* DAX is MEMORY, and STORAGE if NVM */
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
+        if (obj->subtype && !strcmp(obj->subtype, "NVM"))
+          obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+      } else if (obj->subtype && !strcmp(obj->subtype, "CXLMem")) {
+        /* CXL is MEMORY, and STORAGE if there's some PMEM */
+        const char *info = hwloc_obj_get_info_by_name(obj, "CXLPMEMSize");
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
+        if (info)
+          obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+      } else {
+        /* anything else is STORAGE */
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_STORAGE;
+      }
+      break;
+    case 1: /* v2 GPU */
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+      if (obj->name && (!strncmp(obj->name, "rsmi", 4) || !strncmp(obj->name, "nvml", 4) /* no RSMI/NVML subtype for v2.5 */))
+        obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_COPROC;
+      break;
+    case 2: /* v2 Net */
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
+      break;
+    case 3: /* v2 OFED */
+      /* everything is NET and OFED, except BXI which became NET only */
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
+      if (!obj->subtype || strcmp(obj->subtype, "BXI"))
+        obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_OPENFABRICS;
+      break;
+    case 4: /* v2 DMA */
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_DMA;
+      break;
+    case 5: /* v2 COPROC */
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+      if (obj->subtype) {
+        /* CUDA and L0 are also GPU, and OpenCL GPU obviously */
+        if (!strcmp(obj->subtype, "CUDA") || !strcmp(obj->subtype, "LevelZero"))
+          obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_GPU;
+        else if (!strcmp(obj->subtype, "OpenCL")) {
+          const char *info = hwloc_obj_get_info_by_name(obj, "OpenCLDeviceType");
+          if (info && !strcmp(info, "GPU"))
+            obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_GPU;
+        }
+      }
+      break;
+    default:
+      /* unrecognized, no type */
+      obj->attr->osdev.type = 0;
+      break;
+    }
+  }
+
+  /* filter AFTER having updated the osdevice attribute from v2 */
   if (!hwloc_filter_check_keep_object(topology, obj)) {
     /* Ignore this object instead of inserting it.
      *
@@ -857,13 +916,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* root->parent is NULL, and root is already inserted */
     hwloc_insert_object_by_parent(topology, parent, obj);
     /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
-  }
-
-  if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
-    if (obj->attr->osdev.type == HWLOC_OBJ_OSDEV_STORAGE
-        && ((obj->name && !strncmp(obj->name, "dax", 3))
-            || (obj->subtype && !strcmp(obj->subtype, "CXLMem"))))
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
   }
 
   /* process object subnodes, if we found one win the above loop */
@@ -2215,11 +2267,30 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     state->new_prop(state, "pci_link_speed", tmp);
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    if (v2export && obj->attr->osdev.type == HWLOC_OBJ_OSDEV_MEMORY)
-      sprintf(tmp, "%d", (int) HWLOC_OBJ_OSDEV_STORAGE);
-    else
-      sprintf(tmp, "%d", (int) obj->attr->osdev.type);
-    state->new_prop(state, "osdev_type", tmp);
+    if (v2export) {
+      if (obj->attr->osdev.type & (HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY)) {
+        state->new_prop(state, "osdev_type", "0"); /* v2 Block */
+      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_OPENFABRICS) {
+        state->new_prop(state, "osdev_type", "3"); /* v2 OFED */
+      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_NETWORK) {
+        if (obj->subtype && !strcmp(obj->subtype, "BXI"))
+          state->new_prop(state, "osdev_type", "3"); /* v2 OFED */
+        else
+          state->new_prop(state, "osdev_type", "2"); /* v2 Net */
+      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_DMA) {
+        state->new_prop(state, "osdev_type", "4"); /* v2 DMA */
+      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_COPROC) {
+        if (obj->name && (!strncmp(obj->name, "nvml", 4) || !strncmp(obj->name, "rsmi", 4)))
+          state->new_prop(state, "osdev_type", "1"); /* v2 GPU */
+        else
+          state->new_prop(state, "osdev_type", "5"); /* v2 CoProc */
+      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_GPU) {
+        state->new_prop(state, "osdev_type", "1"); /* v2 GPU */
+      }
+    } else {
+      sprintf(tmp, "%lu", obj->attr->osdev.type);
+      state->new_prop(state, "osdev_type", tmp);
+    }
     break;
   default:
     break;

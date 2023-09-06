@@ -356,28 +356,59 @@ typedef enum hwloc_obj_bridge_type_e {
   HWLOC_OBJ_BRIDGE_PCI		/**< \brief PCI-side of a bridge. */
 } hwloc_obj_bridge_type_t;
 
-/** \brief Type of a OS device. */
-typedef enum hwloc_obj_osdev_type_e {
-  HWLOC_OBJ_OSDEV_STORAGE,	/**< \brief Operating system storage device (e.g. block),
-				  * For instance "sda" on Linux. */
-  HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
-				  * For instance ":0.0" for a GL display,
-				  * "card0" for a Linux DRM device. */
-  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
-				  * For instance the "eth0" interface on Linux. */
-  HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
-				  * For instance the "mlx4_0" InfiniBand HCA,
-				  * "hfi1_0" Omni-Path interface,
-				  * or "bxi0" Atos/Bull BXI HCA on Linux. */
-  HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
-				  * For instance the "dma0chan0" DMA channel on Linux. */
-  HWLOC_OBJ_OSDEV_COPROC,	/**< \brief Operating system co-processor device.
-				  * For instance "opencl0d0" for a OpenCL device,
-				  * "cuda0" for a CUDA device. */
-  HWLOC_OBJ_OSDEV_MEMORY	/**< \brief Operating system memory device
-                                 * (e.g. DAX file for non-volatile or high-bandwidth memory),
-				  * For instance "dax2.0" on Linux. */
-} hwloc_obj_osdev_type_t;
+/** \brief Single type of a OS device.
+ * Multiple of these may be combined for a single device.
+ */
+enum hwloc_obj_osdev_type_e {
+  HWLOC_OBJ_OSDEV_STORAGE = (1ULL<<0),     /**< \brief Operating system storage device (e.g. block).
+                                            * For instance "sda" or "pmem0" on Linux,
+                                            * or "dax0.0" if backed by non-volatile memory
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_MEMORY).
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_MEMORY = (1ULL<<1),      /**< \brief Operating system memory device.
+                                            * For instance "dax2.0" on Linux,
+                                            * either for normal DRAM when not exposed as a NUMA node (e.g. CXL),
+                                            * special-purpose memory (SPM), high-bandwidth memory (HBM),
+                                            * or non-volatile memory (may be combined with ::HWLOC_OBJ_OSDEV_STORAGE).
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_GPU = (1ULL<<2),         /**< \brief Operating system GPU device.
+                                            * For instance ":0.0" for a GL display,
+                                            * "card0" for a Linux DRM device,
+                                            * "cuda0", "rsmi1", "ze0.0" for driver-specific GPU handles
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_COPROC).
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_COPROC = (1ULL<<3),      /**< \brief Operating system co-processor device.
+                                            * For instance "opencl0d0" for a OpenCL device,
+                                            * "cuda0", "rsmi1", "ze0.0" for driver-specific GPU handles.
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_GPU).
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_NETWORK = (1ULL<<4),     /**< \brief Operating system network device.
+                                            * For instance the "eth0" interface,
+                                            * "bxi0" Atos/Bull BXI HCA,
+                                            * as well as OpenFabrics HCA.
+                                            * (may be combined with ::HWLOC_OBJ_OSDEV_OPENFABRICS).
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_OPENFABRICS = (1ULL<<5), /**< \brief Operating system OpenFabrics device.
+                                            * For instance the "mlx4_0" InfiniBand HCA,
+                                            * or "hfi1_0" Omni-Path interface.
+                                            * (usually combined with ::HWLOC_OBJ_OSDEV_NETWORK).
+                                            * \hideinitializer
+                                            */
+  HWLOC_OBJ_OSDEV_DMA = (1ULL<<6)	   /**< \brief Operating system dma engine device.
+                                            * For instance the "dma0chan0" DMA channel on Linux.
+                                            * \hideinitializer
+                                            */
+};
+
+/** \brief Type of a OS device.
+ * OR'ed set of ::hwloc_obj_osdev_type_e.
+ */
+typedef unsigned long hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types
  *
@@ -703,7 +734,7 @@ union hwloc_obj_attr_u {
   } bridge;
   /** \brief OS Device specific Object Attributes */
   struct hwloc_osdev_attr_s {
-    hwloc_obj_osdev_type_t type;
+    hwloc_obj_osdev_type_t type; /**< \brief OR'ed set of at least one ::hwloc_obj_osdev_type_e. */
   } osdev;
 };
 
@@ -1066,6 +1097,9 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \\0).
+ *
+ * \note By default the output string is reasonably short without being ambiguous
+ * so that hwloc_type_sscanf() may parse it back.
  */
 HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj, const char * __hwloc_restrict separator,
@@ -1078,22 +1112,29 @@ enum hwloc_obj_snprintf_flag_e {
    */
   HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES = 1ULL<<1,
 
+  /** \brief Reduce the name even if it may become ambiguous,
+   * for instance by removing the OS device prefix and showing a single type.
+   * hwloc_type_sscanf() might not be able to parse it back exactly anymore.
+   * \hideinitializer
+   */
+  HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES = 1ULL<<2,
+
   /** \brief Display additional attributes such as
    * cache associativity, PCI link speed, and total memory.
    * \hideinitializer
    */
-  HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS =1ULL<<2,
+  HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS =1ULL<<3,
 
   /** \brief Display memory sizes in bytes without units.
    * \hideinitializer
    */
-  HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS = 1ULL<<3,
+  HWLOC_OBJ_SNPRINTF_FLAG_NO_UNITS = 1ULL<<4,
 
   /** \brief Display memory sizes in KB, MB, GB, etc
    * i.e. divide by 1000 instead of 1024 for KiB, MiB, GiB, etc.
    * \hideinitializer
    */
-  HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000 = 1ULL<<4,
+  HWLOC_OBJ_SNPRINTF_FLAG_UNITS_1000 = 1ULL<<5,
 
   /** \brief Backward compatibility with hwloc 2.x verbose mode,
    * shows additional attributes,
@@ -1114,7 +1155,8 @@ enum hwloc_obj_snprintf_flag_e {
  * Type-specific attributes, for instance Cache type, Cache depth, Group depth,
  * Bridge type or OS Device type may be returned in \p attrp.
  * Attributes that are not specified in the string (for instance "Group"
- * without a depth, or "L2Cache" without a cache type) are set to -1.
+ * without a depth, or "L2Cache" without a cache type) are set to \c -1.
+ * The OS-device-specific type attribute is rather set to \c 0.
  *
  * \p attrp is only filled if not \c NULL and if its size specified in \p attrsize
  * is large enough. It should be at least as large as union hwloc_obj_attr_u.
@@ -1122,7 +1164,8 @@ enum hwloc_obj_snprintf_flag_e {
  * \return 0 if a type was correctly identified, otherwise -1.
  *
  * \note This function is guaranteed to match any string returned by
- * hwloc_obj_type_string() or hwloc_obj_type_snprintf().
+ * hwloc_obj_type_string() or hwloc_obj_type_snprintf() except if
+ * ::HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES was given.
  */
 HWLOC_DECLSPEC int hwloc_type_sscanf(const char *string,
 				     hwloc_obj_type_t *typep,

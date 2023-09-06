@@ -963,7 +963,7 @@ main (int argc, char *argv[])
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
   loutput.transform_distances = -1;
-  loutput.obj_snprintf_flags = 0;
+  loutput.obj_snprintf_flags = HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES;
 
   loutput.nr_cpukind_styles = 0;
 
@@ -1750,6 +1750,7 @@ main (int argc, char *argv[])
 
   if (loutput.verbose_mode > 1) {
     loutput.obj_snprintf_flags |= HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES;
+    loutput.obj_snprintf_flags &= ~HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES;
     if (may_show_more_attributes)
       loutput.obj_snprintf_flags |= HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS;
   }

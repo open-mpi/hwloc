@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2019 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © Université Bordeaux
  * See COPYING in top-level directory.
  */
@@ -56,7 +56,7 @@ int main(void)
   obj = NULL;
   while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
     assert(obj->type == HWLOC_OBJ_OS_DEVICE);
-    printf(" Found OS device %s subtype %d\n", obj->name, (int) obj->attr->osdev.type);
+    printf(" Found OS device %s subtype %lu\n", obj->name, (unsigned long) obj->attr->osdev.type);
   }
 
   assert(HWLOC_TYPE_DEPTH_BRIDGE == hwloc_get_type_depth(topology, HWLOC_OBJ_BRIDGE));

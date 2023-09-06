@@ -187,7 +187,7 @@ hwloc_opencl_get_device_osdev_by_index(hwloc_topology_t topology,
 	unsigned x = (unsigned) -1, y = (unsigned) -1;
 	hwloc_obj_t osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-		if (HWLOC_OBJ_OSDEV_COPROC == osdev->attr->osdev.type
+          if ((osdev->attr->osdev.type & HWLOC_OBJ_OSDEV_COPROC) /* assume future OpenCL devices will be at least COPROC */
                     && osdev->name
 		    && sscanf(osdev->name, "opencl%ud%u", &x, &y) == 2
 		    && platform_index == x && device_index == y)

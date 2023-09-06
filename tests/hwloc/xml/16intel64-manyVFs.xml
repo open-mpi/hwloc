@@ -88,14 +88,14 @@
           <object type="PCIDev" gp_index="47" id="obj47" pci_busid="0000:02:00.0" pci_type="0200 [8086:1521] [1137:008b] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="48" id="obj48" name="eth0" osdev_type="2">
+            <object type="OSDev" gp_index="48" id="obj48" name="eth0" osdev_type="16">
               <info name="Address" value="a4:93:4c:aa:60:1e"/>
             </object>
           </object>
           <object type="PCIDev" gp_index="49" id="obj49" pci_busid="0000:02:00.1" pci_type="0200 [8086:1521] [1137:008b] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="50" id="obj50" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="50" id="obj50" name="eth1" osdev_type="16">
               <info name="Address" value="a4:93:4c:aa:60:1f"/>
             </object>
           </object>
@@ -118,11 +118,11 @@
                   <object type="PCIDev" gp_index="56" id="obj56" pci_busid="0000:0b:00.0" pci_type="0200 [1137:0043] [1137:0085] a2 00" pci_link_speed="0.000000">
                     <info name="PCIVendor" value="Cisco Systems Inc"/>
                     <info name="PCIDevice" value="VIC Ethernet NIC"/>
-                    <object type="OSDev" gp_index="57" id="obj57" name="eth4" osdev_type="2">
+                    <object type="OSDev" gp_index="57" id="obj57" name="eth4" osdev_type="16">
                       <info name="Address" value="24:57:20:04:20:00"/>
                       <info name="Port" value="1"/>
                     </object>
-                    <object type="OSDev" gp_index="58" id="obj58" name="usnic_0" osdev_type="3">
+                    <object type="OSDev" gp_index="58" id="obj58" name="usnic_0" osdev_type="48">
                       <info name="NodeGUID" value="0200:00ff:fe00:0000"/>
                       <info name="SysImageGUID" value="2657:20ff:fe04:2000"/>
                       <info name="Port1State" value="4"/>
@@ -150,11 +150,11 @@
                   <object type="PCIDev" gp_index="63" id="obj63" pci_busid="0000:0c:00.0" pci_type="0200 [1137:0043] [1137:0085] a2 00" pci_link_speed="0.000000">
                     <info name="PCIVendor" value="Cisco Systems Inc"/>
                     <info name="PCIDevice" value="VIC Ethernet NIC"/>
-                    <object type="OSDev" gp_index="64" id="obj64" name="eth5" osdev_type="2">
+                    <object type="OSDev" gp_index="64" id="obj64" name="eth5" osdev_type="16">
                       <info name="Address" value="24:57:20:04:21:00"/>
                       <info name="Port" value="1"/>
                     </object>
-                    <object type="OSDev" gp_index="65" id="obj65" name="usnic_1" osdev_type="3">
+                    <object type="OSDev" gp_index="65" id="obj65" name="usnic_1" osdev_type="48">
                       <info name="NodeGUID" value="0200:00ff:fe00:0000"/>
                       <info name="SysImageGUID" value="2657:20ff:fe04:2100"/>
                       <info name="Port1State" value="4"/>
@@ -284,11 +284,11 @@
                   <object type="PCIDev" gp_index="119" id="obj119" pci_busid="0000:88:00.0" pci_type="0200 [1137:0043] [1137:0085] a2 00" pci_link_speed="0.000000">
                     <info name="PCIVendor" value="Cisco Systems Inc"/>
                     <info name="PCIDevice" value="VIC Ethernet NIC"/>
-                    <object type="OSDev" gp_index="120" id="obj120" name="eth6" osdev_type="2">
+                    <object type="OSDev" gp_index="120" id="obj120" name="eth6" osdev_type="16">
                       <info name="Address" value="24:57:20:04:50:00"/>
                       <info name="Port" value="1"/>
                     </object>
-                    <object type="OSDev" gp_index="121" id="obj121" name="usnic_2" osdev_type="3">
+                    <object type="OSDev" gp_index="121" id="obj121" name="usnic_2" osdev_type="48">
                       <info name="NodeGUID" value="0200:00ff:fe00:0000"/>
                       <info name="SysImageGUID" value="2657:20ff:fe04:5000"/>
                       <info name="Port1State" value="4"/>
@@ -324,7 +324,7 @@
                   <object type="PCIDev" gp_index="128" id="obj128" pci_busid="0000:89:00.0" pci_type="0200 [1137:0043] [1137:0085] a2 00" pci_link_speed="0.000000">
                     <info name="PCIVendor" value="Cisco Systems Inc"/>
                     <info name="PCIDevice" value="VIC Ethernet NIC"/>
-                    <object type="OSDev" gp_index="129" id="obj129" name="eth7" osdev_type="2">
+                    <object type="OSDev" gp_index="129" id="obj129" name="eth7" osdev_type="16">
                       <info name="Address" value="24:57:20:04:51:00"/>
                     </object>
                   </object>

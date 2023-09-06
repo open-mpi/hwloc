@@ -78,14 +78,14 @@
           <object type="PCIDev" gp_index="37" id="obj37" pci_busid="0000:04:00.0" pci_type="0200 [8086:10c9] [003c:003f] 01 00" pci_link_speed="0.200000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="82576 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="38" id="obj38" name="eth0" osdev_type="2">
+            <object type="OSDev" gp_index="38" id="obj38" name="eth0" osdev_type="16">
               <info name="Address" value="78:e7:d1:21:55:30"/>
             </object>
           </object>
           <object type="PCIDev" gp_index="39" id="obj39" pci_busid="0000:04:00.1" pci_type="0200 [8086:10c9] [003c:003f] 01 00" pci_link_speed="0.200000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="82576 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="40" id="obj40" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="40" id="obj40" name="eth1" osdev_type="16">
               <info name="Address" value="78:e7:d1:21:55:31"/>
             </object>
           </object>
@@ -95,13 +95,13 @@
           <info name="PCIDevice" value="X58 I/O Hub PCI Express Root Port 5"/>
           <object type="PCIDev" gp_index="42" id="obj42" pci_busid="0000:05:00.0" pci_type="0c06 [15b3:6746] [003c:0049] b0 00" pci_link_speed="2.000000">
             <info name="PCIVendor" value="Mellanox Technologies"/>
-            <object type="OSDev" gp_index="43" id="obj43" name="eth2" osdev_type="2">
+            <object type="OSDev" gp_index="43" id="obj43" name="eth2" osdev_type="16">
               <info name="Address" value="78:e7:d1:21:55:35"/>
             </object>
-            <object type="OSDev" gp_index="44" id="obj44" name="ib0" osdev_type="2">
+            <object type="OSDev" gp_index="44" id="obj44" name="ib0" osdev_type="16">
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:78:e7:d1:03:00:21:55:35"/>
             </object>
-            <object type="OSDev" gp_index="45" id="obj45" name="mlx4_0" osdev_type="3"/>
+            <object type="OSDev" gp_index="45" id="obj45" name="mlx4_0" osdev_type="48"/>
           </object>
         </object>
         <object type="Bridge" gp_index="46" id="obj46" bridge_type="1-1" depth="1" bridge_pci="0000:[06-08]" pci_busid="0000:00:07.0" pci_type="0604 [8086:340e] [0000:0000] 13 00" pci_link_speed="4.000000">
@@ -122,7 +122,7 @@
         <object type="PCIDev" gp_index="50" id="obj50" pci_busid="0000:00:1f.2" pci_type="0101 [8086:3a20] [003c:000d] 00 00" pci_link_speed="0.100000">
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="82801JI (ICH10 Family) 4 port SATA IDE Controller"/>
-          <object type="OSDev" gp_index="51" id="obj51" name="sda" osdev_type="0"/>
+          <object type="OSDev" gp_index="51" id="obj51" name="sda" osdev_type="1"/>
         </object>
         <object type="PCIDev" gp_index="52" id="obj52" pci_busid="0000:00:1f.5" pci_type="0101 [8086:3a26] [003c:000d] 00 00" pci_link_speed="0.100000">
           <info name="PCIVendor" value="Intel Corporation"/>

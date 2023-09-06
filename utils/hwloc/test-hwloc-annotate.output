@@ -96,10 +96,10 @@
         <info name="Foo" value="Bar"/>
         <info name="mypcidev" value="byindex"/>
         <info name="mypcidev" value="bymatch"/>
-        <object type="OSDev" gp_index="19" id="obj19" name="controlD64" osdev_type="1">
+        <object type="OSDev" gp_index="19" id="obj19" name="controlD64" osdev_type="4">
           <info name="Foo" value="Bar"/>
         </object>
-        <object type="OSDev" gp_index="20" id="obj20" name="card0" osdev_type="1">
+        <object type="OSDev" gp_index="20" id="obj20" name="card0" osdev_type="4">
           <info name="Foo" value="Bar"/>
         </object>
       </object>
@@ -108,7 +108,7 @@
         <info name="PCIDevice" value="82577LM Gigabit Network Connection"/>
         <info name="Foo" value="Bar"/>
         <info name="mypcidev" value="byindex"/>
-        <object type="OSDev" gp_index="22" id="obj22" name="eth0" osdev_type="2">
+        <object type="OSDev" gp_index="22" id="obj22" name="eth0" osdev_type="16">
           <info name="Address" value="5c:26:0a:53:da:8c"/>
           <info name="Foo" value="Bar"/>
           <info name="myosdev" value="byindex"/>
@@ -124,7 +124,7 @@
           <info name="PCIDevice" value="Centrino Ultimate-N 6300"/>
           <info name="Foo" value="Bar"/>
           <info name="mypcidev" value="bybusid"/>
-          <object type="OSDev" gp_index="25" id="obj25" name="wlan0" osdev_type="2">
+          <object type="OSDev" gp_index="25" id="obj25" name="wlan0" osdev_type="16">
             <info name="Address" value="00:24:d7:0f:bd:34"/>
             <info name="Foo" value="Bar"/>
             <info name="myosdev" value="byindex"/>
@@ -135,10 +135,10 @@
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="5 Series/3400 Series Chipset 6 port SATA AHCI Controller"/>
         <info name="Foo" value="Bar"/>
-        <object type="OSDev" gp_index="27" id="obj27" name="sda" osdev_type="0">
+        <object type="OSDev" gp_index="27" id="obj27" name="sda" osdev_type="1">
           <info name="Foo" value="Bar"/>
         </object>
-        <object type="OSDev" gp_index="28" id="obj28" name="sr0" osdev_type="0">
+        <object type="OSDev" gp_index="28" id="obj28" name="sr0" osdev_type="1">
           <info name="Foo" value="Bar"/>
         </object>
       </object>

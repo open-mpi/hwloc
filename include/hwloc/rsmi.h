@@ -116,7 +116,7 @@ hwloc_rsmi_get_device_osdev_by_index(hwloc_topology_t topology, uint32_t dv_ind)
 {
   hwloc_obj_t osdev = NULL;
   while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-    if (HWLOC_OBJ_OSDEV_GPU == osdev->attr->osdev.type
+    if ((osdev->attr->osdev.type & (HWLOC_OBJ_OSDEV_GPU|HWLOC_OBJ_OSDEV_COPROC)) /* assume future RSMI devices will be at least GPU or COPROC */
       && osdev->name
       && !strncmp("rsmi", osdev->name, 4)
       && atoi(osdev->name + 4) == (int) dv_ind)

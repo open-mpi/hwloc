@@ -411,7 +411,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
   int verbose = lcontext->verbose;
   hwloc_obj_t obj, prev = NULL;
   int pcivendor = -1, pcidevice = -1;
-  int osdevtype = -1;
+  hwloc_obj_osdev_type_t osdevtype = 0; /* none */
   const char *current, *dot;
   char *endp;
   int first = 0, step = 1, amount = 1, wrap = 0; /* assume the index suffix is `:0' by default */
@@ -529,7 +529,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     }
 
     if (type == HWLOC_OBJ_OS_DEVICE) {
-      if (osdevtype != -1 && (int) obj->attr->osdev.type != osdevtype)
+      if (osdevtype != 0 && obj->attr->osdev.type != osdevtype)
 	continue;
     }
 

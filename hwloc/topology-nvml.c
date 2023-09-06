@@ -222,7 +222,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     osdev->name = strdup(buffer);
     osdev->subtype = strdup("NVML");
     osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
-    osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+    osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC | HWLOC_OBJ_OSDEV_GPU;
 
     hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
 

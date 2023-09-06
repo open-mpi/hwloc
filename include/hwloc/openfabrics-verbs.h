@@ -111,7 +111,7 @@ hwloc_ibv_get_device_osdev_by_name(hwloc_topology_t topology,
 {
 	hwloc_obj_t osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-		if (HWLOC_OBJ_OSDEV_OPENFABRICS == osdev->attr->osdev.type
+          if ((osdev->attr->osdev.type & HWLOC_OBJ_OSDEV_OPENFABRICS) /* assume future OFED devices will be at least OFED */
 		    && osdev->name && !strcmp(ibname, osdev->name))
 			return osdev;
 	}

@@ -3856,7 +3856,13 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
   }
 
   /* we'll convert SPM (specific-purpose memory) into a HBM subtype later by looking at memattrs */
-  type = strstr(begin, "ndbus") ? "NVM" : "SPM";
+  if (strstr(begin, "ndbus")) {
+    type = "NVM";
+    if (obj->type == HWLOC_OBJ_OS_DEVICE)
+      obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+  } else {
+    type = "SPM";
+  }
   hwloc_obj_add_info(obj, "DAXType", type);
 
   /* try to get some CXL info from the region */
@@ -6355,7 +6361,7 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 	continue;
 
       obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_MEMORY, dirent->d_name);
-
+      /* annotate_dax_parent() will add HWLOC_OBJ_OSDEV_STORAGE if NVM */
       annotate_dax_parent(obj, dirent->d_name, root_fd);
 
       hwloc_linuxfs_dax_class_fillinfos(backend, root_fd, obj, path);
@@ -6561,7 +6567,7 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned os
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK | HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
 
     hwloc_linuxfs_infiniband_class_fillinfos(root_fd, obj, path);
   }
@@ -6615,7 +6621,7 @@ hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_fla
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
 
     hwloc_linuxfs_bxi_class_fillinfos(root_fd, obj, path);
   }
@@ -6849,6 +6855,7 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
       snprintf(tmp, sizeof(tmp), "%llu", value / 1024);
       hwloc_obj_add_info(obj, "CXLPMEMSize", tmp);
     }
+    obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
   }
 
   snprintf(path, sizeof(path), "%s/serial", osdevpath);
@@ -6883,7 +6890,7 @@ hwloc_linuxfs_lookup_cxlmem(struct hwloc_backend *backend, unsigned osdev_flags)
 	continue;
 
       obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_MEMORY, dirent->d_name);
-
+      /* hwloc_linuxfs_cxlmem_fillinfos() will add HWLOC_OBJ_OSDEV_STORAGE if PMEM */
       hwloc_linuxfs_cxlmem_fillinfos(root_fd, obj, path);
     }
     closedir(dir);

@@ -103,14 +103,14 @@
           <object type="PCIDev" gp_index="55" id="obj55" pci_busid="0000:01:00.0" pci_type="0200 [8086:1521] [00ff:0000] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="56" id="obj56" name="eth0" osdev_type="2">
+            <object type="OSDev" gp_index="56" id="obj56" name="eth0" osdev_type="16">
               <info name="Address" value="08:00:69:16:8c:6e"/>
             </object>
           </object>
           <object type="PCIDev" gp_index="57" id="obj57" pci_busid="0000:01:00.1" pci_type="0200 [8086:1521] [00ff:0000] 01 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Intel Corporation"/>
             <info name="PCIDevice" value="I350 Gigabit Network Connection"/>
-            <object type="OSDev" gp_index="58" id="obj58" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="58" id="obj58" name="eth1" osdev_type="16">
               <info name="Address" value="08:00:69:16:8c:6f"/>
             </object>
           </object>
@@ -252,8 +252,8 @@
           <object type="PCIDev" gp_index="122" id="obj122" pci_busid="0001:02:00.0" pci_type="0104 [1000:0079] [0000:0080] 05 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="LSI Logic / Symbios Logic"/>
             <info name="PCIDevice" value="MegaRAID SAS 2108 [Liberator]"/>
-            <object type="OSDev" gp_index="123" id="obj123" name="sda" osdev_type="0"/>
-            <object type="OSDev" gp_index="124" id="obj124" name="sdb" osdev_type="0"/>
+            <object type="OSDev" gp_index="123" id="obj123" name="sda" osdev_type="1"/>
+            <object type="OSDev" gp_index="124" id="obj124" name="sdb" osdev_type="1"/>
           </object>
         </object>
       </object>
@@ -537,14 +537,14 @@
               <object type="PCIDev" gp_index="282" id="obj282" pci_busid="0002:03:00.0" pci_type="0200 [14e4:1639] [00a9:0027] 20 00" pci_link_speed="0.000000">
                 <info name="PCIVendor" value="Broadcom Corporation"/>
                 <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
-                <object type="OSDev" gp_index="283" id="obj283" name="eth2" osdev_type="2">
+                <object type="OSDev" gp_index="283" id="obj283" name="eth2" osdev_type="16">
                   <info name="Address" value="00:e0:ed:0d:4d:6c"/>
                 </object>
               </object>
               <object type="PCIDev" gp_index="284" id="obj284" pci_busid="0002:03:00.1" pci_type="0200 [14e4:1639] [00a9:0027] 20 00" pci_link_speed="0.000000">
                 <info name="PCIVendor" value="Broadcom Corporation"/>
                 <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
-                <object type="OSDev" gp_index="285" id="obj285" name="eth3" osdev_type="2">
+                <object type="OSDev" gp_index="285" id="obj285" name="eth3" osdev_type="16">
                   <info name="Address" value="00:e0:ed:0d:4d:6e"/>
                 </object>
               </object>
@@ -555,14 +555,14 @@
               <object type="PCIDev" gp_index="287" id="obj287" pci_busid="0002:04:00.0" pci_type="0200 [14e4:1639] [00a9:0027] 20 00" pci_link_speed="0.000000">
                 <info name="PCIVendor" value="Broadcom Corporation"/>
                 <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
-                <object type="OSDev" gp_index="288" id="obj288" name="eth4" osdev_type="2">
+                <object type="OSDev" gp_index="288" id="obj288" name="eth4" osdev_type="16">
                   <info name="Address" value="00:e0:ed:0d:4d:70"/>
                 </object>
               </object>
               <object type="PCIDev" gp_index="289" id="obj289" pci_busid="0002:04:00.1" pci_type="0200 [14e4:1639] [00a9:0027] 20 00" pci_link_speed="0.000000">
                 <info name="PCIVendor" value="Broadcom Corporation"/>
                 <info name="PCIDevice" value="NetXtreme II BCM5709 Gigabit Ethernet"/>
-                <object type="OSDev" gp_index="290" id="obj290" name="eth5" osdev_type="2">
+                <object type="OSDev" gp_index="290" id="obj290" name="eth5" osdev_type="16">
                   <info name="Address" value="00:e0:ed:0d:4d:72"/>
                 </object>
               </object>
@@ -755,11 +755,11 @@
           <object type="PCIDev" gp_index="395" id="obj395" pci_busid="0003:01:00.0" pci_type="0280 [15b3:1003] [00b3:0051] 00 00" pci_link_speed="0.000000">
             <info name="PCIVendor" value="Mellanox Technologies"/>
             <info name="PCIDevice" value="MT27500 Family [ConnectX-3]"/>
-            <object type="OSDev" gp_index="396" id="obj396" name="ib0" osdev_type="2">
+            <object type="OSDev" gp_index="396" id="obj396" name="ib0" osdev_type="16">
               <info name="Address" value="80:00:00:48:fe:80:00:00:00:00:00:00:00:02:c9:03:00:1b:b0:a1"/>
               <info name="Port" value="1"/>
             </object>
-            <object type="OSDev" gp_index="397" id="obj397" name="mlx4_0" osdev_type="3">
+            <object type="OSDev" gp_index="397" id="obj397" name="mlx4_0" osdev_type="48">
               <info name="NodeGUID" value="0002:c903:001b:b0a0"/>
               <info name="SysImageGUID" value="0002:c903:001b:b0a3"/>
               <info name="Port1LID" value="0x0"/>

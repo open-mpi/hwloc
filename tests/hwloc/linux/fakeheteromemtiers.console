@@ -14,7 +14,7 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
             L1iCache L#1 (P#1 size=32KiB linesize=64 ways=8)
               Core L#1 (P#1)
                 PU L#1 (P#1)
-        Memory(SPM) L#0 (DAXType=SPM DAXParent=hmem.0 Size=524288 LinuxDeviceID=253:0) "dax0.0"
+        OSDev[Memory](SPM) L#0 (DAXType=SPM DAXParent=hmem.0 Size=524288 LinuxDeviceID=253:0) "dax0.0"
       Group0 L#1 (total=1875MiB)
         NUMANode(DRAM) L#2 (P#1 local=979MiB total=979MiB)
         NUMANode(HBM) L#3 (P#4 local=512MiB total=512MiB DAXDevice=dax1.0 DAXType=SPM DAXParent=hmem.1)
@@ -29,7 +29,7 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
             L1iCache L#3 (P#3 size=32KiB linesize=64 ways=8)
               Core L#3 (P#3)
                 PU L#3 (P#3)
-        Memory(SPM) L#1 (DAXType=SPM DAXParent=hmem.2 Size=524288 LinuxDeviceID=253:2) "dax2.0"
+        OSDev[Memory](SPM) L#1 (DAXType=SPM DAXParent=hmem.2 Size=524288 LinuxDeviceID=253:2) "dax2.0"
       Group0 L#2 (total=896MiB)
         NUMANode(HBM) L#5 (P#2 local=512MiB total=512MiB DAXDevice=dax3.0 DAXType=SPM DAXParent=hmem.3)
         NUMANode(NVM) L#6 (P#9 local=384MiB total=384MiB DAXDevice=dax8.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region8/dax8.1)
@@ -43,7 +43,7 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
             L1iCache L#5 (P#5 size=32KiB linesize=64 ways=8)
               Core L#5 (P#5)
                 PU L#5 (P#5)
-        Memory(NVM) L#2 (DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region6/dax6.1 Size=514048 LinuxDeviceID=253:6) "dax6.0"
+        OSDev[Memory,Storage](NVM) L#2 (DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region6/dax6.1 Size=514048 LinuxDeviceID=253:6) "dax6.0"
 depth 0:            1 Machine (type #0)
  depth 1:           1 Package (type #1)
   depth 2:          1 L3Cache (type #6)

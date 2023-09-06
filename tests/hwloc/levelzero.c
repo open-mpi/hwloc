@@ -107,7 +107,7 @@ int main(void)
       assert(!err);
       assert(atoi(osdev->name+2) == (int) k);
 
-      assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
+      assert(osdev->attr->osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
 
       assert(has_levelzero_backend);
 

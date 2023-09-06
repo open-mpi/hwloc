@@ -707,7 +707,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
       snprintf(buffer, sizeof(buffer), "ze%u", zeidx); // ze0d0 ?
       osdev->name = strdup(buffer);
       osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
-      osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+      osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC | HWLOC_OBJ_OSDEV_GPU;
       osdev->subtype = strdup("LevelZero");
 
       snprintf(buffer, sizeof(buffer), "%u", i);
@@ -735,7 +735,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
             snprintf(tmp, sizeof(tmp), "ze%u.%u", zeidx, k);
             subosdevs[k]->name = strdup(tmp);
             subosdevs[k]->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
-            subosdevs[k]->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+            subosdevs[k]->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC | HWLOC_OBJ_OSDEV_GPU;
             subosdevs[k]->subtype = strdup("LevelZero");
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
