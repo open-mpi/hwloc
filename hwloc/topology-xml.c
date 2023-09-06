@@ -1168,9 +1168,28 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   /* 3.0 forward compatibility */
   if (data->version_major >= 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
-    /* block replaced by storage+memory in 3.0 */
-    if (obj->attr->osdev.type == 6 /* MEMORY */)
+    /* osdev.type changed into bitmak in 3.0 */
+    if (obj->attr->osdev.type & 3 /* STORAGE|MEMORY for BLOCK */) {
       obj->attr->osdev.type = HWLOC_OBJ_OSDEV_BLOCK;
+    } else if (obj->attr->osdev.type & 8 /* COPROC for COPROC and rsmi/nvml GPUs */) {
+      if (obj->subtype && (!strcmp(obj->subtype, "RSMI") || !strcmp(obj->subtype, "NVML")))
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+      else
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+    } else if (obj->attr->osdev.type & 4 /* GPU for non-COPROC GPUs */) {
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+    } else if (obj->attr->osdev.type & 32 /* OFED */) {
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_OPENFABRICS;
+    } else if (obj->attr->osdev.type & 16 /* NET for NET and BXI v2-fake-OFED */) {
+      if (obj->subtype && !strcmp(obj->subtype, "BXI"))
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_OPENFABRICS;
+      else
+        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
+    } else if (obj->attr->osdev.type & 64 /* DMA */) {
+      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_DMA;
+    } else { /* none or unknown */
+      obj->attr->osdev.type = (hwloc_obj_osdev_type_t)  -1;
+    }
     /* Backend info only in root */
     if (obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
       if (!strcmp(obj->subtype, "CUDA")) {
