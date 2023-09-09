@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
 .\" Copyright © 2010 Jirka Hladky
-.\" Copyright © 2010-2021 Inria.  All rights reserved.
+.\" Copyright © 2010-2023 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-GATHER-TOPOLOGY "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -28,6 +28,11 @@ The gathering may be much slower, and the generated archive may be much bigger.
 \fB\-\-dmi\fR
 Also gather DMI/SMBIOS related files.
 The gathering requires root access, and the dmi-sysfs kernel module should be loaded.
+.
+.TP
+\fB\-\-dt\fR
+Also gather Device-Tree CPU files. These files aren't needed for hwloc,
+but they may be used for debugging what Linux exposes in /sys.
 .
 .TP
 \fB\-\-no\-cpuid\fR

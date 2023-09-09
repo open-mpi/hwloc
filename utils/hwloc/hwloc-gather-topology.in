@@ -31,6 +31,7 @@ unalias ls
 gathercpuid=1
 gatherio=0
 gatherdmi=0
+gatherdt=0
 keep=0
 
 if [ ! -x "$lstopo" ]
@@ -52,6 +53,7 @@ usage()
    echo "Options:"
    echo "  --io        Gather I/O files (takes much longer and generates much larger tarball)"
    echo "  --dmi       Gather SMBIOS files. Works only when run as root. Requires dmi-sysfs kernel module"
+   echo "  --dt        Gather Device-Tree CPU files under /proc/device-tree/cpus"
    echo "  --no-cpuid  Do not gather x86 CPUID using hwloc-gather-cpuid"
    echo "  --keep      Keep the temporary copy of dumped files"
    echo "  --version   Report version and exit"
@@ -64,6 +66,7 @@ while [ x`echo "$1" | cut -c1` = x- ] ; do
   case $1 in
   --io) gatherio=1;;
   --dmi) gatherdmi=1;;
+  --dt) gatherdt=1;;
   --no-cpuid) gathercpuid=0;;
   --keep) keep=1;;
   --version) echo `basename $0`" $HWLOC_VERSION"; exit 0;;
@@ -86,6 +89,9 @@ if [ x$gatherio = x0 ]; then
 fi
 if [ x$gatherdmi = x0 ]; then
   echo "DMI files won't be saved (--dmi not given)."
+fi
+if [ x$gatherdt = x0 ]; then
+  echo "Device-Tree CPU files won't be saved (--dt not given)."
 fi
 
 echo
@@ -248,6 +254,11 @@ savedir "$destdir/$basename" /sys/devices/virtual/dmi/id/
 
 # Gather hugepage information
 savedir "$destdir/$basename" /sys/kernel/mm/hugepages/
+
+if [ x$gatherdt = x1 ]; then
+  # Gather device-tree cpus
+  savedir "$destdir/$basename" /proc/device-tree/cpus/
+fi
 
 # Gather the default /var/run/hwloc (in case it was created by a system-wide hwloc-dump-hwdata)
 if test -d /var/run/hwloc; then
