@@ -48,6 +48,19 @@ Version 2.10.0
   + Remove Netloc.
 
 
+Version 2.9.3
+-------------
+* Handle Linux glibc allocation errors in binding routines (CVE-2022-47022).
+* Fix hwloc-calc when searching objects on heterogeneous memory platforms,
+  thanks to Antoine Morvan for the report.
+* Fix hwloc_get_next_child() when there are some memory-side caches.
+* Don't crash if the topology is empty because Linux cgroups are wrong.
+* Improve some hwloc-bind warnings in case of command-line parsing errors.
+* Many documentation improvements all over the place, including:
+  + hwloc_topology_restrict() and hwloc_topology_insert_group() may reorder
+    children, causing the logical indexes of objects to change.
+
+
 Version 2.9.2
 -------------
 * Don't forget L3i when defining filters for multiple levels of caches
