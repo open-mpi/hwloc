@@ -2631,7 +2631,12 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
  *
  * \return The allocated object on success.
  * \return \c NULL on error.
- */
+ *
+ * \note The only way to free this object is to pass it to hwloc_topology_insert_group_object().
+ * If properly inserted, it will be freed when the entire topology is freed.
+ * If insertion failed (e.g. \c NULL or empty CPU and node-sets),
+ * it is freed before returning the error.
+  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t topology);
 
 /** \brief Add more structure to the topology by adding an intermediate Group
@@ -2670,6 +2675,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  * \note Inserting a group adds some locality information to the topology,
  * hence the existing objects may get reordered (including PUs and NUMA nodes),
  * and their logical indexes may change.
+ *
+ * \note If the insertion fails, the input group object is freed.
  *
  * \return The inserted object if it was properly inserted.
  *
