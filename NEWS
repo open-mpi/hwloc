@@ -19,6 +19,9 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.10.0
 --------------
+* API
+  + Add hwloc_topology_free_group_object() to discard a Group created
+    by hwloc_topology_alloc_group_object().
 * Linux backend
   + Add CXLDevice attributes to CXL DAX objects and NUMA nodes to show
     which PCI device implements which window.

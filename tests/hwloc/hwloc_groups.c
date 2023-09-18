@@ -31,6 +31,12 @@ int main(void)
   hwloc_topology_load(topology);
   root = hwloc_get_root_obj(topology);
   assert(hwloc_topology_get_depth(topology) == 3);
+  /* free instead of inserting */
+  group = hwloc_topology_alloc_group_object(topology);
+  assert(group);
+  group->cpuset = hwloc_bitmap_dup(root->cpuset);
+  err = hwloc_topology_free_group_object(topology, group);
+  assert(err == 0);
   /* insert without sets, fails */
   group = hwloc_topology_alloc_group_object(topology);
   assert(group);

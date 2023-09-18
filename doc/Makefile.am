@@ -458,6 +458,7 @@ man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_allow.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_alloc_group_object.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_free_group_object.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_group_object.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_add_other_obj_sets.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_refresh.3
