@@ -2051,6 +2051,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
   }
   if (topology->adopted_shmem_addr) {
+    hwloc_free_unlinked_object(obj);
     errno = EPERM;
     return NULL;
   }
