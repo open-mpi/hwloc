@@ -2678,6 +2678,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t to
  *
  * \note If the insertion fails, the input group object is freed.
  *
+ * \note \p topology must be the same as the one previously passed
+ * to hwloc_topology_alloc_group_object().
+ *
  * \return The inserted object if it was properly inserted.
  *
  * \return An existing object if the Group was merged or discarded
