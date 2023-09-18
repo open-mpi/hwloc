@@ -2031,6 +2031,22 @@ hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
   return hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
 }
 
+int
+hwloc_topology_free_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
+    /* this could actually work when IS_LOADING, see insert() below */
+    errno = EINVAL;
+    return -1;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return -1;
+  }
+  hwloc_free_unlinked_object(obj);
+  return 0;
+}
+
 static void hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root);
 static void propagate_total_memory(hwloc_obj_t obj);
 static void hwloc_set_group_depth(hwloc_topology_t topology);
@@ -2051,6 +2067,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     return NULL;
   }
   if (topology->adopted_shmem_addr) {
+    hwloc_free_unlinked_object(obj);
     errno = EPERM;
     return NULL;
   }
@@ -2104,6 +2121,7 @@ hwloc_topology_insert_group_object(struct hwloc_topology *topology, hwloc_obj_t 
     res = hwloc__insert_object_by_cpuset(topology, NULL, obj, NULL /* do not show errors on stdout */);
   } else {
     /* just merge root */
+    hwloc_free_unlinked_object(obj);
     res = root;
   }
 

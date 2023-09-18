@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2021 Inria.  All rights reserved.
+ * Copyright © 2011-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -31,6 +31,17 @@ int main(void)
   hwloc_topology_load(topology);
   root = hwloc_get_root_obj(topology);
   assert(hwloc_topology_get_depth(topology) == 3);
+  /* free instead of inserting */
+  group = hwloc_topology_alloc_group_object(topology);
+  assert(group);
+  group->cpuset = hwloc_bitmap_dup(root->cpuset);
+  err = hwloc_topology_free_group_object(topology, group);
+  assert(err == 0);
+  /* insert without sets, fails */
+  group = hwloc_topology_alloc_group_object(topology);
+  assert(group);
+  res = hwloc_topology_insert_group_object(topology, group);
+  assert(res == NULL);
   /* insert a group identical to root, will be merged */
   group = hwloc_topology_alloc_group_object(topology);
   assert(group);
