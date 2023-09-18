@@ -2801,6 +2801,19 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
   */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_alloc_group_object(hwloc_topology_t topology);
 
+/** \brief Free a group object allocated with hwloc_topology_alloc_group_object().
+ *
+ * This function is only useful if the group object was not given
+ * to hwloc_topology_insert_group_object() as planned.
+ *
+ * \note \p topology must be the same as the one previously passed
+ * to hwloc_topology_alloc_group_object().
+ *
+ * \return \c 0 on success.
+ * \return \c -1 on error, for instance if an invalid topology is given.
+ */
+HWLOC_DECLSPEC int hwloc_topology_free_group_object(hwloc_topology_t topology, hwloc_obj_t group);
+
 /** \brief Add more structure to the topology by adding an intermediate Group
  *
  * The caller should first allocate a new Group object with hwloc_topology_alloc_group_object().
