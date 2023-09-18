@@ -1929,8 +1929,8 @@ hwloc_topology_alloc_group_object(struct hwloc_topology *topology)
 int
 hwloc_topology_free_group_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
-    /* this could actually work when IS_LOADING, see insert() below */
+  if (!topology->is_loaded) {
+    /* this could actually work, see insert() below */
     errno = EINVAL;
     return -1;
   }
