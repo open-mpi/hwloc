@@ -2789,13 +2789,15 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object(hwloc_topology_t to
  * This function returns a new Group object.
  *
  * The caller should (at least) initialize its sets before inserting
- * the object in the topology. See hwloc_topology_insert_group_object().
+ * the object in the topology, see hwloc_topology_insert_group_object().
+ * Or it may decide not to insert and just free the group object
+ * by calling hwloc_topology_free_group_object().
  *
  * \return The allocated object on success.
  * \return \c NULL on error.
  *
- * \note The only way to free this object is to pass it to hwloc_topology_insert_group_object().
- * If properly inserted, it will be freed when the entire topology is freed.
+ * \note If successfully inserted by hwloc_topology_insert_group_object(),
+ * the object will be freed when the entire topology is freed.
  * If insertion failed (e.g. \c NULL or empty CPU and node-sets),
  * it is freed before returning the error.
   */
@@ -2852,6 +2854,9 @@ HWLOC_DECLSPEC int hwloc_topology_free_group_object(hwloc_topology_t topology, h
  * and their logical indexes may change.
  *
  * \note If the insertion fails, the input group object is freed.
+ *
+ * \note If the group object should be discarded instead of inserted,
+ * it may be passed to hwloc_topology_free_group_object() instead.
  *
  * \note \p topology must be the same as the one previously passed
  * to hwloc_topology_alloc_group_object().
