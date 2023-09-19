@@ -48,6 +48,7 @@ Version 2.10.0
     for instance with --children-order memory:above:vert.
   + Fix installation failures when configuring with --target,
     thanks to Clement Foyer for the patch.
+  + Fix support for 128bit pointer architectures.
   + Remove Netloc.
 
 
