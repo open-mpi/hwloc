@@ -19,7 +19,9 @@
       <info name="CPUModel" value="06/57"/>
       <info name="CPUStepping" value="0"/>
       <object type="Group" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000081" complete_nodeset="0x00000081" gp_index="3" kind="0" subkind="0">
-        <object type="NUMANode" os_index="0" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" subtype="DRAM" local_memory="1073741824"/>
+        <object type="NUMANode" os_index="0" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" subtype="DRAM" local_memory="1073741824">
+          <info name="MemoryTier" value="1"/>
+        </object>
         <object type="L3Cache" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000001" complete_nodeset="0x00000081" gp_index="5" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
           <info name="Inclusive" value="1"/>
           <object type="L2Cache" cpuset="0x00030003,0x00030003" complete_cpuset="0x00030003,0x00030003" nodeset="0x00000001" complete_nodeset="0x00000081" gp_index="6" cache_size="4194304" depth="2" cache_linesize="64" cache_associativity="0" cache_type="0">
@@ -68,11 +70,15 @@
           </object>
         </object>
         <object type="Group" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000081" complete_nodeset="0x00000081" gp_index="143" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="7" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="36" subtype="MCDRAM" local_memory="2147483648"/>
+          <object type="NUMANode" os_index="7" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="36" subtype="MCDRAM" local_memory="2147483648">
+            <info name="MemoryTier" value="0"/>
+          </object>
         </object>
       </object>
       <object type="Group" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000012" complete_nodeset="0x00000012" gp_index="38" kind="0" subkind="0">
-        <object type="NUMANode" os_index="1" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="39" subtype="DRAM" local_memory="1073741824"/>
+        <object type="NUMANode" os_index="1" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="39" subtype="DRAM" local_memory="1073741824">
+          <info name="MemoryTier" value="1"/>
+        </object>
         <object type="L3Cache" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000002" complete_nodeset="0x00000012" gp_index="40" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
           <info name="Inclusive" value="1"/>
           <object type="L2Cache" cpuset="0x00300030,0x00300030" complete_cpuset="0x00300030,0x00300030" nodeset="0x00000002" complete_nodeset="0x00000012" gp_index="41" cache_size="4194304" depth="2" cache_linesize="64" cache_associativity="0" cache_type="0">
@@ -121,11 +127,15 @@
           </object>
         </object>
         <object type="Group" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000012" complete_nodeset="0x00000012" gp_index="144" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="4" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="71" subtype="MCDRAM" local_memory="2147483648"/>
+          <object type="NUMANode" os_index="4" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="71" subtype="MCDRAM" local_memory="2147483648">
+            <info name="MemoryTier" value="0"/>
+          </object>
         </object>
       </object>
       <object type="Group" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000024" complete_nodeset="0x00000024" gp_index="73" kind="0" subkind="0">
-        <object type="NUMANode" os_index="2" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="74" subtype="DRAM" local_memory="1073741824"/>
+        <object type="NUMANode" os_index="2" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="74" subtype="DRAM" local_memory="1073741824">
+          <info name="MemoryTier" value="1"/>
+        </object>
         <object type="L3Cache" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000004" complete_nodeset="0x00000024" gp_index="75" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
           <info name="Inclusive" value="1"/>
           <object type="L2Cache" cpuset="0x03000300,0x03000300" complete_cpuset="0x03000300,0x03000300" nodeset="0x00000004" complete_nodeset="0x00000024" gp_index="76" cache_size="4194304" depth="2" cache_linesize="64" cache_associativity="0" cache_type="0">
@@ -174,11 +184,15 @@
           </object>
         </object>
         <object type="Group" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000024" complete_nodeset="0x00000024" gp_index="145" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="5" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="106" subtype="MCDRAM" local_memory="2147483648"/>
+          <object type="NUMANode" os_index="5" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="106" subtype="MCDRAM" local_memory="2147483648">
+            <info name="MemoryTier" value="0"/>
+          </object>
         </object>
       </object>
       <object type="Group" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000048" complete_nodeset="0x00000048" gp_index="108" kind="0" subkind="0">
-        <object type="NUMANode" os_index="3" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="109" subtype="DRAM" local_memory="1073741824"/>
+        <object type="NUMANode" os_index="3" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="109" subtype="DRAM" local_memory="1073741824">
+          <info name="MemoryTier" value="1"/>
+        </object>
         <object type="L3Cache" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000008" complete_nodeset="0x00000048" gp_index="110" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
           <info name="Inclusive" value="1"/>
           <object type="L2Cache" cpuset="0x30003000,0x30003000" complete_cpuset="0x30003000,0x30003000" nodeset="0x00000008" complete_nodeset="0x00000048" gp_index="111" cache_size="4194304" depth="2" cache_linesize="64" cache_associativity="0" cache_type="0">
@@ -227,7 +241,9 @@
           </object>
         </object>
         <object type="Group" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000048" complete_nodeset="0x00000048" gp_index="146" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="6" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="141" subtype="MCDRAM" local_memory="2147483648"/>
+          <object type="NUMANode" os_index="6" cpuset="0x0" complete_cpuset="0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="141" subtype="MCDRAM" local_memory="2147483648">
+            <info name="MemoryTier" value="0"/>
+          </object>
         </object>
       </object>
     </object>
