@@ -1221,7 +1221,7 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
  */
 
 enum hwloc_memory_tier_type_e {
-  /* WARNING: the order is important */
+  /* WARNING: keep higher BW types first for compare_tiers_by_bw_and_type() when BW info is missing */
   HWLOC_MEMORY_TIER_HBM  = 1UL<<0,
   HWLOC_MEMORY_TIER_DRAM = 1UL<<1,
   HWLOC_MEMORY_TIER_GPU  = 1UL<<2,
@@ -1303,6 +1303,22 @@ static int compare_node_infos_by_type_and_bw(const void *_a, const void *_b)
     return -1;
   else if (a->local_bw < b->local_bw)
     return 1;
+  return 0;
+}
+
+static int compare_tiers_by_bw_and_type(const void *_a, const void *_b)
+{
+  const struct hwloc_memory_tier_s *a = _a, *b = _b;
+  /* sort by (average) BW first */
+  if (a->local_bw_min && b->local_bw_min) {
+    if (a->local_bw_min + a->local_bw_max > b->local_bw_min + b->local_bw_max)
+      return -1;
+    else if (a->local_bw_min + a->local_bw_max < b->local_bw_min + b->local_bw_max)
+      return 1;
+  }
+  /* then by tier type */
+  if (a->type != b->type)
+    return a->type - b->type;
   return 0;
 }
 
@@ -1781,6 +1797,11 @@ hwloc__apply_memory_tiers_subtypes(hwloc_topology_t topology,
         } else
           hwloc_debug("  node L#%u P#%u already marked as %s, not setting %s\n",
                       node->logical_index, node->os_index, node->subtype, subtype);
+        if (nr_tiers > 1) {
+          char tmp[20];
+          snprintf(tmp, sizeof(tmp), "%u", j);
+          hwloc__replace_infos(&node->infos, "MemoryTier", tmp);
+        }
         break; /* each node is in a single tier */
       }
     }
@@ -1813,6 +1834,10 @@ hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
     goto out;
 
   hwloc__guess_memory_tiers_types(topology, nr_tiers, tiers);
+
+  /* sort tiers by BW first, then by type */
+  hwloc_debug("Sorting memory tiers...\n");
+  qsort(tiers, nr_tiers, sizeof(*tiers), compare_tiers_by_bw_and_type);
 
  ready:
 #ifdef HWLOC_DEBUG

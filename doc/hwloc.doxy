@@ -2278,6 +2278,11 @@ and GID #1 of port #3.
 These info attributes are attached to objects specified in parentheses.
 
 <dl>
+<dt>MemoryTier (NUMA Nodes)</dt>
+<dd>The rank of the memory tier of this node.
+Ranks start from 0 for highest bandwidth nodes.
+The attribute is only set if multiple tiers are found.
+</dd>
 <dt>CXLDevice (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
 If multiple devices are interleaved, their bus IDs are separated by commas,
