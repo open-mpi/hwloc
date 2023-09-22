@@ -215,7 +215,7 @@ main(void)
   check_subtypes(new, "NVM", NULL, "HBM", NULL, "HBM");
   hwloc_topology_destroy(new);
 
-  printf("checking everything can be disabled if HWLOC_MEMTIERS_GUESS=none\n");
+  printf("checking guessing can be disabled if HWLOC_MEMTIERS_GUESS=none\n");
   putenv((char*)"HWLOC_MEMTIERS_GUESS=none");
   err = hwloc_topology_init(&new);
   assert(!err);
@@ -224,6 +224,39 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "NVM", NULL, "SPM", NULL, "SPM");
+  hwloc_topology_destroy(new);
+
+  printf("checking all tier stuff can be disabled if HWLOC_MEMTIERS=none\n");
+  putenv((char*)"HWLOC_MEMTIERS=none");
+  err = hwloc_topology_init(&new);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(new, xmlbuffer, buflen);
+  assert(!err);
+  err = hwloc_topology_load(new);
+  assert(!err);
+  check_subtypes(new, NULL, NULL, NULL, NULL, NULL);
+  hwloc_topology_destroy(new);
+
+  printf("checking everything can be overwritten with HWLOC_MEMTIERS\n");
+  putenv((char*)"HWLOC_MEMTIERS=0x5=HBM;0x12=SPM;0x8=DRAM");
+  err = hwloc_topology_init(&new);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(new, xmlbuffer, buflen);
+  assert(!err);
+  err = hwloc_topology_load(new);
+  assert(!err);
+  check_subtypes(new, "SPM", "HBM", "SPM", "HBM", "DRAM");
+  hwloc_topology_destroy(new);
+
+  printf("checking everything can be overwritten with HWLOC_MEMTIERS with invalid types\n");
+  putenv((char*)"HWLOC_MEMTIERS=0x14=foo;0xb=HBM");
+  err = hwloc_topology_init(&new);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(new, xmlbuffer, buflen);
+  assert(!err);
+  err = hwloc_topology_load(new);
+  assert(!err);
+  check_subtypes(new, NULL, "HBM", "HBM", NULL, "HBM");
   hwloc_topology_destroy(new);
 
   free(xmlbuffer);

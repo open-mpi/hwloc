@@ -1128,6 +1128,14 @@ following environment variables.
   assume all SPM nodes are HBM, assume node0 is in the DRAM tier
 -->
 
+<dt>HWLOC_MEMTIERS=0x0f=HBM;0xf=DRAM</dt>
+  <dd>Enforce the memory tiers from the given semi-colon separated list.
+  Each entry specifies a bitmask (nodeset) of NUMA nodes and their subtype.
+  Nodes not listed in any entry are not placed in any tier.
+
+  If an empty value or <tt>none</tt> is given, tiers are entirely disabled.
+  </dd>
+
 <dt>HWLOC_GROUPING=1</dt>
   <dd>enables or disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read
