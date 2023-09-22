@@ -146,21 +146,24 @@ report_insert_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
   char typestr[64];
   char *cpusetstr;
   char *nodesetstr = NULL;
+  char indexstr[64] = "";
+  char groupstr[64] = "";
 
   hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   hwloc_bitmap_asprintf(&cpusetstr, obj->cpuset);
+  if (obj->os_index != HWLOC_UNKNOWN_INDEX)
+    snprintf(indexstr, sizeof(indexstr), "P#%u ", obj->os_index);
+  if (obj->type == HWLOC_OBJ_GROUP)
+    snprintf(groupstr, sizeof(groupstr), "groupkind %u-%u ", obj->attr->group.kind, obj->attr->group.subkind);
   if (obj->nodeset) /* may be missing during insert */
     hwloc_bitmap_asprintf(&nodesetstr, obj->nodeset);
-  if (obj->os_index != HWLOC_UNKNOWN_INDEX)
-    snprintf(buf, buflen, "%s (P#%u cpuset %s%s%s)",
-             typestr, obj->os_index, cpusetstr,
-             nodesetstr ? " nodeset " : "",
-             nodesetstr ? nodesetstr : "");
-  else
-    snprintf(buf, buflen, "%s (cpuset %s%s%s)",
-             typestr, cpusetstr,
-             nodesetstr ? " nodeset " : "",
-             nodesetstr ? nodesetstr : "");
+  snprintf(buf, buflen, "%s (%s%s%s%s%scpuset %s%s%s)",
+           typestr,
+           indexstr,
+           obj->subtype ? "subtype " : "", obj->subtype ? obj->subtype : "", obj->subtype ? " " : "",
+           groupstr,
+           cpusetstr,
+           nodesetstr ? " nodeset " : "", nodesetstr ? nodesetstr : "");
   free(cpusetstr);
   free(nodesetstr);
 }
@@ -178,8 +181,9 @@ static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *ms
     fprintf(stderr, "****************************************************************************\n");
     fprintf(stderr, "* hwloc %s received invalid information from the operating system.\n", HWLOC_VERSION);
     fprintf(stderr, "*\n");
-    fprintf(stderr, "* Failed with: %s\n", msg);
-    fprintf(stderr, "* while inserting %s at %s\n", newstr, oldstr);
+    fprintf(stderr, "* Failed with error: %s\n", msg);
+    fprintf(stderr, "* while inserting %s\n", newstr);
+    fprintf(stderr, "* at %s\n", oldstr);
     fprintf(stderr, "* coming from: %s\n", reason);
     fprintf(stderr, "*\n");
     fprintf(stderr, "* The following FAQ entry in the hwloc documentation may help:\n");
