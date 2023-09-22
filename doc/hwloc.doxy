@@ -1118,6 +1118,17 @@ following environment variables.
   Bit 2 enables the use of target/initiator information.
   </dd>
 
+<dt>HWLOC_MEMTIERS_GUESS=none</dt>
+<dt>HWLOC_MEMTIERS_GUESS=all</dt>
+  <dd>Disable or enable all heuristics to guess memory subtypes and tiers.
+  By default, hwloc only uses heuristics that are likely correct
+  and disables those that are unlikely.
+  </dd>
+<!-- not stable yet, hence not documented
+ HWLOC_MEMTIERS_GUESS=spm_is_hbm
+  assume all SPM nodes are HBM
+-->
+
 <dt>HWLOC_GROUPING=1</dt>
   <dd>enables or disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read
