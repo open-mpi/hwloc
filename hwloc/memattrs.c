@@ -1220,14 +1220,16 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
  * Using memattrs to identify HBM/DRAM
  */
 
-typedef enum hwloc_memory_tier_type_e {
-  HWLOC_MEMORY_TIER_UNKNOWN,
-  HWLOC_MEMORY_TIER_HBM,
-  HWLOC_MEMORY_TIER_DRAM,
-  HWLOC_MEMORY_TIER_GPU,
-  HWLOC_MEMORY_TIER_SPM, /* Specific-Purpose Memory is usually HBM, we'll use BW to confirm or force*/
-  HWLOC_MEMORY_TIER_NVM
-} hwloc_memory_tier_type_t;
+enum hwloc_memory_tier_type_e {
+  /* WARNING: the order is important */
+  HWLOC_MEMORY_TIER_HBM  = 1UL<<0,
+  HWLOC_MEMORY_TIER_DRAM = 1UL<<1,
+  HWLOC_MEMORY_TIER_GPU  = 1UL<<2,
+  HWLOC_MEMORY_TIER_SPM  = 1UL<<3, /* Specific-Purpose Memory is usually HBM, we'll use BW to confirm or force*/
+  HWLOC_MEMORY_TIER_NVM  = 1UL<<4
+};
+typedef unsigned long hwloc_memory_tier_type_t;
+#define HWLOC_MEMORY_TIER_UNKNOWN 0UL
 
 static const char * hwloc_memory_tier_type_snprintf(hwloc_memory_tier_type_t type)
 {
@@ -1372,7 +1374,7 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
     hwloc_debug("  node info %u = node L#%u P#%u with info type %lx and local BW %llu lat %llu\n",
                 i,
                 nodeinfos[i].node->logical_index, nodeinfos[i].node->os_index,
-                (unsigned long) nodeinfos[i].type,
+                nodeinfos[i].type,
                 (unsigned long long) nodeinfos[i].local_bw,
                 (unsigned long long) nodeinfos[i].local_lat);
 #endif
@@ -1657,8 +1659,7 @@ hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
     hwloc_bitmap_asprintf(&s, tiers[i].nodeset);
     hwloc_debug("  tier %u = nodes %s with type %lx and local BW %llu-%llu lat %llu-%llu\n",
                 i,
-                s,
-                (unsigned long) tiers[i].type,
+                s, tiers[i].type,
                 (unsigned long long) tiers[i].local_bw_min,
                 (unsigned long long) tiers[i].local_bw_max,
                 (unsigned long long) tiers[i].local_lat_min,
