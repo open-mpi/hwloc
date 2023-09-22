@@ -1226,7 +1226,8 @@ enum hwloc_memory_tier_type_e {
   HWLOC_MEMORY_TIER_DRAM = 1UL<<1,
   HWLOC_MEMORY_TIER_GPU  = 1UL<<2,
   HWLOC_MEMORY_TIER_SPM  = 1UL<<3, /* Specific-Purpose Memory is usually HBM, we'll use BW to confirm or force*/
-  HWLOC_MEMORY_TIER_NVM  = 1UL<<4
+  HWLOC_MEMORY_TIER_NVM  = 1UL<<4,
+  HWLOC_MEMORY_TIER_CXL  = 1UL<<5
 };
 typedef unsigned long hwloc_memory_tier_type_t;
 #define HWLOC_MEMORY_TIER_UNKNOWN 0UL
@@ -1239,6 +1240,12 @@ static const char * hwloc_memory_tier_type_snprintf(hwloc_memory_tier_type_t typ
   case HWLOC_MEMORY_TIER_GPU: return "GPUMemory";
   case HWLOC_MEMORY_TIER_SPM: return "SPM";
   case HWLOC_MEMORY_TIER_NVM: return "NVM";
+  case HWLOC_MEMORY_TIER_CXL:
+  case HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_DRAM: return "CXL-DRAM";
+  case HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_HBM: return "CXL-HBM";
+  case HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_GPU: return "CXL-GPUMemory";
+  case HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_SPM: return "CXL-SPM";
+  case HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_NVM: return "CXL-NVM";
   default: return NULL;
   }
 }
@@ -1333,6 +1340,14 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
       nodeinfos[i].type = HWLOC_MEMORY_TIER_NVM;
     else if (daxtype && !strcmp(daxtype, "SPM"))
       nodeinfos[i].type = HWLOC_MEMORY_TIER_SPM;
+    /* add CXL flag */
+    if (hwloc_obj_get_info_by_name(node, "CXLDevice") != NULL) {
+      /* CXL is always SPM for now. HBM and DRAM not possible here yet.
+       * Hence remove all but NVM first.
+       */
+      nodeinfos[i].type &= HWLOC_MEMORY_TIER_NVM;
+      nodeinfos[i].type |= HWLOC_MEMORY_TIER_CXL;
+    }
 
     /* get local bandwidth */
     imtg = NULL;

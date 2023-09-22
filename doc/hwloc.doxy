@@ -1936,8 +1936,9 @@ subtype <tt>DRAM</tt> (for usual main memory),
 <tt>HBM</tt> (high-bandwidth memory),
 <tt>SPM</tt> (specific-purpose memory, usually reserved for some custom applications),
 <tt>NVM</tt> (non-volatile memory when used as main memory),
-<tt>MCDRAM</tt> (on KNL)
-or <tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink).
+<tt>MCDRAM</tt> (on KNL),
+<tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink),
+<tt>CXL-DRAM</tt> or <tt>CXL-NVM</tt> for CXL DRAM or non-volatile memory.
 </li>
 <li>Groups:
 subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
