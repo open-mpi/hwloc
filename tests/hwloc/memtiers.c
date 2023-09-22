@@ -129,6 +129,17 @@ main(void)
   check_subtypes(new, "NVM", NULL, "HBM", NULL, "HBM");
   hwloc_topology_destroy(new);
 
+  printf("checking HBM subtypes are set on XML reload if HWLOC_MEMTIERS_GUESS=node0_is_dram,spm_is_hbm\n");
+  putenv((char*)"HWLOC_MEMTIERS_GUESS=node0_is_dram,spm_is_hbm");
+  err = hwloc_topology_init(&new);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(new, xmlbuffer, buflen);
+  assert(!err);
+  err = hwloc_topology_load(new);
+  assert(!err);
+  check_subtypes(new, "NVM", "DRAM", "HBM", "DRAM", "HBM");
+  hwloc_topology_destroy(new);
+
   free(xmlbuffer);
 
   printf("adding correct BW values\n");

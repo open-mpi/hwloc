@@ -1465,13 +1465,14 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
 }
 
 enum hwloc_guess_memtiers_flag {
-  HWLOC_GUESS_MEMTIERS_FLAG_SPM_IS_HBM = 1<<0
+  HWLOC_GUESS_MEMTIERS_FLAG_NODE0_IS_DRAM = 1<<0,
+  HWLOC_GUESS_MEMTIERS_FLAG_SPM_IS_HBM = 1<<1
 };
 
 static int
 hwloc__guess_dram_hbm_tiers(struct hwloc_memory_tier_s *tier1,
                             struct hwloc_memory_tier_s *tier2,
-                            unsigned long flags __hwloc_attribute_unused)
+                            unsigned long flags)
 {
   struct hwloc_memory_tier_s *tmp;
 
@@ -1497,6 +1498,13 @@ hwloc__guess_dram_hbm_tiers(struct hwloc_memory_tier_s *tier1,
     return -1;
   }
   /* tier2 BW is >2x tier1 */
+
+  if ((flags & HWLOC_GUESS_MEMTIERS_FLAG_NODE0_IS_DRAM)
+      && hwloc_bitmap_isset(tier2->nodeset, 0)) {
+    /* node0 is not DRAM, and we assume that's not possible */
+    hwloc_debug("    node0 shouldn't have HBM BW\n");
+    return -1;
+  }
 
   /* assume tier1 == DRAM and tier2 == HBM */
   tier1->type = HWLOC_MEMORY_TIER_DRAM;
@@ -1528,6 +1536,10 @@ hwloc__guess_memory_tiers_types(hwloc_topology_t topology __hwloc_attribute_unus
     if (strstr(env, "spm_is_hbm")) {
       hwloc_debug("Assuming SPM-tier is HBM, ignore bandwidth\n");
       flags |= HWLOC_GUESS_MEMTIERS_FLAG_SPM_IS_HBM;
+    }
+    if (strstr(env, "node0_is_dram")) {
+      hwloc_debug("Assuming node0 is DRAM\n");
+      flags |= HWLOC_GUESS_MEMTIERS_FLAG_NODE0_IS_DRAM;
     }
   }
 
@@ -1583,6 +1595,17 @@ hwloc__guess_memory_tiers_types(hwloc_topology_t topology __hwloc_attribute_unus
       if (tiers[i].type == HWLOC_MEMORY_TIER_SPM) {
         hwloc_debug("Forcing SPM tier to HBM");
         tiers[i].type = HWLOC_MEMORY_TIER_HBM;
+      }
+  }
+
+  if (flags & HWLOC_GUESS_MEMTIERS_FLAG_NODE0_IS_DRAM) {
+    /* force mark node0's tier as DRAM if we couldn't guess it */
+    for(i=0; i<nr_tiers; i++)
+      if (hwloc_bitmap_isset(tiers[i].nodeset, 0)
+          && tiers[i].type == HWLOC_MEMORY_TIER_UNKNOWN) {
+        hwloc_debug("Forcing node0 tier to DRAM");
+        tiers[i].type = HWLOC_MEMORY_TIER_DRAM;
+        break;
       }
   }
 

@@ -1123,9 +1123,9 @@ following environment variables.
   By default, hwloc only uses heuristics that are likely correct
   and disables those that are unlikely.
   </dd>
-<!-- not stable yet, hence not documented
- HWLOC_MEMTIERS_GUESS=spm_is_hbm
-  assume all SPM nodes are HBM
+<!-- since 2.10, not stable yet, hence not documented
+ HWLOC_MEMTIERS_GUESS=spm_is_hbm,node0_is_dram
+  assume all SPM nodes are HBM, assume node0 is in the DRAM tier
 -->
 
 <dt>HWLOC_GROUPING=1</dt>
