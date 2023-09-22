@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2022 Inria.  All rights reserved.
+ * Copyright © 2020-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -39,6 +39,9 @@ check_subtypes(hwloc_topology_t topo,
   pack1n2 = root->first_child->memory_first_child->next_sibling;
   pack2n1 = root->last_child->memory_first_child;
   pack2n2 = root->last_child->memory_first_child->next_sibling;
+
+  printf("  Expected %s %s %s %s %s\n", rootnsubtype, pack1n1subtype, pack1n2subtype, pack2n1subtype, pack2n2subtype);
+  printf("  Found    %s %s %s %s %s\n", rootn->subtype, pack1n1->subtype, pack1n2->subtype, pack2n1->subtype, pack2n2->subtype);
 
   if (rootnsubtype) {
     assert(rootn->subtype);
@@ -81,7 +84,7 @@ main(void)
   int buflen;
   int err;
 
-  printf("creatin topology...\n");
+  printf("creating topology...\n");
   err = hwloc_topology_init(&topology);
   assert(!err);
   err = hwloc_topology_set_synthetic(topology, "[numa] pack:2 [numa] [numa] pu:2");
@@ -115,7 +118,7 @@ main(void)
   check_subtypes(new, "NVM", NULL, "SPM", NULL, "SPM");
   hwloc_topology_destroy(new);
 
-  printf("checking DRAM and HBM subtypes are set on XML reload if HWLOC_MEMTIERS_GUESS=spm_is_hbm\n");
+  printf("checking HBM subtypes are set on XML reload if HWLOC_MEMTIERS_GUESS=spm_is_hbm\n");
   putenv((char*)"HWLOC_MEMTIERS_GUESS=spm_is_hbm");
   err = hwloc_topology_init(&new);
   assert(!err);
@@ -123,7 +126,7 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, "NVM", "DRAM", "HBM", "DRAM", "HBM");
+  check_subtypes(new, "NVM", NULL, "HBM", NULL, "HBM");
   hwloc_topology_destroy(new);
 
   free(xmlbuffer);
@@ -156,10 +159,21 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, NULL, NULL, NULL, NULL, NULL);
+  check_subtypes(new, "NVM", NULL, "SPM", NULL, "SPM");
   hwloc_topology_destroy(new);
 
-  free(xmlbuffer);
+  printf("checking that no subtypes are back on XML reload if disabling memory attributes (which disables tiers too)\n");
+  putenv((char*)"HWLOC_MEMTIERS_GUESS=spm_is_hbm");
+  err = hwloc_topology_init(&new);
+  assert(!err);
+  err = hwloc_topology_set_flags(new, HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(new, xmlbuffer, buflen);
+  assert(!err);
+  err = hwloc_topology_load(new);
+  assert(!err);
+  check_subtypes(new, NULL, NULL, NULL, NULL, NULL);
+  hwloc_topology_destroy(new);
 
   printf("breaking BW values\n");
   add_local_bw(topology, rootn, 100);
@@ -187,7 +201,7 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, "NVM", "DRAM", "HBM", "DRAM", "HBM");
+  check_subtypes(new, "NVM", NULL, "HBM", NULL, "HBM");
   hwloc_topology_destroy(new);
 
   printf("checking everything can be disabled if HWLOC_MEMTIERS_GUESS=none\n");
@@ -198,7 +212,7 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, NULL, NULL, NULL, NULL, NULL);
+  check_subtypes(new, "NVM", NULL, "SPM", NULL, "SPM");
   hwloc_topology_destroy(new);
 
   free(xmlbuffer);
