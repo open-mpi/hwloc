@@ -1369,8 +1369,6 @@ following environment variables.
 </dl>
 
 <!-- not documented:
- HWLOC_USE_DT
-  enables the use of the POWER Device-Tree on Linux (disabled by default since 2.1)
  HWLOC_KNL_NUMA_QUIRK
   disables the KNL NUMA Cluster quirk in the linux backend
  HWLOC_KNL_HDH_FALLBACK
@@ -1420,7 +1418,7 @@ following environment variables.
   OpenCAPI endpoint is connecter. this may be wrong on POWER8, that's
   why we use the GPU locality instead (assuming GPU have PCIe and
   NVLink connecting to the same socket).
-HWLOC_DARWIN_CPUKINDS_FROM_SYSCTL=0
+ HWLOC_DARWIN_CPUKINDS_FROM_SYSCTL=0
   By default, darwin cpukinds are read from IOKit (device-tree)
   because it's more precise than sysctl hw.perflevel* keys.
   If IOKit cannot be matched with perflevel cache information
