@@ -1249,6 +1249,31 @@ static const char * hwloc_memory_tier_type_snprintf(hwloc_memory_tier_type_t typ
   }
 }
 
+static hwloc_memory_tier_type_t hwloc_memory_tier_type_sscanf(const char *name)
+{
+  if (!strcasecmp(name, "DRAM"))
+    return HWLOC_MEMORY_TIER_DRAM;
+  if (!strcasecmp(name, "HBM"))
+    return HWLOC_MEMORY_TIER_HBM;
+  if (!strcasecmp(name, "GPUMemory"))
+    return HWLOC_MEMORY_TIER_GPU;
+  if (!strcasecmp(name, "SPM"))
+    return HWLOC_MEMORY_TIER_SPM;
+  if (!strcasecmp(name, "NVM"))
+    return HWLOC_MEMORY_TIER_NVM;
+  if (!strcasecmp(name, "CXL-DRAM"))
+    return HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_DRAM;
+  if (!strcasecmp(name, "CXL-HBM"))
+    return HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_HBM;
+  if (!strcasecmp(name, "CXL-GPUMemory"))
+    return HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_GPU;
+  if (!strcasecmp(name, "CXL-SPM"))
+    return HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_SPM;
+  if (!strcasecmp(name, "CXL-NVM"))
+    return HWLOC_MEMORY_TIER_CXL|HWLOC_MEMORY_TIER_NVM;
+  return 0;
+}
+
 /* factorized tier, grouping multiple nodes */
 struct hwloc_memory_tier_s {
   hwloc_nodeset_t nodeset;
@@ -1628,10 +1653,113 @@ hwloc__guess_memory_tiers_types(hwloc_topology_t topology __hwloc_attribute_unus
   return 0;
 }
 
+/* parses something like 0xf=HBM;0x0f=DRAM;0x00f=CXL-DRAM */
+static struct hwloc_memory_tier_s *
+hwloc__force_memory_tiers(hwloc_topology_t topology __hwloc_attribute_unused,
+                          unsigned *nr_tiers_p,
+                          const char *_env)
+{
+  struct hwloc_memory_tier_s *tiers = NULL;
+  unsigned nr_tiers, i;
+  hwloc_bitmap_t nodeset = NULL;
+  char *env;
+  const char *tmp;
+
+  env = strdup(_env);
+  if (!env) {
+    fprintf(stderr, "[hwloc/memtiers] failed to duplicate HWLOC_MEMTIERS envvar\n");
+    goto out;
+  }
+
+  tmp = env;
+  nr_tiers = 1;
+  while (1) {
+    tmp = strchr(tmp, ';');
+    if (!tmp)
+      break;
+    tmp++;
+    nr_tiers++;
+  }
+
+  nodeset = hwloc_bitmap_alloc();
+  if (!nodeset) {
+    fprintf(stderr, "[hwloc/memtiers] failed to allocated forced tiers' nodeset\n");
+    goto out_with_envvar;
+  }
+
+  tiers = calloc(nr_tiers, sizeof(*tiers));
+  if (!tiers) {
+    fprintf(stderr, "[hwloc/memtiers] failed to allocated forced tiers\n");
+    goto out_with_nodeset;
+  }
+  nr_tiers = 0;
+
+  tmp = env;
+  while (1) {
+    char *end;
+    char *equal;
+    hwloc_memory_tier_type_t type;
+
+    end = strchr(tmp, ';');
+    if (end)
+      *end = '\0';
+
+    equal = strchr(tmp, '=');
+    if (!equal) {
+      fprintf(stderr, "[hwloc/memtiers] missing `=' before end of forced tier description at `%s'\n", tmp);
+      goto out_with_tiers;
+    }
+    *equal = '\0';
+
+    hwloc_bitmap_sscanf(nodeset, tmp);
+    if (hwloc_bitmap_iszero(nodeset)) {
+      fprintf(stderr, "[hwloc/memtiers] empty forced tier nodeset `%s', aborting\n", tmp);
+      goto out_with_tiers;
+    }
+    type = hwloc_memory_tier_type_sscanf(equal+1);
+    if (!type)
+      hwloc_debug("failed to recognize forced tier type `%s'\n", equal+1);
+    tiers[nr_tiers].nodeset = hwloc_bitmap_dup(nodeset);
+    tiers[nr_tiers].type = type;
+    tiers[nr_tiers].local_bw_min = tiers[nr_tiers].local_bw_max = 0;
+    tiers[nr_tiers].local_lat_min = tiers[nr_tiers].local_lat_max = 0;
+    nr_tiers++;
+    if (!end)
+      break;
+    tmp = end+1;
+  }
+
+  free(env);
+  hwloc_bitmap_free(nodeset);
+  hwloc_debug("Forcing %u memory tiers\n", nr_tiers);
+#ifdef HWLOC_DEBUG
+  for(i=0; i<nr_tiers; i++) {
+    char *s;
+    hwloc_bitmap_asprintf(&s, tiers[i].nodeset);
+    hwloc_debug("  tier #%u type %lx nodeset %s\n", i, tiers[i].type, s);
+    free(s);
+  }
+#endif
+  *nr_tiers_p = nr_tiers;
+  return tiers;
+
+ out_with_tiers:
+  for(i=0; i<nr_tiers; i++)
+    hwloc_bitmap_free(tiers[i].nodeset);
+  free(tiers);
+ out_with_nodeset:
+  hwloc_bitmap_free(nodeset);
+ out_with_envvar:
+  free(env);
+ out:
+  return NULL;
+}
+
 static void
 hwloc__apply_memory_tiers_subtypes(hwloc_topology_t topology,
                                    unsigned nr_tiers,
-                                   struct hwloc_memory_tier_s *tiers)
+                                   struct hwloc_memory_tier_s *tiers,
+                                   int force)
 {
   hwloc_obj_t node = NULL;
   hwloc_debug("Marking node tiers\n");
@@ -1640,9 +1768,10 @@ hwloc__apply_memory_tiers_subtypes(hwloc_topology_t topology,
     for(j=0; j<nr_tiers; j++) {
       if (hwloc_bitmap_isset(tiers[j].nodeset, node->os_index)) {
         const char *subtype = hwloc_memory_tier_type_snprintf(tiers[j].type);
-        if (!node->subtype) { /* don't overwrite the existing subtype */
+        if (!node->subtype || force) { /* don't overwrite the existing subtype unless forced */
           if (subtype) { /* don't set a subtype for unknown tiers */
             hwloc_debug("  marking node L#%u P#%u as %s (was %s)\n", node->logical_index, node->os_index, subtype, node->subtype);
+            free(node->subtype);
             node->subtype = strdup(subtype);
           }
         } else
@@ -1660,6 +1789,20 @@ hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
   struct hwloc_memory_tier_s *tiers;
   unsigned nr_tiers;
   unsigned i;
+  int force_subtype = 0;
+  const char *env;
+
+  env = getenv("HWLOC_MEMTIERS");
+  if (env) {
+    if (!strcmp(env, "none"))
+      goto out;
+    tiers = hwloc__force_memory_tiers(topology, &nr_tiers, env);
+    if (tiers) {
+      assert(nr_tiers > 0);
+      force_subtype = 1;
+      goto ready;
+    }
+  }
 
   tiers = hwloc__group_memory_tiers(topology, &nr_tiers);
   if (!tiers)
@@ -1667,6 +1810,7 @@ hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
 
   hwloc__guess_memory_tiers_types(topology, nr_tiers, tiers);
 
+ ready:
 #ifdef HWLOC_DEBUG
   for(i=0; i<nr_tiers; i++) {
     char *s;
@@ -1682,7 +1826,7 @@ hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
   }
 #endif
 
-  hwloc__apply_memory_tiers_subtypes(topology, nr_tiers, tiers);
+  hwloc__apply_memory_tiers_subtypes(topology, nr_tiers, tiers, force_subtype);
 
   for(i=0; i<nr_tiers; i++)
     hwloc_bitmap_free(tiers[i].nodeset);
