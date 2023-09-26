@@ -1406,7 +1406,10 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
     }
   }
 
-  /* sort nodes */
+  /* Sort nodes.
+   * We could also sort by the existing subtype.
+   * KNL is the only case where subtypes are set in backends, but we set memattrs as well there.
+   */
   hwloc_debug("Sorting memory node infos...\n");
   qsort(nodeinfos, n, sizeof(*nodeinfos), compare_node_infos_by_type_and_bw);
 #ifdef HWLOC_DEBUG
