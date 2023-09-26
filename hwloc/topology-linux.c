@@ -3274,6 +3274,10 @@ hwloc_linux_knl_add_cluster(struct hwloc_topology *topology,
      */
     hwloc_bitmap_copy(mcdram->cpuset, ddr->cpuset);
 
+    /* also mark ddr as DRAM to match what we do in memattrs.c */
+    assert(ddr);
+    ddr->subtype = strdup("DRAM");
+
     /* Add a Group for Cluster containing this MCDRAM + DDR */
     cluster = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
     hwloc_obj_add_other_obj_sets(cluster, ddr);
