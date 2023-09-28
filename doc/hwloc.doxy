@@ -1137,6 +1137,12 @@ following environment variables.
   If an empty value or <tt>none</tt> is given, tiers are entirely disabled.
   </dd>
 
+<dt>HWLOC_MEMTIERS_REFRESH=1</dt>
+  <dd>Force the rebuilding of memory tiers.
+  This is mostly useful when importing a XML topology from an old hwloc
+  version which was not able to guess memory subtypes and tiers.
+  </dd>
+
 <dt>HWLOC_GROUPING=1</dt>
   <dd>enables or disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read

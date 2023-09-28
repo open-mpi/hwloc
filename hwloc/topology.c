@@ -4187,10 +4187,13 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
+    int force_memtiers = (getenv("HWLOC_MEMTIERS_REFRESH") != NULL);
     /* Same for memattrs */
     hwloc_internal_memattrs_need_refresh(topology);
     hwloc_internal_memattrs_refresh(topology);
-    hwloc_internal_memattrs_guess_memory_tiers(topology);
+    /* update memtiers unless XML */
+    if (force_memtiers || strcmp(topology->backends->component->name, "xml"))
+      hwloc_internal_memattrs_guess_memory_tiers(topology, force_memtiers);
   }
 
   topology->is_loaded = 1;
