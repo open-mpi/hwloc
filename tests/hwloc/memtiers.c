@@ -137,6 +137,8 @@ main(void)
 
   hwloc_topology_export_xmlbuffer(topology, &xmlbuffer, &buflen, 0);
 
+  putenv((char*)"HWLOC_MEMTIERS_REFRESH=1");
+
   printf("checking NVM and SPM subtypes are set on XML reload\n");
   printf("UNKNOWN should be before SPM and NVM in tiers since we have no BW\n");
   err = hwloc_topology_init(&new);

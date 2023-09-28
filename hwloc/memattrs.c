@@ -1425,6 +1425,7 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
   /* Sort nodes.
    * We could also sort by the existing subtype.
    * KNL is the only case where subtypes are set in backends, but we set memattrs as well there.
+   * Also HWLOC_MEMTIERS_REFRESH would be a special value to ignore existing subtypes.
    */
   hwloc_debug("Sorting memory node infos...\n");
   qsort(nodeinfos, n, sizeof(*nodeinfos), compare_node_infos_by_type_and_bw);
@@ -1809,12 +1810,11 @@ hwloc__apply_memory_tiers_subtypes(hwloc_topology_t topology,
 }
 
 int
-hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology)
+hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology, int force_subtype)
 {
   struct hwloc_memory_tier_s *tiers;
   unsigned nr_tiers;
   unsigned i;
-  int force_subtype = 0;
   const char *env;
 
   env = getenv("HWLOC_MEMTIERS");
