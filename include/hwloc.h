@@ -263,6 +263,11 @@ typedef enum {
 			  * This is the smallest object representing Memory resources,
 			  * it cannot have any child except Misc objects.
 			  * However it may have Memory-side cache parents.
+                          *
+                          * NUMA nodes may correspond to different kinds of memory
+                          * (DRAM, HBM, CXL-DRAM, etc.). When hwloc is able to guess
+                          * that kind, it is specified in the subtype field of the object.
+                          * See also \ref attributes_normal in the main documentation.
 			  *
 			  * There is always at least one such object in the topology
 			  * even if the machine is not NUMA.
