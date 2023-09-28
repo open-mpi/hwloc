@@ -1947,6 +1947,10 @@ subtype <tt>DRAM</tt> (for usual main memory),
 <tt>MCDRAM</tt> (on KNL),
 <tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink),
 <tt>CXL-DRAM</tt> or <tt>CXL-NVM</tt> for CXL DRAM or non-volatile memory.
+Note that some of these subtypes are guessed by the library,
+they might be missing or slightly wrong in some corner cases.
+See HWLOC_MEMTIERS and HWLOC_MEMTIERS_GUESS
+in \ref envvar for tuning these.
 </li>
 <li>Groups:
 subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
