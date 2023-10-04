@@ -53,6 +53,7 @@ struct hwloc_linux_backend_data_s {
     HWLOC_LINUX_ARCH_ARM,
     HWLOC_LINUX_ARCH_POWER,
     HWLOC_LINUX_ARCH_S390,
+    HWLOC_LINUX_ARCH_LOONGARCH,
     HWLOC_LINUX_ARCH_UNKNOWN
   } arch;
   int is_knl;
@@ -5287,6 +5288,21 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
   return 0;
 }
 
+static int
+hwloc_linux_parse_cpuinfo_loongarch(const char *prefix, const char *value,
+                                    struct hwloc_infos_s *infos,
+                                    int is_global __hwloc_attribute_unused)
+{
+  if (!strcmp("Model Name", prefix)) {
+    if (value[0])
+      hwloc__add_info(infos, "CPUModel", value);
+  } else if (!strcmp("CPU Family", prefix)) {
+    if (value[0])
+      hwloc__add_info(infos, "CPUFamily", value);
+  }
+  return 0;
+}
+
 /*
  * avr32: "chip type\t:"			=> OK
  * blackfin: "model name\t:"			=> OK
@@ -5433,6 +5449,9 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 	break;
       case HWLOC_LINUX_ARCH_IA64:
 	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ia64;
+	break;
+      case HWLOC_LINUX_ARCH_LOONGARCH:
+	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_loongarch;
 	break;
       default:
 	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_generic;
@@ -5593,6 +5612,8 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
       data->arch = HWLOC_LINUX_ARCH_POWER;
     else if (!strncmp(data->utsname.machine, "s390", 4))
       data->arch = HWLOC_LINUX_ARCH_S390;
+    else if (!strncmp(data->utsname.machine, "loongarch", 9))
+      data->arch = HWLOC_LINUX_ARCH_LOONGARCH;
     else if (!strcmp(data->utsname.machine, "ia64"))
       data->arch = HWLOC_LINUX_ARCH_IA64;
   }
