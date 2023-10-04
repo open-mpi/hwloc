@@ -2087,6 +2087,10 @@ or to the root object (Machine) if package locality information is missing.
 Currently available for x86 and Xeon Phi processors on most systems,
 and for ia64 processors on Linux (except CPUStepping).
 </dd>
+<dt>CPUFamily</dt>
+<dd>
+The family of the CPU, currently only available on Linux on LoongArch platforms.
+</dd>
 <dt>CPURevision</dt>
 <dd>
 A POWER/PowerPC-specific general processor revision number,
