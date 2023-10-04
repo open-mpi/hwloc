@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -5272,15 +5272,15 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
 
 static int
 hwloc_linux_parse_cpuinfo_loongarch(const char *prefix, const char *value,
-                                    struct hwloc_infos_s *infos,
+                                    struct hwloc_info_s **infos, unsigned *infos_count,
                                     int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("Model Name", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, "CPUModel", value);
+      hwloc__add_info(infos, infos_count, "CPUModel", value);
   } else if (!strcmp("CPU Family", prefix)) {
     if (value[0])
-      hwloc__add_info(infos, "CPUFamily", value);
+      hwloc__add_info(infos, infos_count, "CPUFamily", value);
   }
   return 0;
 }
