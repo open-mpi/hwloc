@@ -21,12 +21,20 @@
 #include <ctype.h>
 #include <assert.h>
 
+/* this is a global that doesn't change when walking hierarchy of locations, etc */
 struct hwloc_calc_location_context_s {
   hwloc_topology_t topology;
   int topodepth;
   int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
   int logical;
   int verbose;
+};
+
+/* this a local that changes when going from one level to another in the hierarchy of locations, etc */
+struct hwloc_calc_level {
+  int depth;
+  hwloc_obj_type_t type;
+  union hwloc_obj_attr_u attr;
 };
 
 typedef enum hwloc_calc_append_mode_e {
@@ -138,6 +146,63 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
     }
   }
   return NULL;
+}
+
+static __hwloc_inline int
+hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
+                       hwloc_topology_t topology,
+                       const char *_typestring, size_t typelen,
+                       struct hwloc_calc_level *level)
+{
+  char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
+  char *endptr;
+  int err;
+
+  level->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+
+  if (typelen >= sizeof(typestring))
+    return -1;
+  snprintf(typestring, typelen+1, "%s", _typestring);
+
+  err = hwloc_type_sscanf(typestring, &level->type, &level->attr, sizeof(level->attr));
+  if (!err) {
+    /* parsed a correct type */
+    level->depth = hwloc_get_type_depth(topology, level->type);
+    if (level->type == HWLOC_OBJ_GROUP
+        && level->depth == HWLOC_TYPE_DEPTH_MULTIPLE
+        && level->attr.group.depth != (unsigned)-1) {
+      unsigned l;
+      level->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+      for(l=0; l<(unsigned) hwloc_topology_get_depth(topology); l++) {
+        hwloc_obj_t tmp = hwloc_get_obj_by_depth(topology, l, 0);
+        if (tmp->type == HWLOC_OBJ_GROUP && tmp->attr->group.depth == level->attr.group.depth) {
+          level->depth = (int)l;
+          break;
+        }
+      }
+    }
+    if (level->depth == HWLOC_TYPE_DEPTH_UNKNOWN
+        || level->depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+      return -1;
+    return 0;
+  }
+
+  if (!strcasecmp(typestring, "HBM") || !strcasecmp(typestring, "MCDRAM")) {
+    if (lcontext && lcontext->only_hbm == -1)
+      lcontext->only_hbm = 1;
+    level->type = HWLOC_OBJ_NUMANODE;
+    level->depth = HWLOC_TYPE_DEPTH_NUMANODE;
+    return 0;
+  }
+
+  /* couldn't parse the type, try a depth value */
+  level->depth = strtoul(typestring, &endptr, 0);
+  if (typestring[0] == '-' || *endptr || level->depth >= hwloc_topology_get_depth(topology)) {
+    level->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
+    return -1;
+  }
+  level->type = HWLOC_OBJ_TYPE_NONE;
+  return 0;
 }
 
 static __hwloc_inline int
