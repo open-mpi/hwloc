@@ -193,60 +193,6 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
 }
 
 static __hwloc_inline int
-hwloc_calc_parse_depth_prefix(struct hwloc_calc_location_context_s *lcontext,
-			      const char *string, size_t typelen,
-			      hwloc_obj_type_t *typep)
-{
-  hwloc_topology_t topology = lcontext->topology;
-  int topodepth = lcontext->topodepth;
-  int verbose = lcontext->verbose;
-  char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
-  hwloc_obj_type_t type;
-  union hwloc_obj_attr_u attr;
-  int depth;
-  char *end;
-  int err;
-
-  if (typelen >= sizeof(typestring)) {
-    if (verbose >= 0)
-      fprintf(stderr, "invalid type name %s\n", string);
-    return -1;
-  }
-  strncpy(typestring, string, typelen);
-  typestring[typelen] = '\0';
-
-  /* try to match a type name */
-  err = hwloc_type_sscanf(typestring, &type, &attr, sizeof(attr));
-  if (!err) {
-    *typep = type;
-    return hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
-  }
-
-  if (!strcasecmp(typestring, "HBM") || !strcasecmp(typestring, "MCDRAM")) {
-    if (lcontext->only_hbm == -1)
-      lcontext->only_hbm = 1;
-    *typep = HWLOC_OBJ_NUMANODE;
-    depth = HWLOC_TYPE_DEPTH_NUMANODE;
-    return depth;
-  }
-
-  /* try to match a numeric depth */
-  depth = strtol(string, &end, 0);
-  if (end != &string[typelen]) {
-    if (verbose >= 0)
-      fprintf(stderr, "invalid type name %s\n", string);
-    return -1;
-  }
-  if (depth >= topodepth) {
-    if (verbose >= 0)
-      fprintf(stderr, "ignoring invalid depth %d\n", depth);
-    return -1;
-  }
-  *typep = HWLOC_OBJ_TYPE_NONE;
-  return depth;
-}
-
-static __hwloc_inline int
 hwloc_calc_parse_range(const char *_string,
 		       int *firstp, int *amountp, int *stepp, int *wrapp,
 		       const char **dotp,
@@ -351,6 +297,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
 			       void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   int verbose = lcontext->verbose;
+  hwloc_topology_t topology = lcontext->topology;
   hwloc_obj_t obj;
   unsigned width;
   const char *dot, *nextsep = NULL;
@@ -374,7 +321,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
   if (dot) {
     /* parse the next string before calling ourself recursively */
     size_t typelen;
-    hwloc_obj_type_t type;
+    struct hwloc_calc_level level;
     const char *nextstring = dot+1;
     typelen = strspn(nextstring, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
     if (!typelen || nextstring[typelen] != ':') {
@@ -384,19 +331,21 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     }
     nextsep = &nextstring[typelen];
 
-    nextdepth = hwloc_calc_parse_depth_prefix(lcontext,
-					      nextstring, typelen,
-					      &type);
-    if (nextdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      if (verbose >= 0)
-	fprintf(stderr, "could not find level specified by location %s\n", nextstring);
-      return -1;
+    err = hwloc_calc_parse_level(lcontext, topology, nextstring, typelen, &level);
+    if (err < 0) {
+      if (level.depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+        if (verbose >= 0)
+          fprintf(stderr, "could not find level specified by location %s\n", nextstring);
+        return -1;
+      }
+      if (level.depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+        if (verbose >= 0)
+          fprintf(stderr, "found multiple levels for location %s\n", nextstring);
+        return -1;
+      }
     }
-    if (nextdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      if (verbose >= 0)
-	fprintf(stderr, "found multiple levels for location %s\n", nextstring);
-      return -1;
-    }
+    nextdepth = level.depth;
+
     /* we need an object with a cpuset, that's depth>=0 or memory */
     if (nextdepth < 0 && nextdepth != HWLOC_TYPE_DEPTH_NUMANODE) {
       if (verbose >= 0)
@@ -615,33 +564,33 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
   const char *sep = &arg[typelen];
-  hwloc_obj_type_t type = HWLOC_OBJ_TYPE_NONE;
-  int depth;
+  struct hwloc_calc_level level;
+  int err;
 
-  depth = hwloc_calc_parse_depth_prefix(lcontext,
-					arg, typelen,
-					&type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-    if (verbose >= 0)
-      fprintf(stderr, "could not find level specified by location %s\n", arg);
-    return -1;
-  }
-  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-    if (verbose >= 0)
-      fprintf(stderr, "found multiple levels for location %s\n", arg);
-    return -1;
+  err = hwloc_calc_parse_level(lcontext, topology, arg, typelen, &level);
+  if (err < 0) {
+    if (level.depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      if (verbose >= 0)
+        fprintf(stderr, "could not find level specified by location %s\n", arg);
+      return -1;
+    }
+    if (level.depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      if (verbose >= 0)
+        fprintf(stderr, "found multiple levels for location %s\n", arg);
+      return -1;
+    }
   }
 
-  if (depth < 0 && depth != HWLOC_TYPE_DEPTH_NUMANODE) {
+  if (level.depth < 0 && level.depth != HWLOC_TYPE_DEPTH_NUMANODE) {
     /* special object without cpusets */
 
     /* if we didn't find a depth but found a type, handle special cases */
     hwloc_obj_t obj = NULL;
 
     if (*sep == ':' || *sep == '[') {
-      return hwloc_calc_append_iodev_by_index(lcontext, type, depth, sep, cbfunc, cbdata);
+      return hwloc_calc_append_iodev_by_index(lcontext, level.type, level.depth, sep, cbfunc, cbdata);
 
-    } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
+    } else if (*sep == '=' && level.type == HWLOC_OBJ_PCI_DEVICE) {
       /* try to match a busid */
       obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
       if (obj)
@@ -650,7 +599,7 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 	fprintf(stderr, "invalid PCI device %s\n", sep+1);
       return -1;
 
-    } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
+    } else if (*sep == '=' && level.type == HWLOC_OBJ_OS_DEVICE) {
       /* try to match a OS device name */
       while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
 	if (!strcmp(obj->name, sep+1))
@@ -660,7 +609,7 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 	fprintf(stderr, "invalid OS device %s\n", sep+1);
       return -1;
 
-    } else if (*sep == '=' && type == HWLOC_OBJ_MISC) {
+    } else if (*sep == '=' && level.type == HWLOC_OBJ_MISC) {
       /* try to match a Misc device name */
       obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_MISC, 0);
       while (obj) {
@@ -680,7 +629,7 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
   return hwloc_calc_append_object_range(lcontext,
 					hwloc_topology_get_complete_cpuset(topology),
 					hwloc_topology_get_complete_nodeset(topology),
-					depth, sep+1, cbfunc, cbdata);
+					level.depth, sep+1, cbfunc, cbdata);
 }
 
 struct hwloc_calc_set_context_s {
