@@ -5116,6 +5116,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for(i=HWLOC_OBJ_TYPE_MIN; i<HWLOC_OBJ_TYPE_MAX; i++)
     assert(obj_type_order[obj_order_type[i]] == i);
 
+  if (!topology->is_loaded)
+    return;
+
   depth = hwloc_topology_get_depth(topology);
 
   assert(!topology->modified);
