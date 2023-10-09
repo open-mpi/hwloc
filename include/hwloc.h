@@ -338,6 +338,12 @@ typedef enum {
 
   HWLOC_OBJ_DIE,	/**< \brief Die within a physical package.
 			 * A subpart of the physical package, that contains multiple cores.
+			 *
+			 * Some operating systems (e.g. Linux) may expose a single die per package
+			 * even if the hardware does not support dies at all. To avoid showing
+			 * such non-existing dies, the corresponding hwloc backend may filter them out.
+			 * This is functionally equivalent to ::HWLOC_TYPE_FILTER_KEEP_STRUCTURE
+			 * being enforced.
 			 */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
@@ -2363,7 +2369,7 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  *
  * By default, most objects are kept (::HWLOC_TYPE_FILTER_KEEP_ALL).
  * Instruction caches, memory-side caches, I/O and Misc objects are ignored by default (::HWLOC_TYPE_FILTER_KEEP_NONE).
- * Die and Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
+ * Group levels are ignored unless they bring structure (::HWLOC_TYPE_FILTER_KEEP_STRUCTURE).
  *
  * Note that group objects are also ignored individually (without the entire level)
  * when they do not bring structure.
