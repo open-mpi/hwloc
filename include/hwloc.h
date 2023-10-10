@@ -2099,6 +2099,10 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  * \note On success, the XML component replaces the previously enabled
  * component (if any), but the topology is not actually modified until
  * hwloc_topology_load().
+ *
+ * \note If an invalid XML input file is given, the error may be reported
+ * either here or later by hwloc_topology_load() depending on the XML library
+ * used by hwloc.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
@@ -2128,6 +2132,10 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  * \note On success, the XML component replaces the previously enabled
  * component (if any), but the topology is not actually modified until
  * hwloc_topology_load().
+ *
+ * \note If an invalid XML input file is given, the error may be reported
+ * either here or later by hwloc_topology_load() depending on the XML library
+ * used by hwloc.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
 
