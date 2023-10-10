@@ -2036,6 +2036,10 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * \note -1 is returned and errno is set to \c ENOSYS on platforms that do not
  * support this feature.
  *
+ * \note The PID will not actually be used until hwloc_topology_load().
+ * If the corresponding process exits in the meantime, hwloc will ignore the PID.
+ * If another process reuses the PID, the view of that process will be used.
+ *
  * \return 0 on success, -1 on error.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topology, hwloc_pid_t pid);
