@@ -25,7 +25,9 @@
 struct hwloc_calc_location_context_s {
   hwloc_topology_t topology;
   int topodepth;
-  int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
+  int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes
+		 * stored by caller, and passed to struct hwloc_calc_level for actual filtering
+		 */
   int logical;
   int verbose;
 };
@@ -35,6 +37,7 @@ struct hwloc_calc_level {
   int depth;
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
+  int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
 };
 
 typedef enum hwloc_calc_append_mode_e {
@@ -87,13 +90,13 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 static __hwloc_inline unsigned
 hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					   hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					   int depth)
+					   struct hwloc_calc_level *level)
 {
   hwloc_topology_t topology = lcontext->topology;
-  int only_hbm = lcontext->only_hbm;
+  int only_hbm = level->only_hbm;
   hwloc_obj_t obj = NULL;
   unsigned n = 0;
-  while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+  while ((obj = hwloc_get_next_obj_by_depth(topology, level->depth, obj)) != NULL) {
     if (!hwloc_bitmap_iszero(obj->cpuset) && !hwloc_bitmap_intersects(obj->cpuset, cpuset))
       continue;
     if (!hwloc_bitmap_iszero(obj->nodeset) && !hwloc_bitmap_intersects(obj->nodeset, nodeset))
@@ -115,14 +118,14 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
 static __hwloc_inline hwloc_obj_t
 hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
-					int depth, unsigned ind)
+					struct hwloc_calc_level *level, unsigned ind)
 {
   hwloc_topology_t topology = lcontext->topology;
-  int only_hbm = lcontext->only_hbm;
+  int only_hbm = level->only_hbm;
   int logical = lcontext->logical;
   hwloc_obj_t obj = NULL;
   unsigned i = 0;
-  while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+  while ((obj = hwloc_get_next_obj_by_depth(topology, level->depth, obj)) != NULL) {
     if (!hwloc_bitmap_iszero(obj->cpuset) && !hwloc_bitmap_intersects(obj->cpuset, cpuset))
       continue;
     if (!hwloc_bitmap_iszero(obj->nodeset) && !hwloc_bitmap_intersects(obj->nodeset, nodeset))
@@ -158,6 +161,10 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
   char *endptr;
   int err;
 
+  level->only_hbm = -1;
+  if (lcontext)
+    level->only_hbm = lcontext->only_hbm;
+
   level->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
 
   if (typelen >= sizeof(typestring))
@@ -188,8 +195,7 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
   }
 
   if (!strcasecmp(typestring, "HBM") || !strcasecmp(typestring, "MCDRAM")) {
-    if (lcontext && lcontext->only_hbm == -1)
-      lcontext->only_hbm = 1;
+    level->only_hbm = 1;
     level->type = HWLOC_OBJ_NUMANODE;
     level->depth = HWLOC_TYPE_DEPTH_NUMANODE;
     return 0;
@@ -305,7 +311,7 @@ hwloc_calc_parse_range(const char *_string,
 
 static __hwloc_inline int
 hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
-			       hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, int depth,
+			       hwloc_const_bitmap_t rootcpuset, hwloc_const_bitmap_t rootnodeset, struct hwloc_calc_level *level,
 			       const char *string, /* starts with indexes following the colon */
 			       void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
@@ -314,7 +320,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
   hwloc_obj_t obj;
   unsigned width;
   const char *dot, *nextsep = NULL;
-  int nextdepth = -1;
+  struct hwloc_calc_level nextlevel;
   int first, wrap, amount, step;
   unsigned i,j;
   int found = 0;
@@ -334,7 +340,6 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
   if (dot) {
     /* parse the next string before calling ourself recursively */
     size_t typelen;
-    struct hwloc_calc_level level;
     const char *nextstring = dot+1;
     typelen = strspn(nextstring, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
     if (!typelen || nextstring[typelen] != ':') {
@@ -344,30 +349,29 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     }
     nextsep = &nextstring[typelen];
 
-    err = hwloc_calc_parse_level(lcontext, topology, nextstring, typelen, &level);
+    err = hwloc_calc_parse_level(lcontext, topology, nextstring, typelen, &nextlevel);
     if (err < 0) {
-      if (level.depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      if (nextlevel.depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
         if (verbose >= 0)
           fprintf(stderr, "could not find level specified by location %s\n", nextstring);
         return -1;
       }
-      if (level.depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      if (nextlevel.depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
         if (verbose >= 0)
           fprintf(stderr, "found multiple levels for location %s\n", nextstring);
         return -1;
       }
     }
-    nextdepth = level.depth;
 
     /* we need an object with a cpuset, that's depth>=0 or memory */
-    if (nextdepth < 0 && nextdepth != HWLOC_TYPE_DEPTH_NUMANODE) {
+    if (nextlevel.depth < 0 && nextlevel.depth != HWLOC_TYPE_DEPTH_NUMANODE) {
       if (verbose >= 0)
 	fprintf(stderr, "hierarchical location %s only supported with normal object types\n", string);
       return -1;
     }
   }
 
-  width = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, rootcpuset, rootnodeset, depth);
+  width = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, rootcpuset, rootnodeset, level);
   if (amount == -1)
     amount = (width-first+step-1)/step;
 
@@ -375,24 +379,24 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     if (wrap && i>=width)
       i = 0;
 
-    obj = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, rootcpuset, rootnodeset, depth, i);
+    obj = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, rootcpuset, rootnodeset, level, i);
     if (verbose > 0 || (!obj && verbose >= 0)) {
       char *sc, *sn;
       hwloc_bitmap_asprintf(&sc, rootcpuset);
       hwloc_bitmap_asprintf(&sn, rootnodeset);
       if (obj)
 	printf("using object #%u depth %d below cpuset %s nodeset %s\n",
-	       i, depth, sc, sn);
+	       i, level->depth, sc, sn);
       else
 	fprintf(stderr, "object #%u depth %d below cpuset %s nodeset %s does not exist\n",
-		i, depth, sc, sn);
+		i, level->depth, sc, sn);
       free(sc);
       free(sn);
     }
     if (obj) {
       found++;
       if (dot) {
-	hwloc_calc_append_object_range(lcontext, obj->cpuset, obj->nodeset, nextdepth, nextsep+1, cbfunc, cbdata);
+	hwloc_calc_append_object_range(lcontext, obj->cpuset, obj->nodeset, &nextlevel, nextsep+1, cbfunc, cbdata);
       } else {
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
@@ -642,7 +646,7 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
   return hwloc_calc_append_object_range(lcontext,
 					hwloc_topology_get_complete_cpuset(topology),
 					hwloc_topology_get_complete_nodeset(topology),
-					level.depth, sep+1, cbfunc, cbdata);
+					&level, sep+1, cbfunc, cbdata);
 }
 
 struct hwloc_calc_set_context_s {
