@@ -530,10 +530,14 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   } else if (show_descendants_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     if (show_descendants_depth >= 0) {
       /* normal level */
-      unsigned i = 0;
-      unsigned n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth);
+      struct hwloc_calc_level level;
+      unsigned i = 0, n;
+      level.type = HWLOC_OBJ_TYPE_NONE;
+      level.depth = show_descendants_depth;
+      level.only_hbm = -1;
+      n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level);
       for(i=0; i<n; i++) {
-	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth, i);
+	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level, i);
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
         hwloc_info_show_descendant(topology, child, obj, objs, i, prefix, verbose);
