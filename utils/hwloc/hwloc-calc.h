@@ -37,6 +37,7 @@ struct hwloc_calc_level {
   int depth;
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
+  int pci_vendor, pci_device;
   int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
 };
 
@@ -151,16 +152,69 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
   return NULL;
 }
 
-/* return the length of the type/depth prefix
+/* return the length of the type/depth prefix (including filters if any)
  * 0 if not found or invalid.
  */
 static __hwloc_inline size_t
 hwloc_calc_parse_level_size(const char *string)
 {
+  size_t len;
+  const char *filter_end;
+
   /* type/depth prefix ends with either '.' (for child), "=" (for name of osdev),
-   * ':' (for index).
+   * ':' (for index), or '[' (for filters).
    */
-  return strcspn(string, ":=.");
+  len = strcspn(string, ":=.[");
+  if (string[len] != '[')
+    return len;
+
+  /* we want to include filters */
+  filter_end = strchr(string+len, ']');
+  if (!filter_end)
+    return 0;
+  return filter_end + 1 - string;
+}
+
+static __hwloc_inline int
+hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused,
+                              const char *filter,
+                              struct hwloc_calc_level *level)
+{
+  const char *current = filter;
+
+  if (level->type == HWLOC_OBJ_PCI_DEVICE) {
+    /* try to match by [vendor:device] */
+    char *endp;
+
+    level->pci_vendor = strtoul(current, &endp, 16);
+    if (*endp != ':') {
+      fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
+      return -1;
+    }
+    if (endp == current)
+      level->pci_vendor = -1;
+    current = endp+1;
+
+    level->pci_device = strtoul(current, &endp, 16);
+    if (*endp != ']') {
+      fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
+      return -1;
+    }
+    if (endp == current)
+      level->pci_device = -1;
+    current = endp+1;
+
+    if (*current != ':' && *current != '\0') {
+      fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
+      return -1;
+    }
+
+  } else if (level->type != HWLOC_OBJ_OS_DEVICE) {
+    fprintf(stderr, "invalid filter specification %s\n", filter);
+    return -1;
+  }
+
+  return 0;
 }
 
 static __hwloc_inline int
@@ -173,6 +227,7 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
   char *endptr;
   int err;
 
+  level->pci_device = level->pci_vendor = -1;
   level->only_hbm = -1;
   if (lcontext)
     level->only_hbm = lcontext->only_hbm;
@@ -185,11 +240,19 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
 
   err = hwloc_type_sscanf(typestring, &level->type, &level->attr, sizeof(level->attr));
   if (!err) {
+    char *bracket;
     /* parsed a correct type */
     level->depth = hwloc_get_type_depth_with_attr(topology, level->type, &level->attr, sizeof(level->attr));
     if (level->depth == HWLOC_TYPE_DEPTH_UNKNOWN
         || level->depth == HWLOC_TYPE_DEPTH_MULTIPLE)
       return -1;
+
+    bracket = strchr(typestring, '[');
+    if (bracket) {
+      err = hwloc_calc_parse_level_filter(topology, bracket+1, level);
+      if (err < 0)
+        return -1;
+    }
     return 0;
   }
 
@@ -421,91 +484,17 @@ hwloc_calc_append_iodev(struct hwloc_calc_location_context_s *lcontext,
 
 static __hwloc_inline int
 hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
-				 hwloc_obj_type_t type, int depth, const char *string,
+				 struct hwloc_calc_level *level, const char *string,
 				 void (*cbfunc)(struct hwloc_calc_location_context_s *, void *, hwloc_obj_t), void *cbdata)
 {
   hwloc_topology_t topology = lcontext->topology;
   int verbose = lcontext->verbose;
   hwloc_obj_t obj, prev = NULL;
-  int pcivendor = -1, pcidevice = -1;
-  hwloc_obj_osdev_type_t osdevtype = 0; /* none */
   const char *current, *dot;
-  char *endp;
   int first = 0, step = 1, amount = 1, wrap = 0; /* assume the index suffix is `:0' by default */
   int err, i, max;
 
-  if (*string == '[') {
-    /* matching */
-    current = string+1;
-
-    if (type == HWLOC_OBJ_PCI_DEVICE) {
-      /* try to match by [vendor:device] */
-      pcivendor = strtoul(current, &endp, 16);
-      if (*endp != ':') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
-	return -1;
-      }
-      if (endp == current)
-	pcivendor = -1;
-      current = endp+1;
-
-      pcidevice = strtoul(current, &endp, 16);
-      if (*endp != ']') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
-      	return -1;
-      }
-      if (endp == current)
-	pcidevice = -1;
-      current = endp+1;
-
-      if (*current != ':' && *current != '\0') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI vendor:device matching specification %s\n", string);
-      	return -1;
-      }
-
-    } else if (type == HWLOC_OBJ_OS_DEVICE) {
-      /* try to match by [osdevtype] */
-      hwloc_obj_type_t type2;
-      union hwloc_obj_attr_u attr;
-
-      endp = strchr(current, ']');
-      if (!endp) {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
-	return -1;
-      }
-      *endp = 0;
-
-      err = hwloc_type_sscanf(current, &type2, &attr, sizeof(attr));
-      *endp = ']';
-      if (err < 0 || type2 != HWLOC_OBJ_OS_DEVICE) {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
-	return -1;
-      }
-      osdevtype = attr.osdev.type;
-
-      current = endp+1;
-      if (*current != ':' && *current != '\0') {
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device subtype specification %s\n", string);
-        return -1;
-      }
-
-    } else {
-      /* no matching for non-PCI devices */
-      if (verbose >= 0)
-	fprintf(stderr, "invalid matching specification %s\n", string);
-      return -1;
-    }
-
-  } else {
-    /* no matching */
-    current = string;
-  }
+  current = string;
 
   if (*current != '\0') {
     current++;
@@ -524,7 +513,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     }
   }
 
-  max = hwloc_get_nbobjs_by_depth(topology, depth);
+  max = hwloc_get_nbobjs_by_depth(topology, level->depth);
 
   for(i=0; i < max*(wrap+1); i++) {
     if (i == max && wrap) {
@@ -532,21 +521,21 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
       wrap = 0;
     }
 
-    obj = hwloc_get_obj_by_depth(topology, depth, i);
+    obj = hwloc_get_obj_by_depth(topology, level->depth, i);
     assert(obj);
 
     if (obj == prev) /* already used that object, stop wrapping around */
       break;
 
-    if (type == HWLOC_OBJ_PCI_DEVICE) {
-      if (pcivendor != -1 && (int) obj->attr->pcidev.vendor_id != pcivendor)
+    if (level->type == HWLOC_OBJ_PCI_DEVICE) {
+      if (level->pci_vendor != -1 && (int) obj->attr->pcidev.vendor_id != level->pci_vendor)
 	continue;
-      if (pcidevice != -1 && (int) obj->attr->pcidev.device_id != pcidevice)
+      if (level->pci_device != -1 && (int) obj->attr->pcidev.device_id != level->pci_device)
 	continue;
     }
 
-    if (type == HWLOC_OBJ_OS_DEVICE) {
-      if ((obj->attr->osdev.type & osdevtype) != osdevtype)
+    if (level->type == HWLOC_OBJ_OS_DEVICE) {
+      if ((obj->attr->osdev.type & level->attr.osdev.type) != level->attr.osdev.type)
 	continue;
     }
 
@@ -603,16 +592,8 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
     /* if we didn't find a depth but found a type, handle special cases */
     hwloc_obj_t obj = NULL;
 
-    if (*sep == ':' || *sep == '[') {
-      if (level.type == HWLOC_OBJ_PCI_DEVICE) {
-        /* FIXME: temporary hack because typelen includes pci and osdev filters
-         * but only osdev types are handled in hwloc_calc_parse_level()
-         */
-        const char *bracket = strchr(arg, '[');
-        if (bracket && bracket-sep < 0)
-          sep = bracket;
-      }
-      return hwloc_calc_append_iodev_by_index(lcontext, level.type, level.depth, sep, cbfunc, cbdata);
+    if (*sep == ':') {
+      return hwloc_calc_append_iodev_by_index(lcontext, &level, sep, cbfunc, cbdata);
 
     } else if (*sep == '=' && level.type == HWLOC_OBJ_PCI_DEVICE) {
       /* try to match a busid */
@@ -717,7 +698,7 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 
   /* try to match a type/depth followed by a special character */
   typelen = hwloc_calc_parse_level_size(arg);
-  if (typelen && (arg[typelen] == ':' || arg[typelen] == '=' || arg[typelen] == '[')) {
+  if (typelen && (arg[typelen] == ':' || arg[typelen] == '=')) {
     /* process type/depth */
     struct hwloc_calc_process_location_set_cbdata_s cbdata;
     cbdata.set = hwloc_bitmap_alloc();

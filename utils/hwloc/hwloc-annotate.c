@@ -172,7 +172,7 @@ get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
   int err;
 
   typelen = hwloc_calc_parse_level_size(str);
-  if (!typelen || (str[typelen] != ':' && str[typelen] != '=' && str[typelen] != '['))
+  if (!typelen || (str[typelen] != ':' && str[typelen] != '='))
     return NULL;
 
   lcontext.topology = topology;

@@ -535,6 +535,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       level.type = HWLOC_OBJ_TYPE_NONE;
       level.depth = show_descendants_depth;
       level.only_hbm = -1;
+      level.pci_vendor = level.pci_device = -1;
       n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level);
       for(i=0; i<n; i++) {
 	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level, i);
@@ -1052,7 +1053,7 @@ main (int argc, char *argv[])
       } else {
 	/* try to match a type/depth followed by a special character */
 	typelen = hwloc_calc_parse_level_size(argv[0]);
-	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
+	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=')) {
 	  err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
 					    hwloc_calc_process_location_info_cb, NULL);
 	}
