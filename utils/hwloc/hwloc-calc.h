@@ -184,27 +184,21 @@ hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused
 
   if (level->type == HWLOC_OBJ_PCI_DEVICE) {
     /* try to match by [vendor:device] */
-    char *endp;
-
-    level->pci_vendor = strtoul(current, &endp, 16);
-    if (*endp != ':') {
-      fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
-      return -1;
-    }
-    if (endp == current)
-      level->pci_vendor = -1;
-    current = endp+1;
-
-    level->pci_device = strtoul(current, &endp, 16);
-    if (*endp != ']') {
-      fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
-      return -1;
-    }
-    if (endp == current)
-      level->pci_device = -1;
-    current = endp+1;
-
-    if (*current != ':' && *current != '\0') {
+    unsigned vendor, device;
+    if (sscanf(current, "%x:%x]", &vendor, &device) == 2) {
+      level->pci_vendor = (int) vendor;
+      level->pci_device = (int) device;
+      return 0;
+    } else if (sscanf(current, ":%x]", &device) == 1) {
+      level->pci_device = (int) device;
+      return 0;
+    } else if (sscanf(current, "%x:]", &vendor) == 1) {
+      level->pci_vendor = (int) vendor;
+      return 0;
+    } else if (!strncmp(current, ":]", 2)) {
+      /* nothing */
+      return 0;
+    } else if (strchr(current, ':')) {
       fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
       return -1;
     }
