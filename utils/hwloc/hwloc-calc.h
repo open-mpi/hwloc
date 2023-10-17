@@ -151,6 +151,18 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
   return NULL;
 }
 
+/* return the length of the type/depth prefix
+ * 0 if not found or invalid.
+ */
+static __hwloc_inline size_t
+hwloc_calc_parse_level_size(const char *string)
+{
+  /* type/depth prefix ends with either '.' (for child), "=" (for name of osdev),
+   * ':' (for index).
+   */
+  return strcspn(string, ":=.");
+}
+
 static __hwloc_inline int
 hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
                        hwloc_topology_t topology,
@@ -328,7 +340,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     /* parse the next string before calling ourself recursively */
     size_t typelen;
     const char *nextstring = dot+1;
-    typelen = strspn(nextstring, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+    typelen = hwloc_calc_parse_level_size(nextstring);
     if (!typelen || nextstring[typelen] != ':') {
       if (verbose >= 0)
 	fprintf(stderr, "hierarchical sublocation %s contains types not followed by colon and index range\n", nextstring);
@@ -592,6 +604,14 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
     hwloc_obj_t obj = NULL;
 
     if (*sep == ':' || *sep == '[') {
+      if (level.type == HWLOC_OBJ_PCI_DEVICE) {
+        /* FIXME: temporary hack because typelen includes pci and osdev filters
+         * but only osdev types are handled in hwloc_calc_parse_level()
+         */
+        const char *bracket = strchr(arg, '[');
+        if (bracket && bracket-sep < 0)
+          sep = bracket;
+      }
       return hwloc_calc_append_iodev_by_index(lcontext, level.type, level.depth, sep, cbfunc, cbdata);
 
     } else if (*sep == '=' && level.type == HWLOC_OBJ_PCI_DEVICE) {
@@ -696,7 +716,7 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 				 mode, verbose);
 
   /* try to match a type/depth followed by a special character */
-  typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+  typelen = hwloc_calc_parse_level_size(arg);
   if (typelen && (arg[typelen] == ':' || arg[typelen] == '=' || arg[typelen] == '[')) {
     /* process type/depth */
     struct hwloc_calc_process_location_set_cbdata_s cbdata;

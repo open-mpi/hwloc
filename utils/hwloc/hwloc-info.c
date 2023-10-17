@@ -1051,7 +1051,7 @@ main (int argc, char *argv[])
         return EXIT_FAILURE;
       } else {
 	/* try to match a type/depth followed by a special character */
-	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+	typelen = hwloc_calc_parse_level_size(argv[0]);
 	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
 	  err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
 					    hwloc_calc_process_location_info_cb, NULL);
