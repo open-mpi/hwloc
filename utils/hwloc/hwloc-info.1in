@@ -295,6 +295,12 @@ To display information about the core whose physical index is 2:
      os index = 2
     ...
 
+To list the OS devices that are of subtype OpenCL:
+
+    $ hwloc-info -s "os[OpenCL]:all"
+    OSDev[Co-Processor,GPU]:6
+    OSDev[Co-Processor,GPU]:8
+
 To list the NUMA nodes that are local a PU:
 
     $ hwloc-info --local-memory pu:25
