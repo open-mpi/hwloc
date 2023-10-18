@@ -195,8 +195,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
     hwloc_obj_t obj = NULL;
     while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, numberofdepth, obj)) != NULL) {
       if (numberofdepth == HWLOC_TYPE_DEPTH_OS_DEVICE
-          && numberofattr.osdev.type
-          && numberofattr.osdev.type != obj->attr->osdev.type)
+          && (obj->attr->osdev.type & numberofattr.osdev.type) != numberofattr.osdev.type)
         continue;
       nb++;
     }
@@ -209,8 +208,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
     while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersectdepth, obj)) != NULL) {
       unsigned idx;
       if (intersectdepth == HWLOC_TYPE_DEPTH_OS_DEVICE
-          && intersectattr.osdev.type
-          && intersectattr.osdev.type != obj->attr->osdev.type)
+          && (obj->attr->osdev.type & intersectattr.osdev.type) != intersectattr.osdev.type)
         continue;
       if (!first)
 	printf("%s", sep);

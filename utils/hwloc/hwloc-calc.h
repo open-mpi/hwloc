@@ -529,7 +529,7 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     }
 
     if (type == HWLOC_OBJ_OS_DEVICE) {
-      if (osdevtype != 0 && obj->attr->osdev.type != osdevtype)
+      if ((obj->attr->osdev.type & osdevtype) != osdevtype)
 	continue;
     }
 
