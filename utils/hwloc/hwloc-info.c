@@ -535,6 +535,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       level.type = HWLOC_OBJ_TYPE_NONE;
       level.depth = show_descendants_depth;
       level.only_hbm = -1;
+      level.subtype[0] = '\0';
       level.pci_vendor = level.pci_device = -1;
       n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level);
       for(i=0; i<n; i++) {

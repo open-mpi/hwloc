@@ -37,6 +37,7 @@ struct hwloc_calc_level {
   int depth;
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
+  char subtype[32];
   int pci_vendor, pci_device;
   int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
 };
@@ -111,6 +112,10 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
       if (only_hbm != obj_is_hbm)
 	continue;
     }
+    if (level->subtype[0]) {
+      if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
+        continue;
+    }
     n++;
   }
   return n;
@@ -139,6 +144,10 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
       int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
       if (only_hbm != obj_is_hbm)
 	continue;
+    }
+    if (level->subtype[0]) {
+      if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
+        continue;
     }
     if (logical) {
       if (i == ind)
@@ -181,6 +190,13 @@ hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused
                               struct hwloc_calc_level *level)
 {
   const char *current = filter;
+  const char *end;
+  unsigned subtypelen;
+
+  if (!strncmp(current, "subtype=", 8)) {
+    current += 8;
+    goto subtype;
+  }
 
   if (level->type == HWLOC_OBJ_PCI_DEVICE) {
     /* try to match by [vendor:device] */
@@ -202,12 +218,15 @@ hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused
       fprintf(stderr, "invalid PCI vendor:device filter specification %s\n", filter);
       return -1;
     }
-
-  } else {
-    fprintf(stderr, "invalid filter specification %s\n", filter);
-    return -1;
   }
 
+ subtype:
+  /* assume it's a subtype */
+  end = strchr(current, ']');
+  subtypelen = end - current;
+  if (subtypelen >= sizeof(level->subtype))
+    subtypelen = sizeof(level->subtype) - 1;
+  snprintf(level->subtype, subtypelen+1, "%s", current);
   return 0;
 }
 
@@ -221,6 +240,7 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
   char *endptr;
   int err;
 
+  level->subtype[0] = '\0';
   level->pci_device = level->pci_vendor = -1;
   level->only_hbm = -1;
   if (lcontext)
@@ -534,6 +554,11 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     if (level->type == HWLOC_OBJ_OS_DEVICE) {
       if ((obj->attr->osdev.type & level->attr.osdev.type) != level->attr.osdev.type)
 	continue;
+    }
+
+    if (level->subtype[0]) {
+      if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
+        continue;
     }
 
     if (first--)
