@@ -89,13 +89,43 @@ hwloc_calc_append_set(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
   return 0;
 }
 
+/* return 1 if obj is filtered out */
+static __hwloc_inline int
+hwloc_calc_check_object_filtered(hwloc_obj_t obj, struct hwloc_calc_level *level)
+{
+  if (level->subtype[0]) {
+    if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
+      return 1;
+  }
+
+  if (level->type == HWLOC_OBJ_NUMANODE) {
+    if (level->only_hbm >= 0) {
+      /* filter on hbm */
+      int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
+      if (level->only_hbm != obj_is_hbm)
+        return 1;
+    }
+
+  } else if (level->type == HWLOC_OBJ_PCI_DEVICE) {
+    if (level->pci_vendor != -1 && (int) obj->attr->pcidev.vendor_id != level->pci_vendor)
+      return 1;
+    if (level->pci_device != -1 && (int) obj->attr->pcidev.device_id != level->pci_device)
+      return 1;
+
+  } else if (level->type == HWLOC_OBJ_OS_DEVICE) {
+    if ((int) level->attr.osdev.type != -1 && obj->attr->osdev.type != level->attr.osdev.type)
+      return 1;
+  }
+
+  return 0;
+}
+
 static __hwloc_inline unsigned
 hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s *lcontext,
 					   hwloc_const_bitmap_t cpuset, hwloc_const_bitmap_t nodeset,
 					   struct hwloc_calc_level *level)
 {
   hwloc_topology_t topology = lcontext->topology;
-  int only_hbm = level->only_hbm;
   hwloc_obj_t obj = NULL;
   unsigned n = 0;
   while ((obj = hwloc_get_next_obj_by_depth(topology, level->depth, obj)) != NULL) {
@@ -106,16 +136,8 @@ hwloc_calc_get_nbobjs_inside_sets_by_depth(struct hwloc_calc_location_context_s 
     if (hwloc_bitmap_iszero(obj->cpuset) && hwloc_bitmap_iszero(obj->nodeset))
       /* ignore objects with empty sets (both can be empty when outside of cgroup) */
       continue;
-    if (only_hbm >= 0 && obj->type == HWLOC_OBJ_NUMANODE) {
-      /* filter on hbm */
-      int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
-      if (only_hbm != obj_is_hbm)
-	continue;
-    }
-    if (level->subtype[0]) {
-      if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
-        continue;
-    }
+    if (hwloc_calc_check_object_filtered(obj, level))
+      continue;
     n++;
   }
   return n;
@@ -127,7 +149,6 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
 					struct hwloc_calc_level *level, unsigned ind)
 {
   hwloc_topology_t topology = lcontext->topology;
-  int only_hbm = level->only_hbm;
   int logical = lcontext->logical;
   hwloc_obj_t obj = NULL;
   unsigned i = 0;
@@ -139,16 +160,8 @@ hwloc_calc_get_obj_inside_sets_by_depth(struct hwloc_calc_location_context_s *lc
     if (hwloc_bitmap_iszero(obj->cpuset) && hwloc_bitmap_iszero(obj->nodeset))
       /* ignore objects with empty sets (both can be empty when outside of cgroup) */
       continue;
-    if (only_hbm >= 0 && obj->type == HWLOC_OBJ_NUMANODE) {
-      /* filter on hbm */
-      int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
-      if (only_hbm != obj_is_hbm)
-	continue;
-    }
-    if (level->subtype[0]) {
-      if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
-        continue;
-    }
+    if (hwloc_calc_check_object_filtered(obj, level))
+      continue;
     if (logical) {
       if (i == ind)
 	return obj;
@@ -575,22 +588,8 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
     if (obj == prev) /* already used that object, stop wrapping around */
       break;
 
-    if (level->type == HWLOC_OBJ_PCI_DEVICE) {
-      if (level->pci_vendor != -1 && (int) obj->attr->pcidev.vendor_id != level->pci_vendor)
-	continue;
-      if (level->pci_device != -1 && (int) obj->attr->pcidev.device_id != level->pci_device)
-	continue;
-    }
-
-    if (level->type == HWLOC_OBJ_OS_DEVICE) {
-      if ((int) level->attr.osdev.type != -1 && obj->attr->osdev.type != level->attr.osdev.type)
-	continue;
-    }
-
-    if (level->subtype[0]) {
-      if (!obj->subtype || strcasecmp(level->subtype, obj->subtype))
-        continue;
-    }
+    if (hwloc_calc_check_object_filtered(obj, level))
+      continue;
 
     if (first--)
       continue;

@@ -123,6 +123,8 @@ hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const 
     unsigned idx = logicalo ? logi : obj->os_index;
     if (!hwloc_bitmap_intersects(set, obj->cpuset))
      goto next;
+    if (hwloc_calc_check_object_filtered(obj, &hierlevels[level]))
+      goto next;
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
     if (idx == (unsigned)-1)
       snprintf(string, sizeof(string), "%s%s%s:-1", prefix, level ? "." : "", type);
@@ -192,9 +194,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
     while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, numberof.depth, obj)) != NULL) {
-      if (numberof.depth == HWLOC_TYPE_DEPTH_OS_DEVICE
-          && numberof.attr.osdev.type != (hwloc_obj_osdev_type_t) -1
-          && numberof.attr.osdev.type != obj->attr->osdev.type)
+      if (hwloc_calc_check_object_filtered(obj, &numberof))
         continue;
       nb++;
     }
@@ -206,9 +206,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       sep = ",";
     while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersect.depth, obj)) != NULL) {
       unsigned idx;
-      if (intersect.depth == HWLOC_TYPE_DEPTH_OS_DEVICE
-          && intersect.attr.osdev.type != (hwloc_obj_osdev_type_t) -1
-          && intersect.attr.osdev.type != obj->attr->osdev.type)
+      if (hwloc_calc_check_object_filtered(obj, &intersect))
         continue;
       if (!first)
 	printf("%s", sep);
