@@ -382,13 +382,13 @@ To find how many cores are in the second CPU kind
 To display the list of NUMA nodes, by physical indexes,
 whose locality is exactly equal to a Package:
 
-    $ hwloc-calc --local-memory-flags 0 pack:1
+    $ hwloc-calc --local-memory-flags 0 --physical-output pack:1
     4,7
 
-To display the best-capacity NUMA node, by physical indexe,
+To display the best-capacity NUMA node, by physical indexes,
 whose locality is exactly equal to a Package:
 
-    $ hwloc-calc --local-memory-flags 0 --best-memattr capacity pack:1
+    $ hwloc-calc --local-memory-flags 0 --best-memattr capacity --physical-output pack:1
     4
 
 Converting object logical indexes (default) from/to physical/OS indexes
