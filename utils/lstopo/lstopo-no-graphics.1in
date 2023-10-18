@@ -163,6 +163,9 @@ otherwise it will imply \fB\-\-cpuset\fR.
 .TP
 \fB\-\-only\fR <type>
 Only show objects of the given type in the textual output.
+
+\fI<type>\fR may contain a filter to select specific objects among
+the type. For instance \fB\-\-only "numa[mcdram]"\fR only shows MCDRAM NUMA nodes on KNL.
 .TP
 \fB\-\-filter\fR <type>:<kind>, \fB\-\-filter\fR <type>
 Filter objects of type <type>, or of any type if <type> is "all".
