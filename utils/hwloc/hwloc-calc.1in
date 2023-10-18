@@ -164,6 +164,9 @@ When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
 the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
 
+\fI<type\fR may contain a filter to select specific objects among
+the type. For instance \fB\-N "numa[mcdram]"\fR counts MCDRAM NUMA nodes on KNL.
+
 If an OS device subtype such as \fIgpu\fR  is given instead of \fIosdev\fR,
 only the os devices of that subtype will be counted.
 .TP
@@ -181,6 +184,9 @@ objects are strictly included inside the input objects.
 When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
 the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
+
+\fI<type\fR may contain a filter to select specific objects among
+the type. For instance \fB\-I "numa[mcdram]"\fR lists MCDRAM NUMA nodes on KNL.
 
 If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
 only the os devices of that subtype will be returned.
@@ -390,6 +396,16 @@ whose locality is exactly equal to a Package:
 
     $ hwloc-calc --local-memory-flags 0 --best-memattr capacity --physical-output pack:1
     4
+
+To find the number of NUMA nodes with subtype MCDRAM (on KNL):
+
+    $ hwloc-calc -N "numa[mcdram]" all
+    4
+
+To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
+
+    $ hwloc-calc -I "numa[mcdram]" pu:157
+    1
 
 Converting object logical indexes (default) from/to physical/OS indexes
 may be performed with \fB--intersect\fR combined with either \fB--physical-output\fR
