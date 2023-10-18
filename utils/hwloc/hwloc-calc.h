@@ -203,7 +203,7 @@ hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused
       return -1;
     }
 
-  } else if (level->type != HWLOC_OBJ_OS_DEVICE) {
+  } else {
     fprintf(stderr, "invalid filter specification %s\n", filter);
     return -1;
   }
@@ -241,11 +241,14 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
         || level->depth == HWLOC_TYPE_DEPTH_MULTIPLE)
       return -1;
 
-    bracket = strchr(typestring, '[');
-    if (bracket) {
-      err = hwloc_calc_parse_level_filter(topology, bracket+1, level);
-      if (err < 0)
-        return -1;
+    if (level->type != HWLOC_OBJ_OS_DEVICE || hwloc_strncasecmp(typestring, "os", 2) || !level->attr.osdev.type) {
+      /* don't use filters for OSdev if it was already parsed as "OS*[osdev.type]" */
+      bracket = strchr(typestring, '[');
+      if (bracket) {
+        err = hwloc_calc_parse_level_filter(topology, bracket+1, level);
+        if (err < 0)
+          return -1;
+      }
     }
     return 0;
   }
