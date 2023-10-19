@@ -27,7 +27,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd %SHORTNAME%\contrib\windows-cmake
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake --install-prefix=%cd%/install -DCMAKE_BUILD_TYPE=Release -B build
+cmake %HWLOC_WINCMAKE_OPTS% --install-prefix=%cd%/install -DCMAKE_BUILD_TYPE=Release -B build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cmake --build build --parallel
