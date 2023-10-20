@@ -165,7 +165,8 @@ the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
 
 \fI<type\fR may contain a filter to select specific objects among
-the type. For instance \fB\-N "numa[mcdram]"\fR counts MCDRAM NUMA nodes on KNL.
+the type. For instance \fB\-N "numa[hbm]"\fR counts NUMA nodes marked with subtype "HBM",
+while \fB\-N "numa[mcdram]"\fR only counts MCDRAM NUMA nodes on KNL.
 
 If an OS device subtype such as \fIgpu\fR  is given instead of \fIosdev\fR,
 only the os devices of that subtype will be counted.
@@ -186,7 +187,8 @@ the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
 
 \fI<type\fR may contain a filter to select specific objects among
-the type. For instance \fB\-I "numa[mcdram]"\fR lists MCDRAM NUMA nodes on KNL.
+the type. For instance \fB\-N "numa[hbm]"\fR lists NUMA nodes marked with subtype "HBM",
+while \fB\-N "numa[mcdram]"\fR only lists MCDRAM NUMA nodes on KNL.
 
 If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
 only the os devices of that subtype will be returned.
@@ -397,9 +399,9 @@ whose locality is exactly equal to a Package:
     $ hwloc-calc --local-memory-flags 0 --best-memattr capacity --physical-output pack:1
     4
 
-To find the number of NUMA nodes with subtype MCDRAM (on KNL):
+To find the number of NUMA nodes with subtype "HBM":
 
-    $ hwloc-calc -N "numa[mcdram]" all
+    $ hwloc-calc -N "numa[hbm]" all
     4
 
 To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
