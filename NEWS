@@ -35,6 +35,9 @@ Version 2.10.0
     of Core Complex and Die on Zen4 processors.
   + Improve Zhaoxin topology detection in the x86 backend.
 * Tools
+  + Input locations and many command-line options (e.g. hwloc-calc -I -N -H,
+    lstopo --only) now accept filters such as "NUMA[HBM]" so that only
+    objects are that type and subtype are considered.
   + Add --object-output to hwloc-calc to report the type as a prefix to
     object indexes, e.g. Core:2 instead of 2 in the output of -I.
   + hwloc-info --ancestor and --descendants now accepts kinds of objects
