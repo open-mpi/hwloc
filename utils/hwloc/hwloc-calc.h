@@ -595,9 +595,6 @@ hwloc_calc_append_iodev_by_index(struct hwloc_calc_location_context_s *lcontext,
       continue;
 
     /* ok, got one object */
-    if (verbose > 0)
-      printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
-	     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
     hwloc_calc_append_iodev(lcontext, cbfunc, cbdata, obj);
 
     if (!prev)
