@@ -5032,11 +5032,18 @@ look_sysfscpu(struct hwloc_topology *topology,
 
     /* look at the caches */
     if (topology->want_some_cpu_caches) {
-     for(j=0; j<10; j++) {
+     DIR *cachesdir;
+     struct dirent *dirent;
+     sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/", i);
+     cachesdir = hwloc_opendir(str, data->root_fd);
+     if (cachesdir) {
+     while ((dirent = readdir(cachesdir)) != NULL) {
       char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
       hwloc_bitmap_t cacheset;
 
-      sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", i, j);
+      if (strncmp(dirent->d_name, "index", 5))
+        continue;
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/shared_cpu_map", i, dirent->d_name);
       cacheset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (cacheset) {
 	if (hwloc_bitmap_iszero(cacheset)) {
@@ -5066,14 +5073,14 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  struct hwloc_obj *cache;
 
 	  /* get the cache level depth */
-	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/level", i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/level", i, dirent->d_name); /* contains %u at least up to 4.19 */
 	  if (hwloc_read_path_as_uint(str, &depth, data->root_fd) < 0) {
 	    hwloc_bitmap_free(cacheset);
 	    continue;
 	  }
 
 	  /* cache type */
-	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/type", i, j);
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/type", i, dirent->d_name);
 	  if (hwloc_read_path_by_length(str, str2, sizeof(str2), data->root_fd) > 0) {
 	    if (!strncmp(str2, "Data", 4))
 	      ctype = HWLOC_OBJ_CACHE_DATA;
@@ -5084,7 +5091,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	  }
 
           /* cache id */
-          sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/id", i, j);
+          sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/id", i, dirent->d_name);
           hwloc_read_path_as_uint(str, &id, data->root_fd);
 
 	  otype = hwloc_cache_type_by_depth_type(depth, ctype);
@@ -5099,7 +5106,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* get the cache size */
 	  kB = 0;
-	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/size", i, j); /* contains %uK at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/size", i, dirent->d_name); /* contains %uK at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &kB, data->root_fd);
 	  /* KNL reports L3 with size=0 and full cpuset in cpuid.
 	   * Let hwloc_linux_try_add_knl_mcdram_cache() detect it better.
@@ -5111,7 +5118,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
 	  /* get the line size */
 	  linesize = 0;
-	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/coherency_line_size", i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/coherency_line_size", i, dirent->d_name); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &linesize, data->root_fd);
 
 	  /* get the number of sets and lines per tag.
@@ -5119,11 +5126,11 @@ look_sysfscpu(struct hwloc_topology *topology,
 	   * some archs (ia64, ppc) put 0 there when fully-associative, while others (x86) put something like -1 there.
 	   */
 	  sets = 0;
-	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/number_of_sets", i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/number_of_sets", i, dirent->d_name); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &sets, data->root_fd);
 
 	  lines_per_tag = 1;
-	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/index%d/physical_line_partition", i, j); /* contains %u at least up to 4.19 */
+	  sprintf(str, "/sys/devices/system/cpu/cpu%d/cache/%s/physical_line_partition", i, dirent->d_name); /* contains %u at least up to 4.19 */
 	  hwloc_read_path_as_uint(str, &lines_per_tag, data->root_fd);
 
 	  /* first cpu in this cache, add the cache */
@@ -5146,6 +5153,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 	}
       }
       hwloc_bitmap_free(cacheset);
+     }
+     closedir(cachesdir);
      }
     }
 
