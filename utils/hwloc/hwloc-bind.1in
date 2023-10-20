@@ -88,7 +88,7 @@ in account when looking for NUMA nodes in the input locations.
 
 This option must be combined with NUMA node locations,
 such as \fI--hbm numa:1\fR for binding on the second HBM node.
-It may also be written as \fIhbm:1\fR.
+It may also be written as \fInuma[hbm]:1\fR.
 .TP
 \fB\-\-no\-hbm\fR
 Ignore high bandwidth memory nodes (Intel Xeon Phi MCDRAM)
@@ -297,7 +297,7 @@ To bind on the memory node local to a PU with largest capacity:
 
 To bind memory on the first high-bandwidth memory node on Intel Xeon Phi:
 
-    $ hwloc-bind --membind hbm:0 -- echo hello
+    $ hwloc-bind --membind numa[mcdram]:0 -- echo hello
     $ hwloc-bind --hbm --membind numa:0 -- echo hello
 
 Note that binding the "echo" command to multiple processors is
