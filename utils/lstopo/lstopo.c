@@ -896,6 +896,7 @@ main (int argc, char *argv[])
   hwloc_bitmap_t allow_cpuset = NULL, allow_nodeset = NULL;
   char * callname;
   char * input = NULL;
+  const char *show_only_string = NULL;
   struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   struct lstopo_type_filter type_filter[HWLOC_OBJ_TYPE_MAX];
@@ -959,7 +960,6 @@ main (int argc, char *argv[])
   loutput.show_memattrs_only = 0;
   loutput.show_cpukinds_only = 0;
   loutput.show_windows_processor_groups_only = 0;
-  loutput.show_only = HWLOC_OBJ_TYPE_NONE;
   loutput.show_cpuset = 0;
   loutput.show_taskset = 0;
   loutput.transform_distances = -1;
@@ -1080,8 +1080,7 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "--only")) {
 	if (argc < 2)
 	  goto out_usagefailure;
-        if (hwloc_type_sscanf(argv[1], &loutput.show_only, NULL, 0) < 0)
-	  fprintf(stderr, "Unsupported type `%s' passed to --only, ignoring.\n", argv[1]);
+        show_only_string = argv[1];
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--filter")) {
@@ -1621,7 +1620,7 @@ main (int argc, char *argv[])
   /* if  the output format wasn't enforced, think a bit about what the user probably want */
   if (output_format == LSTOPO_OUTPUT_DEFAULT) {
     if (loutput.show_cpuset
-        || loutput.show_only != HWLOC_OBJ_TYPE_NONE
+        || show_only_string
 	|| loutput.show_distances_only
         || loutput.show_memattrs_only
         || loutput.show_cpukinds_only
@@ -1947,6 +1946,16 @@ main (int argc, char *argv[])
     /* cpukinds must be before factorizing */
     lstopo_add_factorized_attributes(&loutput, topology, hwloc_get_root_obj(topology));
     lstopo_add_collapse_attributes(topology);
+  }
+
+  loutput.show_only.depth = HWLOC_TYPE_DEPTH_UNKNOWN; /* disable this feature by default */
+  if (show_only_string) {
+    err = hwloc_calc_parse_level(NULL, topology, show_only_string, strlen(show_only_string), &loutput.show_only);
+    if (err < 0 && loutput.show_only.depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "level %s passed to --only is unavailable.\n", show_only_string);
+      goto out_with_topology;
+    }
+    /* multiple depth is ok */
   }
 
   /******************

@@ -171,8 +171,8 @@ get_unique_obj(hwloc_topology_t topology, int topodepth, char *str,
   size_t typelen;
   int err;
 
-  typelen = strspn(str, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-  if (!typelen || (str[typelen] != ':' && str[typelen] != '=' && str[typelen] != '['))
+  typelen = hwloc_calc_parse_level_size(str);
+  if (!typelen || (str[typelen] != ':' && str[typelen] != '='))
     return NULL;
 
   lcontext.topology = topology;
@@ -809,7 +809,7 @@ int main(int argc, char *argv[])
 	      apply(topology, hwloc_get_root_obj(topology));
 	    } else {
 		size_t typelen;
-		typelen = strspn(location, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+		typelen = hwloc_calc_parse_level_size(location);
 		if (typelen && (location[typelen] == ':' || location[typelen] == '=' || location[typelen] == '[')) {
 			struct hwloc_calc_location_context_s lcontext;
 			lcontext.topology = topology;

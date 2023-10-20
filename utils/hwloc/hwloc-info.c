@@ -530,10 +530,16 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   } else if (show_descendants_depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     if (show_descendants_depth >= 0) {
       /* normal level */
-      unsigned i = 0;
-      unsigned n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth);
+      struct hwloc_calc_level level;
+      unsigned i = 0, n;
+      level.type = HWLOC_OBJ_TYPE_NONE;
+      level.depth = show_descendants_depth;
+      level.only_hbm = -1;
+      level.subtype[0] = '\0';
+      level.pci_vendor = level.pci_device = -1;
+      n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level);
       for(i=0; i<n; i++) {
-	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, show_descendants_depth, i);
+	hwloc_obj_t child = hwloc_calc_get_obj_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level, i);
 	if (show_index_prefix)
 	  snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
         hwloc_info_show_descendant(topology, child, obj, objs, i, prefix, verbose);
@@ -1047,8 +1053,8 @@ main (int argc, char *argv[])
         return EXIT_FAILURE;
       } else {
 	/* try to match a type/depth followed by a special character */
-	typelen = strspn(argv[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=' || argv[0][typelen] == '[')) {
+	typelen = hwloc_calc_parse_level_size(argv[0]);
+	if (typelen && (argv[0][typelen] == ':' || argv[0][typelen] == '=')) {
 	  err = hwloc_calc_process_location(&lcontext, argv[0], typelen,
 					    hwloc_calc_process_location_info_cb, NULL);
 	}

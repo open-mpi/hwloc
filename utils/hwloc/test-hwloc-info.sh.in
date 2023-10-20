@@ -15,6 +15,7 @@ srcdir="$HWLOC_top_srcdir/utils/hwloc"
 builddir="$HWLOC_top_builddir/utils/hwloc"
 info="$builddir/hwloc-info"
 linuxdir="$HWLOC_top_srcdir/tests/hwloc/linux"
+xmldir="$HWLOC_top_srcdir/tests/hwloc/xml"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc/.libs
 export HWLOC_PLUGINS_PATH
@@ -117,6 +118,17 @@ set -e
   echo
   echo "# only the highest capacity among 2 local-or-larger memories for one PU, silent"
   $info --if synthetic --input "pack:4 [numa(memory=1000000)] l3:2 [numa(memory=1000)] core:4 pu:2" --local-memory-flags larger --best-memattr capacity -s pu:63
+  echo
+
+  echo
+  echo "# MCDRAM subtype NUMA filter"
+  $info --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -s 'numa[mcdram]:1-2'
+  echo
+  echo "# NVML subtype OSdev type filter"
+  $info --if xml --input $xmldir/power8gpudistances.xml -s 'os[nvml]:all'
+  echo
+  echo "# GPU OSdev type filter"
+  $info --if xml --input $xmldir/power8gpudistances.xml -s 'os[gpu]:3-5'
   echo
 
   echo

@@ -504,6 +504,22 @@ NUMANode:10
 NUMANode:11
 
 
+# MCDRAM subtype NUMA filter
+NUMANode:3
+NUMANode:5
+
+# NVML subtype OSdev type filter
+OSDev[Co-Processor,GPU]:2
+OSDev[Co-Processor,GPU]:5
+OSDev[Co-Processor,GPU]:8
+OSDev[Co-Processor,GPU]:11
+
+# GPU OSdev type filter
+OSDev[Co-Processor,GPU]:3
+OSDev[Co-Processor,GPU]:4
+OSDev[Co-Processor,GPU]:5
+
+
 # cpukinds for the entire machine
 Machine L#0
  type = Machine

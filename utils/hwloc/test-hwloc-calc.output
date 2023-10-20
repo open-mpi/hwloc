@@ -76,6 +76,15 @@ Group0:1.Group2:2 Group0:1.Group2:3
 # Number of objects at depth 3 in a NUMA Node
 16
 
+# Number of MCDRAM subtype NUMA Nodes
+4
+
+# List of MCDRAM subtype NUMA Nodes near 2 L3
+3,5
+
+# Hierarchical list of MCDRAM subtype NUMA nodes within Package
+Package:0.NUMANode:1 Package:0.NUMANode:7
+
 # List of Machine objects
 0
 

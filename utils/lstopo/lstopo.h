@@ -13,6 +13,7 @@
 #include "private/autogen/config.h"
 #include "hwloc.h"
 #include "misc.h"
+#include "hwloc-calc.h"
 
 enum lstopo_drawing_e {
   LSTOPO_DRAWING_PREPARE,
@@ -100,7 +101,7 @@ struct lstopo_output {
   int show_memattrs_only;
   int show_cpukinds_only;
   int show_windows_processor_groups_only;
-  hwloc_obj_type_t show_only;
+  struct hwloc_calc_level show_only;
   int show_cpuset;
   int show_taskset;
   int transform_distances;

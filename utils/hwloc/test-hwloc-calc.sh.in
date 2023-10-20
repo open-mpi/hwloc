@@ -120,6 +120,15 @@ set -e
   echo "# Number of objects at depth 3 in a NUMA Node"
   $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N 3
   echo
+  echo "# Number of MCDRAM subtype NUMA Nodes"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -N 'numa[mcdram]' all
+  echo
+  echo "# List of MCDRAM subtype NUMA Nodes near 2 L3"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -I 'numa[mcdram]' l3:1-2
+  echo
+  echo "# Hierarchical list of MCDRAM subtype NUMA nodes within Package"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -H 'pack.numa[mcdram]' 'numa[mcdram]:0' 'numa[mcdram]:3'
+  echo
 
   echo "# List of Machine objects"
   $calc --if synthetic --input "node:4 core:4 pu:4" root --intersect Machine
