@@ -510,6 +510,9 @@ NUMANode:11
 NUMANode:3
 NUMANode:5
 
+# Memory Tier 1 filter
+NUMANode:6
+
 # NVML subtype OSdev type filter
 GPU:2
 GPU:5

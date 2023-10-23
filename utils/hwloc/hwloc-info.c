@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2021 Inria.  All rights reserved.
+ * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -536,6 +536,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       level.depth = show_descendants_depth;
       level.only_hbm = -1;
       level.subtype[0] = '\0';
+      level.memory_tier = -1;
       level.pci_vendor = level.pci_device = -1;
       n = hwloc_calc_get_nbobjs_inside_sets_by_depth(lcontext, obj->cpuset, obj->nodeset, &level);
       for(i=0; i<n; i++) {

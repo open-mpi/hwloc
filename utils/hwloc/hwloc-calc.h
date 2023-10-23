@@ -38,6 +38,7 @@ struct hwloc_calc_level {
   hwloc_obj_type_t type;
   union hwloc_obj_attr_u attr;
   char subtype[32];
+  int memory_tier;
   int pci_vendor, pci_device;
   int only_hbm; /* -1 for everything, 0 for only non-HBM, 1 for only HBM numa nodes */
 };
@@ -99,6 +100,12 @@ hwloc_calc_check_object_filtered(hwloc_obj_t obj, struct hwloc_calc_level *level
   }
 
   if (level->type == HWLOC_OBJ_NUMANODE) {
+    if (level->memory_tier >= 0) {
+      const char *tier = hwloc_obj_get_info_by_name(obj, "MemoryTier");
+      if (!tier || atoi(tier) != level->memory_tier)
+        return 1;
+    }
+
     if (level->only_hbm >= 0) {
       /* filter on hbm */
       int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
@@ -206,6 +213,11 @@ hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused
   const char *end;
   unsigned subtypelen;
 
+  if (!strncmp(current, "tier=", 5)) {
+    level->memory_tier = atoi(current+5);
+    return 0;
+  }
+
   if (!strncmp(current, "subtype=", 8)) {
     current += 8;
     goto subtype;
@@ -275,6 +287,7 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
   int err;
 
   level->subtype[0] = '\0';
+  level->memory_tier = -1;
   level->pci_device = level->pci_vendor = -1;
   level->only_hbm = -1;
   if (lcontext)
