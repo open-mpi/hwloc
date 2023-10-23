@@ -95,6 +95,7 @@ objects are wanted.
 type and also its subtype string attribute.
 For instance \fINUMA[HBM]\fR selects NUMA nodes of subtype "HBM".
 The prefix \fIsubtype=\fR may be avoided if there is no ambiguity.
+\fINUMA[tier=X]\fR select NUMA nodes of tier <X> ("MemoryTier" info attribute).
 \fIOS[Net]\fR also selects OS devices whose OS-device-specific type is Network.
 .br
 

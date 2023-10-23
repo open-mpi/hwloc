@@ -404,6 +404,12 @@ To find the number of NUMA nodes with subtype "HBM":
     $ hwloc-calc -N "numa[hbm]" all
     4
 
+To find the number of NUMA nodes in memory tier 1
+(DRAM nodes on a server with HBM and DRAM):
+
+    $ hwloc-calc -N "numa[tier=1]" all
+    4
+
 To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
 
     $ hwloc-calc -I "numa[mcdram]" pu:157
