@@ -4291,7 +4291,8 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* Same for memattrs */
   hwloc_internal_memattrs_need_refresh(topology);
   hwloc_internal_memattrs_refresh(topology);
-  hwloc_internal_memattrs_guess_memory_tiers(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+    hwloc_internal_memattrs_guess_memory_tiers(topology);
 
   topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_LOADING;
   topology->state |= HWLOC_TOPOLOGY_STATE_IS_LOADED;
