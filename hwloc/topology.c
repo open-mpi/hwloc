@@ -3870,6 +3870,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
 
   hwloc__topology_filter_init(topology);
 
+  /* always initialize since we don't know flags to disable those yet */
   hwloc_internal_distances_init(topology);
   hwloc_internal_memattrs_init(topology);
   hwloc_internal_cpukinds_init(topology);
@@ -4134,9 +4135,12 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 {
   /* no need to set to NULL after free() since callers will call setup_defaults() or just destroy the rest of the topology */
   unsigned l;
+
+  /* always destroy cpukinds/distances/memattrs since there are always initialized during init() */
   hwloc_internal_cpukinds_destroy(topology);
   hwloc_internal_distances_destroy(topology);
   hwloc_internal_memattrs_destroy(topology);
+
   hwloc_free_object_and_children(topology->levels[0][0]);
   hwloc_bitmap_free(topology->allowed_cpuset);
   hwloc_bitmap_free(topology->allowed_nodeset);
@@ -4189,8 +4193,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
   topology->state |= HWLOC_TOPOLOGY_STATE_IS_LOADING;
 
   /* initialize envvar-related things */
-  hwloc_internal_distances_prepare(topology);
-  hwloc_internal_memattrs_prepare(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
+    hwloc_internal_distances_prepare(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+    hwloc_internal_memattrs_prepare(topology);
 
   /* check if any cpu cache filter is not NONE */
   topology->want_some_cpu_caches = 0;
@@ -4275,24 +4281,29 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
     hwloc_topology_check(topology);
 
-  /* Rank cpukinds */
-  hwloc_internal_cpukinds_rank(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
+    /* Rank cpukinds */
+    hwloc_internal_cpukinds_rank(topology);
+  }
 
-  /* Mark distances objs arrays as invalid since we may have removed objects
-   * from the topology after adding the distances (remove_empty, etc).
-   * It would be hard to actually verify whether it's needed.
-   */
-  hwloc_internal_distances_invalidate_cached_objs(topology);
-  /* And refresh distances so that multithreaded concurrent distances_get()
-   * don't refresh() concurrently (disallowed).
-   */
-  hwloc_internal_distances_refresh(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
+    /* Mark distances objs arrays as invalid since we may have removed objects
+     * from the topology after adding the distances (remove_empty, etc).
+     * It would be hard to actually verify whether it's needed.
+     */
+    hwloc_internal_distances_invalidate_cached_objs(topology);
+    /* And refresh distances so that multithreaded concurrent distances_get()
+     * don't refresh() concurrently (disallowed).
+     */
+    hwloc_internal_distances_refresh(topology);
+  }
 
-  /* Same for memattrs */
-  hwloc_internal_memattrs_need_refresh(topology);
-  hwloc_internal_memattrs_refresh(topology);
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
+    /* Same for memattrs */
+    hwloc_internal_memattrs_need_refresh(topology);
+    hwloc_internal_memattrs_refresh(topology);
     hwloc_internal_memattrs_guess_memory_tiers(topology);
+  }
 
   topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_LOADING;
   topology->state |= HWLOC_TOPOLOGY_STATE_IS_LOADED;
@@ -4582,13 +4593,18 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
   if (hwloc_filter_levels_keep_structure(topology) < 0) /* takes care of reconnecting internally */
     goto out;
 
-  /* some objects may have disappeared, we need to update distances objs arrays */
-  hwloc_internal_distances_invalidate_cached_objs(topology);
-  hwloc_internal_memattrs_need_refresh(topology);
+  /* some objects may have disappeared and sets were modified,
+   * we need to update distances, etc */
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
+    hwloc_internal_distances_invalidate_cached_objs(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+    hwloc_internal_memattrs_need_refresh(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
+    hwloc_internal_cpukinds_restrict(topology);
+
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);
-  hwloc_internal_cpukinds_restrict(topology);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -4671,9 +4687,12 @@ hwloc_topology_allow(struct hwloc_topology *topology,
 int
 hwloc_topology_refresh(struct hwloc_topology *topology)
 {
-  hwloc_internal_cpukinds_rank(topology);
-  hwloc_internal_distances_refresh(topology);
-  hwloc_internal_memattrs_refresh(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
+    hwloc_internal_cpukinds_rank(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
+    hwloc_internal_distances_refresh(topology);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+    hwloc_internal_memattrs_refresh(topology);
   return 0;
 }
 
