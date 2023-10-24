@@ -39,6 +39,7 @@
  <li> \ref miscobjs
  <li> \ref attributes
  <li> \ref topoattrs
+ <li> \ref heteromem
  <li> \ref xml
  <li> \ref synthetic
  <li> \ref interoperability
@@ -1955,7 +1956,7 @@ subtype <tt>DRAM</tt> (for usual main memory),
 <tt>CXL-DRAM</tt> or <tt>CXL-NVM</tt> for CXL DRAM or non-volatile memory.
 Note that some of these subtypes are guessed by the library,
 they might be missing or slightly wrong in some corner cases.
-See HWLOC_MEMTIERS and HWLOC_MEMTIERS_GUESS
+See \ref heteromem for details, and HWLOC_MEMTIERS and HWLOC_MEMTIERS_GUESS
 in \ref envvar for tuning these.
 </li>
 <li>Groups:
@@ -2292,6 +2293,7 @@ These info attributes are attached to objects specified in parentheses.
 <dd>The rank of the memory tier of this node.
 Ranks start from 0 for highest bandwidth nodes.
 The attribute is only set if multiple tiers are found.
+See \ref heteromem.
 </dd>
 <dt>CXLDevice (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
@@ -2500,6 +2502,11 @@ The memory attributes API is located in hwloc/memattrs.h,
 see \ref hwlocality_memattrs and \ref hwlocality_memattrs_manage for details.
 See also an example in doc/examples/memory-attributes.c in the source tree.
 
+Memory attributes are the low-level solution to selecting target
+memory. hwloc uses them internally to build Memory Tiers which provide
+an easy way to distinguish NUMA nodes of different kinds, as explained
+in \ref heteromem.
+
 
 \htmlonly
 </div><div class="section" id="topoattrs_cpukinds">
@@ -2555,6 +2562,186 @@ and <tt>apple,firestorm;ARM,v8</tt> on performance cores on Apple M1 CPU.
 </dl>
 
 See \ref hwlocality_cpukinds for details.
+
+
+
+
+\page heteromem Heterogeneous Memory
+
+\htmlonly
+<div class="section">
+\endhtmlonly
+
+Heterogeneous memory hardware exposes different NUMA nodes for
+different memory technologies.
+On the image below, a dual-socket server has both HBM (high bandwidth
+memory) and usual DRAM connected to each socket, as well as some
+CXL memory connected to the entire machine.
+
+\image html heteromem.png
+\image latex heteromem.png "" width=\textwidth
+
+The hardware usually exposes "normal" memory first because it is
+where "normal" data buffers should be allocated by default.
+However there is no guarantee about whether HBM, NVM, CXL will appear
+second.
+Hence there is a need to explicit memory technologies and performance
+to help users decide where to allocate.
+
+\htmlonly
+</div><div class="section" id="heteromem_memtiers">
+\endhtmlonly
+\section heteromem_memtiers Memory Tiers
+
+hwloc builds <i>Memory Tiers</i> to identify different kinds of
+NUMA nodes.
+On the above machine, the first tier would contain both HBM NUMA nodes
+(L\#1 and L\#3), while the second tier would contain both DRAM nodes
+(L\#0 and L\#2), and the CXL memory (L\#4) would be in the third tier.
+NUMA nodes are then annotated accordingly:
+<ul>
+<li> Each node object has its <tt>subtype</tt> field set to <tt>HBM</tt>,
+ <tt>DRAM</tt> or <tt>CXL-DRAM</tt>
+ (see other possible values in \ref attributes_normal).
+<li> Each node also has a string info attribute with name
+<tt>MemoryTier</tt> and value <tt>0</tt> for the first tier,
+<tt>1</tt> for the second, etc.
+</ul>
+
+Tiers are built using two kinds of information:
+<ul>
+<li>First hwloc looks into operating system information to find out
+whether a node is non-volatile, CXL, special-purpose, etc.
+<li>Then it combines that knowledge with performance metrics exposed
+by the hardware to guess what's actually DRAM, HBM, etc.
+These metrics are also exposed in hwloc Memory Attributes, for
+instance bandwidth and latency, for read and write.
+See \ref topoattrs_memattrs and \ref hwlocality_memattrs for more details.
+</ul>
+
+Once nodes with similar or different characteristics are identified,
+they are placed in tiers.
+Tiers are then sorted by bandwidth so that the highest bandwidth
+is ranked first, etc.
+
+If hwloc fails to build tiers properly, see <tt>HWLOC_MEMTIERS</tt>
+and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar.
+
+
+\htmlonly
+</div><div class="section" id="heteromem_use_cli">
+\endhtmlonly
+\section heteromem_use_cli Using Heterogeneous Memory from the command-line
+
+Tiers may be specified in location filters when using NUMA nodes
+in hwloc command-line tools.
+For instance, binding memory on the first HBM node (<tt>numa[hbm]:0</tt>)
+is actually equivalent to binding on the second node (<tt>numa:1</tt>)
+on our example platform:
+\verbatim
+$ hwloc-bind --membind 'numa[hbm]:0' -- myprogram
+$ hwloc-bind --membind 'numa:1' -- myprogram
+\endverbatim
+To count DRAM nodes in the first CPU package, or all nodes:
+\verbatim
+$ hwloc-calc -N 'numa[dram]' package:0
+1
+$ hwloc-calc -N 'numa' package:0
+2
+\endverbatim
+To list all the physical indexes of Tier-0 NUMA nodes (HBM P\#2 and P\#3 not shown on the figure):
+\verbatim
+$ hwloc-calc -I 'numa[tier=0]' -p all
+2,3
+\endverbatim
+
+hwloc-calc and hwloc-bind also have options such as
+<tt>\--local-memory</tt> and <tt>\--best-memattr</tt>
+to select the best NUMA node among the local ones.
+For instance, the following command-lines say that,
+among nodes near node:0 (DRAM L\#0),
+the best one for latency is itself
+while the best one for bandwidth is node:1 (HBM L\#1).
+\verbatim
+$ hwloc-calc --best-memattr latency node:0
+0
+$ hwloc-calc --best-memattr bandwidth node:0
+1
+\endverbatim
+
+
+\htmlonly
+</div><div class="section" id="heteromem_use_api">
+\endhtmlonly
+\section heteromem_use_api Using Heterogeneous Memory from the C API
+
+There are two major changes introduced by heterogeneous memory
+when looking at the hierarchical tree of objects.
+<ul>
+<li> First, there may be multiple memory children attached at the same
+place.
+For instance, each Package in the above image has two memory children,
+one for the DRAM NUMA node, and another one for the HBM node.
+<li> Second, memory children may be attached at different levels.
+In the above image, CXL memory is attached to the root Machine object
+instead of below a Package.
+</ul>
+
+Hence, one may have to rethink the way it selects NUMA nodes.
+
+\subsection heteromem_use_api_iterate Iterating over the list of (heterogeneous) NUMA nodes
+
+A common need consists in iterating over the list of NUMA nodes
+(e.g. using hwloc_get_next_obj_by_type()).
+This is useful for counting some domains before partitioning a job,
+or for finding a node that is local to some objects.
+With heterogeneous memory, one should remember that multiple nodes may
+now have the same locality (HBM and DRAM above) or overlapping localities
+(e.g. DRAM and CXL above).
+Checking NUMA node subtype or tier attributes is a good way to avoid
+this issue by ignoring nodes of different kinds.
+
+Another solution consists in ignoring nodes whose cpuset overlap the
+previously selected ones.
+For instance, in the above example, one could first select DRAM L\#0
+but ignore HBM L\#1 (because it overlaps with DRAM L\#0),
+then select DRAM L\#2 but ignore HBM L\#3 and CXL L\#4
+(overlap wih DRAM L\#2).
+
+<br/>
+
+It is also possible to iterate over the memory parents (e.g. Packages
+in our example) and select only one memory child for each of them.
+hwloc_get_memory_parents_depth() may be used to find the depth
+of these parents.
+However this method only works if all memory parents are at the same level.
+It would fail in our example: the root Machine object
+also has a memory child (CXL), hence hwloc_get_memory_parents_depth()
+would returns ::HWLOC_TYPE_DEPTH_MULTIPLE.
+
+
+\subsection heteromem_use_api_vertical Iterating over local (heterogeneous) NUMA nodes
+
+Another common need is to find NUMA nodes that are local to some
+objects (e.g. a Core).
+A basic solution consists in looking at the Core nodeset and iterating
+over NUMA nodes to select those whose nodeset are included.
+A nicer solution is to walk up the tree to find ancestors with a
+memory child.
+With heterogeneous memory, multiple such ancestors may exist
+(Package and Machine in our example) and they may have multiple memory
+children.
+
+Both these methods may be replaced with hwloc_get_local_numanode_objs()
+which provides a convenient and flexible way to retrieve local NUMA nodes.
+One may then iterate over the returned array to select the appropriate one(s)
+depending on their subtype, tier or performance attributes.
+
+<br>
+
+hwloc_memattr_get_best_target() is also a convenient way to select
+the best local NUMA node according to performance metrics.
+See also \ref hwlocality_memattrs.
 
 
 
