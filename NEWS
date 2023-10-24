@@ -22,8 +22,10 @@ Version 2.11.3
 * Fix Linux cpukind information when some CPUs are offline.
 * Don't report multiple local NUMA nodes in hwloc-calc on heterogeneous memory
   platforms when a single one is requested, broken since 2.9.
+* Fix lstopo build with Clang in MSVC format.
 * Split hwloc-calc.1 into more sections to dsitinguish output conversion,
   I/O set/object and formatting options.
+
 
 
 Version 2.11.2
