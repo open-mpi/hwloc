@@ -2189,9 +2189,10 @@ enum hwloc_topology_flags_e {
    */
   HWLOC_TOPOLOGY_FLAG_NO_DISTANCES = (1UL<<7),
 
-  /** \brief Ignore memory attributes.
+  /** \brief Ignore memory attributes and tiers.
    *
-   * Ignore memory attribues from the operating systems (and from XML).
+   * Ignore memory attribues from the operating systems (and from XML)
+   * Hence also do not try to build memory tiers.
    */
   HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS = (1UL<<8),
 
