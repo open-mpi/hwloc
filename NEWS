@@ -37,11 +37,11 @@ Version 2.10.0
     emulation is enabled on the Linux kernel command-line.
   + Add more info attributes in MemoryModule Misc objects,
     thanks to Zubiao Xiong for the patch.
-  + Get CPUModel and CPUFamily info attributes on LoongArch.
+  + Get CPUModel and CPUFamily info attributes on LoongArch platforms.
 * x86 backend
   + Add support for new AMD CPUID leaf 0x80000026 for better detection
     of Core Complex and Die on Zen4 processors.
-  + Improve Zhaoxin topology detection in the x86 backend.
+  + Improve Zhaoxin CPU topology detection.
 * Tools
   + Input locations and many command-line options (e.g. hwloc-calc -I -N -H,
     lstopo --only) now accept filters such as "NUMA[HBM]" so that only
@@ -51,7 +51,8 @@ Version 2.10.0
   + Add --object-output to hwloc-calc to report the type as a prefix to
     object indexes, e.g. Core:2 instead of 2 in the output of -I.
   + hwloc-info --ancestor and --descendants now accepts kinds of objects
-    instead of single types. --first may also keep only the first object.
+    instead of single types.
+    - The new --first option only shows the first matching object.
   + Add --children-of-pid to hwloc-ps to show a hierarchy of processes.
     Thanks to Antoine Morvan for the suggestion.
   + Add --misc-from to lstopo to add Misc objects described in a file.
