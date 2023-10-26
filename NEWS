@@ -19,6 +19,14 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.10.0
 --------------
+* Heterogeneous Memory core improvements
+  + Better heuristics to identify the subtype of memory such as HBM,
+    DRAM, NVM, CXL-DRAM, etc.
+  + Build memory tiers, i.e. sets of NUMA nodes with the same subtype
+    and similar performance.
+    - NUMA node tier ranks are exposed in the new MemoryTier info
+      attribute (starts from 0 for highest bandwidth tier)..
+  + See the new Heterogeneous Memory section in the documentation.
 * API
   + Add hwloc_topology_free_group_object() to discard a Group created
     by hwloc_topology_alloc_group_object().
@@ -38,6 +46,8 @@ Version 2.10.0
   + Input locations and many command-line options (e.g. hwloc-calc -I -N -H,
     lstopo --only) now accept filters such as "NUMA[HBM]" so that only
     objects are that type and subtype are considered.
+    - NUMA[tier=1] is also accepted for selecting NUMA nodes depending
+      on their MemoryTier info attribute.
   + Add --object-output to hwloc-calc to report the type as a prefix to
     object indexes, e.g. Core:2 instead of 2 in the output of -I.
   + hwloc-info --ancestor and --descendants now accepts kinds of objects
