@@ -93,8 +93,9 @@ Some filters may be added after the type to further specify which
 objects are wanted.
 \fI<type>[subtype=<subtype>]\fR selects objects matching the given
 type and also its subtype string attribute.
-For instance \fINUMA[MCDRAM]\fR selects NUMA nodes of subtype MCDRAM on KNL.
+For instance \fINUMA[HBM]\fR selects NUMA nodes of subtype "HBM".
 The prefix \fIsubtype=\fR may be avoided if there is no ambiguity.
+\fINUMA[tier=X]\fR select NUMA nodes of tier <X> ("MemoryTier" info attribute).
 \fIOS[Net]\fR also selects OS devices whose OS-device-specific type is Network.
 .br
 
@@ -212,7 +213,8 @@ A NUMA node; a set of processors around memory which the processors
 can directly access.
 .
 If \fBnuma[hbm]\fR is used instead of \fBnumanode\fR in locations,
-command-line tools only consider high-bandwidth memory nodes such as Intel Xeon Phi MCDRAM.
+command-line tools only consider NUMA nodes marked as high-bandwidth memory
+(subtype "HBM").
 .
 .TP
 .B package

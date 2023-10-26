@@ -54,6 +54,10 @@ extern "C" {
  * Attribute values for these nodes, if any, may then be obtained with
  * hwloc_memattr_get_value() and manually compared with the desired criteria.
  *
+ * Memory attributes are also used internally to build Memory Tiers which provide
+ * an easy way to distinguish NUMA nodes of different kinds, as explained
+ * in \ref heteromem.
+ *
  * \sa An example is available in doc/examples/memory-attributes.c in the source tree.
  *
  * \note The API also supports specific objects as initiator,

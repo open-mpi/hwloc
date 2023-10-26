@@ -508,6 +508,9 @@ NUMANode:11
 NUMANode:3
 NUMANode:5
 
+# Memory Tier 1 filter
+NUMANode:6
+
 # NVML subtype OSdev type filter
 OSDev[Co-Processor,GPU]:2
 OSDev[Co-Processor,GPU]:5
