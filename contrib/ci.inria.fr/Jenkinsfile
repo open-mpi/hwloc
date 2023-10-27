@@ -48,7 +48,7 @@ pipeline {
 	// Trigger the build
 	triggers {
 		// extended/* jobs poll GitHub explicitly once per night, in case webhooks aren't used
-		pollSCM(isExtendedJob ? '0 5 * * *' : '')
+		pollSCM(isExtendedJob ? '0 4 * * *' : '')
 	}
 
         stages {
