@@ -46,7 +46,8 @@ xml_outputs = \
         8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v1tov2.xml \
         8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.xml \
         64intel64-fakeKNL-SNC4-hybrid.v1tov2.xml \
-        64intel64-fakeKNL-SNC4-hybrid.v2tov1.xml
+        64intel64-fakeKNL-SNC4-hybrid.v2tov1.xml \
+        cxlmem+dax.v2.xml
 
 # Each output `xyz.xml' may have a corresponding `xyz.source' file specifying
 # its source file.
@@ -76,7 +77,9 @@ xml_source = \
         8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v1tov2.source \
         8intel64-fakeKNL-A2A-hybrid.rootattachednumas.v2tov1.source \
         64intel64-fakeKNL-SNC4-hybrid.v1tov2.source \
-        64intel64-fakeKNL-SNC4-hybrid.v2tov1.source
+        64intel64-fakeKNL-SNC4-hybrid.v2tov1.source \
+        cxlmem+dax.v2.source \
+        cxlmem+dax.v3.xml
 
 # Each output `xyz.xml' or `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
