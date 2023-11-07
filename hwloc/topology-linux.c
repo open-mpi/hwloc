@@ -4430,6 +4430,13 @@ look_sysfsnode(struct hwloc_topology *topology,
  * sysfs CPU frequencies for cpukinds
  */
 
+struct hwloc_linux_cpukinds_by_pu {
+  unsigned pu;
+  unsigned long max_freq;
+  unsigned long base_freq;
+  unsigned long capacity;
+};
+
 struct hwloc_linux_cpukinds {
   struct hwloc_linux_cpukind {
     unsigned long value;
@@ -4620,6 +4627,8 @@ static int
 look_sysfscpukinds(struct hwloc_topology *topology,
                    struct hwloc_linux_backend_data_s *data)
 {
+  int nr_pus;
+  struct hwloc_linux_cpukinds_by_pu *by_pu;
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
   int max_without_basefreq = 0; /* any cpu where we have maxfreq without basefreq? */
   char str[293];
@@ -4627,7 +4636,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   hwloc_bitmap_t atom_pmu_set, core_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   unsigned adjust_max = 10;
-  int i;
+  int pu, i;
 
   env = getenv("HWLOC_CPUKINDS_MAXFREQ");
   if (env) {
@@ -4647,24 +4656,45 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     hwloc_debug("linux/cpufreq: max frequency values will be adjusted by up to %u%%\n",
                 adjust_max);
 
-  /* look at the PU base+max frequency */
-  hwloc_linux_cpukinds_init(&cpufreqs_max);
-  hwloc_linux_cpukinds_init(&cpufreqs_base);
-  hwloc_bitmap_foreach_begin(i, topology->levels[0][0]->cpuset) {
-    unsigned maxfreq = 0, basefreq = 0;
+  nr_pus = hwloc_bitmap_weight(topology->levels[0][0]->cpuset);
+  assert(nr_pus > 0);
+  by_pu = calloc(nr_pus, sizeof(*by_pu));
+  if (!by_pu)
+    return -1;
+
+  /* gather all sysfs info in the by_pu array */
+  i = 0;
+  hwloc_bitmap_foreach_begin(pu, topology->levels[0][0]->cpuset) {
+    unsigned maxfreq = 0, basefreq = 0, capacity = 0;;
+    by_pu[i].pu = pu;
+
     /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
-      if (maxfreq)
-        hwloc_linux_cpukinds_add(&cpufreqs_max, i, maxfreq/1000);
+      by_pu[i].max_freq = maxfreq;
     /* base_frequency is intel_pstate specific */
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", i);
     if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0)
-      if (basefreq)
-        hwloc_linux_cpukinds_add(&cpufreqs_base, i, basefreq/1000);
+      by_pu[i].base_freq = basefreq;
     if (maxfreq && !basefreq)
       max_without_basefreq = 1;
+    /* capacity */
+    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
+    if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
+      by_pu[i].capacity = capacity;
+    i++;
   } hwloc_bitmap_foreach_end();
+  assert(i == nr_pus);
+
+  /* now store base+max frequency */
+  hwloc_linux_cpukinds_init(&cpufreqs_max);
+  hwloc_linux_cpukinds_init(&cpufreqs_base);
+  for(i=0; i<nr_pus; i++) {
+    if (by_pu[i].max_freq)
+      hwloc_linux_cpukinds_add(&cpufreqs_max, by_pu[i].pu, by_pu[i].max_freq/1000);
+    if (by_pu[i].base_freq)
+      hwloc_linux_cpukinds_add(&cpufreqs_base, by_pu[i].pu, by_pu[i].base_freq/1000);
+  }
 
   if (maxfreq_enabled == -1 && cpufreqs_max.nr_sets && !max_without_basefreq)
     /* we have basefreq, check maxfreq and ignore/fix it if turboboost 3.0 makes the max different on different cores */
@@ -4679,14 +4709,14 @@ look_sysfscpukinds(struct hwloc_topology *topology,
 
   /* look at the PU capacity */
   hwloc_linux_cpukinds_init(&cpu_capacity);
-  hwloc_bitmap_foreach_begin(i, topology->levels[0][0]->cpuset) {
-    unsigned capacity;
-    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
-    if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
-      hwloc_linux_cpukinds_add(&cpu_capacity, i, capacity);
-  } hwloc_bitmap_foreach_end();
+  for(i=0; i<nr_pus; i++) {
+    if (by_pu[i].capacity)
+      hwloc_linux_cpukinds_add(&cpu_capacity, by_pu[i].pu, by_pu[i].capacity);
+  }
   hwloc_linux_cpukinds_register(&cpu_capacity, topology, "LinuxCapacity", 1);
   hwloc_linux_cpukinds_destroy(&cpu_capacity);
+
+  free(by_pu);
 
   /* look at Intel core/atom PMUs */
   atom_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_atom/cpus", data->root_fd);
