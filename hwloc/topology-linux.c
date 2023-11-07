@@ -4429,6 +4429,9 @@ struct hwloc_linux_cpukinds_by_pu {
   unsigned long max_freq;
   unsigned long base_freq;
   unsigned long capacity;
+  int done; /* temporary bit to identify PU that were processed by the current algorithm
+             * (only hwloc_linux_cpukinds_adjust_maxfreqs() for now)
+             */
 };
 
 struct hwloc_linux_cpukinds {
@@ -4529,85 +4532,54 @@ hwloc_linux_cpukinds_destroy(struct hwloc_linux_cpukinds *cpukinds)
   free (cpukinds->sets);
 }
 
-/* merge all PUs of cpuset inside a single cpukinds set with the given value */
-static void
-hwloc_linux_cpukinds_merge_values(struct hwloc_linux_cpukinds *cpukinds,
-                                  hwloc_const_cpuset_t cpuset,
-                                  unsigned long value)
-{
-  unsigned first, i;
-  hwloc_bitmap_t tmpset = hwloc_bitmap_alloc();
-  if (!tmpset)
-    return;
-
-  /* find a set with that value */
-  for(first=0; first<cpukinds->nr_sets; first++)
-    if (cpukinds->sets[first].value == value)
-      break;
-  /* it must exist since we're downgrading some values to an existing one */
-  assert(first < cpukinds->nr_sets);
-
-  /* merge affected sets with the existing one */
-  for(i=0; i<cpukinds->nr_sets; i++) {
-    if (i == first)
-      continue;
-
-    hwloc_bitmap_and(tmpset, cpukinds->sets[i].cpuset, cpuset);
-    if (hwloc_bitmap_iszero(tmpset))
-      /* not affected */
-      continue;
-
-    hwloc_bitmap_or(cpukinds->sets[first].cpuset, cpukinds->sets[first].cpuset, tmpset);
-    hwloc_bitmap_andnot(cpukinds->sets[i].cpuset, cpukinds->sets[i].cpuset, tmpset);
-    if (hwloc_bitmap_iszero(cpukinds->sets[i].cpuset)) {
-      /* became empty, remove it, and move remaining sets by one */
-      hwloc_bitmap_free(cpukinds->sets[i].cpuset);
-      memmove(&cpukinds->sets[i], &cpukinds->sets[i+1], (cpukinds->nr_sets-i-1)*sizeof(cpukinds->sets[i]));
-      cpukinds->nr_sets--;
-      if (i<first)
-        first--;
-      i--;
-    }
-  }
-
-  hwloc_bitmap_free(tmpset);
-}
-
 /* for each set of PUs with the same base frequency,
  * adjust max frequencies by up to adjust_max percents
  */
 static void
-hwloc_linux_cpukinds_adjust_maxfreqs(struct hwloc_linux_cpukinds *cpufreqs_max,
-                                     struct hwloc_linux_cpukinds *cpufreqs_base,
+hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
+                                     struct hwloc_linux_cpukinds_by_pu *by_pu,
                                      unsigned adjust_max)
 {
-  unsigned i, j;
-  for(i=0; i<cpufreqs_base->nr_sets; i++) {
-    unsigned long min_maxfreq = UINT_MAX, max_maxfreq = 0;
-
-    for(j=0; j<cpufreqs_max->nr_sets; j++) {
-      if (!hwloc_bitmap_intersects(cpufreqs_base->sets[i].cpuset, cpufreqs_max->sets[j].cpuset))
+  unsigned i, next = 0, done = 0;
+  while (done < nr_pus) {
+    /* start a new group of same base_frequency at next */
+    unsigned first = next;
+    unsigned long cur_base_freq = by_pu[first].base_freq;
+    unsigned long min_maxfreq = by_pu[first].max_freq;
+    unsigned long max_maxfreq = by_pu[first].max_freq;
+    by_pu[first].done = 1;
+    done++;
+    next = 0;
+    for(i=first+1; i<nr_pus; i++) {
+      if (by_pu[i].done)
         continue;
-
-      if (cpufreqs_max->sets[j].value < min_maxfreq)
-        min_maxfreq = cpufreqs_max->sets[j].value;
-      if (cpufreqs_max->sets[j].value > max_maxfreq)
-        max_maxfreq = cpufreqs_max->sets[j].value;
+      if (by_pu[i].base_freq == cur_base_freq) {
+        if (by_pu[i].max_freq > max_maxfreq)
+          max_maxfreq = by_pu[i].max_freq;
+        else if (by_pu[i].max_freq < min_maxfreq)
+          min_maxfreq = by_pu[i].max_freq;
+        by_pu[i].done = 1;
+        done++;
+      } else {
+        if (!next)
+          next = i;
+      }
     }
-    if (min_maxfreq == UINT_MAX)
-      continue;
 
     if (min_maxfreq == max_maxfreq) {
       hwloc_debug("linux/cpufreq: max frequencies always %lu when base=%lu\n",
-                  min_maxfreq, cpufreqs_base->sets[i].value);
+                  min_maxfreq, cur_base_freq);
     } else {
       float ratio = ((float)(max_maxfreq-min_maxfreq)/(float)min_maxfreq);
       hwloc_debug("linux/cpufreq: max frequencies in [%lu-%lu] when base=%lu\n",
-                  min_maxfreq, max_maxfreq, cpufreqs_base->sets[i].value);
+                  min_maxfreq, max_maxfreq, cur_base_freq);
       if (ratio*100 < (float)adjust_max) {
         hwloc_debug("linux/cpufreq: max frequencies overrated up to %u%% < %u%%, adjust all to %lu\n",
                     (unsigned)(ratio*100), adjust_max, min_maxfreq);
-        hwloc_linux_cpukinds_merge_values(cpufreqs_max, cpufreqs_base->sets[i].cpuset, min_maxfreq);
+        /* update max_freq of all PUs with this base_freq */
+        for(i=first; i<nr_pus; i++)
+          if (by_pu[i].base_freq == cur_base_freq)
+            by_pu[i].max_freq = min_maxfreq;
       }
     }
   }
@@ -4676,6 +4648,10 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   } hwloc_bitmap_foreach_end();
   assert(i == nr_pus);
 
+  if (maxfreq_enabled == -1 && !max_without_basefreq)
+    /* we have basefreq, check maxfreq and ignore/fix it if turboboost 3.0 makes the max different on different cores */
+    hwloc_linux_cpukinds_adjust_maxfreqs(nr_pus, by_pu, adjust_max);
+
   /* now store base+max frequency */
   hwloc_linux_cpukinds_init(&cpufreqs_max);
   hwloc_linux_cpukinds_init(&cpufreqs_base);
@@ -4685,10 +4661,6 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     if (by_pu[i].base_freq)
       hwloc_linux_cpukinds_add(&cpufreqs_base, by_pu[i].pu, by_pu[i].base_freq/1000);
   }
-
-  if (maxfreq_enabled == -1 && cpufreqs_max.nr_sets && !max_without_basefreq)
-    /* we have basefreq, check maxfreq and ignore/fix it if turboboost 3.0 makes the max different on different cores */
-    hwloc_linux_cpukinds_adjust_maxfreqs(&cpufreqs_max, &cpufreqs_base, adjust_max);
 
   if (maxfreq_enabled != 0)
     /* only expose maxfreq info if we miss some basefreq info */
