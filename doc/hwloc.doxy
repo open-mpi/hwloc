@@ -1207,6 +1207,13 @@ following environment variables.
   If set to 0, max frequencies are entirely ignored.
   </dd>
 
+<dt>HWLOC_CPUKINDS_HOMOGENEOUS=0</dt>
+  <dd>uniformize max frequency, base frequency and Linux capacity to
+  force a single homogeneous kind of CPUs.
+  This is enabled by default on NVIDIA Grace but may be disabled
+  if set to 0 (or enabled on other platforms if set to 1).
+  </dd>
+
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
 <dd>changes the locality of I/O devices behing the specified PCI buses.
