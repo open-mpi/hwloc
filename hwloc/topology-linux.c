@@ -4493,6 +4493,20 @@ hwloc_linux_cpukinds_compar(const void *_a, const void *_b)
 }
 
 static void
+hwloc_linux_cpukinds_register_one(struct hwloc_topology *topology,
+                                  hwloc_bitmap_t cpuset,
+                                  int efficiency,
+                                  char *infoname,
+                                  char *infovalue)
+{
+  struct hwloc_info_s infoattr;
+  infoattr.name = infoname;
+  infoattr.value = infovalue;
+  hwloc_internal_cpukinds_register(topology, cpuset, efficiency, &infoattr, 1, 0);
+  /* the cpuset is given to the callee */
+}
+
+static void
 hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
                               struct hwloc_topology *topology,
                               const char *name,
@@ -4504,15 +4518,12 @@ hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
   qsort(cpukinds->sets, cpukinds->nr_sets, sizeof(*cpukinds->sets), hwloc_linux_cpukinds_compar);
 
   for(i=0; i<cpukinds->nr_sets; i++) {
-    struct hwloc_info_s infoattr;
     char value[32];
-    infoattr.name = (char *) name;
-    infoattr.value = value;
     snprintf(value, sizeof(value), "%lu", cpukinds->sets[i].value);
     /* value (at least cpu_capacity) may be > INT_MAX, too large for a forced_efficiency, hence use i instead */
-    hwloc_internal_cpukinds_register(topology, cpukinds->sets[i].cpuset,
-                                     forced_efficiency ? (int) i : HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
-                                     &infoattr, 1, 0);
+    hwloc_linux_cpukinds_register_one(topology, cpukinds->sets[i].cpuset,
+                                      forced_efficiency ? (int) i : HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                      (char *) name, value);
     /* the cpuset is given to the callee */
     cpukinds->sets[i].cpuset = NULL;
   }
@@ -4684,19 +4695,17 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   atom_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_atom/cpus", data->root_fd);
   core_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_core/cpus", data->root_fd);
   if (atom_pmu_set) {
-    struct hwloc_info_s infoattr;
-    infoattr.name = (char *) "CoreType";
-    infoattr.value = (char *) "IntelAtom";
-    hwloc_internal_cpukinds_register(topology, atom_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    hwloc_linux_cpukinds_register_one(topology, atom_pmu_set,
+                                      HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                      (char *) "CoreType", (char *) "IntelAtom");
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(atom_pmu_set);
   }
   if (core_pmu_set) {
-    struct hwloc_info_s infoattr;
-    infoattr.name = (char *) "CoreType";
-    infoattr.value = (char *) "IntelCore";
-    hwloc_internal_cpukinds_register(topology, core_pmu_set, HWLOC_CPUKIND_EFFICIENCY_UNKNOWN, &infoattr, 1, 0);
+    hwloc_linux_cpukinds_register_one(topology, core_pmu_set,
+                                      HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                      (char *) "CoreType", (char *) "IntelCore");
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(core_pmu_set);
