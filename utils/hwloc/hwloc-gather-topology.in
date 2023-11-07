@@ -246,6 +246,7 @@ savedir "$destdir/$basename" /sys/devices/system/node/
 savedir "$destdir/$basename" /sys/bus/node/devices/
 savefile "$destdir/$basename" /sys/devices/cpu_atom/cpus
 savefile "$destdir/$basename" /sys/devices/cpu_core/cpus
+savebusdir "$destdir/$basename" soc .
 
 # Gather DMI IDs
 # (no need for aveclassdir since we only want "id" and it usually points to /sys/devices/virtual/dmi/id/)
