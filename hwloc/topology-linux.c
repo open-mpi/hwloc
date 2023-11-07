@@ -2748,6 +2748,54 @@ hwloc__get_dmi_id_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
   hwloc__get_dmi_id_one_info(data, obj, path, pathlen, "sys_vendor", "DMISysVendor");
 }
 
+static void
+hwloc__get_soc_one_info(struct hwloc_linux_backend_data_s *data,
+                        hwloc_obj_t obj,
+                        char *path, int n, const char *info_suffix)
+{
+  char soc_line[64];
+  char infoname[64];
+
+  if (hwloc_read_path_by_length(path, soc_line, sizeof(soc_line), data->root_fd) <= 0)
+    return;
+
+  if (soc_line[0] != '\0') {
+    char *tmp = strchr(soc_line, '\n');
+    if (tmp)
+      *tmp = '\0';
+    snprintf(infoname, sizeof(infoname), "SoC%d%s", n, info_suffix);
+    hwloc_obj_add_info(obj, infoname, soc_line);
+  }
+}
+
+static void
+hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
+{
+  char path[128];
+  struct dirent *dirent;
+  DIR *dir;
+
+  /* single SoC, add topology info */
+  strcpy(path, "/sys/bus/soc/devices");
+  dir = hwloc_opendir(path, data->root_fd);
+  if (!dir)
+    return;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    int i;
+    if (sscanf(dirent->d_name, "soc%d", &i) != 1)
+      continue;
+
+    snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/soc_id", i);
+    hwloc__get_soc_one_info(data, obj, path, i, "ID");
+    snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/family", i);
+    hwloc__get_soc_one_info(data, obj, path, i, "Family");
+    snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/revision", i);
+    hwloc__get_soc_one_info(data, obj, path, i, "Revision");
+  }
+  closedir(dir);
+}
+
 
 /***************************************
  * KNL NUMA quirks
@@ -5811,6 +5859,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
    * Platform information for later
    */
   hwloc_gather_system_info(topology, data);
+  /* soc info needed for cpukinds quirks in look_sysfscpukinds() */
+  hwloc__get_soc_info(data, topology->levels[0][0]);
 
   /**********************************
    * Detect things in /proc/cmdline
