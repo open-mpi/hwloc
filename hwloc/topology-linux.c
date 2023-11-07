@@ -4606,6 +4606,64 @@ hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
   }
 }
 
+static void
+hwloc_linux_cpukinds_force_homogeneous(struct hwloc_topology *topology,
+                                       unsigned nr_pus,
+                                       struct hwloc_linux_cpukinds_by_pu *by_pu)
+{
+  unsigned i;
+  unsigned long base_freq = ULONG_MAX;
+  unsigned long max_freq = 0;
+  unsigned long capacity = 0;
+  for(i=0; i<nr_pus; i++) {
+    /* use the lowest base_freq for all cores */
+    if (by_pu[i].base_freq && by_pu[i].base_freq < base_freq)
+      base_freq = by_pu[i].base_freq;
+    /* use the highest max_freq for all cores */
+    if (by_pu[i].max_freq > max_freq)
+      max_freq = by_pu[i].max_freq;
+    /* use the highest capacity for all cores */
+    if (by_pu[i].capacity > capacity)
+      capacity = by_pu[i].capacity;
+  }
+  hwloc_debug("linux/cpukinds: forcing homogeneous max_freq %lu base_freq %lu capacity %lu\n",
+              max_freq, base_freq, capacity);
+
+  if (max_freq) {
+    hwloc_bitmap_t rootset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
+    if (rootset) {
+      char value[64];
+      snprintf(value, sizeof(value), "%lu", max_freq/1000);
+      hwloc_linux_cpukinds_register_one(topology, rootset,
+                                        HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                        (char *) "FrequencyMaxMHz", value);
+      /* the cpuset is given to the callee */
+    }
+  }
+  if (base_freq != ULONG_MAX) {
+    hwloc_bitmap_t rootset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
+    if (rootset) {
+      char value[64];
+      snprintf(value, sizeof(value), "%lu", base_freq/1000);
+      hwloc_linux_cpukinds_register_one(topology, rootset,
+                                        HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                        (char *) "FrequencyBaseMHz", value);
+      /* the cpuset is given to the callee */
+    }
+  }
+  if (capacity) {
+    hwloc_bitmap_t rootset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
+    if (rootset) {
+      char value[64];
+      snprintf(value, sizeof(value), "%lu", capacity);
+      hwloc_linux_cpukinds_register_one(topology, rootset,
+                                        HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                        (char *) "LinuxCapacity", value);
+      /* the cpuset is given to the callee */
+    }
+  }
+}
+
 static int
 look_sysfscpukinds(struct hwloc_topology *topology,
                    struct hwloc_linux_backend_data_s *data)
@@ -4619,6 +4677,8 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   hwloc_bitmap_t atom_pmu_set, core_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   unsigned adjust_max = 10;
+  int force_homogeneous;
+  const char *info;
   int pu, i;
 
   env = getenv("HWLOC_CPUKINDS_MAXFREQ");
@@ -4668,6 +4728,19 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     i++;
   } hwloc_bitmap_foreach_end();
   assert(i == nr_pus);
+
+  /* NVIDIA Grace is homogeneous with slight variations of max frequency, ignore those */
+  info = hwloc_obj_get_info_by_name(topology->levels[0][0], "SoC0ID");
+  force_homogeneous = info && !strcmp(info, "jep106:036b:0241");
+  /* force homogeneity ? */
+  env = getenv("HWLOC_CPUKINDS_HOMOGENEOUS");
+  if (env)
+    force_homogeneous = atoi(env);
+  if (force_homogeneous) {
+    hwloc_linux_cpukinds_force_homogeneous(topology, (unsigned) nr_pus, by_pu);
+    free(by_pu);
+    return 0;
+  }
 
   if (maxfreq_enabled == -1 && !max_without_basefreq)
     /* we have basefreq, check maxfreq and ignore/fix it if turboboost 3.0 makes the max different on different cores */
