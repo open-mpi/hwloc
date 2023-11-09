@@ -31,6 +31,9 @@ Version 2.10.0
   + Add hwloc_topology_free_group_object() to discard a Group created
     by hwloc_topology_alloc_group_object().
 * Linux backend
+  + Fix cpukinds on NVIDIA Grace to report identical cores even if they
+    actually have very small frequency differences.
+    Thanks to John C. Linford for the report.
   + Add CXLDevice attributes to CXL DAX objects and NUMA nodes to show
     which PCI device implements which window.
   + Ignore buggy memory-side caches and memory attributes when fake NUMA
