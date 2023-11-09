@@ -1206,6 +1206,13 @@ following environment variables.
   If set to 0, max frequencies are entirely ignored.
   </dd>
 
+<dt>HWLOC_CPUKINDS_HOMOGENEOUS=0</dt>
+  <dd>uniformize max frequency, base frequency and Linux capacity to
+  force a single homogeneous kind of CPUs.
+  This is enabled by default on NVIDIA Grace but may be disabled
+  if set to 0 (or enabled on other platforms if set to 1).
+  </dd>
+
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
 <dd>changes the locality of I/O devices behing the specified PCI buses.
@@ -2038,6 +2045,10 @@ hwloc failed to discover any package.
 <dd>DMI hardware information such as the motherboard and chassis
 models and vendors, the BIOS revision, etc.,
 as reported by Linux under <tt>/sys/class/dmi/id/</tt>.
+</dd>
+<dt>SoC0ID, SoC0Family, SoC1Revision, etc.</dt>
+<dd>The ID, family and revision of the first system-on-chip
+(<tt>SoC0</tt>), second (<tt>SoC1</tt>), etc.
 </dd>
 <dt>MemoryMode, ClusterMode</dt>
 <dd>
