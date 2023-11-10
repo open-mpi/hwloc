@@ -720,12 +720,17 @@ union hwloc_obj_attr_u {
   } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
-    unsigned int domain;
-    unsigned char bus, dev, func;
-    unsigned char prog_if; /* the register-level programming interface */
-    unsigned short class_id;
-    unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
-    unsigned char revision;
+    unsigned int domain; /**< \brief Domain number   (xxxx in the PCI BDF notation xxxx:yy:zz.t). */
+    unsigned char bus;   /**< \brief Bus number      (yy   in the PCI BDF notation xxxx:yy:zz.t). */
+    unsigned char dev;   /**< \brief Device number   (zz   in the PCI BDF notation xxxx:yy:zz.t). */
+    unsigned char func;  /**< \brief Function number (t    in the PCI BDF notation xxxx:yy:zz.t). */
+    unsigned char prog_if;    /**< \brief Register-level programming interface number (3rd byte of the class). */
+    unsigned short class_id;  /**< \brief The class number (first two bytes, without the prog_if). */
+    unsigned short vendor_id;    /**< \brief Vendor ID (xxxx in [xxxx:yyyy]). */
+    unsigned short device_id;    /**< \brief Device ID (yyyy in [xxxx:yyyy]). */
+    unsigned short subvendor_id; /**< \brief Sub-Vendor ID. */
+    unsigned short subdevice_id; /**< \brief Sub-Device ID. */
+    unsigned char revision;   /**< \brief Revision number. */
     float linkspeed; /**< \brief Link speed in GB/s.
                       *   This datarate is the currently configured speed of the entire PCI link
                       *   (sum of the bandwidth of all PCI lanes in that link).
@@ -736,16 +741,17 @@ union hwloc_obj_attr_u {
   /** \brief Bridge specific Object Attributes */
   struct hwloc_bridge_attr_s {
     union {
-      struct hwloc_pcidev_attr_s pci;
+      struct hwloc_pcidev_attr_s pci; /**< \brief PCI attribute of the upstream part as a PCI device. */
     } upstream;
-    hwloc_obj_bridge_type_t upstream_type;
+    hwloc_obj_bridge_type_t upstream_type; /**< \brief Upstream Bridge type. */
     union {
       struct {
-	unsigned int domain;
-	unsigned char secondary_bus, subordinate_bus;
+	unsigned int domain;           /**< \brief Domain number the downstream PCI buses. */
+	unsigned char secondary_bus;   /**< \brief First PCI bus number below the bridge. */
+        unsigned char subordinate_bus; /**< \brief Highest PCI bus number below the bridge. */
       } pci;
     } downstream;
-    hwloc_obj_bridge_type_t downstream_type;
+    hwloc_obj_bridge_type_t downstream_type; /**< \brief Downstream Bridge type. */
     unsigned depth;
   } bridge;
   /** \brief OS Device specific Object Attributes */
