@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017-2020 Inria.  All rights reserved.
+ * Copyright © 2017-2023 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -140,6 +140,22 @@ int main(void)
 #endif
     size = sizeof(struct hwloc_info_s);
     assert(size == 16);
+
+#ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
+    size = sizeof(struct hwloc_pcidev_attr_s);
+    assert(size == 24);
+    offset = offsetof(struct hwloc_pcidev_attr_s, class_id);
+    assert(offset == 6);
+    offset = offsetof(struct hwloc_pcidev_attr_s, revision);
+    assert(offset == 16);
+#else
+    size = sizeof(struct hwloc_pcidev_attr_s);
+    assert(size == 24);
+    offset = offsetof(struct hwloc_pcidev_attr_s, class_id);
+    assert(offset == 8);
+    offset = offsetof(struct hwloc_pcidev_attr_s, revision);
+    assert(offset == 18);
+#endif
 
     size = sizeof(struct hwloc_topology_support);
     assert(size == 32);
