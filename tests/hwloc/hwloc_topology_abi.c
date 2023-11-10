@@ -142,6 +142,13 @@ int main(void)
     size = sizeof(struct hwloc_info_s);
     assert(size == 16);
 
+    size = sizeof(struct hwloc_pcidev_attr_s);
+    assert(size == 24);
+    offset = offsetof(struct hwloc_pcidev_attr_s, prog_if);
+    assert(offset == 7);
+    offset = offsetof(struct hwloc_pcidev_attr_s, revision);
+    assert(offset == 18);
+
     size = sizeof(struct hwloc_topology_support);
     assert(size == 32);
     size = sizeof(struct hwloc_topology_discovery_support);
