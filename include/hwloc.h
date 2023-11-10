@@ -675,7 +675,12 @@ union hwloc_obj_attr_u {
     unsigned short class_id;
     unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
     unsigned char revision;
-    float linkspeed; /* in GB/s */
+    float linkspeed; /**< \brief Link speed in GB/s.
+                      *   This datarate is the currently configured speed of the entire PCI link
+                      *   (sum of the bandwidth of all PCI lanes in that link).
+                      *   It may change during execution since some devices are able to
+                      *   slow their PCI links down when idle.
+                      */
   } pcidev;
   /** \brief Bridge specific Object Attributes */
   struct hwloc_bridge_attr_s {
