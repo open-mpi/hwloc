@@ -57,6 +57,7 @@ sysfs_outputs = \
 		128arm-2pa2n8cluster4co.output \
 		256ia64-64n2s2c.output \
 		2s390-2c.output \
+		20em64t-hybrid-1p6c2t+2ca4co1t.output \
 		20s390-2g6s4c.output \
 		2arm-2c.output \
 		nvidiagpunumanodes.output \
@@ -128,6 +129,7 @@ sysfs_tarballs = \
 		128arm-2pa2n8cluster4co.tar.bz2 \
 		256ia64-64n2s2c.tar.bz2 \
 		2s390-2c.tar.bz2 \
+		20em64t-hybrid-1p6c2t+2ca4co1t.tar.bz2 \
 		20s390-2g6s4c.tar.bz2 \
 		2arm-2c.tar.bz2 \
 		2pa-pcidomain32bits.tar.bz2 \
