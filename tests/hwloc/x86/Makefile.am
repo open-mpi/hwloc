@@ -7,6 +7,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 # Add your tests files here.
 cpuid_tests = \
+	Intel-SapphireRapids-2xXeonMax9460.test \
 	Intel-CPUID.1A-1p2co2t.test \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.test \
 	Intel-CascadeLake-2xXeon6230.test \
@@ -40,6 +41,7 @@ cpuid_tests = \
 # XML outputs shouldn't have gp_index attributes to avoid spurious errors.
 # Remove them with: sed -r -e 's/ gp_index=\"[0-9]+\"//' -i foo.outpu
 cpuid_xml_outputs = \
+	Intel-SapphireRapids-2xXeonMax9460.xml \
 	Intel-CPUID.1A-1p2co2t.xml \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.xml \
 	Intel-CascadeLake-2xXeon6230.xml \
@@ -72,6 +74,7 @@ cpuid_xml_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # specifying which tarball to use
 cpuid_tarballs = \
+	Intel-SapphireRapids-2xXeonMax9460.tar.bz2 \
 	Intel-CPUID.1A-1p2co2t.tar.bz2 \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.tar.bz2 \
 	Intel-CascadeLake-2xXeon6230.tar.bz2 \
