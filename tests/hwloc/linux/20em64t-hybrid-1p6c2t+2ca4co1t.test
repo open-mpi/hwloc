@@ -1,0 +1,5 @@
+# raptorlake Core i7-1370P with 6 HT P-cores and 8 non-HT E-cores
+# hybrid CPUkinds
+# TurboBoost Max 3.0 causes different max freqs on big cores
+source:  20em64t-hybrid-1p6c2t+2ca4co1t.tar.bz2
+target:  20em64t-hybrid-1p6c2t+2ca4co1t.console

@@ -34,6 +34,7 @@ sysfs_tests = \
 	16em64t-4s2ca2c-cpusetreorder-merge.test \
 	16em64t-4s2ca2c-cpusetreorder.test \
 	16ia64-8n2s.test \
+	20em64t-hybrid-1p6c2t+2ca4co1t.test \
 	20s390-2g6s4c.test \
 	32amd64-4s2n4c-cgroup2.test \
 	32em64t-2n8c+dax+nvme+mic+dimms.test \
@@ -82,6 +83,7 @@ sysfs_tarballs = \
 	16em64t-4s2c2t.tar.bz2 \
 	16em64t-4s2ca2c-cpusetreorder.tar.bz2 \
 	16ia64-8n2s.tar.bz2 \
+	20em64t-hybrid-1p6c2t+2ca4co1t.tar.bz2 \
 	20s390-2g6s4c.tar.bz2 \
 	32amd64-4s2n4c-cgroup2.tar.bz2 \
 	32em64t-2n8c+dax+nvme+mic+dimms.tar.bz2 \
@@ -128,6 +130,7 @@ sysfs_console_outputs = \
 	16em64t-4s2ca2c-cpusetreorder.console \
 	16em64t-4s2ca2c-cpusetreorder-merge.console \
 	16ia64-8n2s.console \
+	20em64t-hybrid-1p6c2t+2ca4co1t.console \
 	20s390-2g6s4c.console \
 	32intel64-2p8co2t+8ve.console \
 	40intel64-4n10c+pci-conflicts.console \
