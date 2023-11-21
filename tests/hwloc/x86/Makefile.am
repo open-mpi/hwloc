@@ -11,6 +11,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # XML outputs shouldn't have gp_index attributes to avoid spurious errors.
 # Remove them with: sed -r -e 's/ gp_index=\"[0-9]+\"//' -i foo.outpu
 cpuid_outputs = \
+	Intel-RaptorLake-Corei7-1370P.output \
 	Intel-SapphireRapids-2xXeonMax9460.output \
 	Intel-CPUID.1A-1p2co2t.output \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.output \
@@ -44,6 +45,7 @@ cpuid_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # specifying which tarball to use
 cpuid_tarballs = \
+	Intel-RaptorLake-Corei7-1370P.tar.bz2 \
 	Intel-SapphireRapids-2xXeonMax9460.tar.bz2 \
 	Intel-CPUID.1A-1p2co2t.tar.bz2 \
 	Intel-CPUID.1F-Qemu-2p3d3c2t.tar.bz2 \
