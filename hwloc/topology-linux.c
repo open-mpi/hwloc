@@ -38,6 +38,7 @@
 #include <sys/syscall.h>
 #include <mntent.h>
 #include <stddef.h>
+#include <endian.h>
 
 struct hwloc_linux_backend_data_s {
   char *root_path; /* NULL if unused */
@@ -7162,17 +7163,28 @@ static const char *dmi_memory_device_type(uint8_t code)
   return NULL; /* return NULL to distinguish unsupported values from the official "Unknown" value above */
 }
 
+/* SMBIOS structures are stored in little-endian, at least since 2.8.
+ * Only used for memory size and extended_size so far.
+ */
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define get_smbios_uint16_t(x) (uint16_t)((x)[0] + ((x)[1] << 8))
+#define get_smbios_uint32_t(x) (uint32_t)((x)[0] + ((x)[1] << 8) + ((x)[2] << 16) + ((x)[3] << 24))
+#else
+#define get_smbios_uint16_t(x) (uint16_t)(*(uint16_t *)(x))
+#define get_smbios_uint32_t(x) (uint32_t)(*(uint32_t *)(x))
+#endif
+
 static int dmi_memory_device_size(char *buffer, size_t len,
                                   const struct hwloc_firmware_dmi_mem_device_header *header)
 {
   uint64_t memory_size = 0;
-  uint16_t code = *(uint16_t *)(header->size);
+  uint16_t code = get_smbios_uint16_t(header->size);
 
   if (code == 0xFFFF)
     return -1;
 
   if (header->length >= offsetof(struct hwloc_firmware_dmi_mem_device_header, extended_size) + sizeof(header->extended_size) && code == 0x7FFF) {
-    memory_size = *(uint32_t *)(header->extended_size) & 0x7FFFFFFF; /* MiB */
+    memory_size = get_smbios_uint32_t(header->extended_size) & 0x7FFFFFFF; /* MiB */
     memory_size <<= 10;
   } else {
     memory_size = code & 0x7FFF;
