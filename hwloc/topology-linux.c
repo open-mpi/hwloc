@@ -7166,13 +7166,8 @@ static const char *dmi_memory_device_type(uint8_t code)
 /* SMBIOS structures are stored in little-endian, at least since 2.8.
  * Only used for memory size and extended_size so far.
  */
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define get_smbios_uint16_t(x) (uint16_t)((x)[0] + ((x)[1] << 8))
-#define get_smbios_uint32_t(x) (uint32_t)((x)[0] + ((x)[1] << 8) + ((x)[2] << 16) + ((x)[3] << 24))
-#else
-#define get_smbios_uint16_t(x) (uint16_t)(*(uint16_t *)(x))
-#define get_smbios_uint32_t(x) (uint32_t)(*(uint32_t *)(x))
-#endif
+#define get_smbios_uint16_t(x) htole16(*(uint16_t*)(x))
+#define get_smbios_uint32_t(x) htole32(*(uint32_t*)(x))
 
 static int dmi_memory_device_size(char *buffer, size_t len,
                                   const struct hwloc_firmware_dmi_mem_device_header *header)
