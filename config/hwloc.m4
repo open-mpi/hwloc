@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2009-2023 Inria.  All rights reserved.
-dnl Copyright © 2009-2012, 2015-2017, 2020 Université Bordeaux
+dnl Copyright © 2009-2012, 2015-2017, 2020, 2023 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -1863,6 +1863,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
         AM_CONDITIONAL([HWLOC_HAVE_CXX], [test "x$hwloc_have_cxx" = "xyes"])
+        AM_CONDITIONAL([HWLOC_CROSS_COMPILING], [test "x$cross_compiling" = "xyes"])
     ])
     hwloc_did_am_conditionals=yes
 ])dnl
