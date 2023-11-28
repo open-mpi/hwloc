@@ -44,12 +44,17 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y --no-install-recommends pkg-config libcairo2-dev libxml2-dev
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: '.github/workflows'
+        sparse-checkout-cone-mode: false
     - name: Download tarball
       uses: actions/download-artifact@v3
       with:
         name: Tarball
     - name: Extract, build and check
-      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
   check-tarball-gh-macos-latest:
     name: Check tarball on GH macos-latest
     needs: build-tarball
@@ -59,12 +64,17 @@ jobs:
       run: |
         brew install pkg-config
         brew install cairo
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: '.github/workflows'
+        sparse-checkout-cone-mode: false
     - name: Download tarball
       uses: actions/download-artifact@v3
       with:
         name: Tarball
     - name: Extract, build and check
-      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
 # check-tarball:
 #   name: Check tarball on GH runners
 #   needs: build-tarball
