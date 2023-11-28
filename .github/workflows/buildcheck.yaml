@@ -48,12 +48,12 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: Tarball
-    - name: Extract
-      run: tar xvf hwloc-*.tar.gz
+    - name: Extract, build and check
+      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
   check-tarball-gh-macos-latest:
-    name: Check tarball on GH macosx-latest
+    name: Check tarball on GH macos-latest
     needs: build-tarball
-    runs-on: macosx-latest
+    runs-on: macos-latest
     steps:
     - name: Install dependencies
       run: |
@@ -63,8 +63,8 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: Tarball
-    - name: Extract
-      run: tar xvf hwloc-*.tar.gz
+    - name: Extract, build and check
+      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
 # check-tarball:
 #   name: Check tarball on GH runners
 #   needs: build-tarball
