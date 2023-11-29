@@ -12,19 +12,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends libltdl-dev libcairo2-dev libx11-dev libxml2-dev libxml2-utils libncurses5-dev libxnvctrl-dev libpciaccess-dev libudev-dev pkg-config ocl-icd-opencl-dev autoconf automake libtool doxygen-latex transfig w3m
     - uses: actions/checkout@v4
-    - name: Autogen
-      run: ./autogen.sh
-    - name: Configure
-      run: ./configure --prefix=${PWD}/install
-    - name: Build
-      run: make -j
-    - name: Distcheck
-      run: make distcheck
-    - name: Check versions
-      run: |
-        contrib/windows/check-versions.sh
-        contrib/windows-cmake/check-versions.sh
-        contrib/android/check-versions.sh
+    - name: Build and distcheck
+      run: $GITHUB_WORKSPACE/.github/workflows/job-0-tarball.sh
     - name: Archive tarballs
       uses: actions/upload-artifact@v3
       with:
@@ -49,8 +38,7 @@ jobs:
       with:
         name: Tarball
     - name: Extract, build and check
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
   check-tarball-gh-ubuntu-latest:
     name: Check tarball on GH ubuntu-latest
     needs: build-tarball
@@ -69,8 +57,7 @@ jobs:
       with:
         name: Tarball
     - name: Extract, build and check
-      run: |
-        $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
   check-tarball-gh-macos-latest:
     name: Check tarball on GH macos-latest
     needs: build-tarball
