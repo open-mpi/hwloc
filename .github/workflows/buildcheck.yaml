@@ -48,10 +48,12 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y --no-install-recommends pkg-config libcairo2-dev libxml2-dev
+    - run: ls -la
     - uses: actions/checkout@v4
       with:
         sparse-checkout: '.github/workflows'
         sparse-checkout-cone-mode: false
+    - run: ls -la
     - name: Download tarball
       uses: actions/download-artifact@v3
       with:
