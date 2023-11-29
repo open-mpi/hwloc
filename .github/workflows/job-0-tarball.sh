@@ -15,12 +15,9 @@ set -x
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
-branch=$(git branch --show-current)
-
-echo "Got GIT branch name $branch"
-
-# convert "refs/remotes/pull/XYZ/merge" into "PR-XYZ"
-branch=$(echo $branch | sed -r -e 's@refs/remotes/pull/([0-9]+)/mergepr/@PR-\1@')
+# GITHUB_REF contains refs/heads/<branch_name>, refs/pull/<pr_number>/merge, or refs/tags/<tag_name>
+# convert into the branch/tag name or into "PR-XYZ"
+branch=$(echo $GITHUB_REF | sed -r -e 's@refs/([^/]+)/@@' | sed -r -e 's@([0-9]+)/merge@PR-\1@')
 
 # keep branch-name before the first '-' (e.g. v2.0-beta becomes v2.0)
 # and look for the corresponding autotools.
