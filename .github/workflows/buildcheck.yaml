@@ -10,7 +10,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends libltdl-dev libcairo2-dev libx11-dev libxml2-dev libxml2-utils libncurses5-dev libxnvctrl-dev libpciaccess-dev libudev-dev pkg-config ocl-icd-opencl-dev autoconf automake libtool doxygen-latex transfig
+        sudo apt-get install -y --no-install-recommends libltdl-dev libcairo2-dev libx11-dev libxml2-dev libxml2-utils libncurses5-dev libxnvctrl-dev libpciaccess-dev libudev-dev pkg-config ocl-icd-opencl-dev autoconf automake libtool doxygen-latex transfig w3m
     - uses: actions/checkout@v4
     - name: Autogen
       run: ./autogen.sh
