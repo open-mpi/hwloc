@@ -6242,7 +6242,7 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
   char model[64] = "";
   char serial[64] = "";
   char revision[64] = "";
-  char blocktype[64] = "";
+  char blocktype[128] = "";
   unsigned sectorsize = 0;
   unsigned major_id, minor_id;
   int is_nvm = 0;
