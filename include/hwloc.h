@@ -1975,9 +1975,10 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
 /** \brief Enable XML based topology using a memory buffer (instead of
  * a file, as with hwloc_topology_set_xml()).
  *
- * Gather topology information from the XML memory buffer given at \p
- * buffer and of length \p size.  This buffer may have been filled
- * earlier with hwloc_topology_export_xmlbuffer() in hwloc/export.h.
+ * Gather topology information from the XML memory buffer given at
+ * \p buffer and of length \p size (including an ending \0).
+ * This buffer may have been filled earlier with
+ * hwloc_topology_export_xmlbuffer() in hwloc/export.h.
  *
  * Note that this function does not actually load topology
  * information; it just tells hwloc where to load it from.  You'll
