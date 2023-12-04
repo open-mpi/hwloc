@@ -64,6 +64,7 @@ Version 2.10.0
 * Misc
   + lstopo may now configure the layout of memory object placed above,
     for instance with --children-order memory:above:vert.
+  + Fix XML import from memory or stdin when using libxml2 2.12.
   + Fix installation failures when configuring with --target,
     thanks to Clement Foyer for the patch.
   + Fix support for 128bit pointer architectures.
