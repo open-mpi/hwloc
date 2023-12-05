@@ -1341,8 +1341,8 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
         }
 
       }
-      if (HWLOC_OBJ_OSDEV_STORAGE & obj->attr->osdev.type) {
-	/* Storage */
+      if ((HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY) & obj->attr->osdev.type) {
+	/* Storage or Memory size */
 	const char *value;
 	value = hwloc_obj_get_info_by_name(obj, "Size");
 	if (value) {
@@ -1351,14 +1351,11 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	}
 
       }
-      if (HWLOC_OBJ_OSDEV_MEMORY & obj->attr->osdev.type) {
-	/* Memory */
+      if (HWLOC_OBJ_OSDEV_MEMORY) {
+	/* Memory
+         * Size was printed above in STORAGE|MEMORY.
+         */
 	const char *value;
-	value = hwloc_obj_get_info_by_name(obj, "Size");
-	if (value) {
-	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
-	  hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
-	}
 	value = hwloc_obj_get_info_by_name(obj, "CXLRAMSize");
 	if (value) {
 	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
