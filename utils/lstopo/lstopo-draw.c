@@ -1326,7 +1326,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
           if (!valueMem)
             valueMem = hwloc_obj_get_info_by_name(obj, "LevelZeroMemorySize");
           if (valueMem) {
-            unsigned long long bytes = strtoull(valueMem, NULL, 10) / 1024;
+            unsigned long long bytes = strtoull(valueMem, NULL, 10) * 1024;
             hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
           }
           valueSl = hwloc_obj_get_info_by_name(obj, "LevelZeroNumSlices");
