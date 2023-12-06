@@ -560,6 +560,7 @@ extern "C" {
 
 /* opencl.h */
 
+#define hwloc_cl_device_pci_bus_info_khr HWLOC_NAME(cl_device_pci_bus_info_khr)
 #define hwloc_cl_device_topology_amd HWLOC_NAME(cl_device_topology_amd)
 #define hwloc_opencl_get_device_pci_busid HWLOC_NAME(opencl_get_device_pci_ids)
 #define hwloc_opencl_get_device_cpuset HWLOC_NAME(opencl_get_device_cpuset)
