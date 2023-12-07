@@ -52,7 +52,7 @@ TIMEOUT 10
 # --- optional tests
 
 if(HWLOC_HAVE_OPENCL)
-  add_executable(test_opencl opencl.c)
+  add_executable(test_opencl ${TOPDIR}/tests/hwloc/opencl.c)
   target_link_libraries(test_opencl PRIVATE hwloc OpenCL::OpenCL)
 
   add_test(NAME OpenCL COMMAND test_opencl)
@@ -60,7 +60,7 @@ if(HWLOC_HAVE_OPENCL)
 endif()
 
 if(HAVE_CUDA)
-  add_executable(test_cuda cuda.c)
+  add_executable(test_cuda ${TOPDIR}/tests/hwloc/cuda.c)
   target_link_libraries(test_cuda PRIVATE hwloc CUDA::cudart CUDA::cuda_driver)
 
   add_test(NAME CUDA COMMAND test_cuda)
