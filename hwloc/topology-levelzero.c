@@ -447,6 +447,7 @@ hwloc__levelzero_ports_get(zes_device_handle_t dvh,
         hwloc_debug("    no such subdevice exists, ignoring\n");
         continue;
       }
+    } else {
       hports->ports[id].osdev = root_osdev;
     }
 
