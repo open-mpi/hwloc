@@ -2444,6 +2444,9 @@ or between two subdevices of the same parent.
 
 The matrix interconnects all LevelZero devices and subdevices (if any),
 even if some of them may have no link at all.
+
+The bandwidths of links between subdevices are accumulated in the
+bandwidth between their parents.
 </dd>
 <dt>NVLinkBandwidth (NVML)</dt>
 <dd>This is the matrix of unidirectional NVLink bandwidths between
