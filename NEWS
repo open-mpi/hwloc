@@ -17,6 +17,14 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.10.1
+--------------
+* Get Intel GPU OpenCL device locality.
+* Add bandwidths between subdevices in the LevelZero XeLinkBandwidth
+  matrix.
+* Fix CUDA/OpenCL test source path in Windows CMake.
+
+
 Version 2.10.0
 --------------
 * Heterogeneous Memory core improvements
