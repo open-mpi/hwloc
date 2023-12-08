@@ -382,6 +382,7 @@ struct hwloc_levelzero_ports {
   unsigned nr;
   struct hwloc_levelzero_port {
     hwloc_obj_t osdev;
+    hwloc_obj_t parent_osdev;
     zes_fabric_port_properties_t props;
     zes_fabric_port_state_t state;
   } *ports;
@@ -443,12 +444,14 @@ hwloc__levelzero_ports_get(zes_device_handle_t dvh,
                   i, hports->ports[id].props.subdeviceId);
       if (hports->ports[id].props.subdeviceId < nr_sub_osdevs) {
         hports->ports[id].osdev = sub_osdevs[hports->ports[id].props.subdeviceId];
+        hports->ports[id].parent_osdev = root_osdev;
       } else {
         hwloc_debug("    no such subdevice exists, ignoring\n");
         continue;
       }
     } else {
       hports->ports[id].osdev = root_osdev;
+      hports->ports[id].parent_osdev = NULL;
     }
 
     res = zesFabricPortGetState(ports[i], &hports->ports[id].state);
@@ -549,7 +552,14 @@ hwloc__levelzero_ports_connect(struct hwloc_topology *topology,
           if (iindex<0 || jindex<0)
             continue;
           bws[iindex*oarray->nr+jindex] += hports->ports[i].state.rxSpeed.bitRate >> 20; /* MB/s */
-          /* TODO: way to accumulate subdevs bw into rootdevs? tranformation? different matrix? */
+          if (hports->ports[i].parent_osdev && hports->ports[j].parent_osdev) {
+            /* also accumulate in root devices */
+            iindex = hwloc__levelzero_osdev_array_find(oarray, hports->ports[i].parent_osdev);
+            jindex = hwloc__levelzero_osdev_array_find(oarray, hports->ports[j].parent_osdev);
+            if (iindex<0 || jindex<0)
+              continue;
+            bws[iindex*oarray->nr+jindex] += hports->ports[i].state.rxSpeed.bitRate >> 20; /* MB/s */
+          }
           gotbw++;
         }
       }
