@@ -14,9 +14,6 @@
 <hr>
 <br>
 
-\htmlonly
-<div class="section" id="toc">
-\endhtmlonly
 \section toc Table of Contents
 
 <ul>
@@ -56,9 +53,6 @@ Chapters are also available from the <i>Related Pages</i> tab above.
 \endhtmlonly
 
 
-\htmlonly
-</div><div class="section" id="overview">
-\endhtmlonly
 \section overview hwloc Overview
 
 The Hardware Locality (hwloc) software project aims at easing the process
@@ -138,10 +132,6 @@ Bindings for several other languages are available from the
 <a href="https://www.open-mpi.org/projects/hwloc/#language_bindings">project website</a>.
 
 
-
-\htmlonly
-</div><div class="section" id="cli_examples">
-\endhtmlonly
 \section cli_examples Command-line Examples
 
 On a 4-package 2-core machine with hyper-threading, the \c lstopo tool
@@ -247,9 +237,6 @@ Machine (total 16GB)
 \endverbatim
 
 
-\htmlonly
-</div><div class="section" id="interface">
-\endhtmlonly
 \section interface Programming Interface
 
 The basic interface is available in hwloc.h.
@@ -284,6 +271,7 @@ installed -- the documentation will be built during the normal "make"
 process.  The documentation is installed during "make install" to
 $prefix/share/doc/hwloc/ and your systems default man page tree (under
 $prefix, of course).
+
 
 \subsection portability Portability
 
@@ -414,10 +402,6 @@ shell$
 \endverbatim
 
 
-
-\htmlonly
-</div><div class="section" id="bugs">
-\endhtmlonly
 \section bugs Questions and Bugs
 
 Bugs should be reported in the tracker
@@ -431,10 +415,6 @@ Questions may be sent to the users or developers mailing lists
 There is also a <tt>\#hwloc</tt> IRC channel on Libera Chat (<tt>irc.libera.chat</tt>).
 
 
-
-\htmlonly
-</div><div class="section" id="history">
-\endhtmlonly
 \section history History / Credits
 
 hwloc is the evolution and merger of the libtopology project and the Portable
@@ -449,10 +429,6 @@ the Open MPI development team as a sub-project. Both are now deprecated
 in favor of hwloc, which is distributed as an Open MPI sub-project.
 
 
-\htmlonly
-</div>
-\endhtmlonly
-
 
 
 \page installation Installation
@@ -464,9 +440,7 @@ any functionality from Open MPI -- it is a wholly separate (and much
 smaller!) project and code base.  It just happens to be hosted as part
 of the overall Open MPI project.
 
-\htmlonly
-</div><div class="section" id="basic_installation">
-\endhtmlonly
+
 \section basic_installation Basic Installation
 
 Installation is the fairly common GNU-based process:
@@ -483,9 +457,6 @@ Running the "lstopo" tool is a good way to check as a graphical output
 whether hwloc properly detected the architecture of your node.
 
 
-\htmlonly
-</div><div class="section" id="optional_dependencies">
-\endhtmlonly
 \section optional_dependencies Optional Dependencies
 
 lstopo may also export graphics to the SVG and "fig" file formats.
@@ -567,9 +538,6 @@ Note that because of the possibility of GPL taint, the
 that hwloc is BSD-licensed).
 
 
-\htmlonly
-</div><div class="section" id="gitclone_installation">
-\endhtmlonly
 \section gitclone_installation Installing from a Git clone
 
 Additionally, the code can be directly cloned from Git:
@@ -589,12 +557,9 @@ or GNU Autotools.
 
 
 
-\page termsanddefs Terms and Definitions 
 
+\page termsanddefs Terms and Definitions
  
-\htmlonly
-<div class="section" id="termsanddefs_objects">
-\endhtmlonly
 \section termsanddefs_objects Objects
 
 <dl>
@@ -659,9 +624,6 @@ or GNU Autotools.
 </dl>
 
 
-\htmlonly
-</div><div class="section" id="termsanddefs_indexes">
-\endhtmlonly
 \section termsanddefs_indexes Indexes and Sets
 
 <dl>
@@ -717,9 +679,6 @@ or GNU Autotools.
 </dl>
 
 
-\htmlonly
-</div><div class="section" id="termsanddefs_tree">
-\endhtmlonly
 \section termsanddefs_tree Hierarchy, Tree and Levels
 
 <dl>
@@ -822,11 +781,8 @@ I/O or Misc objects could be attached in a similar manner.
 
 
 
-\page tools Command-Line Tools 
 
-\htmlonly
-<div class="section">
-\endhtmlonly
+\page tools Command-Line Tools
 
 hwloc comes with an extensive C programming interface and several
 command line utilities. Each of them is fully documented in its own
@@ -834,9 +790,6 @@ manual page; the following is a summary of the available command line
 tools.
 
 
-\htmlonly
-</div><div class="section" id="cli_lstopo">
-\endhtmlonly
 \section cli_lstopo lstopo and lstopo-no-graphics
 
 lstopo (also known as hwloc-ls) displays the
@@ -860,9 +813,6 @@ filesystems and display topological maps representing those systems
 lstopo to read in that XML file and display it on a different system).
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_bind">
-\endhtmlonly
 \section cli_hwloc_bind hwloc-bind
 
 hwloc-bind binds processes to specific hardware objects through a
@@ -878,9 +828,6 @@ Just like hwloc-calc, the input locations given to hwloc-bind may be
 either objects or cpusets (bitmaps as reported by hwloc-calc or hwloc-distrib).
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_calc">
-\endhtmlonly
 \section cli_hwloc_calc hwloc-calc
 
 hwloc-calc is hwloc's Swiss Army Knife command-line tool for converting things.
@@ -909,9 +856,6 @@ physical indexes.
 See also \ref faq_indexes.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_info">
-\endhtmlonly
 \section cli_hwloc_info hwloc-info
 
 hwloc-info dumps information about the given objects, as well as all its specific attributes.
@@ -923,9 +867,6 @@ When <tt>\--support</tt> is passed, hwloc-info lists the supported
 features for the topology.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_distrib">
-\endhtmlonly
 \section cli_hwloc_distrib hwloc-distrib
 
 hwloc-distrib generates a set of cpuset bitmaps that are uniformly
@@ -935,9 +876,6 @@ their memory bandwidth by properly distributing them across the
 machine.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_ps">
-\endhtmlonly
 \section cli_hwloc_ps hwloc-ps
 
 hwloc-ps is a tool to display the bindings of processes that are
@@ -946,9 +884,6 @@ lists processes that are bound; unbound process (and Linux kernel
 threads) are not displayed.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_annotate">
-\endhtmlonly
 \section cli_hwloc_annotate hwloc-annotate
 
 hwloc-annotate may modify object (and topology) attributes such as string information
@@ -958,9 +893,6 @@ It reads an input topology from a XML file and outputs
 the annotated topology as another XML file.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_diffpatchcompress">
-\endhtmlonly
 \section cli_hwloc_diffpatchcompress hwloc-diff, hwloc-patch and hwloc-compress-dir
 
 hwloc-diff computes the difference between two topologies
@@ -974,9 +906,6 @@ files by using hwloc-diff to save the differences between
 topologies instead of entire topologies.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_dump_hwdata">
-\endhtmlonly
 \section cli_hwloc_dump_hwdata hwloc-dump-hwdata
 
 hwloc-dump-hwdata is a Linux and x86-specific tool that dumps
@@ -991,9 +920,6 @@ See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
 about the location of dumped files.
 
 
-\htmlonly
-</div><div class="section" id="cli_hwloc_gather">
-\endhtmlonly
 \section cli_hwloc_gather hwloc-gather-topology and hwloc-gather-cpuid
 
 hwloc-gather-topology is a Linux-specific tool that saves the
@@ -1014,10 +940,6 @@ or debugging a machine without actually running on it.
 
 
 \page envvar Environment Variables
-
-\htmlonly
-<div class="section">
-\endhtmlonly
 
 The behavior of the hwloc library and tools may be tuned thanks to the
 following environment variables.
@@ -1465,10 +1387,6 @@ following environment variables.
 
 \page cpu_mem_bind CPU and Memory Binding Overview
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 Binding tasks and data buffers is hwloc's second main goal after
 discovering and exposing the hardware topology.
 hwloc defines APIs to bind threads and processes to cores and
@@ -1477,6 +1395,7 @@ and to bind memory buffers to NUMA nodes (see \ref hwlocality_membinding).
 Some examples are available under doc/examples/ in the source tree.
 
 Sections below provide high-level insights on how these APIs work.
+
 
 \section cpu_mem_bind_portability Binding Policies and Portability
 
@@ -1562,10 +1481,6 @@ Again, reading \ref hwlocality_membinding is strongly recommended.
 
 \page iodevices I/O Devices
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 hwloc usually manipulates processing units and memory but it can also
 discover I/O devices and report their locality as well.
 This is useful for placing I/O intensive applications on cores near the
@@ -1573,9 +1488,6 @@ I/O devices they use, or for gathering information about all platform
 components.
 
 
-\htmlonly
-</div><div class="section" id="iodevices_enabling">
-\endhtmlonly
 \section iodevices_enabling Enabling and requirements
 
 I/O discovery is disabled by default (except in lstopo) for performance
@@ -1597,9 +1509,6 @@ Other operating system will just report I/O devices as being attached
 to the topology root object.
 
 
-\htmlonly
-</div><div class="section" id="iodevices_objects">
-\endhtmlonly
 \section iodevices_objects I/O objects
 
 When I/O discovery is enabled and supported, some additional objects
@@ -1634,9 +1543,6 @@ However, hwloc offers some dedicated helpers such as hwloc_get_next_pcidev()
 and hwloc_get_next_osdev() for convenience (see \ref hwlocality_advanced_io).
 
 
-\htmlonly
-</div><div class="section" id="iodevices_osdev">
-\endhtmlonly
 \section iodevices_osdev OS devices
 
 Although each PCI device is uniquely identified by its bus ID
@@ -1741,9 +1647,6 @@ See also \ref interoperability for managing these devices without
 considering them as hwloc objects.
 
 
-\htmlonly
-</div><div class="section" id="iodevices_pci">
-\endhtmlonly
 \section iodevices_pci PCI devices and bridges
 
 A PCI hierarchy is usually organized as follows:
@@ -1760,9 +1663,6 @@ The number of bridges between the hostbridge and a PCI device depends
 on the machine.
 
 
-\htmlonly
-</div><div class="section" id="iodevices_consult">
-\endhtmlonly
 \section iodevices_consult Consulting I/O devices and binding
 
 I/O devices may be consulted by traversing the topology manually
@@ -1802,9 +1702,6 @@ This enables easy binding of I/O-intensive applications near the
 device they use.
 
 
-\htmlonly
-</div><div class="section" id="iodevices_examples">
-\endhtmlonly
 \section iodevices_examples Examples
 
 The following picture shows a dual-package dual-core host whose
@@ -1867,10 +1764,6 @@ Machine (24GB total)
 
 \page miscobjs Miscellaneous objects
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 hwloc topologies may be annotated with Misc objects
 (of type <tt>::HWLOC_OBJ_MISC</tt>)
 either automatically or by the user.
@@ -1885,9 +1778,6 @@ to replace <tt>Misc</tt> with something else in the lstopo
 output.
 
 
-\htmlonly
-</div><div class="section" id="miscobjs_auto">
-\endhtmlonly
 \section miscobjs_auto Misc objects added by hwloc
 
 hwloc only uses Misc objects when other object types are not sufficient,
@@ -1919,9 +1809,6 @@ The textual <tt>lstopo</tt> displays them as:
 </ul>
 
 
-\htmlonly
-</div><div class="section" id="miscobjs_annotate">
-\endhtmlonly
 \section miscobjs_annotate Annotating topologies with Misc objects
 
 The user may annotate hwloc topologies with its own Misc objects.
@@ -1933,9 +1820,6 @@ as well as hwloc-annotate command-line tool.
 
 \page attributes Object attributes
 
-\htmlonly
-<div class="section" id="attributes_normal">
-\endhtmlonly
 \section attributes_normal Normal attributes
 
 hwloc objects have many generic attributes in the ::hwloc_obj structure,
@@ -2003,9 +1887,6 @@ associativity, cache type.
 See ::hwloc_obj_attr_u for details.
 
 
-\htmlonly
-</div><div class="section" id="attributes_info">
-\endhtmlonly
 \section attributes_info Custom string infos
 
 Aside of these generic attribute fields, hwloc annotates
@@ -2025,9 +1906,7 @@ Note that these attributes heavily depend on the ability of the
 operating system to report them.
 Many of them will therefore be missing on some OS.
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_platform">
-\endhtmlonly
+
 \subsection attributes_info_platform Hardware Platform Information
 
 These info attributes are attached to the root object (Machine).
@@ -2066,9 +1945,6 @@ See doc/examples/get-knl-modes.c in the source directory for an example of retri
 </dl>
 
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_os">
-\endhtmlonly
 \subsection attributes_info_os Operating System Information
 
 These info attributes are attached to the topology itself.
@@ -2088,9 +1964,6 @@ placed.
 </dl>
 
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_hwloc">
-\endhtmlonly
 \subsection attributes_info_hwloc hwloc Topology Information
 
 These info attributes are attached to the topology itself.
@@ -2121,9 +1994,6 @@ the topology to XML earlier.
 </dl>
 
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_cpu">
-\endhtmlonly
 \subsection attributes_info_cpu CPU Information
 
 These info attributes are attached to Package objects,
@@ -2153,9 +2023,6 @@ A Solaris-specific general processor type name, such as "i86pc".
 </dl>
 
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_osdev">
-\endhtmlonly
 \subsection attributes_info_osdev OS Device Information
 
 These info attributes are attached to OS device objects specified in parentheses.
@@ -2292,9 +2159,6 @@ and GID #1 of port #3.
 </dl>
 
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_otherobjs">
-\endhtmlonly
 \subsection attributes_info_otherobjs Other Object-specific Information
 
 These info attributes are attached to objects specified in parentheses.
@@ -2357,9 +2221,6 @@ Size is in KiB.
 </dl>
 
 
-\htmlonly
-</div><div class="subsection" id="attributes_info_user">
-\endhtmlonly
 \subsection attributes_info_user User-Given Information
 
 Here is a non-exhaustive list of user-provided info attributes
@@ -2377,18 +2238,11 @@ that have a special meaning:
 
 \page topoattrs Topology Attributes: Distances, Memory Attributes and CPU Kinds
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 Besides the hierarchy of objects, individual object attributes
 and topology info attributes (see \ref attributes),
 hwloc may also expose finer information about the hardware organization.
 
 
-\htmlonly
-</div><div class="section" id="topoattrs_distances">
-\endhtmlonly
 \section topoattrs_distances Distances
 
 A machine with 4 CPUs may have identical links between every pairs of CPUs,
@@ -2495,9 +2349,6 @@ as well as \ref hwlocality_distances_consult
 and \ref hwlocality_distances_add.
 
 
-\htmlonly
-</div><div class="section" id="topoattrs_memattrs">
-\endhtmlonly
 \section topoattrs_memattrs Memory Attributes
 
 Machines with heterogeneous memory, for instance high-bandwidth memory (HBM),
@@ -2522,9 +2373,6 @@ an easy way to distinguish NUMA nodes of different kinds, as explained
 in \ref heteromem.
 
 
-\htmlonly
-</div><div class="section" id="topoattrs_cpukinds">
-\endhtmlonly
 \section topoattrs_cpukinds CPU Kinds
 
 Hybrid CPUs may contain different kinds of cores.
@@ -2582,10 +2430,6 @@ See \ref hwlocality_cpukinds for details.
 
 \page heteromem Heterogeneous Memory
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 Heterogeneous memory hardware exposes different NUMA nodes for
 different memory technologies.
 On the image below, a dual-socket server has both HBM (high bandwidth
@@ -2602,9 +2446,7 @@ second.
 Hence there is a need to explicit memory technologies and performance
 to help users decide where to allocate.
 
-\htmlonly
-</div><div class="section" id="heteromem_memtiers">
-\endhtmlonly
+
 \section heteromem_memtiers Memory Tiers
 
 hwloc builds <i>Memory Tiers</i> to identify different kinds of
@@ -2642,9 +2484,6 @@ If hwloc fails to build tiers properly, see <tt>HWLOC_MEMTIERS</tt>
 and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar.
 
 
-\htmlonly
-</div><div class="section" id="heteromem_use_cli">
-\endhtmlonly
 \section heteromem_use_cli Using Heterogeneous Memory from the command-line
 
 Tiers may be specified in location filters when using NUMA nodes
@@ -2684,9 +2523,6 @@ $ hwloc-calc --best-memattr bandwidth node:0
 \endverbatim
 
 
-\htmlonly
-</div><div class="section" id="heteromem_use_api">
-\endhtmlonly
 \section heteromem_use_api Using Heterogeneous Memory from the C API
 
 There are two major changes introduced by heterogeneous memory
@@ -2702,6 +2538,7 @@ instead of below a Package.
 </ul>
 
 Hence, one may have to rethink the way it selects NUMA nodes.
+
 
 \subsection heteromem_use_api_iterate Iterating over the list of (heterogeneous) NUMA nodes
 
@@ -2762,10 +2599,6 @@ See also \ref hwlocality_memattrs.
 
 \page xml Importing and exporting topologies from/to XML files
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 hwloc offers the ability to export topologies to XML files and reload
 them later. This is for instance useful for loading topologies faster
 (see \ref faq_xml), manipulating other nodes' topology, or avoiding
@@ -2806,9 +2639,6 @@ If a less precise exporting/importing is required, one may want to
 look at \ref synthetic instead.
 
 
-\htmlonly
-</div><div class="section" id="xml_backends">
-\endhtmlonly
 \section xml_backends libxml2 and minimalistic XML backends
 
 hwloc offers two backends for importing/exporting XML.
@@ -2840,9 +2670,6 @@ Or pass <tt>\--enable-plugins=xml_libxml</tt> to only build this
 libxml2 support as a plugin.
 
 
-\htmlonly
-</div><div class="section" id="xml_errors">
-\endhtmlonly
 \section xml_errors XML import error management
 
 Importing XML files can fail at least because of file access errors,
@@ -2863,10 +2690,6 @@ and hwloc_topology_load() to handle all these errors.
 
 
 \page synthetic Synthetic topologies
-
-\htmlonly
-<div class="section">
-\endhtmlonly
 
 hwloc may load fake or remote topologies so as to consult them
 without having the underlying hardware available.
@@ -2902,9 +2725,6 @@ precise than XML but may still be enough when only the hierarchy
 of resources matters.
 
 
-\htmlonly
-</div><div class="section" id="synthetic_string">
-\endhtmlonly
 \section synthetic_string Synthetic description string
 
 Each item in the description string gives the type of the level and
@@ -2981,9 +2801,6 @@ or to remove some objects to make the topology heterogeneous or asymmetric.
 See many examples in \ref faq_create_asymmetric.
 
 
-\htmlonly
-</div><div class="section" id="synthetic_use">
-\endhtmlonly
 \section synthetic_use Loading a synthetic topology
 
 Aside from lstopo, the hwloc programming interface offers the same
@@ -3002,9 +2819,6 @@ environment or by setting the ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM
 topology flag.
 
 
-\htmlonly
-</div><div class="section" id="synthetic_export">
-\endhtmlonly
 \section synthetic_export Exporting a topology as a synthetic string
 
 The function hwloc_topology_export_synthetic() may export
@@ -3034,10 +2848,6 @@ symmetry and exporting the string.
 
 
 \page interoperability Interoperability With Other Software
-
-\htmlonly
-<div class="section">
-\endhtmlonly
 
 Although hwloc offers its own portable interface, it still may have to
 interoperate with specific or non-portable libraries that manipulate
@@ -3180,11 +2990,8 @@ enabled for the current topology.
 
 
 
-\page threadsafety Thread Safety
 
-\htmlonly
-<div class="section">
-\endhtmlonly
+\page threadsafety Thread Safety
 
 Like most libraries that mainly fill data structures, hwloc is not
 thread safe but rather reentrant: all state is held in a
@@ -3291,11 +3098,8 @@ For reference, ::hwloc_topology_t modification operations include
 
 
 
-\page plugins Components and plugins
 
-\htmlonly
-<div class="section">
-\endhtmlonly
+\page plugins Components and plugins
 
 hwloc is organized in <b>components</b> that are responsible for discovering
 objects.
@@ -3315,9 +3119,6 @@ If a XML topology is loaded, the <tt>xml</tt> discovery  component
 will be used instead of all other components.
 
 
-\htmlonly
-</div><div class="section" id="plugins_default">
-\endhtmlonly
 \section plugins_default Components enabled by default
 
 The hwloc core contains a list of components sorted by priority.
@@ -3368,9 +3169,6 @@ may be set to get verbose messages about available components
 (including their priority) and enabling as backends.
 
 
-\htmlonly
-</div><div class="section" id="plugins_select">
-\endhtmlonly
 \section plugins_select Selecting which components to use
 
 If no topology configuration functions such as
@@ -3408,9 +3206,6 @@ hwloc_topology_set_components() may also be used inside the program
 to prevent the loading of a specific component (or phases) for the target topology.
 
 
-\htmlonly
-</div><div class="section" id="plugins_load">
-\endhtmlonly
 \section plugins_load Loading components from plugins
 
 Components may optionally be built as <b>plugins</b> so that the hwloc core
@@ -3439,9 +3234,6 @@ Also note that plugins should carefully be enabled and used when
 embedding hwloc in another project, see \ref embed for details.
 
 
-\htmlonly
-</div><div class="section" id="plugins_list">
-\endhtmlonly
 \section plugins_list Existing components and plugins
 
 All components distributed within hwloc are listed below.
@@ -3558,10 +3350,6 @@ environment variable (see \ref envvar).
 
 \page embed Embedding hwloc in Other Software
 
-\htmlonly
-<div class="section">
-\endhtmlonly
-
 It can be desirable to include hwloc in a larger software package (be
 sure to check out the LICENSE file) so that users don't have to
 separately download and install it before installing your software.
@@ -3602,9 +3390,6 @@ The embedder project is <b>strongly</b> advised not to use hwloc's
 dynamically loading plugins / dlopen / libltdl capability.
 
 
-\htmlonly
-</div><div class="section" id="embedding_m4">
-\endhtmlonly
 \section embedding_m4 Using hwloc's M4 Embedding Capabilities
 
 Every project is different, and there are many different ways of
@@ -3709,9 +3494,6 @@ default).  You may want to examine it for one example of how these
 macros are used.
 
 
-\htmlonly
-</div><div class="section" id="embedding_example">
-\endhtmlonly
 \section embedding_example Example Embedding hwloc
 
 Here's an example of integrating with a larger project named sandbox
@@ -3747,16 +3529,9 @@ than any system-provided copy of hwloc.
 
 
 
-
-
 \page faq Frequently Asked Questions (FAQ)
 
-
-\htmlonly
-<div class="section" id="faq1">
-\endhtmlonly
 \section faq1 Concepts
-
 
 \subsection faq_why I only need binding, or the number of cores, why should I use hwloc ?
 
@@ -4129,12 +3904,7 @@ hello from a single thread on core #3
 
 
 
-\htmlonly
-</div><div class="section" id="faq2">
-\endhtmlonly
 \section faq2 Advanced
-
-
 
 \subsection faq_xml I do not want hwloc to rediscover my enormous machine topology every time I rerun a process
 
@@ -4322,12 +4092,7 @@ an I/O subtree.
 
 
 
-\htmlonly
-</div><div class="section" id="faq3">
-\endhtmlonly
 \section faq3 Caveats
-
-
 
 \subsection faq_slow_lstopo Why is lstopo slow?
 
@@ -4472,11 +4237,7 @@ You should pass the following command-line option to Valgrind to use it:
 
 
 
-\htmlonly
-</div><div class="section" id="faq4">
-\endhtmlonly
 \section faq4 Platform-specific
-
 
 \subsection faq_rocm_build How do I enable ROCm SMI and select which version to use?
 
@@ -4495,7 +4256,6 @@ To find out whether ROCm SMI was detected and enabled, look in <i>Probe / displa
 at the end of the configure script output.
 Passing <tt>\--enable-rsmi</tt> will also cause configure to fail
 if RSMI could not be found and enabled in hwloc.
-
 
 
 \subsection faq_cuda_build How do I enable CUDA and select which CUDA version to use?
@@ -4524,7 +4284,6 @@ if CUDA could not be found and enabled in hwloc.
 Note that <tt>\--with-cuda=/nonexisting</tt> may be used to disable all dependencies
 that are installed by CUDA, i.e. the CUDA, NVML and NVIDIA OpenCL backends,
 since the given directory does not exist.
-
 
 
 \subsection faq_knl_numa How do I find the local MCDRAM NUMA node on Intel Xeon Phi processor?
@@ -4662,9 +4421,6 @@ chuser "capabilities=CAP_PROPAGATE,CAP_NUMA_ATTACH" <username>
 \endverbatim
 
 
-\htmlonly
-</div><div class="section" id="faq5">
-\endhtmlonly
 \section faq5 Compatibility between hwloc versions
 
 \subsection faq_version_api How do I handle API changes?
@@ -4726,7 +4482,6 @@ However their HWLOC_VERSION strings are different
 (<tt>\"2.0.3\"</tt> and <tt>\"2.0.4\"</tt> respectively).
 
 
-
 \subsection faq_version_abi How do I handle ABI breaks?
 
 The hwloc interface was deeply modified in release 2.0
@@ -4770,7 +4525,6 @@ Hence running one of the above (cheap) checks before initializing hwloc topology
 may be useful.
 
 
-
 \subsection faq_version_xml Are XML topology files compatible between hwloc releases?
 
 XML topology files are forward-compatible:
@@ -4790,7 +4544,6 @@ Building all these components on the same (cluster-wide)
 hwloc installation is a good way to avoid such incompatibilities.
 
 
-
 \subsection faq_version_synthetic Are synthetic strings compatible between hwloc releases?
 
 Synthetic strings (see \ref synthetic) are forward-compatible:
@@ -4800,7 +4553,6 @@ However they are often not backward-compatible because new details may have been
 added to synthetic descriptions in recent releases.
 Some flags may be given to hwloc_topology_export_synthetic() to avoid such details
 and stay backward compatible.
-
 
 
 \subsection faq_version_shmem Is it possible to share a shared-memory topology between different hwloc releases?
@@ -4821,19 +4573,13 @@ is a good way to avoid such incompatibilities.
 
 
 
-\page upgrade_to_api_2x Upgrading to the hwloc 2.0 API
 
-\htmlonly
-<div class="section">
-\endhtmlonly
+\page upgrade_to_api_2x Upgrading to the hwloc 2.0 API
 
 See \ref faq5 for detecting the hwloc version that you are compiling
 and/or running against.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_memory">
-\endhtmlonly
 \section upgrade_to_api_2x_memory New Organization of NUMA nodes and Memory
 
 \subsection upgrade_to_api_2x_memory_children Memory children
@@ -4858,6 +4604,7 @@ hwloc_get_next_child() may still be used to iterate over all children of all lis
 
 Hence the CPU-side hierarchy is built using normal children,
 while memory is attached to that hierarchy depending on its affinity.
+
 
 \subsection upgrade_to_api_2x_memory_examples Examples
 
@@ -5019,9 +4766,6 @@ Moreover, it is compatible with the hwloc v1.x API.
 
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_children">
-\endhtmlonly
 \section upgrade_to_api_2x_children 4 Kinds of Objects and Children
 
 \subsection upgrade_to_api_2x_io_misc_children I/O and Misc children
@@ -5058,9 +4802,6 @@ Normal and Memory objects have (non-NULL) CPU sets and nodesets,
 while I/O and Misc objects don't have any sets (they are NULL).
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_cache">
-\endhtmlonly
 \section upgrade_to_api_2x_cache HWLOC_OBJ_CACHE replaced
 
 Instead of a single HWLOC_OBJ_CACHE, there are now 8 types
@@ -5077,9 +4818,6 @@ hwloc_obj_type_is_cache(), hwloc_obj_type_is_dcache() and hwloc_obj_type_is_icac
 may be used to check whether a given type is a cache, data/unified cache or instruction cache.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_allowed">
-\endhtmlonly
 \section upgrade_to_api_2x_allowed allowed_cpuset and allowed_nodeset only in the main topology
 
 Objects do not have <code>allowed_cpuset</code> and <code>allowed_nodeset</code> anymore.
@@ -5096,9 +4834,6 @@ Replace cpusets with nodesets for NUMA nodes.
 To find out which ones, replace intersects() with and() to get the actual intersection.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_depth">
-\endhtmlonly
 \section upgrade_to_api_2x_depth Object depths are now signed int
 
 <code>obj->depth</code> as well as depths given to functions
@@ -5108,9 +4843,6 @@ such as hwloc_get_obj_by_depth() or returned by hwloc_topology_get_depth() are n
 Other depth such as cache-specific depth attribute are still unsigned.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_memory_attrs">
-\endhtmlonly
 \section upgrade_to_api_2x_memory_attrs Memory attributes become NUMANode-specific
 
 Memory attributes such as <code>obj->memory.local_memory</code>
@@ -5123,9 +4855,6 @@ in all objects as <code>obj->total_memory</code>.
 See hwloc_obj_attr_u::hwloc_numanode_attr_s and hwloc_obj for details.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_config">
-\endhtmlonly
 \section upgrade_to_api_2x_config Topology configuration changes
 
 The old ignoring API as well as several configuration flags
@@ -5171,9 +4900,6 @@ hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
 </ul>
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_xml">
-\endhtmlonly
 \section upgrade_to_api_2x_xml XML changes
 
 2.0 XML files are not compatible with 1.x
@@ -5222,9 +4948,6 @@ and hwloc_topology_diff_destroy() lost the topology argument:
 The first argument (topology) isn't needed anymore.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_distances">
-\endhtmlonly
 \section upgrade_to_api_2x_distances Distances API totally rewritten
 
 The new distances API is in hwloc/distances.h.
@@ -5240,9 +4963,6 @@ The set of object involved in a distances structure is specified
 by an array of objects, it may not always cover the entire machine or so.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_return">
-\endhtmlonly
 \section upgrade_to_api_2x_return Return values of functions
 
 Bitmap functions (and a couple other functions) can return errors (in theory).
@@ -5258,9 +4978,6 @@ hwloc_obj_add_info(), hwloc_cpuset_from_nodeset() and hwloc_cpuset_from_nodeset(
 also return an int, which would be -1 in case of allocation errors.
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_misc">
-\endhtmlonly
 \section upgrade_to_api_2x_misc Misc API changes
 
 <ul>
@@ -5289,9 +5006,6 @@ with hwloc_topology_insert_misc_object().
 </ul>
 
 
-\htmlonly
-</div><div class="section" id="upgrade_to_api_2x_removals">
-\endhtmlonly
 \section upgrade_to_api_2x_removals API removals and deprecations
 
 <ul>
