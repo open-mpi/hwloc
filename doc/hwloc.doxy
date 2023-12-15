@@ -1810,21 +1810,21 @@ PCI bus is connected to the first package and NUMA node.
 \image html devel09-pci.png
 \image latex devel09-pci.png "" width=\textwidth
 
-Six interesting PCI devices were discovered.
+Six interesting PCI devices were discovered (dark green boxes).
 However, hwloc found some corresponding software devices
 (<em>eth0</em>, <em>eth1</em>, <em>sda</em>, <em>mlx4_0</em>,
-<em>ib0</em>, and <em>ib1</em>) for only four of these physical
-devices.
-The other ones (<em>PCI 102b:0532</em> and <em>PCI 8086:3a20</em>)
+<em>ib0</em>, and <em>ib1</em> light grey boxes)
+for only four of these physical devices.
+The other ones (<em>PCI 04:03.0</em> and <em>PCI 00:1f.2</em>)
 are an unused IDE controller (no disk attached)
 and a graphic card (no corresponding software device reported
 to the user by the operating system).
 
 On the contrary, it should be noted that three different software
-devices were found for the last PCI device (<em>PCI 15b3:634a</em>).
-Indeed this OpenFabrics HCA PCI device object contains one
+devices were found for the last PCI device (<em>PCI 51:00.0</em>).
+Indeed this OpenFabrics HCA PCI device object contains
 one OpenFabrics software device (<em>mlx4_0</em>) and two virtual
-network interface software devices (<em>ib0</em> and <em>ib1</em>).
+network interfaces (<em>ib0</em> and <em>ib1</em>).
 
 
 Here is the corresponding textual output:
