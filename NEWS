@@ -23,6 +23,9 @@ Version 2.10.1
 * Add bandwidths between subdevices in the LevelZero XeLinkBandwidth
   matrix.
 * Fix CUDA/OpenCL test source path in Windows CMake.
+* Add section "Compiling software on top of hwloc's C API" in the
+  documentation with examples for GNU Make and CMake,
+  thanks to Florent Pruvost for the help.
 
 
 Version 2.10.0
