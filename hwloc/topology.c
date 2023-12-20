@@ -470,6 +470,20 @@ struct hwloc_infos_s * hwloc_topology_get_infos(hwloc_topology_t topology)
   return &topology->infos;
 }
 
+int hwloc_obj_set_subtype(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, const char *subtype)
+{
+  char *new = NULL;
+  if (subtype) {
+    new = strdup(subtype);
+    if (!new)
+      return -1;
+  }
+  if (obj->subtype)
+    free(obj->subtype);
+  obj->subtype = new;
+  return 0;
+}
+
 void hwloc__free_infos(struct hwloc_infos_s *infos)
 {
   unsigned i;
