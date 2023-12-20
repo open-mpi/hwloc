@@ -1159,6 +1159,22 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name) __hwloc_attribute_
  */
 HWLOC_DECLSPEC int hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 
+/** \brief Set (or replace) the subtype of an object.
+ *
+ * The given \p subtype is copied internally, the caller is responsible
+ * for freeing the original \p subtype if needed.
+ *
+ * If another subtype already exists in \p object, it is replaced.
+ * The given \p subtype may be \c NULL to remove the existing subtype.
+ *
+ * \note This function is mostly meant to initialize the subtype of user-added
+ * objects such as groups with hwloc_topology_alloc_group_object().
+ *
+ * \return \c 0 on success.
+ * \return \c -1 with \p errno set to \c ENOMEM on failure to allocate memory.
+ */
+HWLOC_DECLSPEC int hwloc_obj_set_subtype(hwloc_topology_t topology, hwloc_obj_t obj, const char *subtype);
+
 /** @} */
 
 
@@ -2651,6 +2667,9 @@ HWLOC_DECLSPEC int hwloc_topology_allow(hwloc_topology_t __hwloc_restrict topolo
  *
  * The new leaf object will not have any \p cpuset.
  *
+ * The \p subtype object attribute may be defined with hwloc_obj_set_subtype()
+ * after successful insertion.
+ *
  * \return the newly-created object
  *
  * \return \c NULL on error.
@@ -2730,9 +2749,8 @@ HWLOC_DECLSPEC int hwloc_topology_free_group_object(hwloc_topology_t topology, h
  * restricted silently.
  * The core will setup the other sets after actual insertion.
  *
- * The \p subtype object attribute may be defined (to a dynamically
- * allocated string) to display something else than "Group" as the
- * type name for this object in lstopo.
+ * The \p subtype object attribute may be defined with hwloc_obj_set_subtype()
+ * to display something else than "Group" as the type name for this object in lstopo.
  * Custom name-value info pairs may be added with hwloc_obj_add_info() after
  * insertion.
  *

@@ -349,7 +349,8 @@ man3_object_info_attrsdir = $(man3dir)
 man3_object_info_attrs_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_info_attr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_get_info_by_name.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_add_info.3
+        $(DOX_MAN_DIR)/man3/hwloc_obj_add_info.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_set_subtype.3
 
 man3_cpubindingdir = $(man3dir)
 man3_cpubinding_DATA = \

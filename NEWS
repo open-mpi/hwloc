@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.11.0
+--------------
+* API
+  + Add hwloc_obj_set_subtype().
+
+
 Version 2.10.0
 --------------
 * Heterogeneous Memory core improvements
