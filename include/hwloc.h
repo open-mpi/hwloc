@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2701,12 +2701,31 @@ HWLOC_DECLSPEC int hwloc_topology_free_group_object(hwloc_topology_t topology, h
  * the final location of the Group in the topology.
  * Then the object can be passed to this function for actual insertion in the topology.
  *
- * Either the cpuset or nodeset field (or both, if compatible) must be set
- * to a non-empty bitmap. The complete_cpuset or complete_nodeset may be set
- * instead if inserting with respect to the complete topology
+ * The main use case for this function is to group a subset of
+ * siblings among the list of children below a single parent.
+ * For instance, if grouping 4 cores out of a 8-core socket,
+ * the logical list of cores will be reordered so that the 4 grouped
+ * ones are consecutive.
+ * Then, if needed, a new depth is added between the parent and those
+ * children, and the Group is inserted there.
+ * At the end, the 4 grouped cores are now children of the Group,
+ * which replaces them as a child of the original parent.
+ *
+ * In practice, the grouped objects are specified through cpusets
+ * and/or nodesets, for instance using hwloc_obj_add_other_obj_sets()
+ * iteratively.
+ * Hence it is possible to Group objects that are not children of the
+ * same parent, for instance some PUs below the 4 cores in example above.
+ * However this general case may fail if the expected Group conflicts
+ * with the existing hierarchy.
+ * For instance if each core has two PUs, it is not possible to insert
+ * a Group containing a single PU of each core.
+ *
+ * To specify the objects to group, either the cpuset or nodeset field
+ * (or both, if compatible) must be set to a non-empty bitmap.
+ * The complete_cpuset or complete_nodeset may be set instead if
+ * inserting with respect to the complete topology
  * (including disallowed, offline or unknown objects).
- * If grouping several objects, hwloc_obj_add_other_obj_sets() is an easy way
- * to build the Group sets iteratively.
  * These sets cannot be larger than the current topology, or they would get
  * restricted silently.
  * The core will setup the other sets after actual insertion.
