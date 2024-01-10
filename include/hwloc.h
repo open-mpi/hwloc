@@ -2714,7 +2714,7 @@ HWLOC_DECLSPEC int hwloc_topology_free_group_object(hwloc_topology_t topology, h
  * In practice, the grouped objects are specified through cpusets
  * and/or nodesets, for instance using hwloc_obj_add_other_obj_sets()
  * iteratively.
- * Hence it is possible to Group objects that are not children of the
+ * Hence it is possible to group objects that are not children of the
  * same parent, for instance some PUs below the 4 cores in example above.
  * However this general case may fail if the expected Group conflicts
  * with the existing hierarchy.
