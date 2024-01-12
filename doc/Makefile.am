@@ -357,7 +357,8 @@ man3_object_info_attrs_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MODIFY_INFOS_OP_REPLACE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MODIFY_INFOS_OP_REMOVE.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_infos.3
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_infos.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_set_subtype.3
 
 man3_cpubindingdir = $(man3dir)
 man3_cpubinding_DATA = \
