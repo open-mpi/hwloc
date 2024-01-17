@@ -4619,7 +4619,7 @@ but they should be configured to use the public one instead.
 
 To work around XML compatibility issues, the hwloc export may be
 configured to target older releases,
-e.g. force hwloc v3.x to export to v2.x format, see \ref upgrade_to_api_2x_xml.
+e.g. force hwloc v3.x to export to v2.x format, see \ref upgrade_to_api_3x_xml.
 
 
 \subsection faq_version_synthetic Are synthetic strings compatible between hwloc releases?
@@ -4978,52 +4978,50 @@ hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
 </ul>
 
 
-\section upgrade_to_api_2x_xml XML changes
+\section upgrade_to_api_3x_xml XML changes
 
-2.0 XML files are not compatible with 1.x
+hwloc 3.x can load XML topology files exported by hwloc 2.x.
+hwloc 3.x may also export 2.x-compatible topology files (see below).
 
-2.0 can load 1.x files, but only NUMA distances are imported. Other distance matrices are ignored
- (they were never used by default anyway).
-
-2.0 can export 1.x-compatible files, but only distances attached to the root object are exported
-(i.e. distances that cover the entire machine).
-Other distance matrices are dropped (they were never used by default anyway).
+Moreover hwloc 2.10 is also able to import 3.0 exports.
+However this convenient transitional feature may break in the future
+if new features are added in 3.x.
+Hence developers should not rely on it and rather assume that
+hwloc 3.x XMLs are not compatible with hwloc 2.x.
+<br/>
 
 <b>Users are advised to negociate hwloc versions between exporter and importer:</b>
-If the importer isn't 2.x, the exporter should export to 1.x.
+If the importer isn't 3.x, the exporter should export to 2.x.
 Otherwise, things should work by default.
 
-Hence hwloc_topology_export_xml() and hwloc_topology_export_xmlbuffer() have a new flags argument.
-to force a hwloc-1.x-compatible XML export.
+Hence hwloc_topology_export_xml() and hwloc_topology_export_xmlbuffer() have a flags argument
+to force a hwloc-2.x-compatible XML export.
 <ul>
 <li>
- If both always support 2.0, don't pass any flag.
+ If both importer and exporter use hwloc 3.x, do not pass any flag.
 </li>
 <li>
- When the importer uses hwloc 1.x, export with HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1.
+ When the importer uses hwloc 2.x, export with ::HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2.
  Otherwise the importer will fail to import.
 </li>
 <li>
- When the exporter uses hwloc 1.x, it cannot pass any flag,
- and a 2.0 importer can import without problem.
+ When the exporter uses hwloc 2.x, a 3.x importer can import without problem.
 </li>
 </ul>
 
+Here is an example of code for supporting these three cases:
 \verbatim
-#if HWLOC_API_VERSION >= 0x20000
-   if (need 1.x compatible XML export)
-      hwloc_topology_export_xml(...., HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1);
-   else /* need 2.x compatible XML export */
-      hwloc_topology_export_xml(...., 0);
-#else
-   hwloc_topology_export_xml(....);
+#if HWLOC_API_VERSION >= 0x30000
+if (3.x exporter with 2.x importer)
+  hwloc_topology_export_xml(...., HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2);
+else /* 3.x exporter with 3.x importer */
+  hwloc_topology_export_xml(...., 0);
+#else /* 2.x exporter is compatible with both 2.x and 3.x importers */
+  hwloc_topology_export_xml(...., 0);
 #endif
 \endverbatim
 
-Additionally, hwloc_topology_diff_load_xml(), hwloc_topology_diff_load_xmlbuffer(),
-hwloc_topology_diff_export_xml(), hwloc_topology_diff_export_xmlbuffer()
-and hwloc_topology_diff_destroy() lost the topology argument:
-The first argument (topology) isn't needed anymore.
+Note that hwloc v3.x can neither import from nor export to hwloc 1.x.
 
 
 \section upgrade_to_api_2x_distances Distances API totally rewritten
