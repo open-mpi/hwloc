@@ -386,7 +386,6 @@ extern "C" {
 #define HWLOC_DISTRIB_FLAG_REVERSE HWLOC_NAME_CAPS(DISTRIB_FLAG_REVERSE)
 #define hwloc_distrib HWLOC_NAME(distrib)
 #define hwloc_alloc_membind_policy HWLOC_NAME(alloc_membind_policy)
-#define hwloc_alloc_membind_policy_nodeset HWLOC_NAME(alloc_membind_policy_nodeset)
 #define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
 #define hwloc_topology_get_topology_cpuset HWLOC_NAME(topology_get_topology_cpuset)
 #define hwloc_topology_get_allowed_cpuset HWLOC_NAME(topology_get_allowed_cpuset)
@@ -686,14 +685,6 @@ extern "C" {
 #define hwloc_type_sscanf_as_depth HWLOC_NAME(type_sscanf_as_depth)
 
 #define hwloc_distances_add HWLOC_NAME(distances_add)
-
-#define hwloc_set_membind_nodeset HWLOC_NAME(set_membind_nodeset)
-#define hwloc_get_membind_nodeset HWLOC_NAME(get_membind_nodeset)
-#define hwloc_set_proc_membind_nodeset HWLOC_NAME(set_proc_membind_nodeset)
-#define hwloc_get_proc_membind_nodeset HWLOC_NAME(get_proc_membind_nodeset)
-#define hwloc_set_area_membind_nodeset HWLOC_NAME(set_area_membind_nodeset)
-#define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
-#define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
 
 /* private/debug.h */
 
