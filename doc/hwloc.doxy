@@ -4589,21 +4589,37 @@ may be useful.
 
 \subsection faq_version_xml Are XML topology files compatible between hwloc releases?
 
-XML topology files are forward-compatible:
-a XML file may be loaded by a hwloc library that is more recent
-than the hwloc release that exported that file.
+The general rule is that hwloc XML topology files are forward-compatible up-to the next major release series:
+<ul>
+<li>XML exported by hwloc 3.x may be imported by
+  <ul>
+  <li>the same release or a more recent 3.x;
+  <li>older 3.x hopefully (it may break if new XML features are added to future 3.x releases);
+  <li>the next major release 4.x.
+  </ul>
+<li>XML exported by hwloc 2.x may be imported by any 2.x or any 3.x;
+<li>XML exported by hwloc 1.x may be imported by any 2.x but <b>not by any 3.x</b>.
+</ul>
 
-However, hwloc XMLs are not always backward-compatible:
-Topologies exported by hwloc 2.x cannot be imported by 1.x by default
-(see \ref upgrade_to_api_2x_xml for working around such issues).
-There are also some corner cases where backward compatibility
-is not guaranteed because of changes between major releases
-(for instance 1.11 XMLs could not be imported in 1.10).
+However, hwloc XMLs are not always backward-compatible.
+As a convenience feature, hwloc 3.0 XMLs may be imported by hwloc 2.10 but
+not by any older releases.
+2.10 import may fail for future 3.x XMLs if new features are added.
+<br/>
 
-XMLs are exchanged at runtime between some components of the HPC software stack
-(for instance the resource managers and MPI processes).
+As XMLs may be exchanged at runtime between some components of the software stack
+(for instance the resource managers and MPI processes),
+users are advised to use a single hwloc release (or at least a single
+release per major release series, e.g. 2.10 and 3.0 only).
 Building all these components on the same (cluster-wide)
 hwloc installation is a good way to avoid such incompatibilities.
+For instance, some MPI implementations come with their own custom hwloc builds,
+but they should be configured to use the public one instead.
+<br/>
+
+To work around XML compatibility issues, the hwloc export may be
+configured to target older releases,
+e.g. force hwloc v3.x to export to v2.x format, see \ref upgrade_to_api_2x_xml.
 
 
 \subsection faq_version_synthetic Are synthetic strings compatible between hwloc releases?
