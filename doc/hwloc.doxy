@@ -4487,30 +4487,29 @@ chuser "capabilities=CAP_PROPAGATE,CAP_NUMA_ATTACH" <username>
 
 \subsection faq_version_api How do I handle API changes?
 
-The hwloc interface is extended with every new major release.
+The hwloc interface may be extended in every new major release.
 Any application using the hwloc API should be prepared to check at
 compile-time whether some features are available in the currently
 installed hwloc distribution.
+<br/>
 
-For instance, to check whether the hwloc version is at least 2.0, you should use:
+To check for the API of release X.Y.Z at build time,
+you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
+For instance, to check for at least 3.0:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00020000
+#if HWLOC_API_VERSION >= 0x00030000
 ...
 #endif
 \endverbatim
 
-To check for the API of release X.Y.Z at build time,
-you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
-
-For supporting older releases that do not have <tt>HWLOC_OBJ_NUMANODE</tt>
-and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
-
+For instance, the cpukinds API is only available starting with hwloc 2.4:
 \verbatim
-#include <hwloc.h>
-#if HWLOC_API_VERSION < 0x00010b00
-#define HWLOC_OBJ_NUMANODE HWLOC_OBJ_NODE
-#define HWLOC_OBJ_PACKAGE HWLOC_OBJ_SOCKET
+#if HWLOC_API_VERSION >= 0x00020400
+  int nr = hwloc_cpukinds_get_nr(topology, 0);
+  if (nr > 0) {
+    ...
+  }
 #endif
 \endverbatim
 
