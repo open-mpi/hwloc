@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2023 Inria.  All rights reserved.
+Copyright © 2009-2024 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -59,6 +59,8 @@ Version 3.0.0
   + Importing and exporting from/to hwloc 1.x XML.
   + BlueGene/Q support.
   + Functions that were deprecated since 2.0:
+    - memory-binding functions with the "_nodeset" suffix,
+      e.g. hwloc_get_proc_membind_nodeset()
     - hwloc_topology_insert_misc_object_by_parent()
     - hwloc_obj_cpuset_snprintf()
     - hwloc_obj_type_sscanf()

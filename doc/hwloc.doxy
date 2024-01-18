@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -45,7 +45,7 @@
  <li> \ref plugins
  <li> \ref embed
  <li> \ref faq
- <li> \ref upgrade_to_api_2x
+ <li> \ref upgrade_to_api_3x
  </ul>
 </ul>
 \htmlonly
@@ -4487,30 +4487,29 @@ chuser "capabilities=CAP_PROPAGATE,CAP_NUMA_ATTACH" <username>
 
 \subsection faq_version_api How do I handle API changes?
 
-The hwloc interface is extended with every new major release.
+The hwloc interface may be extended in every new major release.
 Any application using the hwloc API should be prepared to check at
 compile-time whether some features are available in the currently
 installed hwloc distribution.
+<br/>
 
-For instance, to check whether the hwloc version is at least 2.0, you should use:
+To check for the API of release X.Y.Z at build time,
+you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
+For instance, to check for at least 3.0:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00020000
+#if HWLOC_API_VERSION >= 0x00030000
 ...
 #endif
 \endverbatim
 
-To check for the API of release X.Y.Z at build time,
-you may compare ::HWLOC_API_VERSION with <tt>(X<<16)+(Y<<8)+Z</tt>.
-
-For supporting older releases that do not have <tt>HWLOC_OBJ_NUMANODE</tt>
-and <tt>HWLOC_OBJ_PACKAGE</tt> yet, you may use:
-
+For instance, the cpukinds API is only available starting with hwloc 2.4:
 \verbatim
-#include <hwloc.h>
-#if HWLOC_API_VERSION < 0x00010b00
-#define HWLOC_OBJ_NUMANODE HWLOC_OBJ_NODE
-#define HWLOC_OBJ_PACKAGE HWLOC_OBJ_SOCKET
+#if HWLOC_API_VERSION >= 0x00020400
+  int nr = hwloc_cpukinds_get_nr(topology, 0);
+  if (nr > 0) {
+    ...
+  }
 #endif
 \endverbatim
 
@@ -4532,6 +4531,7 @@ hwloc_topology_set_flags(topology, topology_flags);
 
 See also \ref faq_version_abi for using hwloc_get_api_version() for testing ABI compatibility.
 
+See also \ref upgrade_to_api_3x for significant API changes between hwloc 2.x and 3.0.
 
 \subsection faq_version What is the difference between API and library version numbers?
 
@@ -4546,11 +4546,11 @@ However their HWLOC_VERSION strings are different
 
 \subsection faq_version_abi How do I handle ABI breaks?
 
-The hwloc interface was deeply modified in release 2.0
-to fix several issues of the 1.x interface
-(see \ref upgrade_to_api_2x and the NEWS file in the source directory for details).
+The hwloc interface was slightly modified in release 3.0
+to fix several issues of the 2.x interface
+(see \ref upgrade_to_api_3x and the NEWS file in the source directory for details).
 The ABI was broken, which means
-<b>applications must be recompiled against the new 2.0 interface</b>.
+<b>applications must be recompiled against the new 3.0 interface</b>.
 
 To check that you are not mixing old/recent headers with a recent/old runtime library,
 check the major revision number in the API version:
@@ -4566,17 +4566,17 @@ check the major revision number in the API version:
     exit(EXIT_FAILURE);
   }
 \endverbatim
-To specifically detect v2.0 issues:
+To specifically detect issues between v3.0 and previous releases:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00020000
+#if HWLOC_API_VERSION >= 0x00030000
   /* headers are recent */
-  if (hwloc_get_api_version() < 0x20000)
-    ... error out, the hwloc runtime library is older than 2.0 ...
+  if (hwloc_get_api_version() < 0x30000)
+    ... error out, the hwloc runtime library is older than 3.0 ...
 #else
-  /* headers are pre-2.0 */
-  if (hwloc_get_api_version() >= 0x20000)
-    ... error out, the hwloc runtime library is more recent than 2.0 ...
+  /* headers are pre-3.0 */
+  if (hwloc_get_api_version() >= 0x30000)
+    ... error out, the hwloc runtime library is more recent than 3.0 ...
 #endif
 \endverbatim
 
@@ -4589,21 +4589,37 @@ may be useful.
 
 \subsection faq_version_xml Are XML topology files compatible between hwloc releases?
 
-XML topology files are forward-compatible:
-a XML file may be loaded by a hwloc library that is more recent
-than the hwloc release that exported that file.
+The general rule is that hwloc XML topology files are forward-compatible up-to the next major release series:
+<ul>
+<li>XML exported by hwloc 3.x may be imported by
+  <ul>
+  <li>the same release or a more recent 3.x;
+  <li>older 3.x hopefully (it may break if new XML features are added to future 3.x releases);
+  <li>the next major release 4.x.
+  </ul>
+<li>XML exported by hwloc 2.x may be imported by any 2.x or any 3.x;
+<li>XML exported by hwloc 1.x may be imported by any 2.x but <b>not by any 3.x</b>.
+</ul>
 
-However, hwloc XMLs are not always backward-compatible:
-Topologies exported by hwloc 2.x cannot be imported by 1.x by default
-(see \ref upgrade_to_api_2x_xml for working around such issues).
-There are also some corner cases where backward compatibility
-is not guaranteed because of changes between major releases
-(for instance 1.11 XMLs could not be imported in 1.10).
+However, hwloc XMLs are not always backward-compatible.
+As a convenience feature, hwloc 3.0 XMLs may be imported by hwloc 2.10 but
+not by any older releases.
+2.10 import may fail for future 3.x XMLs if new features are added.
+<br/>
 
-XMLs are exchanged at runtime between some components of the HPC software stack
-(for instance the resource managers and MPI processes).
+As XMLs may be exchanged at runtime between some components of the software stack
+(for instance the resource managers and MPI processes),
+users are advised to use a single hwloc release (or at least a single
+release per major release series, e.g. 2.10 and 3.0 only).
 Building all these components on the same (cluster-wide)
 hwloc installation is a good way to avoid such incompatibilities.
+For instance, some MPI implementations come with their own custom hwloc builds,
+but they should be configured to use the public one instead.
+<br/>
+
+To work around XML compatibility issues, the hwloc export may be
+configured to target older releases,
+e.g. force hwloc v3.x to export to v2.x format, see \ref upgrade_to_api_3x_xml.
 
 
 \subsection faq_version_synthetic Are synthetic strings compatible between hwloc releases?
@@ -4636,489 +4652,218 @@ is a good way to avoid such incompatibilities.
 
 
 
-\page upgrade_to_api_2x Upgrading to the hwloc 2.0 API
+\page upgrade_to_api_3x Upgrading to the hwloc 3.0 API
+
+The following subsections contain hints to upgrade code from the hwloc 2.x
+API to the 3.0 API, or to support both APIs simultaneously.
+They <b>do not document how to migrate from hwloc 1.x to 3.0</b>.
+It is strongly discouraged to support hwloc APIs from 1.x to 3.0 in the
+same code.
+hwloc 2.0 was released more than 6 years ago, its documentation contain
+a similar page to migrate away from hwloc 1.x API.
+All users are strong encouraged to stop using hwloc 1.x.
 
 See \ref faq5 for detecting the hwloc version that you are compiling
 and/or running against.
 
+\section upgrade_to_api_3x_osdev OS device type is now a bitmask
 
-\section upgrade_to_api_2x_memory New Organization of NUMA nodes and Memory
+<b>This change does not *imply compile failures but things will very likely break at runtime.</b>
+<br/>
 
-\subsection upgrade_to_api_2x_memory_children Memory children
-
-In hwloc v1.x, NUMA nodes were inside the tree, for instance Packages
-contained 2 NUMA nodes which contained a L3 and several cache.
-
-Starting with hwloc v2.0, NUMA nodes are not in the main tree anymore.
-They are attached under objects as <i>Memory Children</i> on the side
-of normal children.
-This memory children list starts at <code>obj->memory_first_child</code>
-and its size is <code>obj->memory_arity</code>.
-Hence there can now exist two local NUMA nodes,
-for instance on Intel Xeon Phi processors.
-
-The normal list of children (starting at <code>obj->first_child</code>,
-ending at <code>obj->last_child</code>, of size <code>obj->arity</code>,
-and available as the array <code>obj->children</code>)
-now only contains CPU-side objects:
-PUs, Cores, Packages, Caches, Groups, Machine and System.
-hwloc_get_next_child() may still be used to iterate over all children of all lists.
-
-Hence the CPU-side hierarchy is built using normal children,
-while memory is attached to that hierarchy depending on its affinity.
-
-
-\subsection upgrade_to_api_2x_memory_examples Examples
-
+The OS device "type" attribute is now a bitmask instead of a single value,
+and many existing devices now combine two values.
 <ul>
-<li>a UMA machine with 2 packages and a single NUMA node is now modeled
- as a "Machine" object with two "Package" children
- and one "NUMANode" memory children (displayed first in lstopo below):
-\verbatim
-Machine (1024MB total)
-  NUMANode L#0 (P#0 1024MB)
-  Package L#0
-    Core L#0 + PU L#0 (P#0)
-    Core L#1 + PU L#1 (P#1)
-  Package L#1
-    Core L#2 + PU L#2 (P#2)
-    Core L#3 + PU L#3 (P#3)
-\endverbatim
-</li>
-
-<li>a machine with 2 packages with one NUMA node and 2 cores in each is now:
-\verbatim
-Machine (2048MB total)
-  Package L#0
-    NUMANode L#0 (P#0 1024MB)
-    Core L#0 + PU L#0 (P#0)
-    Core L#1 + PU L#1 (P#1)
-  Package L#1
-    NUMANode L#1 (P#1 1024MB)
-    Core L#2 + PU L#2 (P#2)
-    Core L#3 + PU L#3 (P#3)
-\endverbatim
-</li>
-
-<li>if there are two NUMA nodes per package, a Group object may be added to keep
-cores together with their local NUMA node:
-\verbatim
-Machine (4096MB total)
-  Package L#0
-    Group0 L#0
-      NUMANode L#0 (P#0 1024MB)
-      Core L#0 + PU L#0 (P#0)
-      Core L#1 + PU L#1 (P#1)
-    Group0 L#1
-      NUMANode L#1 (P#1 1024MB)
-      Core L#2 + PU L#2 (P#2)
-      Core L#3 + PU L#3 (P#3)
-  Package L#1
-    [...]
-\endverbatim
-</li>
-
-<li>if the platform has L3 caches whose localities are identical to NUMA nodes, Groups aren't needed:
-\verbatim
-Machine (4096MB total)
-  Package L#0
-    L3 L#0 (16MB)
-      NUMANode L#0 (P#0 1024MB)
-      Core L#0 + PU L#0 (P#0)
-      Core L#1 + PU L#1 (P#1)
-    L3 L#1 (16MB)
-      NUMANode L#1 (P#1 1024MB)
-      Core L#2 + PU L#2 (P#2)
-      Core L#3 + PU L#3 (P#3)
-  Package L#1
-    [...]
-\endverbatim
-</li>
+<li>"Block" OS devices are now "Storage" (for actual Block devices)
+    and/or "Memory" (for Linux DAX and CXL devices, etc).
+<li>Some "CoProcessors" are also "GPUs" (e.g. CUDA devices),
+    and some GPUs are also CoProcessors (e.g. RSMI).
+<li>"OpenFabrics" devices are now also "Network".
+<li>BXI interfaces are now "Network" instead of "OpenFabrics".
 </ul>
+See \ref iodevices_osdev for details.
+<br/>
 
-
-\subsection upgrade_to_api_2x_numa_level NUMA level and depth
-
-NUMA nodes are not in "main" tree of normal objects anymore.
-Hence, they don't have a meaningful depth anymore (like I/O and Misc objects).
-They have a virtual (negative) depth (::HWLOC_TYPE_DEPTH_NUMANODE)
-so that functions manipulating depths and level still work,
-and so that we can still iterate over the level of NUMA nodes just like for any other level.
-
-For instance we can still use lines such as
+Codes looking OS device types should be updated as follows:
 \verbatim
-int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NUMANODE);
-hwloc_obj_t obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 4);
-hwloc_obj_t node = hwloc_get_next_obj_by_depth(topology, HWLOC_TYPE_DEPTH_NUMANODE, prev);
-\endverbatim
-
-The NUMA depth should not be compared with others.
-An unmodified code that still compares NUMA and Package depths
-(to find out whether Packages contain NUMA or the contrary)
-would now always assume Packages contain NUMA (because the NUMA depth is negative).
-
-However, the depth of the Normal parents of NUMA nodes may be used instead.
-In the last example above, NUMA nodes are attached to L3 caches,
-hence one may compare the depth of Packages and L3 to find out
-that NUMA nodes are contained in Packages.
-This depth of parents may be retrieved with hwloc_get_memory_parents_depth().
-However, this function may return ::HWLOC_TYPE_DEPTH_MULTIPLE
-on future platforms if NUMA nodes are attached to different levels.
-
-
-\subsection upgrade_to_api_2x_memory_find Finding Local NUMA nodes and looking at Children and Parents
-
-Applications that walked up/down to find NUMANode parent/children must
-now be updated.
-Instead of looking directly for a NUMA node, one should now look for
-an object that has some memory children.
-NUMA node(s) will be attached there.
-For instance, when looking for a NUMA node above a given core <tt>core</tt>:
-\verbatim
-hwloc_obj_t parent = core->parent;
-while (parent && !parent->memory_arity)
-  parent = parent->parent; /* no memory child, walk up */
-if (parent)
-  /* use parent->memory_first_child (and its siblings if there are multiple local NUMA nodes) */
-\endverbatim
-
-The list of local NUMA nodes (usually a single one) is also described
-by the <tt>nodeset</tt> attribute of each object (which contains the
-physical indexes of these nodes).
-Iterating over the NUMA level is also an easy way to find local NUMA nodes:
-\verbatim
-hwloc_obj_t tmp = NULL;
-while ((tmp = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, tmp)) != NULL) {
-  if (hwloc_bitmap_isset(obj->nodeset, tmp->os_index))
-    /* tmp is a NUMA node local to obj, use it */
-}
-\endverbatim
-
-Similarly finding objects that are close to a given NUMA nodes
-should be updated too.
-Instead of looking at the NUMA node parents/children, one should
-now find a Normal parent above that NUMA node, and then look
-at its parents/children as usual:
-\verbatim
-hwloc_obj_t tmp = obj->parent;
-while (hwloc_obj_type_is_memory(tmp))
-  tmp = tmp->parent;
-/* now use tmp instead of obj */
-\endverbatim
-
-To avoid such hwloc v2.x-specific and NUMA-specific cases in the code,
-a <b>generic lookup for any kind of object, including NUMA nodes</b>,
-might also be implemented by iterating over a level.
-For instance finding an object of type <tt>type</tt> which either
-contains or is included in object <tt>obj</tt> can be
-performed by traversing the level of that type and comparing CPU sets:
-\verbatim
-hwloc_obj_t tmp = NULL;
-while ((tmp = hwloc_get_next_obj_by_type(topology, type, tmp)) != NULL) {
-  if (hwloc_bitmap_intersects(tmp->cpuset, obj->cpuset))
-    /* tmp matches, use it */
-}
-\endverbatim
-<b>
-This generic lookup works whenever <tt>type</tt> or <tt>obj</tt>
-are Normal or Memory objects since both have CPU sets.
-Moreover, it is compatible with the hwloc v1.x API.
-</b>
-
-
-
-
-\section upgrade_to_api_2x_children 4 Kinds of Objects and Children
-
-\subsection upgrade_to_api_2x_io_misc_children I/O and Misc children
-
-I/O children are not in the main object children list anymore either.
-They are in the list starting at <code>obj->io_first_child</code>
-and its size is <code>obj->io_arity</code>.
-
-Misc children are not in the main object children list anymore.
-They are in the list starting at <code>obj->misc_first_child</code>
-and its size is <code>obj->misc_arity</code>.
-
-See hwloc_obj for details about children lists.
-
-hwloc_get_next_child() may still be used to iterate over all children of all lists.
-
-
-\subsection upgrade_to_api_2x_kinds_subsec Kinds of objects
-
-Given the above, objects may now be of 4 kinds:
-<ul>
-<li>Normal (everything not listed below, including Machine, Package, Core, PU, CPU Caches, etc);</li>
-<li>Memory (currently NUMA nodes or Memory-side Caches), attached to parents as Memory children;</li>
-<li>I/O (Bridges, PCI and OS devices), attached to parents as I/O children;</li>
-<li>Misc objects, attached to parents as Misc children.</li>
-</ul>
-See hwloc_obj for details about children lists.
-
-For a given object type, the kind may be found with hwloc_obj_type_is_normal(),
-hwloc_obj_type_is_memory(), hwloc_obj_type_is_normal(),
-or comparing with ::HWLOC_OBJ_MISC.
-
-Normal and Memory objects have (non-NULL) CPU sets and nodesets,
-while I/O and Misc objects don't have any sets (they are NULL).
-
-
-\section upgrade_to_api_2x_cache HWLOC_OBJ_CACHE replaced
-
-Instead of a single HWLOC_OBJ_CACHE, there are now 8 types
-::HWLOC_OBJ_L1CACHE, ..., ::HWLOC_OBJ_L5CACHE,
-::HWLOC_OBJ_L1ICACHE, ..., ::HWLOC_OBJ_L3ICACHE.
-
-Cache object attributes are unchanged.
-
-hwloc_get_cache_type_depth() is not needed to disambiguate cache types anymore
-since new types can be passed to hwloc_get_type_depth()
-without ever getting ::HWLOC_TYPE_DEPTH_MULTIPLE anymore.
-
-hwloc_obj_type_is_cache(), hwloc_obj_type_is_dcache() and hwloc_obj_type_is_icache()
-may be used to check whether a given type is a cache, data/unified cache or instruction cache.
-
-
-\section upgrade_to_api_2x_allowed allowed_cpuset and allowed_nodeset only in the main topology
-
-Objects do not have <code>allowed_cpuset</code> and <code>allowed_nodeset</code> anymore.
-They are only available for the entire topology using
-hwloc_topology_get_allowed_cpuset() and hwloc_topology_get_allowed_nodeset().
-
-As usual, those are only needed when the INCLUDE_DISALLOWED topology flag is given,
-which means disallowed objects are kept in the topology.
-If so, one may find out whether some PUs inside an object is allowed by checking
-\verbatim
-hwloc_bitmap_intersects(obj->cpuset, hwloc_topology_get_allowed_cpuset(topology))
-\endverbatim
-Replace cpusets with nodesets for NUMA nodes.
-To find out which ones, replace intersects() with and() to get the actual intersection.
-
-
-\section upgrade_to_api_2x_depth Object depths are now signed int
-
-<code>obj->depth</code> as well as depths given to functions
-such as hwloc_get_obj_by_depth() or returned by hwloc_topology_get_depth() are now
-<b>signed int</b>.
-
-Other depth such as cache-specific depth attribute are still unsigned.
-
-
-\section upgrade_to_api_2x_memory_attrs Memory attributes become NUMANode-specific
-
-Memory attributes such as <code>obj->memory.local_memory</code>
-are now only available in NUMANode-specific attributes
-in <code>obj->attr->numanode.local_memory</code>.
-
-<code>obj->memory.total_memory</code> is available
-in all objects as <code>obj->total_memory</code>.
-
-See hwloc_obj_attr_u::hwloc_numanode_attr_s and hwloc_obj for details.
-
-
-\section upgrade_to_api_2x_config Topology configuration changes
-
-The old ignoring API as well as several configuration flags
-are replaced with the new filtering API,
-see hwloc_topology_set_type_filter() and its variants,
-and ::hwloc_type_filter_e for details.
-
-<ul>
-
-<li>
-hwloc_topology_ignore_type(), hwloc_topology_ignore_type_keep_structure()
-and hwloc_topology_ignore_all_keep_structure() are respectively superseded by
-\verbatim
-hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_NONE);
-hwloc_topology_set_type_filter(topology, type, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
-hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_STRUCTURE);
-\endverbatim
-
-Also, the meaning of KEEP_STRUCTURE has changed (only entire levels may be ignored, instead of single objects), the old behavior is not available anymore.
-</li>
-
-<li>
-HWLOC_TOPOLOGY_FLAG_ICACHES is superseded by
-\verbatim
-hwloc_topology_set_icache_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
-\endverbatim
-</li>
-
-<li>
-HWLOC_TOPOLOGY_FLAG_WHOLE_IO, HWLOC_TOPOLOGY_FLAG_IO_DEVICES and HWLOC_TOPOLOGY_FLAG_IO_BRIDGES replaced.
-
-To keep all I/O devices (PCI, Bridges, and OS devices), use:
-\verbatim
-hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
-\endverbatim
-
-To only keep important devices (Bridges with children, common PCI devices and OS devices):
-\verbatim
-hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
-\endverbatim
-</li>
-
-</ul>
-
-
-\section upgrade_to_api_2x_xml XML changes
-
-2.0 XML files are not compatible with 1.x
-
-2.0 can load 1.x files, but only NUMA distances are imported. Other distance matrices are ignored
- (they were never used by default anyway).
-
-2.0 can export 1.x-compatible files, but only distances attached to the root object are exported
-(i.e. distances that cover the entire machine).
-Other distance matrices are dropped (they were never used by default anyway).
-
-<b>Users are advised to negociate hwloc versions between exporter and importer:</b>
-If the importer isn't 2.x, the exporter should export to 1.x.
-Otherwise, things should work by default.
-
-Hence hwloc_topology_export_xml() and hwloc_topology_export_xmlbuffer() have a new flags argument.
-to force a hwloc-1.x-compatible XML export.
-<ul>
-<li>
- If both always support 2.0, don't pass any flag.
-</li>
-<li>
- When the importer uses hwloc 1.x, export with HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1.
- Otherwise the importer will fail to import.
-</li>
-<li>
- When the exporter uses hwloc 1.x, it cannot pass any flag,
- and a 2.0 importer can import without problem.
-</li>
-</ul>
-
-\verbatim
-#if HWLOC_API_VERSION >= 0x20000
-   if (need 1.x compatible XML export)
-      hwloc_topology_export_xml(...., HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V1);
-   else /* need 2.x compatible XML export */
-      hwloc_topology_export_xml(...., 0);
+#if HWLOC_API_VERSION >= 0x30000
+  if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type & HWLOC_OSDEV_TYPE_GPU)
+    /* obj is a 3.x GPU OS device */
 #else
-   hwloc_topology_export_xml(....);
+  if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OSDEV_TYPE_GPU)
+    /* obj is a 2.x GPU OS device */
 #endif
 \endverbatim
 
-Additionally, hwloc_topology_diff_load_xml(), hwloc_topology_diff_load_xmlbuffer(),
-hwloc_topology_diff_export_xml(), hwloc_topology_diff_export_xmlbuffer()
-and hwloc_topology_diff_destroy() lost the topology argument:
-The first argument (topology) isn't needed anymore.
+\section upgrade_to_api_3x_type_depth Finding the level depth from a type and some attributes
+
+hwloc_get_type_depth_with_attr() generalizes hwloc_get_type_depth() by
+using object attributes to disambiguate multiple levels with same type.
+hwloc_type_sscanf_as_depth() is deprecated in favor of using
+hwloc_type_sscanf() followed by hwloc_get_type_depth_with_attr():
+
+\verbatim
+int my_hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
+                                  hwloc_topology_t topology, int *depthp)
+{
+#if HWLOC_API_VERSION >= 0x30000
+  hwloc_obj_type_t type;
+  union hwloc_obj_attr_u attr;
+  int depth, err;
+
+  err = hwloc_type_sscanf(string, &type, &attr, sizeof(attr));
+  if (err < 0)
+    return err;
+  if (typep)
+    *typep = type;
+  depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
+  *depthp = depth;
+  return 0;
+#else
+  return_hwloc_type_sscanf_as_depth(string, typep, topology, depthp);
+#endif
+}
+\endverbatim
 
 
-\section upgrade_to_api_2x_distances Distances API totally rewritten
+\section upgrade_to_api_3x_infos_struct Info attribute structure
 
-The new distances API is in hwloc/distances.h.
+A new structure hwloc_infos_s embeds the pointer and count
+of struct hwloc_info_s. Former functions such as hwloc_obj_get_info_by_name()
+still work fine, but any code that manipulates this array and count directly
+with the 2.x API will fail to build on 3.x.
 
-Distances are not accessible directly from objects anymore.
-One should first call hwloc_distances_get() (or a variant)
-to retrieve distances (possibly with one call to get the
-number of available distances structures, and another call
-to actually get them).
-Then it may consult these structures, and finally release them.
+\verbatim
+#if HWLOC_API_VERSION >= 0x30000
+  for(i=0; i<obj->infos.count; i++)
+    printf("%s = %s\n", obj->infos.array[i].name, obj->infos.array[i].value);
+#else
+  for(i=0; i<obj->infos_count; i++)
+    printf("%s = %s\n", obj->infos[i].name, obj->infos[i].value);
+#endif
+\endverbatim
 
-The set of object involved in a distances structure is specified
-by an array of objects, it may not always cover the entire machine or so.
-
-
-\section upgrade_to_api_2x_return Return values of functions
-
-Bitmap functions (and a couple other functions) can return errors (in theory).
-
-Most bitmap functions may have to reallocate the internal bitmap storage.
-In v1.x, they would silently crash if realloc failed.
-In v2.0, they now return an int that can be negative on error.
-However, the preallocated storage is 512 bits,
-hence realloc will not even be used unless you run
-hwloc on machines with larger PU or NUMAnode indexes.
-
-hwloc_obj_add_info(), hwloc_cpuset_from_nodeset() and hwloc_cpuset_from_nodeset()
-also return an int, which would be -1 in case of allocation errors.
+Functions hwloc_cpukinds_get_info() and hwloc_cpukinds_register() now
+manipulate infos as such a structure.
 
 
-\section upgrade_to_api_2x_misc Misc API changes
+\section upgrade_to_api_3x_infos_root Root and topology infos
 
+Info attributes may now be stored directly inside the topology.
+The array of topology infos may be retrieved with hwloc_topology_get_infos().
+<br/>
+
+Several info attributes previously stored in the root object are
+now topology attributes (e.g. information about hwloc, about the
+discovery, operating system information returned by uname).
+See \ref attributes_info for details.
+<br/>
+
+Additionally, the "Backend" info attribute of OS devices is now
+in the topology root object together with other backends instead
+of in each object.
+
+
+\section upgrade_to_api_3x_xml XML changes
+
+hwloc 3.x can load XML topology files exported by hwloc 2.x.
+hwloc 3.x may also export 2.x-compatible topology files (see below).
+
+Moreover hwloc 2.10 is also able to import 3.0 exports.
+However this convenient transitional feature may break in the future
+if new features are added in 3.x.
+Hence developers should not rely on it and rather assume that
+hwloc 3.x XMLs are not compatible with hwloc 2.x.
+<br/>
+
+<b>Users are advised to negociate hwloc versions between exporter and importer:</b>
+If the importer isn't 3.x, the exporter should export to 2.x.
+Otherwise, things should work by default.
+
+Hence hwloc_topology_export_xml() and hwloc_topology_export_xmlbuffer() have a flags argument
+to force a hwloc-2.x-compatible XML export.
 <ul>
-
 <li>
-hwloc_type_sscanf() extends hwloc_obj_type_sscanf()
-by passing a union hwloc_obj_attr_u which may receive
-Cache, Group, Bridge or OS device attributes.
+ If both importer and exporter use hwloc 3.x, do not pass any flag.
 </li>
-
 <li>
-hwloc_type_sscanf_as_depth() is also added to
-directly return the corresponding level depth within a topology.
+ When the importer uses hwloc 2.x, export with ::HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2.
+ Otherwise the importer will fail to import.
 </li>
-
 <li>
-hwloc_topology_insert_misc_object_by_cpuset() is replaced
-with hwloc_topology_alloc_group_object() and hwloc_topology_insert_group_object().
+ When the exporter uses hwloc 2.x, a 3.x importer can import without problem.
 </li>
-
-<li>
-hwloc_topology_insert_misc_object_by_parent() is replaced
-with hwloc_topology_insert_misc_object().
-</li>
-
 </ul>
 
+Here is an example of code for supporting these three cases:
+\verbatim
+#if HWLOC_API_VERSION >= 0x30000
+if (3.x exporter with 2.x importer)
+  hwloc_topology_export_xml(...., HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2);
+else /* 3.x exporter with 3.x importer */
+  hwloc_topology_export_xml(...., 0);
+#else /* 2.x exporter is compatible with both 2.x and 3.x importers */
+  hwloc_topology_export_xml(...., 0);
+#endif
+\endverbatim
 
-\section upgrade_to_api_2x_removals API removals and deprecations
+Note that hwloc v3.x can neither import from nor export to hwloc 1.x.
+
+
+\section upgrade_to_api_3x_deprecations API Deprecations
 
 <ul>
 
 <li>
-HWLOC_OBJ_SYSTEM removed:
-The root object is always ::HWLOC_OBJ_MACHINE
+HWLOC_OBJ_OSDEV_BLOCK deprecated in favor of ::HWLOC_OBJ_OSDEV_STORAGE
+(or ::HWLOC_OBJ_OSDEV_MEMORY or both, depending on the device) since hwloc 3.0.
 </li>
 
 <li>
-*_membind_nodeset() memory binding interfaces deprecated:
-One should use the variant without _nodeset suffix and pass the ::HWLOC_MEMBIND_BYNODESET flag.
+HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM deprecated in favor of
+::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED since hwloc 2.1.
 </li>
 
 <li>
-HWLOC_MEMBIND_REPLICATE removed:
-no supported operating system supports it anymore.
+hwloc_type_sscanf_as_depth() deprecated in favor of hwloc_type_sscanf()
+and hwloc_get_type_depth_with_attr() since hwloc 3.0,
+see \ref upgrade_to_api_3x_type_depth.
 </li>
 
 <li>
-hwloc_obj_snprintf() removed because it was long-deprecated
-by hwloc_obj_type_snprintf() and hwloc_obj_attr_snprintf().
+hwloc_distances add() deprecated in favor of hwloc_distances_add_create(),
+hwloc_distances_add_values() and hwloc_distances_add_commit() since hwloc 2.5.
+</li>
+
+
+\section upgrade_to_api_3x_removals API Removals
+
+Functions that were deprecated since 2.0 were removed:
+
+<ul>
+
+<li>
+Memory binding functions with the <tt>_nodeset</tt> prefix, for instance
+hwloc_set_membind_nodeset(),
+replaced with using the ::HWLOC_MEMBIND_BYNODESET flag.
 </li>
 
 <li>
-hwloc_obj_type_sscanf() deprecated, hwloc_obj_type_of_string() removed.
+hwloc_topology_insert_misc_object_by_parent(),
+replaced with hwloc_topology_insert_misc_object().
 </li>
 
 <li>
-hwloc_cpuset_from/to_nodeset_strict() deprecated:
-Now useless since all topologies are NUMA. Use the variant without the _strict suffix
+hwloc_obj_cpuset_snprintf() replaced with hwloc_bitmap_snprintf().
 </li>
 
 <li>
-hwloc_distribute() and hwloc_distributev() removed,
-deprecated by hwloc_distrib().
+hwloc_obj_type_sscanf() replace with hwloc_type_sscanf().
 </li>
 
 <li>
-The Custom interface (hwloc_topology_set_custom(), etc.)
-was removed, as well as the corresponding command-line tools (hwloc-assembler, etc.).
-Topologies always start with object with valid cpusets and nodesets.
-</li>
-
-<li>
-<code>obj->online_cpuset</code> removed:
-Offline PUs are simply listed in the <code>complete_cpuset</code> as previously.
-</li>
-
-<li>
-<code>obj->os_level</code> removed.
+hwloc_cpuset_to_nodeset_strict() and hwloc_cpuset_from_nodeset_strict()
+removed since their non-strict variants are sufficient.
 </li>
 
 </ul>
