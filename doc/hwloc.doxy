@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -4545,11 +4545,10 @@ However their HWLOC_VERSION strings are different
 
 \subsection faq_version_abi How do I handle ABI breaks?
 
-The hwloc interface was deeply modified in release 2.0
-to fix several issues of the 1.x interface
-(see \ref upgrade_to_api_2x and the NEWS file in the source directory for details).
+The hwloc interface was slightly modified in release 3.0
+to fix several issues of the 2.x interface
 The ABI was broken, which means
-<b>applications must be recompiled against the new 2.0 interface</b>.
+<b>applications must be recompiled against the new 3.0 interface</b>.
 
 To check that you are not mixing old/recent headers with a recent/old runtime library,
 check the major revision number in the API version:
@@ -4565,17 +4564,17 @@ check the major revision number in the API version:
     exit(EXIT_FAILURE);
   }
 \endverbatim
-To specifically detect v2.0 issues:
+To specifically detect issues between v3.0 and previous releases:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00020000
+#if HWLOC_API_VERSION >= 0x00030000
   /* headers are recent */
-  if (hwloc_get_api_version() < 0x20000)
-    ... error out, the hwloc runtime library is older than 2.0 ...
+  if (hwloc_get_api_version() < 0x30000)
+    ... error out, the hwloc runtime library is older than 3.0 ...
 #else
-  /* headers are pre-2.0 */
-  if (hwloc_get_api_version() >= 0x20000)
-    ... error out, the hwloc runtime library is more recent than 2.0 ...
+  /* headers are pre-3.0 */
+  if (hwloc_get_api_version() >= 0x30000)
+    ... error out, the hwloc runtime library is more recent than 3.0 ...
 #endif
 \endverbatim
 
