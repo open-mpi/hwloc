@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2023 Inria.  All rights reserved.
+Copyright © 2009-2024 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -26,6 +26,8 @@ Version 2.10.1
 * Add section "Compiling software on top of hwloc's C API" in the
   documentation with examples for GNU Make and CMake,
   thanks to Florent Pruvost for the help.
+* Fix the enabling of CUDA in Windows CMake build,
+  Thanks to Moritz Kreutzer for the patch.
 
 
 Version 2.10.0
