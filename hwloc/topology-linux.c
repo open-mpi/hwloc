@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -4242,7 +4242,10 @@ look_sysfsnode(struct hwloc_topology *topology,
 	struct dirent *dirent;
 	int keep;
 	env = getenv("HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES");
-        keep = env && atoi(env);
+        /* NVIDIA GPU NUMA nodes hidden by default on POWER */
+        keep = (data->arch != HWLOC_LINUX_ARCH_POWER);
+        if (env)
+          keep = atoi(env);
 	while ((dirent = readdir(dir)) != NULL) {
 	  char nvgpunumapath[300], line[256];
           int err;

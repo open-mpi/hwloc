@@ -1320,10 +1320,13 @@ following environment variables.
 
 <dt>HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=0</dt>
   <dd>show or hide NUMA nodes that correspond to NVIDIA GPU memory.
-  By default they are ignored to avoid interleaved memory being allocated
-  on GPU by mistake.
-  Setting this environment variable to 1 exposes these NUMA nodes.
-  They may be recognized by the <em>GPUMemory</em> subtype.
+  By default they are ignored on POWER platforms to avoid interleaved
+  memory being allocated on GPU by mistake.
+
+  Setting this environment variable to 0 hides the NUMA nodes (default on POWER).
+  Setting to 1 exposes these NUMA nodes (default on non-POWER platforms such as NVIDIA Grace Hopper).
+
+  These NUMA nodes may be recognized by the <em>GPUMemory</em> subtype.
   They also have a <em>PCIBusID</em> info attribute to identify the
   corresponding GPU.
   </dd>

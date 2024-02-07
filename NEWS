@@ -28,6 +28,7 @@ Version 2.10.1
   thanks to Florent Pruvost for the help.
 * Fix the enabling of CUDA in Windows CMake build,
   Thanks to Moritz Kreutzer for the patch.
+* Don't hide the GPU NUMA node on NVIDIA Grace Hopper.
 
 
 Version 2.10.0
