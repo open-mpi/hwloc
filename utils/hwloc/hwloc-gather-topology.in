@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2024 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -230,7 +230,7 @@ savefile "$destdir/$basename" /proc/stat
 savefile "$destdir/$basename" /proc/version
 savefile "$destdir/$basename" /proc/self/cpuset
 savefile "$destdir/$basename" /proc/self/cgroup
-savefile "$destdir/$basename" /proc/driver/nvidia
+savedir "$destdir/$basename" /proc/driver/nvidia
 
 # Gather cpu and node information
 # (no need for savebusdir since we already gather the target /sys/devices/system/{cpu,node} explicitly)
