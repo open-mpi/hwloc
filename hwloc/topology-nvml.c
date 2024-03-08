@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2023 Inria.  All rights reserved.
+ * Copyright © 2012-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -247,12 +247,12 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
       gpu_bdfs[i] = pci;
 #endif
       parent = hwloc_pci_find_parent_by_busid(topology, pci.domain, pci.bus, pci.device, 0);
-#if HAVE_DECL_NVMLDEVICEGETMAXPCIELINKGENERATION
+#if HAVE_DECL_NVMLDEVICEGETCURRPCIELINKGENERATION
       if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
 	unsigned maxwidth = 0, maxgen = 0;
 	float lanespeed;
-	nvmlDeviceGetMaxPcieLinkWidth(device, &maxwidth);
-	nvmlDeviceGetMaxPcieLinkGeneration(device, &maxgen);
+	nvmlDeviceGetCurrPcieLinkWidth(device, &maxwidth);
+	nvmlDeviceGetCurrPcieLinkGeneration(device, &maxgen);
 	/* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
 	 * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
 	 * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane

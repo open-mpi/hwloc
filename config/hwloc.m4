@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2023 Inria.  All rights reserved.
+dnl Copyright © 2009-2024 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020, 2023 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -1217,7 +1217,7 @@ char nvmlInit ();
       if test "x$hwloc_nvml_happy" = "xyes"; then
         tmp_save_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
-        AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
+        AC_CHECK_DECLS([nvmlDeviceGetCurrPcieLinkGeneration],,[:],[[#include <nvml.h>]])
         CPPFLAGS="$tmp_save_CPPFLAGS"
       fi
 
