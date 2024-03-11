@@ -19,6 +19,8 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.10.1
 --------------
+* Fix PCI Gen4+ link speed of NVIDIA GPU obtained from NVML,
+  thanks to Akram Sbaih for the report.
 * Get Intel GPU OpenCL device locality.
 * Add bandwidths between subdevices in the LevelZero XeLinkBandwidth
   matrix.
