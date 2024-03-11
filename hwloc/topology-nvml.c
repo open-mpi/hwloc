@@ -256,8 +256,9 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 	/* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
 	 * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
 	 * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
+         * Then it doubles with each gen (with slight encoding changes ignored here).
 	 */
-	lanespeed = maxgen <= 2 ? 2.5 * maxgen * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
+	lanespeed = maxgen <= 2 ? 2.5 * maxgen * 0.8 : 8.0 * (1<<(maxgen-3)) * 128/130; /* Gbit/s per lane */
 	if (lanespeed * maxwidth != 0.)
 	  /* we found the max link speed, replace the current link speed found by pci (or none) */
 	  parent->attr->pcidev.linkspeed = lanespeed * maxwidth / 8; /* GB/s */
