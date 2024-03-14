@@ -83,6 +83,7 @@ static int show_first_only = 0;
 static int show_local_memory = 0;
 static int show_local_memory_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
+static unsigned long best_node_flags = 0;
 static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
@@ -582,9 +583,10 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   } else if (show_local_memory) {
     unsigned nrnodes;
     hwloc_obj_t *nodes;
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc_full(); /* show all nodes by default */
     nrnodes = hwloc_bitmap_weight(hwloc_topology_get_topology_nodeset(topology));
     nodes = malloc(nrnodes * sizeof(*nodes));
-    if (nodes) {
+    if (nodeset && nodes) {
       struct hwloc_location loc;
       int err;
       loc.type = HWLOC_LOCATION_TYPE_OBJECT;
@@ -593,28 +595,21 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       if (!err) {
         unsigned i;
         if (best_memattr_id != (hwloc_memattr_id_t) -1) {
-          /* only keep the best one for that memattr */
-          int best;
+          /* only keep the best ones for that memattr */
 
           /* won't work if obj is CPU-less: perf from I/O is likely different from perf from CPU objects */
           loc.type = HWLOC_LOCATION_TYPE_CPUSET;
           loc.location.cpuset = obj->cpuset;
-          best = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id,
-                                                               nrnodes, nodes, &loc);
-          if (best == -1) {
-            /* no perf info found, report nothing */
+          err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id,
+                                                               nrnodes, nodes, &loc, best_node_flags, nodeset);
+          if (err < -1) {
             if (verbose > 0)
               fprintf(stderr, "Failed to find a best local node for memory attribute.\n");
-            nrnodes = 0;
-          } else {
-            /* only report the best node, but keep the index intact */
-            for(i=0; i<nrnodes; i++)
-              if (i != (unsigned) best)
-                nodes[i] = NULL;
+            /* on error, nodeset is zeroed, and we report nothing below (except if default flag is set) */
           }
         }
         for(i=0; i<nrnodes; i++) {
-          if (!nodes[i])
+          if (!hwloc_bitmap_isset(nodeset, nodes[i]->os_index))
             continue;
           if (show_index_prefix)
 	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
@@ -626,6 +621,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
     } else {
       fprintf(stderr, "Failed to allocate array of local NUMA nodes\n");
     }
+    hwloc_bitmap_free(nodeset);
     free(nodes);
   } else {
     hwloc_info_show_single_obj(topology, obj, objs, prefix, verbose);
@@ -963,8 +959,19 @@ main (int argc, char *argv[])
   }
 
   if (best_memattr_str) {
+    char *tmp;
     if (!show_local_memory)
       fprintf(stderr, "--best-memattr is ignored without --local-memory.\n");
+    tmp = strstr(best_memattr_str, ",default");
+    if (tmp) {
+      memmove(tmp, tmp+8, strlen(tmp+8)+1);
+      best_node_flags |= HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT;
+    }
+    tmp = strstr(best_memattr_str, ",strict");
+    if (tmp) {
+      memmove(tmp, tmp+7, strlen(tmp+7)+1);
+      best_node_flags |= HWLOC_UTILS_BEST_NODE_FLAG_STRICT;
+    }
     best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
     if (best_memattr_id == (hwloc_memattr_id_t) -1) {
       fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);

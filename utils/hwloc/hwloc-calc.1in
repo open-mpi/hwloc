@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2023 Inria.  All rights reserved.
+.\" Copyright © 2010-2024 Inria.  All rights reserved.
 .\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-CALC "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -248,7 +248,7 @@ This option enables \fB\-\-local\-memory\fR.
 .TP
 \fB\-\-best\-memattr\fR <name>
 Enable the listing of local memory nodes with \fB\-\-local\-memory\fR,
-but only display the local node that has the best value for the memory
+but only display the local nodes that have the best value for the memory
 attribute given by \fI<name>\fR (or as an index).
 
 If the memory attribute values depend on the initiator, the hwloc-calc
@@ -262,6 +262,15 @@ All existing attributes in the current topology may be listed with
 
 If combined with \fB\-\-object\-output\fR, the object index is prefixed
 with its type (e.g. \fINUMANode:0\fR instead of \fI0\fR).
+
+\fI<name>\fR may be suffixed with flags to tune the selection of best nodes,
+for instance as \fBbandwidth,strict,default\fR.
+\fBdefault\fR means that all local nodes are reported if no best could be found.
+\fBstrict\fR means that nodes are selected only if their performance is the best
+for all the input CPUs. On a dual-socket machine with HBM in each socket,
+both HBMs are the best for their local socket, but not for the remote socket.
+Hence both HBM are also considered best for the entire machine by default,
+but none if \fBstrict\fR.
 .TP
 \fB\-\-sep <sep>\fR
 Change the field separator in the output.
@@ -393,7 +402,7 @@ whose locality is exactly equal to a Package:
     $ hwloc-calc --local-memory-flags 0 --physical-output pack:1
     4,7
 
-To display the best-capacity NUMA node, by physical indexes,
+To display the best-capacity NUMA node(s), by physical indexes,
 whose locality is exactly equal to a Package:
 
     $ hwloc-calc --local-memory-flags 0 --best-memattr capacity --physical-output pack:1

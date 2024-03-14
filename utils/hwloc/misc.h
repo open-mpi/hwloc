@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -770,70 +770,144 @@ hwloc_utils_parse_memattr_name(hwloc_topology_t topo, const char *str)
     return id;
 }
 
+#define HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT (1UL<<0) /* report all nodes if no best found */
+#define HWLOC_UTILS_BEST_NODE_FLAG_STRICT (1UL<<1) /* report only best with same initiator */
+
+static __hwloc_inline void
+hwloc_utils__update_best_node(hwloc_obj_t newnode, uint64_t newvalue,
+                              uint64_t *bestvalue, hwloc_bitmap_t bestnodeset,
+                              unsigned long mflags)
+{
+  if (hwloc_bitmap_iszero(bestnodeset)) {
+    /* first */
+    *bestvalue = newvalue;
+    hwloc_bitmap_only(bestnodeset, newnode->os_index);
+
+  } else if (mflags & HWLOC_MEMATTR_FLAG_HIGHER_FIRST) {
+    if (newvalue > *bestvalue) {
+      /* higher */
+      *bestvalue = newvalue;
+      hwloc_bitmap_only(bestnodeset, newnode->os_index);
+    } else if (newvalue == *bestvalue) {
+      /* as high */
+      hwloc_bitmap_set(bestnodeset, newnode->os_index);
+    }
+
+  } else {
+    assert(mflags & HWLOC_MEMATTR_FLAG_LOWER_FIRST);
+    if (newvalue < *bestvalue) {
+      /* lower */
+      *bestvalue = newvalue;
+      hwloc_bitmap_only(bestnodeset, newnode->os_index);
+    } else if (newvalue == *bestvalue) {
+      /* as low */
+      hwloc_bitmap_set(bestnodeset, newnode->os_index);
+    }
+  }
+}
+
+/* fill best_nodeset with best nodes.
+ * if STRICT flag, only the really local ones are returned.
+ * if none is best (they don't have values), return empty.
+ * if none is best and DEFAULT flag, return all nodes.
+ * on error, return empty.
+ */
 static __hwloc_inline int
 hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_memattr_id_t id,
                                               unsigned nbnodes, hwloc_obj_t *nodes,
-                                              struct hwloc_location *initiator)
+                                              struct hwloc_location *initiator,
+                                              unsigned long flags,
+                                              hwloc_nodeset_t best_nodeset)
 {
-  unsigned nbtgs, i, j;
-  hwloc_obj_t *tgs;
-  int best;
-  hwloc_uint64_t *values, bestvalue;
+  unsigned i, j;
+  hwloc_uint64_t *values, bestvalue = 0;
   unsigned long mflags;
   int err;
+
+  hwloc_bitmap_zero(best_nodeset);
 
   err = hwloc_memattr_get_flags(topology, id, &mflags);
   if (err < 0)
     goto out;
 
-  nbtgs = 0;
-  err = hwloc_memattr_get_targets(topology, id, initiator, 0, &nbtgs, NULL, NULL);
-  if (err < 0)
-    goto out;
+  if (mflags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
+    /* iterate over targets, and then on their initiators */
+    for(i=0; i<nbnodes; i++) {
+      unsigned nbi;
+      struct hwloc_location *initiators;
 
-  tgs = malloc(nbtgs * sizeof(*tgs));
-  values = malloc(nbtgs * sizeof(*values));
-  if (!tgs || !values)
-    goto out_with_arrays;
+      nbi = 0;
+      err = hwloc_memattr_get_initiators(topology, id, nodes[i], 0, &nbi, NULL, NULL);
+      if (err < 0)
+        goto out;
 
-  err = hwloc_memattr_get_targets(topology, id, initiator, 0, &nbtgs, tgs, values);
-  if (err < 0)
-    goto out_with_arrays;
-
-  best = -1;
-  bestvalue = 0;
-  for(i=0; i<nbnodes; i++) {
-    for(j=0; j<nbtgs; j++)
-      if (tgs[j] == nodes[i])
-        break;
-    if (j==nbtgs)
-      /* no target info for this node */
-      continue;
-    if (best == -1) {
-      best = i;
-      bestvalue = values[j];
-    } else if (mflags & HWLOC_MEMATTR_FLAG_HIGHER_FIRST) {
-      if (values[j] > bestvalue) {
-        best = i;
-        bestvalue = values[j];
+      initiators = malloc(nbi * sizeof(*initiators));
+      values = malloc(nbi * sizeof(*values));
+      if (!initiators || !values) {
+        free(initiators);
+        free(values);
+        goto out;
       }
-    } else {
-      assert(mflags & HWLOC_MEMATTR_FLAG_LOWER_FIRST);
-      if (values[j] < bestvalue) {
-        best = i;
-        bestvalue = values[j];
+
+      err = hwloc_memattr_get_initiators(topology, id, nodes[i], 0, &nbi, initiators, values);
+      if (err < 0) {
+        free(initiators);
+        free(values);
+        goto out;
       }
+
+      for(j=0; j<nbi; j++) {
+        /* does this initiator match the user location? */
+        if (initiator->type != initiators[j].type)
+          continue;
+        switch (initiator->type) {
+        case HWLOC_LOCATION_TYPE_OBJECT:
+          if (initiator->location.object->type != initiators[j].location.object->type
+              || initiator->location.object->gp_index != initiators[j].location.object->gp_index)
+            continue;
+          break;
+        case HWLOC_LOCATION_TYPE_CPUSET:
+          if (flags & HWLOC_UTILS_BEST_NODE_FLAG_STRICT) {
+            if (!hwloc_bitmap_isincluded(initiator->location.cpuset, initiators[j].location.cpuset))
+              continue;
+          } else {
+            if (!hwloc_bitmap_intersects(initiator->location.cpuset, initiators[j].location.cpuset))
+              continue;
+          }
+          break;
+        default:
+          abort();
+        }
+
+        hwloc_utils__update_best_node(nodes[i], values[j],
+                                      &bestvalue, best_nodeset,
+                                      mflags);
+      }
+
+      free(initiators);
+      free(values);
+    }
+
+  } else {
+    /* no initiator, just iterate over targets */
+    for(i=0; i<nbnodes; i++) {
+      uint64_t value;
+      if (!hwloc_memattr_get_value(topology, id, nodes[i], NULL, 0, &value))
+        hwloc_utils__update_best_node(nodes[i], value,
+                                      &bestvalue, best_nodeset,
+                                      mflags);
     }
   }
 
-  free(tgs);
-  free(values);
-  return best;
+  if ((flags & HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT)
+      && hwloc_bitmap_iszero(best_nodeset)) {
+    for(i=0; i<nbnodes; i++)
+      hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+  }
+  return 0;
 
- out_with_arrays:
-  free(tgs);
-  free(values);
  out:
+  hwloc_bitmap_zero(best_nodeset);
   return -1;
 }
 
@@ -848,6 +922,8 @@ hwloc_utils_get_best_node_in_nodeset_by_memattr(hwloc_topology_t topology, hwloc
   hwloc_uint64_t *values, bestvalue;
   unsigned long mflags;
   int err;
+
+  // TODO update
 
   err = hwloc_memattr_get_flags(topology, id, &mflags);
   if (err < 0)
