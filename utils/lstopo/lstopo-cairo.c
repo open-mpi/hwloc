@@ -390,7 +390,7 @@ output_x11(struct lstopo_output *loutput, const char *dummy __hwloc_attribute_un
   XSetIconName(dpy, top, "lstopo");
   class_hint = XAllocClassHint();
   if (class_hint) {
-    class_hint->res_name = class_hint->res_class = "lstopo";
+    class_hint->res_name = class_hint->res_class = (char *) "lstopo";
     XSetClassHint(dpy, top, class_hint);
     XFree(class_hint);
   }
