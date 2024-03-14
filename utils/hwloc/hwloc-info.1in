@@ -136,10 +136,19 @@ This option enables \fB\-\-local\-memory\fR.
 .TP
 \fB\-\-best\-memattr\fR <name>
 Enable the listing of local memory nodes with \fB\-\-local\-memory\fR,
-but only display the local node that has the best value for the memory
+but only display the local nodes that have the best value for the memory
 attribute given by \fI<name>\fR (or as an index).
 If the memory attribute values depend on the initiator, the object given
 to hwloc-info is used as the initiator.
+
+\fI<name>\fR may be suffixed with flags to tune the selection of best nodes,
+for instance as \fBbandwidth,strict,default\fR.
+\fBdefault\fR means that all local nodes are reported if no best could be found.
+\fBstrict\fR means that nodes are selected only if their performance is the best
+for all the input CPUs. On a dual-socket machine with HBM in each socket,
+both HBMs are the best for their local socket, but not for the remote socket.
+Hence both HBM are also considered best for the entire machine by default,
+but none if \fBstrict\fR.
 .TP
 \fB\-\-first\fR
 For each input object, only report the first matching output object
@@ -310,7 +319,7 @@ To list the NUMA nodes that are local a PU:
      type = NUMANode
     ...
 
-To show the best-bandwidth node among NUMA nodes local to a PU:
+To show the best-bandwidth node(s) among NUMA nodes local to a PU:
 
     $ hwloc-info --local-memory --best-memattr bandwidth pu:25
     NUMANode L#7 = local memory #1 of PU L#25

@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2023 Inria.  All rights reserved.
+Copyright © 2009-2024 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -21,6 +21,9 @@ Version 2.11.0
 --------------
 * API
   + Add hwloc_obj_set_subtype().
+* Tools/
+  + Option --best-memattr may now return multiple nodes. Additional
+    configuration flags may be given to tweak its behavior.
 
 
 Version 2.10.0

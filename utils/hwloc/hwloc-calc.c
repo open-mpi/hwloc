@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -79,6 +79,7 @@ static struct hwloc_calc_level *hierlevels;
 static int local_numanodes = 0;
 static unsigned long local_numanode_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
+static unsigned long best_node_flags = 0;
 static int showobjs = 0;
 static int no_smt = -1;
 static int singlify = 0;
@@ -232,35 +233,33 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (local_numanodes) {
     unsigned nrnodes;
     hwloc_obj_t *nodes;
+    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc_full(); /* show all nodes by default */
     nrnodes = hwloc_bitmap_weight(hwloc_topology_get_topology_nodeset(topology));
     nodes = malloc(nrnodes * sizeof(*nodes));
-    if (nodes) {
+    if (nodeset && nodes) {
       int err;
       struct hwloc_location loc;
       loc.type = HWLOC_LOCATION_TYPE_CPUSET;
       loc.location.cpuset = set;
       err = hwloc_get_local_numanode_objs(topology, &loc, &nrnodes, nodes, local_numanode_flags);
       if (!err) {
-        unsigned i;
+        unsigned i, first = 1;
         if (best_memattr_id != (hwloc_memattr_id_t) -1) {
-          int best = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc);
-          if (best == -1) {
-            /* no perf info found, report nothing */
-            nrnodes = 0;
-          } else {
-            /* only report the best nodes */
-            nodes[0] = nodes[best];
-            nrnodes = 1;
-          }
+          err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, nodeset);
+          /* on error, nodeset is zeroed, and we report nothing below (except if default flag is set) */
         }
         if (!sep)
           sep = ",";
         for(i=0; i<nrnodes; i++) {
           char type[64];
           unsigned idx;
+          if (!hwloc_bitmap_isset(nodeset, nodes[i]->os_index))
+            continue;
           hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], 1);
           idx = logicalo ? nodes[i]->logical_index : nodes[i]->os_index;
-          if (i>0)
+          if (first)
+            first = 0;
+          else
             printf("%s", sep);
           if (objecto) {
             char types[64];
@@ -270,8 +269,9 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
           printf("%u", idx);
         }
       }
-      free(nodes);
     }
+    free(nodes);
+    hwloc_bitmap_free(nodeset);
     printf("\n");
 
   } else {
@@ -695,6 +695,17 @@ int main(int argc, char *argv[])
   }
 
   if (best_memattr_str) {
+    char *tmp;
+    tmp = strstr(best_memattr_str, ",default");
+    if (tmp) {
+      memmove(tmp, tmp+8, strlen(tmp+8)+1);
+      best_node_flags |= HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT;
+    }
+    tmp = strstr(best_memattr_str, ",strict");
+    if (tmp) {
+      memmove(tmp, tmp+7, strlen(tmp+7)+1);
+      best_node_flags |= HWLOC_UTILS_BEST_NODE_FLAG_STRICT;
+    }
     best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
     if (best_memattr_id == (hwloc_memattr_id_t) -1) {
       fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);
