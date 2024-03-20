@@ -685,17 +685,8 @@ int main(int argc, char *argv[])
   }
 
   if (best_memattr_str) {
-    char *tmp;
-    tmp = strstr(best_memattr_str, ",default");
-    if (tmp) {
-      memmove(tmp, tmp+8, strlen(tmp+8)+1);
-      best_memattr_flags |= HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT;
-    }
-    tmp = strstr(best_memattr_str, ",strict");
-    if (tmp) {
-      memmove(tmp, tmp+7, strlen(tmp+7)+1);
-      best_memattr_flags |= HWLOC_UTILS_BEST_NODE_FLAG_STRICT;
-    }
+    best_node_flags = hwloc_utils_parse_best_node_flags(best_memattr_str);
+
     best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
     if (best_memattr_id == (hwloc_memattr_id_t) -1) {
       fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);

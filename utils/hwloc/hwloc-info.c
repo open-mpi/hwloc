@@ -643,7 +643,7 @@ main (int argc, char *argv[])
   struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   const char *show_ancestor_type = NULL;
   const char *show_descendants_type = NULL;
-  const char *best_memattr_str = NULL;
+  char *best_memattr_str = NULL;
   char *restrictstring = NULL;
   size_t typelen;
   int opt;
@@ -959,19 +959,8 @@ main (int argc, char *argv[])
   }
 
   if (best_memattr_str) {
-    char *tmp;
-    if (!show_local_memory)
-      fprintf(stderr, "--best-memattr is ignored without --local-memory.\n");
-    tmp = strstr(best_memattr_str, ",default");
-    if (tmp) {
-      memmove(tmp, tmp+8, strlen(tmp+8)+1);
-      best_node_flags |= HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT;
-    }
-    tmp = strstr(best_memattr_str, ",strict");
-    if (tmp) {
-      memmove(tmp, tmp+7, strlen(tmp+7)+1);
-      best_node_flags |= HWLOC_UTILS_BEST_NODE_FLAG_STRICT;
-    }
+    best_node_flags = hwloc_utils_parse_best_node_flags(best_memattr_str);
+
     best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
     if (best_memattr_id == (hwloc_memattr_id_t) -1) {
       fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);
