@@ -70,9 +70,9 @@ ln -sf ../../../../includes/jquery.js "$dst/v${VERSION}/jquery.js"
 
 echo
 cd "$dst/v${VERSION}/"
-echo "Looking for main page links:"
-echo "- Examples:"
-grep -l '<div class="section" id="cli_examples">' *.php || echo "Not found!"
-echo "- 2.x API upgrade page:"
-grep -l '<div class="title">Upgrading to the hwloc 2.0 API' *.php || echo "Not found!"
+echo "Looking for URLs to be updated in links in main pages:"
+echo "- Link to examples:"
+grep -H ' id="cli_examples">' *.php || echo "Not found!"
+echo "- Link to API upgrade in NEWS and tutorials:"
+grep -H ' class="title">Upgrading to the hwloc .* API<' *.php || echo "Not found!"
 cd ../..
