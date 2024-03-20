@@ -806,6 +806,27 @@ hwloc_utils_parse_memattr_name(hwloc_topology_t topo, const char *str)
 #define HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT (1UL<<0) /* report all nodes if no best found */
 #define HWLOC_UTILS_BEST_NODE_FLAG_STRICT (1UL<<1) /* report only best with same initiator */
 
+static __hwloc_inline unsigned long
+hwloc_utils_parse_best_node_flags(char *str)
+{
+  unsigned long best_memattr_flags = 0;
+  char *tmp;
+
+  tmp = strstr(str, ",default");
+  if (tmp) {
+    memmove(tmp, tmp+8, strlen(tmp+8)+1);
+    best_memattr_flags |= HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT;
+  }
+
+  tmp = strstr(str, ",strict");
+  if (tmp) {
+    memmove(tmp, tmp+7, strlen(tmp+7)+1);
+    best_memattr_flags |= HWLOC_UTILS_BEST_NODE_FLAG_STRICT;
+  }
+
+  return best_memattr_flags;
+}
+
 static __hwloc_inline void
 hwloc_utils__update_best_node(hwloc_obj_t newnode, uint64_t newvalue,
                               uint64_t *bestvalue, hwloc_bitmap_t bestnodeset,
