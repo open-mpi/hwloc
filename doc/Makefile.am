@@ -1,4 +1,4 @@
-# Copyright © 2009-2023 Inria.  All rights reserved.
+# Copyright © 2009-2024 Inria.  All rights reserved.
 # Copyright © 2009-2013, 2021 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -26,7 +26,7 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 #
 
 # images already available in repository
-PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png \
+PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png images/heteromem.png \
         images/ppc64-with-smt.png images/ppc64-without-smt.png images/ppc64-full-with-smt.png \
         images/devel09-pci.png
 # images built from repository before inclusion in make dist
