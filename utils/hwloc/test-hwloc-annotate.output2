@@ -38,11 +38,11 @@
             <object type="OSDev" gp_index="328" id="obj328" name="cuda0" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
-              <info name="CUDAGlobalMemorySize" value="16671616"/>
-              <info name="CUDAL2CacheSize" value="4096"/>
+              <info name="CUDAGlobalMemorySize" value="16671616KiB"/>
+              <info name="CUDAL2CacheSize" value="4096KiB"/>
               <info name="CUDAMultiProcessors" value="56"/>
               <info name="CUDACoresPerMP" value="64"/>
-              <info name="CUDASharedMemorySizePerMP" value="48"/>
+              <info name="CUDASharedMemorySizePerMP" value="48KiB"/>
             </object>
             <object type="OSDev" gp_index="324" id="obj324" name="opencl0d0" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
@@ -52,7 +52,7 @@
               <info name="OpenCLPlatformName" value="NVIDIA CUDA"/>
               <info name="OpenCLPlatformDeviceIndex" value="0"/>
               <info name="OpenCLComputeUnits" value="56"/>
-              <info name="OpenCLGlobalMemorySize" value="16671616"/>
+              <info name="OpenCLGlobalMemorySize" value="16671616KiB"/>
             </object>
             <object type="OSDev" gp_index="332" id="obj332" name="nvml0" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
@@ -69,11 +69,11 @@
             <object type="OSDev" gp_index="329" id="obj329" name="cuda1" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
-              <info name="CUDAGlobalMemorySize" value="16671616"/>
-              <info name="CUDAL2CacheSize" value="4096"/>
+              <info name="CUDAGlobalMemorySize" value="16671616KiB"/>
+              <info name="CUDAL2CacheSize" value="4096KiB"/>
               <info name="CUDAMultiProcessors" value="56"/>
               <info name="CUDACoresPerMP" value="64"/>
-              <info name="CUDASharedMemorySizePerMP" value="48"/>
+              <info name="CUDASharedMemorySizePerMP" value="48KiB"/>
             </object>
             <object type="OSDev" gp_index="325" id="obj325" name="opencl0d1" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
@@ -83,7 +83,7 @@
               <info name="OpenCLPlatformName" value="NVIDIA CUDA"/>
               <info name="OpenCLPlatformDeviceIndex" value="1"/>
               <info name="OpenCLComputeUnits" value="56"/>
-              <info name="OpenCLGlobalMemorySize" value="16671616"/>
+              <info name="OpenCLGlobalMemorySize" value="16671616KiB"/>
             </object>
             <object type="OSDev" gp_index="333" id="obj333" name="nvml1" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
@@ -129,11 +129,11 @@
             <object type="OSDev" gp_index="330" id="obj330" name="cuda2" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
-              <info name="CUDAGlobalMemorySize" value="16671616"/>
-              <info name="CUDAL2CacheSize" value="4096"/>
+              <info name="CUDAGlobalMemorySize" value="16671616KiB"/>
+              <info name="CUDAL2CacheSize" value="4096KiB"/>
               <info name="CUDAMultiProcessors" value="56"/>
               <info name="CUDACoresPerMP" value="64"/>
-              <info name="CUDASharedMemorySizePerMP" value="48"/>
+              <info name="CUDASharedMemorySizePerMP" value="48KiB"/>
             </object>
             <object type="OSDev" gp_index="326" id="obj326" name="opencl0d2" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
@@ -143,7 +143,7 @@
               <info name="OpenCLPlatformName" value="NVIDIA CUDA"/>
               <info name="OpenCLPlatformDeviceIndex" value="2"/>
               <info name="OpenCLComputeUnits" value="56"/>
-              <info name="OpenCLGlobalMemorySize" value="16671616"/>
+              <info name="OpenCLGlobalMemorySize" value="16671616KiB"/>
             </object>
             <object type="OSDev" gp_index="334" id="obj334" name="nvml2" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
@@ -160,11 +160,11 @@
             <object type="OSDev" gp_index="331" id="obj331" name="cuda3" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla P100-SXM2-16GB"/>
-              <info name="CUDAGlobalMemorySize" value="16671616"/>
-              <info name="CUDAL2CacheSize" value="4096"/>
+              <info name="CUDAGlobalMemorySize" value="16671616KiB"/>
+              <info name="CUDAL2CacheSize" value="4096KiB"/>
               <info name="CUDAMultiProcessors" value="56"/>
               <info name="CUDACoresPerMP" value="64"/>
-              <info name="CUDASharedMemorySizePerMP" value="48"/>
+              <info name="CUDASharedMemorySizePerMP" value="48KiB"/>
             </object>
             <object type="OSDev" gp_index="327" id="obj327" name="opencl0d3" subtype="OpenCL" osdev_type="12">
               <info name="OpenCLDeviceType" value="GPU"/>
@@ -174,7 +174,7 @@
               <info name="OpenCLPlatformName" value="NVIDIA CUDA"/>
               <info name="OpenCLPlatformDeviceIndex" value="3"/>
               <info name="OpenCLComputeUnits" value="56"/>
-              <info name="OpenCLGlobalMemorySize" value="16671616"/>
+              <info name="OpenCLGlobalMemorySize" value="16671616KiB"/>
             </object>
             <object type="OSDev" gp_index="335" id="obj335" name="nvml3" subtype="NVML" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
