@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2020 Inria.  All rights reserved.
+# Copyright © 2012-2023 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 

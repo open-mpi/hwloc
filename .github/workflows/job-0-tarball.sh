@@ -12,21 +12,14 @@ echo "############################"
 set -e
 set -x
 
-branch="$1"
-if test -z "$branch"; then
-  echo "Need branch name as argument."
-  exit 1
-fi
-
-echo "Got GIT branch name $branch"
-
 # environment variables
 test -f $HOME/.ciprofile && . $HOME/.ciprofile
 
-# convert "pr/XYZ/head" into "PR-XYZ"
-branch=$(echo $branch | sed -r -e 's@pr/([0-9]+)/head@PR-\1@')
+# GITHUB_REF contains refs/heads/<branch_name>, refs/pull/<pr_number>/merge, or refs/tags/<tag_name>
+# convert into the branch/tag name or into "PR-XYZ"
+branch=$(echo $GITHUB_REF | sed -r -e 's@refs/([^/]+)/@@' | sed -r -e 's@([0-9]+)/merge@PR-\1@')
 
-# keep branch-name before the first - (e.g. v2.0-beta becomes v2.0)
+# keep branch-name before the first '-' (e.g. v2.0-beta becomes v2.0)
 # and look for the corresponding autotools.
 # "PR-XYZ" will get "PR" which means they'll use master autotools (likely OK)
 basebranch=$( echo $branch | sed -r -e 's@^.*/([^/]+)$@\1@' -e 's/-.*//' )
@@ -37,9 +30,6 @@ else
   export PATH=$HOME/local/hwloc-master/bin:$PATH
   echo using generic $HOME/local/hwloc-master
 fi
-
-# remove previous artifacts so that they don't exported again by this build
-rm -f hwloc-*.tar.gz hwloc-*.tar.bz2 || true
 
 # display autotools versions
 automake --version | head -1

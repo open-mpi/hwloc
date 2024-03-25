@@ -1,0 +1,96 @@
+name: Build checks
+
+on: [push, pull_request]
+
+jobs:
+  build-tarball:
+    name: Build tarball from GIT
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libltdl-dev libcairo2-dev libx11-dev libxml2-dev libxml2-utils libncurses5-dev libxnvctrl-dev libpciaccess-dev libudev-dev pkg-config ocl-icd-opencl-dev autoconf automake libtool doxygen-latex transfig w3m
+    - uses: actions/checkout@v4
+    - name: Build and distcheck
+      run: $GITHUB_WORKSPACE/.github/workflows/job-0-tarball.sh
+    - name: Archive tarballs
+      uses: actions/upload-artifact@v3
+      with:
+        name: Tarball
+        path: hwloc-*.tar.gz
+    - name: Archive documentation PDF
+      uses: actions/upload-artifact@v3
+      with:
+        name: Documentation PDF
+        path: doc/doxygen-doc/hwloc-a4.pdf
+  check-tarball-inria-centos81amd64:
+    name: Check tarball on Inria centos81amd64
+    needs: build-tarball
+    runs-on: hwloc-centos81amd64
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: '.github/workflows'
+        sparse-checkout-cone-mode: false
+    - name: Download tarball
+      uses: actions/download-artifact@v3
+      with:
+        name: Tarball
+    - name: Extract, build and check
+      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+  check-tarball-gh-ubuntu-latest:
+    name: Check tarball on GH ubuntu-latest
+    needs: build-tarball
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y --no-install-recommends pkg-config libcairo2-dev libxml2-dev
+    - run: ls -la
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: '.github/workflows'
+        sparse-checkout-cone-mode: false
+    - run: ls -la
+    - name: Download tarball
+      uses: actions/download-artifact@v3
+      with:
+        name: Tarball
+    - name: Extract, build and check
+      run: $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+  check-tarball-gh-macos-latest:
+    name: Check tarball on GH macos-latest
+    needs: build-tarball
+    runs-on: macos-latest
+    steps:
+    - name: Install dependencies
+      run: |
+        brew install pkg-config
+        brew install cairo
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: '.github/workflows'
+        sparse-checkout-cone-mode: false
+    - name: Download tarball
+      uses: actions/download-artifact@v3
+      with:
+        name: Tarball
+    - name: Extract, build and check
+      run: |
+        $GITHUB_WORKSPACE/.github/workflows/job-1-check.sh hwloc-*.tar.gz
+# check-tarball:
+#   name: Check tarball on GH runners
+#   needs: build-tarball
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest,macos-latest]
+#   runs-on: ${{ matrix.os }}
+#   steps:
+#   - name: Download tarball
+#     uses: actions/download-artifact@v3
+#     with:
+#       name: Tarball
+#   - name: Extract
+#     run: tar xvf hwloc-*.tar.gz
