@@ -2094,8 +2094,9 @@ These info attributes are attached to OS device objects specified in parentheses
 
 <dl>
 <dt>Vendor, Model, Revision, Size, SectorSize (Storage OS devices)</dt>
-<dd>The vendor and model names, revision, size (in KiB = 1024 bytes)
-and SectorSize (in bytes).
+<dd>The vendor and model names, revision,
+ size (in kibibytes = 1024 bytes, and the value string is suffixed with "KiB")
+ and SectorSize (in bytes).
 </dd>
 <dt>LinuxDeviceID (Storage OS devices)</dt>
 <dd>The major/minor device number such as 8:0 of Linux device.
@@ -2106,7 +2107,7 @@ and SectorSize (in bytes).
 <dt>CXLRAMSize, CXLPMEMSize (CXL Memory OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
  in a CXL Type-3 device.
- Sizes are in KiB (1024 bytes).
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
 </dd>
 <dt>GPUVendor, GPUModel (GPU and/or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
@@ -2119,7 +2120,7 @@ and SectorSize (in bytes).
 </dd>
 <dt>OpenCLComputeUnits, OpenCLGlobalMemorySize (OpenCL OS devices)</dt>
 <dd>The number of compute units and global memory size of an OpenCL device.
- Sizes are in KiB (1024 bytes).
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
 </dd>
 <dt>LevelZeroVendor, LevelZeroModel, LevelZeroBrand,</dt>
 <dt>LevelZeroSerialNumber, LevelZeroBoardNumber (LevelZero OS devices)</dt>
@@ -2150,7 +2151,7 @@ and SectorSize (in bytes).
 </dd>
 <dt>LevelZeroHBMSize, LevelZeroDDRSize, LevelZeroMemorySize (LevelZero OS devices or subdevices)</dt>
 <dd>The amount of HBM or DDR memory of a LevelZero device or subdevice.
- Sizes are in KiB (1024 bytes).
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
  If the type of memory could not be determined, the generic name LevelZeroMemorySize is used.
  For devices that contain subdevices, the amount reported in the root device
  includes the memories of all its subdevices.
@@ -2169,7 +2170,7 @@ and SectorSize (in bytes).
  The amount of GPU memory (VRAM),
  of GPU memory that is visible from the host (Visible VRAM),
  and of system memory that is usable by the GPU (Graphics Translation Table).
- Sizes are in KiB (1024 bytes).
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
 </dd>
 <dt>XGMIHiveID (RSMI GPU OS devices)</dt>
 <dd>The ID of the group of GPUs (Hive) interconnected by XGMI links
@@ -2189,7 +2190,7 @@ and SectorSize (in bytes).
  The number of shared multiprocessors, the number of cores per
  multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
- Sizes are in KiB (1024 bytes).
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
 </dd>
 <dt>VectorEngineModel, VectorEngineSerialNumber (VectorEngine OS devices)</dt>
 <dd>
@@ -2200,7 +2201,7 @@ and SectorSize (in bytes).
 <dd>
  The number of cores, memory size, and the sizes of the (global)
  last level cache and of L2, L1d and L1i caches of a VectorEngine device.
- Sizes are in KiB (1024 bytes).
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
 </dd>
 <dt>VectorEngineNUMAPartitioned (VectorEngine OS devices)</dt>
 <dd>
@@ -2280,8 +2281,8 @@ The Solaris kstat processor group name that was used to build this Group object.
 </dd>
 <dt>Vendor, AssetTag, PartNumber, DeviceLocation, BankLocation, FormFactor, Type, Size, Rank (MemoryModule Misc objects)</dt>
 <dd>
-Information about memory modules (DIMMs) extracted from SMBIOS.
-Size is in KiB.
+ Information about memory modules (DIMMs) extracted from SMBIOS.
+ Size is in kibibytes (1024 bytes), and the value string is suffixed with "KiB".
 </dd>
 </dl>
 

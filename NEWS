@@ -72,6 +72,8 @@ Version 3.0.0
   + hwloc_topology_allow() is now possible on shmem-adopted topology.
     This allows to share a topology between processes in different
     Linux cgroups, etc.
+  + Size info attribute values that were in KiB are now explicitly
+    suffixed by "KiB".
   + XML format switches to 3.0 by default. Exporting to 2.x is
     possible with the new V2 XML export flag.
 

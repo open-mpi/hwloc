@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1214,6 +1214,46 @@ lstopo_set_object_color(struct lstopo_output *loutput,
     s->t2 = lud->style.t2;
 }
 
+/* official info attributes are in KiB (with "KiB" suffix since v3.0)
+ * but support other cases to be future-proof
+ */
+static unsigned long long parse_info_size(hwloc_obj_t obj, const char *infoname)
+{
+  const char *value;
+  char *end;
+  unsigned long long bytes;
+
+  value = hwloc_obj_get_info_by_name(obj, infoname);
+  if (!value)
+    return 0;
+
+  bytes = strtoull(value, &end, 10);
+  if (end == value)
+    return 0;
+
+  if (*end) {
+    /* handle suffix */
+    if (!strcasecmp(end, "KiB")) /* normal case */
+      bytes <<= 10;
+    else if (!strcasecmp(end, "KB"))
+      bytes *= 1000;
+    else if (!strcasecmp(end, "MiB"))
+      bytes <<= 20;
+    else if (!strcasecmp(end, "MB"))
+      bytes *= 1000 * 1000;
+    else if (!strcasecmp(end, "GiB"))
+      bytes <<= 30;
+    else if (!strcasecmp(end, "GB"))
+      bytes *= 1000 * 1000 * 1000;
+    else if (!strcasecmp(end, "TiB"))
+      bytes <<= 40;
+    else if (!strcasecmp(end, "TB"))
+      bytes *= 1000ULL * 1000ULL * 1000ULL * 1000ULL;
+  }
+
+  return bytes;
+}
+
 static void
 prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 {
@@ -1264,18 +1304,17 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	if (!strcmp(obj->subtype, "CUDA")) {
 	  /* CUDA */
 	  const char *value, *value2, *value3;
-	  value = hwloc_obj_get_info_by_name(obj, "CUDAGlobalMemorySize");
-	  if (value) {
-	    unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+          unsigned long long bytes;
+          bytes = parse_info_size(obj, "CUDAGlobalMemorySize");
+          if (bytes) {
             hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
-	  }
-	  value = hwloc_obj_get_info_by_name(obj, "CUDAL2CacheSize");
-	  if (value) {
-	    unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+          }
+          bytes = parse_info_size(obj, "CUDAL2CacheSize");
+          if (bytes) {
             char bytestr[25];
             hwloc_memory_size_snprintf(bytestr, sizeof(bytestr), bytes, loutput->obj_snprintf_flags);
-	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "L2 (%s)", bytestr);
-	  }
+            snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "L2 (%s)", bytestr);
+          }
 	  value = hwloc_obj_get_info_by_name(obj, "CUDAMultiProcessors");
 	  value2 = hwloc_obj_get_info_by_name(obj, "CUDACoresPerMP");
 	  value3 = hwloc_obj_get_info_by_name(obj, "CUDASharedMemorySizePerMP");
@@ -1287,47 +1326,48 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	} else if (!strcmp(obj->subtype, "OpenCL")) {
 	  /* OpenCL */
 	  const char *value;
+          unsigned long long bytes;
 	  value = hwloc_obj_get_info_by_name(obj, "OpenCLComputeUnits");
 	  if (value) {
 	    unsigned long long cu = strtoull(value, NULL, 10);
 	    snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
 		     "%llu compute units", cu);
 	  }
-	  value = hwloc_obj_get_info_by_name(obj, "OpenCLGlobalMemorySize");
-	  if (value) {
-	    unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
-	    hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
-	  }
+          bytes = parse_info_size(obj, "OpenCLGlobalMemorySize");
+          if (bytes) {
+            hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
+          }
+
 	} else if (!strcmp(obj->subtype, "VectorEngine")) {
           /* NEC Vector Engine */
           const char *value;
+          unsigned long long bytes;
           value = hwloc_obj_get_info_by_name(obj, "VectorEngineCores");
           if (value) {
             unsigned long long cu = strtoull(value, NULL, 10);
             snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text),
                      "%llu cores", cu);
           }
-          value = hwloc_obj_get_info_by_name(obj, "VectorEngineMemorySize");
-          if (value) {
-            unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+          bytes = parse_info_size(obj, "VectorEngineMemorySize");
+          if (bytes) {
             hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
           }
+
         } else if (!strcmp(obj->subtype, "LevelZero")) {
           /* LevelZero */
-          const char *valueSl, *valueSS, *valueEU, *valueTh, *valueHBM, *valueMem;
-          valueHBM = hwloc_obj_get_info_by_name(obj, "LevelZeroHBMSize");
-          if (valueHBM) {
-            unsigned long long bytes = strtoull(valueHBM, NULL, 10) * 1024;
+          const char *valueSl, *valueSS, *valueEU, *valueTh;
+          unsigned long long bytesHBM, bytesMem;
+          bytesHBM = parse_info_size(obj, "LevelZeroHBMSize");
+          if (bytesHBM) {
             char bytestr[25];
-            hwloc_memory_size_snprintf(bytestr, sizeof(bytestr), bytes, loutput->obj_snprintf_flags);
+            hwloc_memory_size_snprintf(bytestr, sizeof(bytestr), bytesHBM, loutput->obj_snprintf_flags);
             snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "%s (HBM)", bytestr);
           }
-          valueMem = hwloc_obj_get_info_by_name(obj, "LevelZeroDDRSize");
-          if (!valueMem)
-            valueMem = hwloc_obj_get_info_by_name(obj, "LevelZeroMemorySize");
-          if (valueMem) {
-            unsigned long long bytes = strtoull(valueMem, NULL, 10) * 1024;
-            hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
+          bytesMem = parse_info_size(obj, "LevelZeroDDRSize");
+          if (!bytesMem)
+            bytesMem = parse_info_size(obj, "LevelZeroMemorySize");
+          if (bytesMem) {
+            hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytesMem, loutput->obj_snprintf_flags);
           }
           valueSl = hwloc_obj_get_info_by_name(obj, "LevelZeroNumSlices");
           valueSS = hwloc_obj_get_info_by_name(obj, "LevelZeroNumSubslicesPerSlice");
@@ -1343,10 +1383,9 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
       }
       if ((HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY) & obj->attr->osdev.type) {
 	/* Storage or Memory size */
-	const char *value;
-	value = hwloc_obj_get_info_by_name(obj, "Size");
-	if (value) {
-	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+        unsigned long long bytes;
+        bytes = parse_info_size(obj, "Size");
+	if (bytes) {
 	  hwloc_memory_size_snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), bytes, loutput->obj_snprintf_flags);
 	}
 
@@ -1355,17 +1394,15 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	/* Memory
          * Size was printed above in STORAGE|MEMORY.
          */
-	const char *value;
-	value = hwloc_obj_get_info_by_name(obj, "CXLRAMSize");
-	if (value) {
-	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+        unsigned long long bytes;
+	bytes = parse_info_size(obj, "CXLRAMSize");
+	if (bytes) {
 	  char bytestr[25];
           hwloc_memory_size_snprintf(bytestr, sizeof(bytestr), bytes, loutput->obj_snprintf_flags);
           snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "%s (RAM)", bytestr);
 	}
-	value = hwloc_obj_get_info_by_name(obj, "CXLPMEMSize");
-	if (value) {
-	  unsigned long long bytes = strtoull(value, NULL, 10) * 1024;
+	bytes = parse_info_size(obj, "CXLPMEMSize");
+	if (bytes) {
 	  char bytestr[25];
           hwloc_memory_size_snprintf(bytestr, sizeof(bytestr), bytes, loutput->obj_snprintf_flags);
           snprintf(lud->text[lud->ntext++].text, sizeof(lud->text[0].text), "%s (PMEM)", bytestr);

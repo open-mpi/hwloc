@@ -230,11 +230,11 @@
             <object type="OSDev" gp_index="136" id="obj136" name="cuda0" subtype="CUDA" osdev_type="12">
               <info name="GPUVendor" value="NVIDIA Corporation"/>
               <info name="GPUModel" value="Tesla K40m"/>
-              <info name="CUDAGlobalMemorySize" value="11796032"/>
-              <info name="CUDAL2CacheSize" value="1536"/>
+              <info name="CUDAGlobalMemorySize" value="11796032KiB"/>
+              <info name="CUDAL2CacheSize" value="1536KiB"/>
               <info name="CUDAMultiProcessors" value="15"/>
               <info name="CUDACoresPerMP" value="192"/>
-              <info name="CUDASharedMemorySizePerMP" value="48"/>
+              <info name="CUDASharedMemorySizePerMP" value="48KiB"/>
             </object>
             <object type="OSDev" gp_index="137" id="obj137" name="card0" osdev_type="4"/>
           </object>
@@ -249,7 +249,7 @@
               <info name="OpenCLPlatformName" value="AMD Accelerated Parallel Processing"/>
               <info name="OpenCLPlatformDeviceIndex" value="1"/>
               <info name="OpenCLComputeUnits" value="32"/>
-              <info name="OpenCLGlobalMemorySize" value="3087360"/>
+              <info name="OpenCLGlobalMemorySize" value="3087360KiB"/>
             </object>
           </object>
           <object type="PCIDev" gp_index="140" id="obj140" pci_busid="0000:04:00.0" pci_type="0207 [15b3:1013] [15b3:0013] 00 00" pci_link_speed="0.000000">

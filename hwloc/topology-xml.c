@@ -469,6 +469,30 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
             hwloc__add_info(&topology->infos, infoname, infovalue);
             return 0;
           }
+        } else if (obj->type == HWLOC_OBJ_OS_DEVICE) {
+          /* if infoname contains Size (but is not SectorSize), add "KiB" suffix to infovalue if missing */
+          if (strstr(infoname, "Size") && strcmp(infoname, "SectorSize") && !strstr(infovalue, "KiB")) {
+            /* CUDA: CUDAGlobalMemorySize CUDAL2CacheSize CUDASharedMemorySizePerMP
+             * LevelZero: LevelZeroMemorySize LevelZeroHBMSize LevelZeroDDRSize
+             * OpenCL: OpenCLGlobalMemorySize
+             * RSMI: RSMIVRAMSize RSMIVisibleVRAMSize RSMIGTTSize
+             * VectorEngine: VectorEngineMemorySize VectorEngineLLCSize VectorEngineL2Size VectorEngineL1dSize VectorEngineL1iSize
+             * CXL: CXLRAMSize CXLPMEMSize
+             * Block and DAX: Size
+             */
+            char tmp[64];
+            snprintf(tmp, sizeof(tmp), "%sKiB", infovalue);
+            hwloc_obj_add_info(obj, infoname, tmp);
+            return 0;
+          }
+        } else if (obj->type == HWLOC_OBJ_MISC && obj->subtype && !strcmp(obj->subtype, "MemoryModule")) {
+          /* Misc/MemoryModule Size needs "KiB" suffix if missing too */
+          if (!strcmp(infoname, "Size") && !strstr(infovalue, "KiB")) {
+            char tmp[64];
+            snprintf(tmp, sizeof(tmp), "%sKiB", infovalue);
+            hwloc_obj_add_info(obj, infoname, tmp);
+            return 0;
+          }
         }
       }
       hwloc_obj_add_info(obj, infoname, infovalue);

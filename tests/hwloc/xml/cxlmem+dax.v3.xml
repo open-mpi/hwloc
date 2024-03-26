@@ -65,7 +65,7 @@
       <object type="OSDev" gp_index="48" id="obj48" name="dax0.0" subtype="SPM" osdev_type="2">
         <info name="DAXType" value="SPM"/>
         <info name="DAXParent" value="hmem.0"/>
-        <info name="Size" value="1048576"/>
+        <info name="Size" value="1048576KiB"/>
         <info name="LinuxDeviceID" value="253:0"/>
       </object>
     </object>
@@ -82,7 +82,7 @@
         <info name="PCIVendor" value="Intel Corporation"/>
         <info name="PCIDevice" value="82801IR/IO/IH (ICH9R/DO/DH) 6 port SATA Controller [AHCI mode]"/>
         <object type="OSDev" gp_index="46" id="obj46" name="sr0" subtype="Removable Media Device" osdev_type="1">
-          <info name="Size" value="1048575"/>
+          <info name="Size" value="1048575KiB"/>
           <info name="SectorSize" value="512"/>
           <info name="LinuxDeviceID" value="11:0"/>
           <info name="Model" value="QEMU_DVD-ROM"/>
@@ -90,7 +90,7 @@
           <info name="SerialNumber" value="QM00005"/>
         </object>
         <object type="OSDev" gp_index="47" id="obj47" name="sda" subtype="Disk" osdev_type="1">
-          <info name="Size" value="10485760"/>
+          <info name="Size" value="10485760KiB"/>
           <info name="SectorSize" value="512"/>
           <info name="LinuxDeviceID" value="8:0"/>
           <info name="Model" value="QEMU_HARDDISK"/>
@@ -116,7 +116,7 @@
                   <info name="PCISlot" value="4"/>
                   <info name="PCIVendor" value="Intel Corporation"/>
                   <object type="OSDev" gp_index="52" id="obj52" name="mem2" subtype="CXLMem" osdev_type="2">
-                    <info name="CXLRAMSize" value="262144"/>
+                    <info name="CXLRAMSize" value="262144KiB"/>
                   </object>
                 </object>
               </object>
@@ -126,7 +126,7 @@
                   <info name="PCISlot" value="5"/>
                   <info name="PCIVendor" value="Intel Corporation"/>
                   <object type="OSDev" gp_index="51" id="obj51" name="mem0" subtype="CXLMem" osdev_type="3">
-                    <info name="CXLPMEMSize" value="262144"/>
+                    <info name="CXLPMEMSize" value="262144KiB"/>
                   </object>
                 </object>
               </object>
@@ -143,7 +143,7 @@
                   <info name="PCISlot" value="6"/>
                   <info name="PCIVendor" value="Intel Corporation"/>
                   <object type="OSDev" gp_index="53" id="obj53" name="mem3" subtype="CXLMem" osdev_type="2">
-                    <info name="CXLRAMSize" value="262144"/>
+                    <info name="CXLRAMSize" value="262144KiB"/>
                   </object>
                 </object>
               </object>
@@ -153,8 +153,8 @@
                   <info name="PCISlot" value="7"/>
                   <info name="PCIVendor" value="Intel Corporation"/>
                   <object type="OSDev" gp_index="50" id="obj50" name="mem1" subtype="CXLMem" osdev_type="3">
-                    <info name="CXLRAMSize" value="262144"/>
-                    <info name="CXLPMEMSize" value="262144"/>
+                    <info name="CXLRAMSize" value="262144KiB"/>
+                    <info name="CXLPMEMSize" value="262144KiB"/>
                   </object>
                 </object>
               </object>
