@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 Inria.  All rights reserved.
+ * Copyright © 2010-2024 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -534,7 +534,7 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
 }
 
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration)
- * or AMD complex/ccd from CPUID 0x80000026 (extended CPU topology)
+ * or AMD core/thread or even complex/ccd from CPUID 0x0b or 0x80000026 (extended CPU topology)
  */
 static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
@@ -550,10 +550,12 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
     /* Intel specifies that the 0x0b/0x1f loop should stop when we get "invalid domain" (0 in ecx[8:15])
      * (if so, we also get 0 in eax/ebx for invalid subleaves).
      * However AMD rather says that the 0x80000026/0x0b loop should stop when we get "no thread at this level" (0 in ebx[0:15]).
-     * Zhaoxin follows the Intel specs but also returns "no thread at this level" for the last *valid* level (at least on KH-4000).
-     * From the Linux kernel code, it's very likely that AMD also returns "invalid domain"
-     * (because detect_extended_topology() uses that for all x86 CPUs)
-     * but keep with the official doc until AMD can clarify that (see #593).
+     * Zhaoxin follows the Intel specs but also returns "no thread at this level" for the last *valid* level (at least on KH-40000).
+     * Hence we use AMD's condition on AMD and Intel otherwise.
+     *
+     * Linux kernel <= 6.8 used "invalid domain" for both Intel and AMD (in detect_extended_topology())
+     * but x86 discovery revamp in 6.9 properly now checks both Intel and AMD conditions (in topo_subleaf()).
+     * Not sure how this could work on Zhaoxin KH-40000.
      */
     if (cpuid_type == amd) {
       if (!(ebx & 0xffff))
