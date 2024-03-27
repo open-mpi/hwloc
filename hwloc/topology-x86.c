@@ -5,7 +5,7 @@
  * See COPYING in top-level directory.
  *
  *
- * This backend is only used when the operating system does not export
+ * This backend is mostly used when the operating system does not export
  * the necessary hardware topology information to user-space applications.
  * Currently, FreeBSD and NetBSD only add PUs and then fallback to this
  * backend for CPU/Cache discovery.
@@ -15,6 +15,7 @@
  * on various architectures, without having to use this x86-specific code.
  * But this backend is still used after them to annotate some objects with
  * additional details (CPU info in Package, Inclusiveness in Caches).
+ * It may also be enabled manually to work-around bugs in native OS discovery.
  */
 
 #include "private/autogen/config.h"
