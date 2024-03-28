@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   int tid_number = -1;
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
-  const char *best_memattr_str = NULL;
+  char *best_memattr_str = NULL;
   char *callname;
   char *restrictstring = NULL;
   struct hwloc_calc_location_context_s lcontext;
@@ -473,9 +473,17 @@ int main(int argc, char *argv[])
 	goto failed_binding;
     }
 
-    if (best_memattr_str) {
+    if (best_memattr_str && !hwloc_bitmap_iszero(membind_set)) {
+      unsigned nrnodes = hwloc_bitmap_weight(membind_set);
+      hwloc_obj_t *nodes;
+      unsigned i;
+      int j;
+      unsigned long best_node_flags;
       struct hwloc_location loc;
       char *s;
+
+      best_node_flags = hwloc_utils_parse_best_node_flags(best_memattr_str);
+
       best_memattr_id = hwloc_utils_parse_memattr_name(topology, best_memattr_str);
       if (best_memattr_id == (hwloc_memattr_id_t) -1) {
         fprintf(stderr, "unrecognized memattr %s\n", best_memattr_str);
@@ -489,16 +497,32 @@ int main(int argc, char *argv[])
         fprintf(stderr, "memory binding set was %s before filtering by best memattr\n", s);
         free(s);
       }
-      hwloc_utils_get_best_node_in_nodeset_by_memattr(topology, best_memattr_id, membind_set, &loc);
+
+      nodes = malloc(nrnodes *sizeof(*nodes));
+      if (!nodes) {
+        fprintf(stderr, "failed to allocate nodes array for finding best node(s).\n");
+        return EXIT_FAILURE;
+      }
+
+      for(i=0, j=hwloc_bitmap_first(membind_set);
+          i<nrnodes;
+          i++, j=hwloc_bitmap_next(membind_set, j))
+        nodes[i] = hwloc_get_numanode_obj_by_os_index(topology, j);
+
+      ret = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, membind_set);
+
+      free(nodes);
+
+      if (ret < 0 || hwloc_bitmap_iszero(membind_set)) {
+        fprintf(stderr, "failed to find best memory node(s) for memory attribute `%s' among the given membind set.\n", best_memattr_str);
+        return EXIT_FAILURE;
+      }
+
       if (verbose > 0) {
         hwloc_bitmap_asprintf(&s, membind_set);
         /* double-space before %s for alignment with previous verbose message */
         fprintf(stderr, "memory binding is now  %s after filtering by best memattr\n", s);
         free(s);
-      }
-      if (hwloc_bitmap_iszero(membind_set)) {
-        fprintf(stderr, "failed to find a best memory node for memory attribute `%s' among the given membind set.\n", best_memattr_str);
-        return EXIT_FAILURE;
       }
     }
 
