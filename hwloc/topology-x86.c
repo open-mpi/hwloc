@@ -536,7 +536,7 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration)
  * or AMD core/thread or even complex/ccd from CPUID 0x0b or 0x80000026 (extended CPU topology)
  */
-static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
+static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, enum cpuid_type cpuid_type __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
@@ -548,22 +548,15 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
     eax = leaf;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     /* Intel specifies that the 0x0b/0x1f loop should stop when we get "invalid domain" (0 in ecx[8:15])
-     * (if so, we also get 0 in eax/ebx for invalid subleaves).
+     * (if so, we also get 0 in eax/ebx for invalid subleaves). Zhaoxin implements this too.
      * However AMD rather says that the 0x80000026/0x0b loop should stop when we get "no thread at this level" (0 in ebx[0:15]).
-     * Zhaoxin follows the Intel specs but also returns "no thread at this level" for the last *valid* level (at least on KH-40000).
-     * Hence we use AMD's condition on AMD and Intel otherwise.
      *
      * Linux kernel <= 6.8 used "invalid domain" for both Intel and AMD (in detect_extended_topology())
-     * but x86 discovery revamp in 6.9 properly now checks both Intel and AMD conditions (in topo_subleaf()).
-     * Not sure how this could work on Zhaoxin KH-40000.
+     * but x86 discovery revamp in 6.9 now properly checks both Intel and AMD conditions (in topo_subleaf()).
+     * So let's assume we are allowed to break-out once one of the Intel+AMD conditions is met.
      */
-    if (cpuid_type == amd) {
-      if (!(ebx & 0xffff))
-        break;
-    } else {
-      if (!(ecx & 0xff00))
-        break;
-    }
+    if (!(ebx & 0xffff) || !(ecx & 0xff00))
+      break;
     apic_packageshift = eax & 0x1f;
   }
 
@@ -575,13 +568,8 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
 	ecx = level;
 	eax = leaf;
 	cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
-        if (cpuid_type == amd) {
-          if (!(ebx & 0xffff))
-            break;
-        } else {
-          if (!(ecx & 0xff00))
-            break;
-        }
+        if (!(ebx & 0xffff) || !(ecx & 0xff00))
+          break;
 	apic_nextshift = eax & 0x1f;
 	apic_type = (ecx & 0xff00) >> 8;
 	apic_id = edx;
