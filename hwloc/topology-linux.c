@@ -2262,6 +2262,26 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
   int err;
   size_t bufsize;
 
+  /* try standard mount points */
+  if (!hwloc_accessat("/sys/fs/cgroup/cpuset.cpus.effective", R_OK, fsroot_fd)) {
+    hwloc_debug("Found standard cgroup2/cpuset mount point at /sys/fs/cgroup/\n");
+    *cgtype = HWLOC_LINUX_CGROUP2;
+    *mntpnt = strdup("/sys/fs/cgroup");
+    return;
+  } else if (!hwloc_accessat("/sys/fs/cgroup/cpuset/cpuset.cpus", R_OK, fsroot_fd)) {
+    hwloc_debug("Found standard cgroup1/cpuset mount point at /sys/fs/cgroup/cpuset/\n");
+    *cgtype = HWLOC_LINUX_CGROUP1;
+    *mntpnt = strdup("/sys/fs/cgroup/cpuset");
+    return;
+  } else if (!hwloc_accessat("/dev/cpuset/cpus", R_OK, fsroot_fd)) {
+    hwloc_debug("Found standard cpuset mount point at /dev/cpuset/\n");
+    *cgtype = HWLOC_LINUX_CPUSET;
+    *mntpnt = strdup("/dev/cpuset");
+    return;
+  }
+  hwloc_debug("Couldn't find any standard cgroup or cpuset mount point, looking in /proc/mounts...\n");
+
+  /* try to manually find the mount point */
   *mntpnt = NULL;
 
   if (root_path) {
