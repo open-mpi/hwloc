@@ -34,7 +34,7 @@ cpuid_tests = \
 	AMD-K8-SledgeHammer-2xOpteron-250.test \
 	Hygon-Dhyana-32cores.test \
 	Zhaoxin-CentaurHauls-ZXD-4600.test \
-	Zhaoxin-CentaurHauls-KaiSheng-KH-40000.test \
+	Zhaoxin-2xCentaurHauls-KaiSheng-KH-40000.test \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.test
 
 # Add your expected output file here.
@@ -70,7 +70,7 @@ cpuid_xml_outputs = \
 	AMD-K8-SledgeHammer-2xOpteron-250.xml \
 	Hygon-Dhyana-32cores.xml \
 	Zhaoxin-CentaurHauls-ZXD-4600.xml \
-	Zhaoxin-CentaurHauls-KaiSheng-KH-40000.xml \
+	Zhaoxin-2xCentaurHauls-KaiSheng-KH-40000.xml \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.xml
 
 # FIXME add AMD-K10-Shanghai/Barcelona-[248]3xx
@@ -105,7 +105,7 @@ cpuid_tarballs = \
 	AMD-K8-SledgeHammer-2xOpteron-250.tar.bz2 \
 	Hygon-Dhyana-32cores.tar.bz2 \
 	Zhaoxin-CentaurHauls-ZXD-4600.tar.bz2 \
-	Zhaoxin-CentaurHauls-KaiSheng-KH-40000.tar.bz2 \
+	Zhaoxin-2xCentaurHauls-KaiSheng-KH-40000.tar.bz2 \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.tar.bz2
 
 if HWLOC_HAVE_BUNZIPP
