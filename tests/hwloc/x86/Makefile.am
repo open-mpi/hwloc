@@ -38,7 +38,7 @@ cpuid_outputs = \
 	AMD-K8-SledgeHammer-2xOpteron-250.output \
 	Hygon-Dhyana-32cores.output \
 	Zhaoxin-CentaurHauls-ZXD-4600.output \
-	Zhaoxin-CentaurHauls-KaiSheng-KH-40000.output \
+	Zhaoxin-2xCentaurHauls-KaiSheng-KH-40000.output \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.output
 
 # FIXME add AMD-K10-Shanghai/Barcelona-[248]3xx
@@ -73,7 +73,7 @@ cpuid_tarballs = \
 	AMD-K8-SledgeHammer-2xOpteron-250.tar.bz2 \
 	Hygon-Dhyana-32cores.tar.bz2 \
 	Zhaoxin-CentaurHauls-ZXD-4600.tar.bz2 \
-	Zhaoxin-CentaurHauls-KaiSheng-KH-40000.tar.bz2 \
+	Zhaoxin-2xCentaurHauls-KaiSheng-KH-40000.tar.bz2 \
 	Zhaoxin-Shanghai-KaiSheng-ZXC+-FC1081.tar.bz2
 
 # Each output `xyz.output' may have a corresponding `xyz.options'
