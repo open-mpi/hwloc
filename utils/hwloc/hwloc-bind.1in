@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2023 Inria.  All rights reserved.
+.\" Copyright © 2009-2024 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -69,7 +69,7 @@ The default is \fB0\fR (or \fBnone\fR).
 Include objects disallowed by administrative limitations.
 .TP
 \fB\-\-best\-memattr\fR <name>
-Select the best NUMA node among the given memory binding set by looking
+Select the best NUMA node(s) among the given memory binding set by looking
 at the memory attribute given by \fI<name>\fR (or as an index).
 
 If the memory attribute values depend on the initiator, the CPU binding
@@ -80,6 +80,15 @@ Standard attribute names are \fICapacity\fR, \fILocality\fR,
 All existing attributes in the current topology may be listed with
 
     $ lstopo --memattrs
+
+\fI<name>\fR may be suffixed with flags to tune the selection of best nodes,
+for instance as \fBbandwidth,strict,default\fR.
+\fBdefault\fR means that all local nodes are reported if no best could be found.
+\fBstrict\fR means that nodes are selected only if their performance is the best
+for all the input CPUs. On a dual-socket machine with HBM in each socket,
+both HBMs are the best for their local socket, but not for the remote socket.
+Hence both HBM are also considered best for the entire machine by default,
+but none if \fBstrict\fR.
 
 .TP
 \fB\-\-hbm\fR
@@ -293,7 +302,7 @@ To bind on the first PU of all cores of the first package:
     $ hwloc-bind package:0.core:all.pu:0 -- echo hello
     $ hwloc-bind --no-smt package:0 -- echo hello
 
-To bind on the memory node local to a PU with largest capacity:
+To bind on the memory node(s) local to a PU with largest capacity:
 
     $ hwloc-bind --best-memattr capacity --cpubind pu:23 --membind pu:23 -- echo hello
 
