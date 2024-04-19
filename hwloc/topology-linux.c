@@ -177,6 +177,9 @@ struct hwloc_linux_backend_data_s {
 #ifndef MPOL_PREFERRED_MANY
 # define MPOL_PREFERRED_MANY 5
 #endif
+#ifndef MPOL_WEIGHTED_INTERLEAVE
+# define MPOL_WEIGHTED_INTERLEAVE 6
+#endif
 #ifndef MPOL_F_ADDR
 # define  MPOL_F_ADDR (1<<1)
 #endif
@@ -1673,6 +1676,9 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t p
   case HWLOC_MEMBIND_INTERLEAVE:
     *linuxpolicy = MPOL_INTERLEAVE;
     break;
+  case HWLOC_MEMBIND_WEIGHTED_INTERLEAVE:
+    *linuxpolicy = MPOL_WEIGHTED_INTERLEAVE;
+    break;
   /* TODO: next-touch when (if?) patch applied upstream */
   default:
     errno = ENOSYS;
@@ -1971,6 +1977,9 @@ hwloc_linux_membind_policy_to_hwloc(int linuxpolicy, hwloc_membind_policy_t *pol
     return 0;
   case MPOL_INTERLEAVE:
     *policy = HWLOC_MEMBIND_INTERLEAVE;
+    return 0;
+  case MPOL_WEIGHTED_INTERLEAVE:
+    *policy = HWLOC_MEMBIND_WEIGHTED_INTERLEAVE;
     return 0;
   default:
     errno = EINVAL;

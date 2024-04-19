@@ -1551,6 +1551,16 @@ typedef enum {
    * \hideinitializer */
   HWLOC_MEMBIND_NEXTTOUCH =	4,
 
+  /** \brief Allocate memory on the given nodes in an interleaved
+   * / weighted manner.  The precise layout of the memory across
+   * multiple NUMA nodes is OS/system specific. Weighted interleaving
+   * can be useful when threads distributed across the specified NUMA
+   * nodes with different bandwidth capabilities will all be accessing
+   * the whole memory range concurrently, since the interleave will then
+   * balance the memory references.
+   * \hideinitializer */
+  HWLOC_MEMBIND_WEIGHTED_INTERLEAVE = 5,
+
   /** \brief Returned by get_membind() functions when multiple
    * threads or parts of a memory area have differing memory binding
    * policies.
