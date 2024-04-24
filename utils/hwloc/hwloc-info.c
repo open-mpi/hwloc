@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <assert.h>
 
@@ -129,62 +130,85 @@ void usage(const char *name, FILE *where)
 }
 
 static void
+hwloc_info_show_attr(const char *prefix, const char *name, const char *value)
+{
+  printf("%s %s = %s\n", prefix, name, value);
+}
+
+static void
 hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type, const char *prefix, int verbose)
 {
-  char s[128];
+  char name[512], value[512];
   unsigned i;
   if (verbose < 0)
     return;
-  printf("%s type = %s\n", prefix, hwloc_obj_type_string(obj->type));
-  printf("%s full type = %s\n", prefix, type);
+
+  hwloc_info_show_attr(prefix, "type", hwloc_obj_type_string(obj->type));
+  hwloc_info_show_attr(prefix, "full type", type);
   if (obj->subtype)
-    printf("%s subtype = %s\n", prefix, obj->subtype);
-  printf("%s logical index = %u\n", prefix, obj->logical_index);
-  if (obj->os_index != (unsigned) -1)
-    printf("%s os index = %u\n", prefix, obj->os_index);
-  printf("%s gp index = %llu\n", prefix, (unsigned long long) obj->gp_index);
+    hwloc_info_show_attr(prefix, "subtype", obj->subtype);
+
+  snprintf(value, sizeof(value), "%u", obj->logical_index);
+  hwloc_info_show_attr(prefix, "logical index", value);
+  if (obj->os_index != (unsigned) -1) {
+    snprintf(value, sizeof(value), "%u", obj->os_index);
+    hwloc_info_show_attr(prefix, "os index", value);
+  }
+  snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->gp_index);
+  hwloc_info_show_attr(prefix, "gp index", value);
+
   if (obj->name)
-    printf("%s name = %s\n", prefix, obj->name);
-  printf("%s depth = %d\n", prefix, obj->depth);
-  printf("%s sibling rank = %u\n", prefix, obj->sibling_rank);
-  printf("%s children = %u\n", prefix, obj->arity);
-  printf("%s memory children = %u\n", prefix, obj->memory_arity);
-  printf("%s i/o children = %u\n", prefix, obj->io_arity);
-  printf("%s misc children = %u\n", prefix, obj->misc_arity);
+    hwloc_info_show_attr(prefix, "name", obj->name);
+
+  snprintf(value, sizeof(value), "%d", obj->depth);
+  hwloc_info_show_attr(prefix, "depth", value);
+  snprintf(value, sizeof(value), "%u", obj->sibling_rank);
+  hwloc_info_show_attr(prefix, "sibling rank", value);
+  snprintf(value, sizeof(value), "%u", obj->arity);
+  hwloc_info_show_attr(prefix, "children", value);
+  snprintf(value, sizeof(value), "%u", obj->memory_arity);
+  hwloc_info_show_attr(prefix, "memory children", value);
+  snprintf(value, sizeof(value), "%u", obj->io_arity);
+  hwloc_info_show_attr(prefix, "i/o children", value);
+  snprintf(value, sizeof(value), "%u", obj->misc_arity);
+  hwloc_info_show_attr(prefix, "misc children", value);
 
   if (obj->type == HWLOC_OBJ_NUMANODE) {
-    printf("%s local memory = %llu\n", prefix, (unsigned long long) obj->attr->numanode.local_memory);
+    snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->attr->numanode.local_memory);
+    hwloc_info_show_attr(prefix, "local memory", value);
   }
-  if (obj->total_memory)
-    printf("%s total memory = %llu\n", prefix, (unsigned long long) obj->total_memory);
+  if (obj->total_memory) {
+    snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->total_memory);
+    hwloc_info_show_attr(prefix, "total memory", value);
+  }
 
   if (obj->cpuset) {
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->cpuset);
-    printf("%s cpuset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->cpuset);
+    hwloc_info_show_attr(prefix, "cpuset", value);
 
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_cpuset);
-    printf("%s complete cpuset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->complete_cpuset);
+    hwloc_info_show_attr(prefix, "complete cpuset", value);
 
     {
       hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
       hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, hwloc_topology_get_allowed_cpuset(topology));
-      hwloc_bitmap_snprintf(s, sizeof(s), allowed_cpuset);
+      hwloc_bitmap_snprintf(value, sizeof(value), allowed_cpuset);
       hwloc_bitmap_free(allowed_cpuset);
-      printf("%s allowed cpuset = %s\n", prefix, s);
+      hwloc_info_show_attr(prefix, "allowed cpuset", value);
     }
 
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->nodeset);
-    printf("%s nodeset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->nodeset);
+    hwloc_info_show_attr(prefix, "nodeset", value);
 
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_nodeset);
-    printf("%s complete nodeset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->complete_nodeset);
+    hwloc_info_show_attr(prefix, "complete nodeset", value);
 
     {
       hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
       hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, hwloc_topology_get_allowed_nodeset(topology));
-      hwloc_bitmap_snprintf(s, sizeof(s), allowed_nodeset);
+      hwloc_bitmap_snprintf(value, sizeof(value), allowed_nodeset);
       hwloc_bitmap_free(allowed_nodeset);
-      printf("%s allowed nodeset = %s\n", prefix, s);
+      hwloc_info_show_attr(prefix, "allowed nodeset", value);
     }
   }
 
@@ -198,74 +222,88 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
   case HWLOC_OBJ_MEMCACHE:
-    printf("%s attr cache depth = %u\n", prefix, obj->attr->cache.depth);
+    snprintf(value, sizeof(value), "%u", obj->attr->cache.depth);
+    hwloc_info_show_attr(prefix, "attr cache depth", value);
     switch (obj->attr->cache.type) {
-    case HWLOC_OBJ_CACHE_UNIFIED: printf("%s attr cache type = Unified\n", prefix); break;
-    case HWLOC_OBJ_CACHE_DATA: printf("%s attr cache type = Data\n", prefix); break;
-    case HWLOC_OBJ_CACHE_INSTRUCTION: printf("%s attr cache type = Instruction\n", prefix); break;
+    case HWLOC_OBJ_CACHE_UNIFIED: hwloc_info_show_attr(prefix, "attr cache type", "Unified"); break;
+    case HWLOC_OBJ_CACHE_DATA: hwloc_info_show_attr(prefix, "attr cache type", "Data"); break;
+    case HWLOC_OBJ_CACHE_INSTRUCTION: hwloc_info_show_attr(prefix, "attr cache type", "Instruction"); break;
     }
-    printf("%s attr cache size = %llu\n", prefix, (unsigned long long) obj->attr->cache.size);
-    printf("%s attr cache line size = %u\n", prefix, obj->attr->cache.linesize);
-    if (obj->attr->cache.associativity == -1)
-      printf("%s attr cache ways = Fully-associative\n", prefix);
-    else if (obj->attr->cache.associativity != 0)
-      printf("%s attr cache ways = %d\n", prefix, obj->attr->cache.associativity);
+    snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->attr->cache.size);
+    hwloc_info_show_attr(prefix, "attr cache size", value);
+    snprintf(value, sizeof(value), "%u", obj->attr->cache.linesize);
+    hwloc_info_show_attr(prefix, "attr cache line size", value);
+    if (obj->attr->cache.associativity == -1) {
+      hwloc_info_show_attr(prefix, "attr cache line ways", "Fully-associative");
+    } else if (obj->attr->cache.associativity != 0) {
+      snprintf(value, sizeof(value), "%d", obj->attr->cache.associativity);
+      hwloc_info_show_attr(prefix, "attr cache line ways", value);
+    }
     break;
   case HWLOC_OBJ_GROUP:
-    printf("%s attr group depth = %u\n", prefix, obj->attr->group.depth);
+    snprintf(value, sizeof(value), "%u", obj->attr->group.depth);
+    hwloc_info_show_attr(prefix, "attr group depth", value);
     break;
   case HWLOC_OBJ_BRIDGE:
     switch (obj->attr->bridge.upstream_type) {
     case HWLOC_OBJ_BRIDGE_HOST:
-      printf("%s attr bridge upstream type = Host\n", prefix);
+      hwloc_info_show_attr(prefix, "attr bridge upstream type", "Host");
       break;
     case HWLOC_OBJ_BRIDGE_PCI:
-      printf("%s attr bridge upstream type = PCI\n", prefix);
-      printf("%s attr PCI bus id = %04x:%02x:%02x.%01x\n",
-	     prefix, obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-      printf("%s attr PCI class = %04x\n",
-	     prefix, obj->attr->pcidev.class_id);
-      printf("%s attr PCI id = %04x:%04x\n",
-	     prefix, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
-      if (obj->attr->pcidev.linkspeed)
-	printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
+      hwloc_info_show_attr(prefix, "attr bridge upstream type", "PCI");
+      snprintf(value, sizeof(value), "%04x:%02x:%02x.%01x",
+               obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+      hwloc_info_show_attr(prefix, "attr PCI bus id", value);
+      snprintf(value, sizeof(value), "%04x", obj->attr->pcidev.class_id);
+      hwloc_info_show_attr(prefix, "attr PCI class", value);
+      snprintf(value, sizeof(value), "%04x:%04x", obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+      hwloc_info_show_attr(prefix, "attr PCI id", value);
+      if (obj->attr->pcidev.linkspeed) {
+	snprintf(value, sizeof(value), "%f GB/s\n", obj->attr->pcidev.linkspeed);
+        hwloc_info_show_attr(prefix, "attr PCI linkspeed", value);
+      }
       break;
     }
     switch (obj->attr->bridge.downstream_type) {
     case HWLOC_OBJ_BRIDGE_HOST:
       assert(0);
     case HWLOC_OBJ_BRIDGE_PCI:
-      printf("%s attr bridge downstream type = PCI\n", prefix);
-      printf("%s attr PCI secondary bus = %02x\n",
-	     prefix, obj->attr->bridge.downstream.pci.secondary_bus);
-      printf("%s attr PCI subordinate bus = %02x\n",
-	     prefix, obj->attr->bridge.downstream.pci.subordinate_bus);
+      hwloc_info_show_attr(prefix, "attr bridge downstream type", "PCI");
+      snprintf(value, sizeof(value), "%02x", obj->attr->bridge.downstream.pci.secondary_bus);
+      hwloc_info_show_attr(prefix, "attr PCI secondary bus bus", value);
+      snprintf(value, sizeof(value), "%02x", obj->attr->bridge.downstream.pci.subordinate_bus);
+      hwloc_info_show_attr(prefix, "attr PCI subordinate bus bus", value);
       break;
     }
     break;
   case HWLOC_OBJ_PCI_DEVICE:
-    printf("%s attr PCI bus id = %04x:%02x:%02x.%01x\n",
-	   prefix, obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-    printf("%s attr PCI class = %04x\n",
-	   prefix, obj->attr->pcidev.class_id);
-    printf("%s attr PCI id = %04x:%04x\n",
-	   prefix, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
-    if (obj->attr->pcidev.linkspeed)
-      printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
+    snprintf(value, sizeof(value), "%04x:%02x:%02x.%01x",
+             obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+    hwloc_info_show_attr(prefix, "attr PCI bus id", value);
+    snprintf(value, sizeof(value), "%04x", obj->attr->pcidev.class_id);
+    hwloc_info_show_attr(prefix, "attr PCI class", value);
+    snprintf(value, sizeof(value), "%04x:%04x", obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+    hwloc_info_show_attr(prefix, "attr PCI id", value);
+    if (obj->attr->pcidev.linkspeed) {
+      snprintf(value, sizeof(value), "%f GB/s\n", obj->attr->pcidev.linkspeed);
+      hwloc_info_show_attr(prefix, "attr PCI linkspeed", value);
+    }
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    printf("%s attr osdev type = %s\n", prefix, type);
+    hwloc_info_show_attr(prefix, "attr osdev type", type);
     break;
   default:
     /* nothing to show */
     break;
   }
 
-  printf("%s symmetric subtree = %d\n", prefix, obj->symmetric_subtree);
+  snprintf(value, sizeof(value), "%d", obj->symmetric_subtree);
+  hwloc_info_show_attr(prefix, "symmetric subtree", value);
 
   for(i=0; i<obj->infos_count; i++) {
     struct hwloc_info_s *info = &obj->infos[i];
-    printf("%s info %s = %s\n", prefix, info->name, info->value);
+    snprintf(name, sizeof(name), "info %s", info->name);
+    hwloc_info_show_attr(prefix, name, info->value);
   }
 
   if (hwloc_obj_type_is_normal(obj->type)) {
@@ -283,14 +321,16 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
         partial = 1;
       else
         continue;
-      printf("%s cpukind = %u%s\n",
-             prefix, i, partial ? " (partially)" : "");
-      if (efficiency != -1)
-        printf("%s cpukind efficiency = %d\n",
-               prefix, efficiency);
-      for(j=0; j<nr_infos; j++)
-        printf("%s cpukind info %s = %s\n",
-               prefix, infos[j].name, infos[j].value);
+      snprintf(value, sizeof(value), "%u%s", i, partial ? " (partially)" : "");
+      hwloc_info_show_attr(prefix, "cpukind", value);
+      if (efficiency != -1) {
+        snprintf(value, sizeof(value), "%d", efficiency);
+        hwloc_info_show_attr(prefix, "cpukind efficiency", value);
+      }
+      for(j=0; j<nr_infos; j++) {
+        snprintf(name, sizeof(name), "cpukind info %s", infos[j].name);
+        hwloc_info_show_attr(prefix, name, infos[j].value);
+      }
     }
     hwloc_bitmap_free(cpuset);
   }
@@ -301,22 +341,24 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
      */
     unsigned id;
     for(id=0; ; id++) {
-      const char *name;
+      const char *mname;
       unsigned long flags;
       int err;
 
-      err = hwloc_memattr_get_name(topology, id, &name);
+      err = hwloc_memattr_get_name(topology, id, &mname);
       if (err < 0)
         break;
       err = hwloc_memattr_get_flags(topology, id, &flags);
       assert(!err);
 
       if (!(flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
-        hwloc_uint64_t value;
-        err = hwloc_memattr_get_value(topology, id, obj, NULL, 0, &value);
-        if (!err)
-          printf("%s memory attribute %s = %llu\n",
-                 prefix, name, (unsigned long long) value);
+        hwloc_uint64_t mvalue;
+        err = hwloc_memattr_get_value(topology, id, obj, NULL, 0, &mvalue);
+        if (!err) {
+          snprintf(name, sizeof(name), "memory attribute %s", mname);
+          snprintf(value, sizeof(value), "%llu", (unsigned long long) mvalue);
+          hwloc_info_show_attr(prefix, name, value);
+        }
       } else {
         unsigned nr_initiators = 0;
         err = hwloc_memattr_get_initiators(topology, id, obj, 0, &nr_initiators, NULL, NULL);
@@ -342,8 +384,9 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
                 } else {
                   assert(0);
                 }
-                printf("%s memory attribute %s from initiator %s = %llu\n",
-                       prefix, name, inits, (unsigned long long) values[j]);
+                snprintf(name, sizeof(name), "memory attribute %s from initiator %s", mname, inits);
+                snprintf(value, sizeof(value), "%llu", (unsigned long long) values[j]);
+                hwloc_info_show_attr(prefix, name, value);
                 if (inits != _inits)
                   free(inits);
               }
