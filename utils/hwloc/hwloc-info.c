@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -87,7 +87,7 @@ static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] [ locations ]\n", name);
+  fprintf (where, "Usage: %s [ options ] [ object | root ... ]\n", name);
   fprintf (where, "\nOutput options:\n");
   fprintf (where, "  --objects             Report information about specific objects\n");
   fprintf (where, "  --topology            Report information the topology\n");

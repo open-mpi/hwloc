@@ -5,7 +5,7 @@
 .\" See COPYING in top-level directory.
 .TH HWLOC-INFO "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
-hwloc-info \- Show some information about some objects or about a topology or about support features
+hwloc-info \- Show some information about some objects, a topology or supported features
 .
 .\" **************************
 .\"    Synopsis Section
@@ -20,6 +20,25 @@ hwloc-info \- Show some information about some objects or about a topology or ab
 .B hwloc-info
 [ \fIoptions \fR]...
 .
+.PP
+\fI<object>\fR... may be a space-separated list of target objects to query.
+The program reports all information about one object before looking at the next one:
+
+    $ hwloc-info core:2 package:1 pu:all
+    Core L#2
+     type = Core
+     ...
+    Package L#1
+     ...
+    PU L#0
+     ...
+    PU L#1
+     ...
+
+The list may also contain special keywords such as:
+
+    \fBroot\fR for the topology root object.
+
 .PP
 Note that hwloc(7) provides a detailed explanation of the hwloc system
 and of valid <object> formats;
@@ -255,7 +274,7 @@ Display help message and exit.
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-info displays information about the specified object.
+hwloc-info displays information about the specified objects.
 It is intended to be used with tools such as grep for filtering
 certain attribute lines.
 When no object is specified, or when \fB\-\-topology\fR is passed,
