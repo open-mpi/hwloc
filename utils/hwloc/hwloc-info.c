@@ -88,7 +88,7 @@ static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] [ locations ]\n", name);
+  fprintf (where, "Usage: %s [ options ] [ object | root ... ]\n", name);
   fprintf (where, "\nOutput options:\n");
   fprintf (where, "  --objects             Report information about specific objects\n");
   fprintf (where, "  --topology            Report information the topology\n");
