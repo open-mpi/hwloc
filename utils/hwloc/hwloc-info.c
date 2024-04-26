@@ -630,6 +630,74 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   current_obj++;
 }
 
+static void
+hwloc_info_show_levels(FILE *output, hwloc_topology_t topology)
+{
+  hwloc_lstopo_show_summary(output, topology);
+}
+
+static void
+hwloc_info_show_topology_infos(hwloc_topology_t topology)
+{
+  struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
+  unsigned i;
+  for(i=0; i<infos->count; i++)
+    printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
+}
+
+static void
+hwloc_info_show_support(hwloc_topology_t topology)
+{
+  const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
+
+#ifdef HWLOC_DEBUG
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
+#endif
+
+#define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
+  DO(discovery, pu);
+  DO(discovery, disallowed_pu);
+  DO(discovery, numa);
+  DO(discovery, numa_memory);
+  DO(discovery, disallowed_numa);
+  DO(discovery, cpukind_efficiency);
+
+  DO(cpubind, set_thisproc_cpubind);
+  DO(cpubind, get_thisproc_cpubind);
+  DO(cpubind, set_proc_cpubind);
+  DO(cpubind, get_proc_cpubind);
+  DO(cpubind, set_thisthread_cpubind);
+  DO(cpubind, get_thisthread_cpubind);
+  DO(cpubind, set_thread_cpubind);
+  DO(cpubind, get_thread_cpubind);
+  DO(cpubind, get_thisproc_last_cpu_location);
+  DO(cpubind, get_proc_last_cpu_location);
+  DO(cpubind, get_thisthread_last_cpu_location);
+
+  DO(membind, set_thisproc_membind);
+  DO(membind, get_thisproc_membind);
+  DO(membind, set_proc_membind);
+  DO(membind, get_proc_membind);
+  DO(membind, set_thisthread_membind);
+  DO(membind, get_thisthread_membind);
+  DO(membind, set_area_membind);
+  DO(membind, get_area_membind);
+  DO(membind, alloc_membind);
+  DO(membind, firsttouch_membind);
+  DO(membind, bind_membind);
+  DO(membind, interleave_membind);
+  DO(membind, nexttouch_membind);
+  DO(membind, migrate_membind);
+  DO(membind, get_area_memlocation);
+
+  DO(misc, imported_support);
+#undef DO
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -976,63 +1044,12 @@ main (int argc, char *argv[])
   }
 
   if (mode == HWLOC_INFO_MODE_TOPOLOGY) {
-    hwloc_lstopo_show_summary(stdout, topology);
-    if (verbose_mode > 0) {
-      struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
-      unsigned i;
-      for(i=0; i<infos->count; i++)
-        printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
-    }
+    hwloc_info_show_levels(stdout, topology);
+    if (verbose_mode > 0)
+      hwloc_info_show_topology_infos(topology);
 
   } else if (mode == HWLOC_INFO_MODE_SUPPORT) {
-    const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
-
-#ifdef HWLOC_DEBUG
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
-#endif
-
-#define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
-    DO(discovery, pu);
-    DO(discovery, disallowed_pu);
-    DO(discovery, numa);
-    DO(discovery, numa_memory);
-    DO(discovery, disallowed_numa);
-    DO(discovery, cpukind_efficiency);
-
-    DO(cpubind, set_thisproc_cpubind);
-    DO(cpubind, get_thisproc_cpubind);
-    DO(cpubind, set_proc_cpubind);
-    DO(cpubind, get_proc_cpubind);
-    DO(cpubind, set_thisthread_cpubind);
-    DO(cpubind, get_thisthread_cpubind);
-    DO(cpubind, set_thread_cpubind);
-    DO(cpubind, get_thread_cpubind);
-    DO(cpubind, get_thisproc_last_cpu_location);
-    DO(cpubind, get_proc_last_cpu_location);
-    DO(cpubind, get_thisthread_last_cpu_location);
-
-    DO(membind, set_thisproc_membind);
-    DO(membind, get_thisproc_membind);
-    DO(membind, set_proc_membind);
-    DO(membind, get_proc_membind);
-    DO(membind, set_thisthread_membind);
-    DO(membind, get_thisthread_membind);
-    DO(membind, set_area_membind);
-    DO(membind, get_area_membind);
-    DO(membind, alloc_membind);
-    DO(membind, firsttouch_membind);
-    DO(membind, bind_membind);
-    DO(membind, interleave_membind);
-    DO(membind, nexttouch_membind);
-    DO(membind, migrate_membind);
-    DO(membind, get_area_memlocation);
-
-    DO(misc, imported_support);
-#undef DO
+    hwloc_info_show_support(topology);
 
   } else if (mode == HWLOC_INFO_MODE_OBJECTS) {
     struct hwloc_calc_location_context_s lcontext;
