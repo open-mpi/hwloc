@@ -5,14 +5,16 @@ depth 0:           1 Machine (type #0)
    depth 3:        24 PU (type #3)
 Special depth -3:  2 NUMANode (type #13)
 
-# --topology
+# topology infos
+info Backend = Synthetic
+info SyntheticDescription = node:2 core:3 pu:4
+
+# levels support
 depth 0:           1 Machine (type #0)
  depth 1:          2 Group0 (type #12)
   depth 2:         6 Core (type #2)
    depth 3:        24 PU (type #3)
 Special depth -3:  2 NUMANode (type #13)
-
-# --support
 discovery:pu = 1
 discovery:disallowed_pu = 0
 discovery:numa = 1
@@ -46,8 +48,6 @@ membind:nexttouch_membind = 0
 membind:migrate_membind = 0
 membind:get_area_memlocation = 0
 misc:imported_support = 0
-
-# --objects
 
 # Core range
 Core L#2

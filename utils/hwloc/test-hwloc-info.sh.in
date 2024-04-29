@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2023 Inria.  All rights reserved.
+# Copyright © 2009-2024 Inria.  All rights reserved.
 # Copyright © 2009 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -43,14 +43,11 @@ set -e
   echo "# (default)"
   $info --if synthetic --input "node:2 core:3 pu:4"
   echo
-  echo "# --topology"
-  $info --if synthetic --input "node:2 core:3 pu:4" --topology
+  echo "# topology infos"
+  $info --if synthetic --input "node:2 core:3 pu:4" topology | grep -v hwlocVersion | grep -v ProcessName
   echo
-  echo "# --support"
-  $info --if synthetic --input "node:2 core:3 pu:4" --support
-  echo
-  echo "# --objects"
-  $info --if synthetic --input "node:2 core:3 pu:4" --objects
+  echo "# levels support"
+  $info --if synthetic --input "node:2 core:3 pu:4" levels support
   echo
 
   echo "# Core range"
