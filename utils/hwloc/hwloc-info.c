@@ -86,6 +86,7 @@ static int show_local_memory_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY 
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static unsigned long best_node_flags = 0;
 static unsigned current_obj;
+static const char *only_attr_name = NULL;
 
 void usage(const char *name, FILE *where)
 {
@@ -93,6 +94,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "\nOutput options:\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -q --quiet -s         Reduce the amount of details to show\n");
+  fprintf (where, "  --get-attr <name>     Only show the attribute line with name <name>\n");
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
   fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
   fprintf (where, "  --children            Display all children\n");
@@ -129,7 +131,12 @@ void usage(const char *name, FILE *where)
 static void
 hwloc_info_show_attr(const char *prefix, const char *name, const char *value)
 {
-  printf("%s %s = %s\n", prefix, name, value);
+  if (only_attr_name) {
+    if (!strcmp(only_attr_name, name))
+      printf("%s\n", value);
+  } else {
+    printf("%s %s = %s\n", prefix, name, value);
+  }
 }
 
 static void
@@ -404,17 +411,19 @@ hwloc_info_show_ancestor(hwloc_topology_t topology, hwloc_obj_t ancestor,
 {
   char ancestors[128];
   hwloc_obj_type_snprintf(ancestors, sizeof(ancestors), ancestor, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, ancestors, ancestor->logical_index);
-  else if (level > 0)
-    printf("%s%s L#%u = parent #%u of %s L#%u\n",
-           prefix, ancestors, ancestor->logical_index, level, objs, obj->logical_index);
-  else if (level == 0) /* the object itself, don't show it twice */
-    printf("%s%s L#%u\n",
-           prefix, ancestors, ancestor->logical_index);
-  else /* single ancestor */
-    printf("%s%s L#%u = parent of %s L#%u\n",
-           prefix, ancestors, ancestor->logical_index, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, ancestors, ancestor->logical_index);
+    else if (level > 0)
+      printf("%s%s L#%u = parent #%u of %s L#%u\n",
+             prefix, ancestors, ancestor->logical_index, level, objs, obj->logical_index);
+    else if (level == 0) /* the object itself, don't show it twice */
+      printf("%s%s L#%u\n",
+             prefix, ancestors, ancestor->logical_index);
+    else /* single ancestor */
+      printf("%s%s L#%u = parent of %s L#%u\n",
+             prefix, ancestors, ancestor->logical_index, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, ancestor, ancestors, prefix, verbose);
 }
 
@@ -425,11 +434,13 @@ hwloc_info_show_descendant(hwloc_topology_t topology, hwloc_obj_t descendant,
 {
   char descendants[128];
   hwloc_obj_type_snprintf(descendants, sizeof(descendants), descendant, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, descendants, descendant->logical_index);
-  else
-    printf("%s%s L#%u = descendant #%u of %s L#%u\n",
-           prefix, descendants, descendant->logical_index, number, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, descendants, descendant->logical_index);
+    else
+      printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+             prefix, descendants, descendant->logical_index, number, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, descendant, descendants, prefix, verbose);
 }
 
@@ -440,11 +451,13 @@ hwloc_info_show_child(hwloc_topology_t topology, hwloc_obj_t child,
 {
   char childs[128];
   hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, childs, child->logical_index);
-  else
-    printf("%s%s L#%u = child #%u of %s L#%u\n",
-           prefix, childs, child->logical_index, number, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, childs, child->logical_index);
+    else
+      printf("%s%s L#%u = child #%u of %s L#%u\n",
+             prefix, childs, child->logical_index, number, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, child, childs, prefix, verbose);
 }
 
@@ -455,11 +468,13 @@ hwloc_info_show_local_memory(hwloc_topology_t topology, hwloc_obj_t node,
 {
   char nodes[128];
   hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, nodes, node->logical_index);
-  else
-    printf("%s%s L#%u = local memory #%u of %s L#%u\n",
-           prefix, nodes, node->logical_index, number, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, nodes, node->logical_index);
+    else
+      printf("%s%s L#%u = local memory #%u of %s L#%u\n",
+             prefix, nodes, node->logical_index, number, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, node, nodes, prefix, verbose);
 }
 
@@ -468,10 +483,12 @@ hwloc_info_show_single_obj(hwloc_topology_t topology,
                            hwloc_obj_t obj, const char *objs,
                            const char *prefix, int verbose)
 {
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, objs, obj->logical_index);
-  else
-    printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, objs, obj->logical_index);
+    else
+      printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, obj, objs, prefix, verbose);
 }
 
@@ -682,7 +699,14 @@ hwloc_info_show_topology_infos(hwloc_topology_t topology)
   struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
   unsigned i;
   for(i=0; i<infos->count; i++)
-    printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
+    if (!only_attr_name)
+      printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
+    else {
+      char name[256];
+      snprintf(name, sizeof(name), "info %s", infos->array[i].name);
+      if (!strcmp(only_attr_name, name))
+        printf("%s\n", infos->array[i].value);
+    }
 }
 
 static void
@@ -798,6 +822,14 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
+      }
+      else if (!strcmp (argv[0], "--get-attr")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	only_attr_name = argv[1];
+	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))
 	show_index_prefix = 1;

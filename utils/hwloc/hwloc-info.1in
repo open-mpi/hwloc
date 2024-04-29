@@ -98,6 +98,17 @@ Include additional detail.
 Reduce the amount of details to show.
 A single summary line per object is displayed.
 .TP
+\fB\-\-get\-attr\fR <name>
+Only report the attribute of name <name> for each object (instead of all attributes).
+The name must exactly match what is usually reported by the program,
+for instance "complete cpuset" in "0.1: complete cpuset = %0x00ffff00".
+
+Only the value is reported, any other prefix or object name is ignored,
+so that the output may easily be used by other tools.
+
+This option also works on topology information but it is ignored for
+\fBlevels\fR and \fBsupport\fR keywords.
+.TP
 \fB\-\-ancestors\fR
 Display information about the object as well as
 about all its ancestors up to the root of the topology.
@@ -329,6 +340,12 @@ To list the OS devices that are of subtype OpenCL:
     $ hwloc-info -s "os[OpenCL]:all"
     OSDev[Co-Processor,GPU]:6
     OSDev[Co-Processor,GPU]:8
+
+To find the PCI bus ID of PCI devices containing OpenCL devices:
+
+    $ hwloc-info --ancestor PCI --get-attr "attr PCI bus id" 'os[opencl]:all'
+    0000:05:00.0
+    0000:42:00.0
 
 To list the NUMA nodes that are local a PU:
 
