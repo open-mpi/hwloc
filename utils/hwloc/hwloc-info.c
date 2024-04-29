@@ -90,9 +90,6 @@ void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] [ object | root | levels | topology | support ... ]\n", name);
   fprintf (where, "\nOutput options:\n");
-  fprintf (where, "  --objects             Report information about specific objects\n");
-  fprintf (where, "  --topology            Report information the topology\n");
-  fprintf (where, "  --support             Report information about supported features\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -q --quiet -s         Reduce the amount of details to show\n");
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
@@ -744,11 +741,11 @@ main (int argc, char *argv[])
   while (argc >= 1) {
     opt = 0;
     if (*argv[0] == '-') {
-      if (!strcmp (argv[0], "--objects"))
+      if (!strcmp (argv[0], "--objects")) /* backward compat with v2 */
 	mode = HWLOC_INFO_MODE_OBJECTS;
-      else if (!strcmp (argv[0], "--topology"))
+      else if (!strcmp (argv[0], "--topology")) /* backward compat with v2 */
 	mode = HWLOC_INFO_MODE_TOPOLOGY;
-      else if (!strcmp (argv[0], "--support"))
+      else if (!strcmp (argv[0], "--support")) /* backward compat with v2 */
 	mode = HWLOC_INFO_MODE_SUPPORT;
       else if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose"))
         verbose_mode++;

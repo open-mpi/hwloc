@@ -42,11 +42,14 @@ The list may also contain special keywords such as:
 
     \fBroot\fR for the topology root object.
 
-    \fBlevels\fR for information about topology levels (default if no target object is given, identical to \fB\-\-topology\fR).
+    \fBlevels\fR for information about topology levels (default if no target object is given, supersedes \fB\-\-topology\fR in hwloc 2.x).
 
-    \fBtopology\fR for info attributes attached to the topology (usually included in \fB\-\-topology \-v\fR).
+    \fBtopology\fR for info attributes attached to the topology (formerly included in \fB\-\-topology \-v\fR in hwloc 2.x).
 
-    \fBsupport\fR for information about supported features (identical to \fB\-\-support\fR).
+    \fBsupport\fR for information about supported features (supersedes \fB\-\-support\fR in hwloc 2.x).
+    The features are those available through the \fBhwloc_topology_get_support()\fR function.
+    This is useful for verifying which CPU or memory binding options are supported
+    by the current hwloc installation.
 
 Real targets and special keywords may be combined:
 
@@ -61,25 +64,6 @@ it should be read before reading this man page.
 .\" **************************
 .SH OPTIONS
 .
-.TP
-\fB\-\-objects\fR
-Report information specific objects.
-This is the default if some objects are given on the command-line.
-.TP
-\fB\-\-topology\fR
-Report a summary of the topology instead of about some specific objects.
-This is the default if no object is given on the command-line.
-This is equivalent to passing \fIlevels\fR as a target object on the command-line.
-
-If \-v is also given, topology info attributes are also shown.
-This is equivalent to passing \fIlevels topology\fR as a target object on the command-line.
-.TP
-\fB\-\-support\fR
-Report the features that are supported by hwloc on the topology.
-The features are those available through the \fBhwloc_topology_get_support()\fR function.
-This is useful for verifying which CPU or memory binding options are supported
-by the current hwloc installation.
-This is equivalent to passing \fIsupport\fR as a target object on the command-line.
 .TP
 \fB\-i\fR <path>, \fB\-\-input\fR <path>
 Read the topology from <path> instead of discovering the topology of the local machine.
@@ -304,9 +288,9 @@ Display help message and exit.
 hwloc-info displays information about the specified objects.
 It is intended to be used with tools such as grep for filtering
 certain attribute lines.
-When no object is specified, or when \fB\-\-topology\fR is passed,
-hwloc-info prints a summary of the topology.
-When \fB\-\-support\fR is passed, hwloc-info lists the supported
+When no object is specified, hwloc-info prints a summary of the topology
+(as if \fBlevels\fR was given).
+When \fBsupport\fR is given, hwloc-info lists the supported
 features for the topology.
 .
 .PP
