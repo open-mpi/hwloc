@@ -88,7 +88,7 @@ static unsigned current_obj;
 
 void usage(const char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] [ object | root ... ]\n", name);
+  fprintf (where, "Usage: %s [ options ] [ object | root | levels | topology | support ... ]\n", name);
   fprintf (where, "\nOutput options:\n");
   fprintf (where, "  --objects             Report information about specific objects\n");
   fprintf (where, "  --topology            Report information the topology\n");
@@ -1060,7 +1060,13 @@ main (int argc, char *argv[])
     lcontext.verbose = verbose_mode;
     current_obj = 0;
     while (argc >= 1) {
-      if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
+      if (!strcmp(argv[0], "levels")) {
+        hwloc_info_show_levels(stdout, topology);
+      } else if (!strcmp(argv[0], "topology")) {
+        hwloc_info_show_topology_infos(topology);
+      } else if (!strcmp(argv[0], "support")) {
+        hwloc_info_show_support(topology);
+      } else if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
 	hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
       } else if (*argv[0] == '-') {
         fprintf(stderr, "Cannot handle command-line option %s after some locations.\n", argv[0]);
