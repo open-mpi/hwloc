@@ -46,6 +46,9 @@ set -e
   echo "# topology infos"
   $info --if synthetic --input "node:2 core:3 pu:4" topology | grep -v hwlocVersion | grep -v ProcessName
   echo
+  echo "# topology infos --get-attr"
+  $info --if synthetic --input "node:2 core:3 pu:4" --get-attr "info SyntheticDescription" topology
+  echo
   echo "# levels support"
   $info --if synthetic --input "node:2 core:3 pu:4" levels support
   echo
@@ -77,6 +80,9 @@ set -e
   echo
   echo "# Where a NUMA is attached"
   $info --if synthetic --input "pack:4 [numa] l3:2 [numa] [numa] core:4 pu:2" --ancestor kind=normal --first -s numa:3 numa:14
+  echo
+  echo "# Allowed cpuset of where NUMA is attached"
+  $info --if synthetic --input "pack:4 [numa] l3:2 [numa] [numa] core:4 pu:2" --ancestor kind=normal --first --get-attr "allowed cpuset" numa:3 numa:14
   echo
 
   echo "# Children of L2 and Core of Node, silent"

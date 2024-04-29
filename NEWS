@@ -24,6 +24,7 @@ Version 2.11.0
 * Tools/
   + Option --best-memattr may now return multiple nodes. Additional
     configuration flags may be given to tweak its behavior.
+  + hwloc-info has a new --get-attr option to get a single attribute.
   + hwloc-info now supports "levels", "support" and "topology"
     special keywords for backward compatibility for hwloc 3.0.
 

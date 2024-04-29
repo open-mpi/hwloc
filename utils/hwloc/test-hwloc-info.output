@@ -9,6 +9,9 @@ Special depth -3:  2 NUMANode (type #13)
 info Backend = Synthetic
 info SyntheticDescription = node:2 core:3 pu:4
 
+# topology infos --get-attr
+node:2 core:3 pu:4
+
 # levels support
 depth 0:           1 Machine (type #0)
  depth 1:          2 Group0 (type #12)
@@ -402,6 +405,10 @@ L1dCache:5
 # Where a NUMA is attached
 L3Cache:1
 Package:2
+
+# Allowed cpuset of where NUMA is attached
+0x0000ff00
+0x0000ffff,0x0
 
 # Children of L2 and Core of Node, silent
 L1dCache:2
