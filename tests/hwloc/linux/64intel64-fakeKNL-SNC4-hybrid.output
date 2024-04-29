@@ -1,4 +1,4 @@
-Machine (P#0 total=12582912KB ClusterMode=SNC4 MemoryMode=Hybrid50 Backend=Linux OSName=Linux OSRelease=3.10.0-327.el7.x86_64 OSVersion="#1 SMP Thu Oct 29 17:29:29 EDT 2015" HostName=localhost.localdomain Architecture=x86_64)
+Machine (P#0 total=12582912KB ClusterMode=SNC4 MemoryMode=Hybrid50 Backend=Linux OSName=Linux OSRelease=3.10.0-327.el7.x86_64 OSVersion="#1 SMP Thu Oct 29 17:29:29 EDT 2015" HostName=localhost.localdomain Architecture=x86_64 MemoryTiersNr=2)
   Package L#0 (P#0 total=12582912KB CPUVendor=GenuineIntel CPUFamilyNumber=6 CPUModelNumber=87 CPUModel=06/57 CPUStepping=0)
     L3Cache(MemorySideCache) L#0 (total=3145728KB size=2097152KB linesize=64 ways=1 Inclusive=1)
       NUMANode(DRAM) L#0 (P#0 local=1048576KB total=1048576KB MemoryTier=1)

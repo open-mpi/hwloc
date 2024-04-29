@@ -1,4 +1,4 @@
-Machine (P#0 total=1951314696KB Backend=Linux LinuxCgroup=/)
+Machine (P#0 total=1951314696KB Backend=Linux LinuxCgroup=/ MemoryTiersNr=2)
   Package L#0 (P#0 total=974581080KB CPUModel="Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz")
     NUMANode(NVM) L#2 (P#7 local=778043392KB total=778043392KB DAXDevice=dax0.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region0/dax0.1 MemoryTier=1)
     Group0 L#0 (total=97447340KB)

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -2032,6 +2032,10 @@ If several components were combined, multiple Backend pairs may exist,
 with different values, for instance <tt>x86</tt> and <tt>Linux</tt> in the root
 object and <tt>CUDA</tt> in CUDA OS device objects.
 </dd>
+<dt>MemoryTiersNr</dt>
+<dd>The number of different memory tiers in the topology, if any.
+See \ref heteromem.
+</dd>
 <dt>SyntheticDescription</dt>
 <dd>The description string that was given to hwloc to build this
 synthetic topology.
@@ -2563,6 +2567,13 @@ To list all the physical indexes of Tier-0 NUMA nodes (HBM P\#2 and P\#3 not sho
 \verbatim
 $ hwloc-calc -I 'numa[tier=0]' -p all
 2,3
+\endverbatim
+
+The number of tiers may be retrieved by looking at topology attributes
+in the root object:
+\verbatim
+$ hwloc-info --get-attr "info MemoryTiersNr" topology
+2
 \endverbatim
 
 hwloc-calc and hwloc-bind also have options such as

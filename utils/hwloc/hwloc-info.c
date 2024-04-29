@@ -705,6 +705,7 @@ hwloc_info_show_topology_infos(hwloc_topology_t topology)
     const char *infoname = root->infos[i].name;
     if (!strcmp(infoname, "Backend")
         || !strcmp(infoname, "SyntheticDescription")
+        || !strcmp(infoname, "MemoryTiersNr")
         || !strcmp(infoname, "LinuxCgroup")
         || !strcmp(infoname, "WindowsBuildEnvironment")
         || !strcmp(infoname, "OSName")

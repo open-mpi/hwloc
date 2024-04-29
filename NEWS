@@ -21,6 +21,9 @@ Version 2.11.0
 --------------
 * API
   + Add hwloc_obj_set_subtype().
+* Misc
+  + The MemoryTiersNr info attribute in the root object now says how many
+    memory tiers were built. Thanks to Antoine Morvan for the report.
 * Tools/
   + Option --best-memattr may now return multiple nodes. Additional
     configuration flags may be given to tweak its behavior.

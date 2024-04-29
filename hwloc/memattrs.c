@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2023 Inria.  All rights reserved.
+ * Copyright © 2020-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -1805,6 +1805,12 @@ hwloc__apply_memory_tiers_subtypes(hwloc_topology_t topology,
         break; /* each node is in a single tier */
       }
     }
+  }
+  if (nr_tiers > 1) {
+    hwloc_obj_t root = hwloc_get_root_obj(topology);
+    char tmp[20];
+    snprintf(tmp, sizeof(tmp), "%u", nr_tiers);
+    hwloc__add_info_nodup(&root->infos, &root->infos_count, "MemoryTiersNr", tmp, 1);
   }
 }
 
