@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -329,6 +329,7 @@ extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_t
 
 extern int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value);
 extern int hwloc__replace_infos(struct hwloc_infos_s *infos, const char *name, const char *value);
+extern int hwloc__remove_infos(struct hwloc_infos_s *infos, const char *name, const char *value);
 extern int hwloc__move_infos(struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
 extern int hwloc__tma_dup_infos(struct hwloc_tma *tma, struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
 extern void hwloc__free_infos(struct hwloc_infos_s *infos);
