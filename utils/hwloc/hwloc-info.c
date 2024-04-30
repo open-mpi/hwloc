@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <assert.h>
 
@@ -85,16 +86,15 @@ static int show_local_memory_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY 
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static unsigned long best_node_flags = 0;
 static unsigned current_obj;
+static const char *only_attr_name = NULL;
 
 void usage(const char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] [ locations ]\n", name);
+  fprintf (where, "Usage: %s [ options ] [ object | root | levels | topology | support ... ]\n", name);
   fprintf (where, "\nOutput options:\n");
-  fprintf (where, "  --objects             Report information about specific objects\n");
-  fprintf (where, "  --topology            Report information the topology\n");
-  fprintf (where, "  --support             Report information about supported features\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -q --quiet -s         Reduce the amount of details to show\n");
+  fprintf (where, "  --get-attr <name>     Only show the attribute line with name <name>\n");
   fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
   fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
   fprintf (where, "  --children            Display all children\n");
@@ -129,62 +129,90 @@ void usage(const char *name, FILE *where)
 }
 
 static void
+hwloc_info_show_attr(const char *prefix, const char *name, const char *value)
+{
+  if (only_attr_name) {
+    if (!strcmp(only_attr_name, name))
+      printf("%s\n", value);
+  } else {
+    printf("%s %s = %s\n", prefix, name, value);
+  }
+}
+
+static void
 hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type, const char *prefix, int verbose)
 {
-  char s[128];
+  char name[512], value[512];
   unsigned i;
   if (verbose < 0)
     return;
-  printf("%s type = %s\n", prefix, hwloc_obj_type_string(obj->type));
-  printf("%s full type = %s\n", prefix, type);
+
+  hwloc_info_show_attr(prefix, "type", hwloc_obj_type_string(obj->type));
+  hwloc_info_show_attr(prefix, "full type", type);
   if (obj->subtype)
-    printf("%s subtype = %s\n", prefix, obj->subtype);
-  printf("%s logical index = %u\n", prefix, obj->logical_index);
-  if (obj->os_index != (unsigned) -1)
-    printf("%s os index = %u\n", prefix, obj->os_index);
-  printf("%s gp index = %llu\n", prefix, (unsigned long long) obj->gp_index);
+    hwloc_info_show_attr(prefix, "subtype", obj->subtype);
+
+  snprintf(value, sizeof(value), "%u", obj->logical_index);
+  hwloc_info_show_attr(prefix, "logical index", value);
+  if (obj->os_index != (unsigned) -1) {
+    snprintf(value, sizeof(value), "%u", obj->os_index);
+    hwloc_info_show_attr(prefix, "os index", value);
+  }
+  snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->gp_index);
+  hwloc_info_show_attr(prefix, "gp index", value);
+
   if (obj->name)
-    printf("%s name = %s\n", prefix, obj->name);
-  printf("%s depth = %d\n", prefix, obj->depth);
-  printf("%s sibling rank = %u\n", prefix, obj->sibling_rank);
-  printf("%s children = %u\n", prefix, obj->arity);
-  printf("%s memory children = %u\n", prefix, obj->memory_arity);
-  printf("%s i/o children = %u\n", prefix, obj->io_arity);
-  printf("%s misc children = %u\n", prefix, obj->misc_arity);
+    hwloc_info_show_attr(prefix, "name", obj->name);
+
+  snprintf(value, sizeof(value), "%d", obj->depth);
+  hwloc_info_show_attr(prefix, "depth", value);
+  snprintf(value, sizeof(value), "%u", obj->sibling_rank);
+  hwloc_info_show_attr(prefix, "sibling rank", value);
+  snprintf(value, sizeof(value), "%u", obj->arity);
+  hwloc_info_show_attr(prefix, "children", value);
+  snprintf(value, sizeof(value), "%u", obj->memory_arity);
+  hwloc_info_show_attr(prefix, "memory children", value);
+  snprintf(value, sizeof(value), "%u", obj->io_arity);
+  hwloc_info_show_attr(prefix, "i/o children", value);
+  snprintf(value, sizeof(value), "%u", obj->misc_arity);
+  hwloc_info_show_attr(prefix, "misc children", value);
 
   if (obj->type == HWLOC_OBJ_NUMANODE) {
-    printf("%s local memory = %llu\n", prefix, (unsigned long long) obj->attr->numanode.local_memory);
+    snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->attr->numanode.local_memory);
+    hwloc_info_show_attr(prefix, "local memory", value);
   }
-  if (obj->total_memory)
-    printf("%s total memory = %llu\n", prefix, (unsigned long long) obj->total_memory);
+  if (obj->total_memory) {
+    snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->total_memory);
+    hwloc_info_show_attr(prefix, "total memory", value);
+  }
 
   if (obj->cpuset) {
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->cpuset);
-    printf("%s cpuset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->cpuset);
+    hwloc_info_show_attr(prefix, "cpuset", value);
 
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_cpuset);
-    printf("%s complete cpuset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->complete_cpuset);
+    hwloc_info_show_attr(prefix, "complete cpuset", value);
 
     {
       hwloc_bitmap_t allowed_cpuset = hwloc_bitmap_dup(obj->cpuset);
       hwloc_bitmap_and(allowed_cpuset, allowed_cpuset, hwloc_topology_get_allowed_cpuset(topology));
-      hwloc_bitmap_snprintf(s, sizeof(s), allowed_cpuset);
+      hwloc_bitmap_snprintf(value, sizeof(value), allowed_cpuset);
       hwloc_bitmap_free(allowed_cpuset);
-      printf("%s allowed cpuset = %s\n", prefix, s);
+      hwloc_info_show_attr(prefix, "allowed cpuset", value);
     }
 
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->nodeset);
-    printf("%s nodeset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->nodeset);
+    hwloc_info_show_attr(prefix, "nodeset", value);
 
-    hwloc_bitmap_snprintf(s, sizeof(s), obj->complete_nodeset);
-    printf("%s complete nodeset = %s\n", prefix, s);
+    hwloc_bitmap_snprintf(value, sizeof(value), obj->complete_nodeset);
+    hwloc_info_show_attr(prefix, "complete nodeset", value);
 
     {
       hwloc_bitmap_t allowed_nodeset = hwloc_bitmap_dup(obj->nodeset);
       hwloc_bitmap_and(allowed_nodeset, allowed_nodeset, hwloc_topology_get_allowed_nodeset(topology));
-      hwloc_bitmap_snprintf(s, sizeof(s), allowed_nodeset);
+      hwloc_bitmap_snprintf(value, sizeof(value), allowed_nodeset);
       hwloc_bitmap_free(allowed_nodeset);
-      printf("%s allowed nodeset = %s\n", prefix, s);
+      hwloc_info_show_attr(prefix, "allowed nodeset", value);
     }
   }
 
@@ -198,74 +226,88 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
   case HWLOC_OBJ_L2ICACHE:
   case HWLOC_OBJ_L3ICACHE:
   case HWLOC_OBJ_MEMCACHE:
-    printf("%s attr cache depth = %u\n", prefix, obj->attr->cache.depth);
+    snprintf(value, sizeof(value), "%u", obj->attr->cache.depth);
+    hwloc_info_show_attr(prefix, "attr cache depth", value);
     switch (obj->attr->cache.type) {
-    case HWLOC_OBJ_CACHE_UNIFIED: printf("%s attr cache type = Unified\n", prefix); break;
-    case HWLOC_OBJ_CACHE_DATA: printf("%s attr cache type = Data\n", prefix); break;
-    case HWLOC_OBJ_CACHE_INSTRUCTION: printf("%s attr cache type = Instruction\n", prefix); break;
+    case HWLOC_OBJ_CACHE_UNIFIED: hwloc_info_show_attr(prefix, "attr cache type", "Unified"); break;
+    case HWLOC_OBJ_CACHE_DATA: hwloc_info_show_attr(prefix, "attr cache type", "Data"); break;
+    case HWLOC_OBJ_CACHE_INSTRUCTION: hwloc_info_show_attr(prefix, "attr cache type", "Instruction"); break;
     }
-    printf("%s attr cache size = %llu\n", prefix, (unsigned long long) obj->attr->cache.size);
-    printf("%s attr cache line size = %u\n", prefix, obj->attr->cache.linesize);
-    if (obj->attr->cache.associativity == -1)
-      printf("%s attr cache ways = Fully-associative\n", prefix);
-    else if (obj->attr->cache.associativity != 0)
-      printf("%s attr cache ways = %d\n", prefix, obj->attr->cache.associativity);
+    snprintf(value, sizeof(value), "%llu", (unsigned long long) obj->attr->cache.size);
+    hwloc_info_show_attr(prefix, "attr cache size", value);
+    snprintf(value, sizeof(value), "%u", obj->attr->cache.linesize);
+    hwloc_info_show_attr(prefix, "attr cache line size", value);
+    if (obj->attr->cache.associativity == -1) {
+      hwloc_info_show_attr(prefix, "attr cache line ways", "Fully-associative");
+    } else if (obj->attr->cache.associativity != 0) {
+      snprintf(value, sizeof(value), "%d", obj->attr->cache.associativity);
+      hwloc_info_show_attr(prefix, "attr cache line ways", value);
+    }
     break;
   case HWLOC_OBJ_GROUP:
-    printf("%s attr group depth = %u\n", prefix, obj->attr->group.depth);
+    snprintf(value, sizeof(value), "%u", obj->attr->group.depth);
+    hwloc_info_show_attr(prefix, "attr group depth", value);
     break;
   case HWLOC_OBJ_BRIDGE:
     switch (obj->attr->bridge.upstream_type) {
     case HWLOC_OBJ_BRIDGE_HOST:
-      printf("%s attr bridge upstream type = Host\n", prefix);
+      hwloc_info_show_attr(prefix, "attr bridge upstream type", "Host");
       break;
     case HWLOC_OBJ_BRIDGE_PCI:
-      printf("%s attr bridge upstream type = PCI\n", prefix);
-      printf("%s attr PCI bus id = %04x:%02x:%02x.%01x\n",
-	     prefix, obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-      printf("%s attr PCI class = %04x\n",
-	     prefix, obj->attr->pcidev.class_id);
-      printf("%s attr PCI id = %04x:%04x\n",
-	     prefix, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
-      if (obj->attr->pcidev.linkspeed)
-	printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
+      hwloc_info_show_attr(prefix, "attr bridge upstream type", "PCI");
+      snprintf(value, sizeof(value), "%04x:%02x:%02x.%01x",
+               obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+      hwloc_info_show_attr(prefix, "attr PCI bus id", value);
+      snprintf(value, sizeof(value), "%04x", obj->attr->pcidev.class_id);
+      hwloc_info_show_attr(prefix, "attr PCI class", value);
+      snprintf(value, sizeof(value), "%04x:%04x", obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+      hwloc_info_show_attr(prefix, "attr PCI id", value);
+      if (obj->attr->pcidev.linkspeed) {
+	snprintf(value, sizeof(value), "%f GB/s\n", obj->attr->pcidev.linkspeed);
+        hwloc_info_show_attr(prefix, "attr PCI linkspeed", value);
+      }
       break;
     }
     switch (obj->attr->bridge.downstream_type) {
     case HWLOC_OBJ_BRIDGE_HOST:
       assert(0);
     case HWLOC_OBJ_BRIDGE_PCI:
-      printf("%s attr bridge downstream type = PCI\n", prefix);
-      printf("%s attr PCI secondary bus = %02x\n",
-	     prefix, obj->attr->bridge.downstream.pci.secondary_bus);
-      printf("%s attr PCI subordinate bus = %02x\n",
-	     prefix, obj->attr->bridge.downstream.pci.subordinate_bus);
+      hwloc_info_show_attr(prefix, "attr bridge downstream type", "PCI");
+      snprintf(value, sizeof(value), "%02x", obj->attr->bridge.downstream.pci.secondary_bus);
+      hwloc_info_show_attr(prefix, "attr PCI secondary bus bus", value);
+      snprintf(value, sizeof(value), "%02x", obj->attr->bridge.downstream.pci.subordinate_bus);
+      hwloc_info_show_attr(prefix, "attr PCI subordinate bus bus", value);
       break;
     }
     break;
   case HWLOC_OBJ_PCI_DEVICE:
-    printf("%s attr PCI bus id = %04x:%02x:%02x.%01x\n",
-	   prefix, obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-    printf("%s attr PCI class = %04x\n",
-	   prefix, obj->attr->pcidev.class_id);
-    printf("%s attr PCI id = %04x:%04x\n",
-	   prefix, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
-    if (obj->attr->pcidev.linkspeed)
-      printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
+    snprintf(value, sizeof(value), "%04x:%02x:%02x.%01x",
+             obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+    hwloc_info_show_attr(prefix, "attr PCI bus id", value);
+    snprintf(value, sizeof(value), "%04x", obj->attr->pcidev.class_id);
+    hwloc_info_show_attr(prefix, "attr PCI class", value);
+    snprintf(value, sizeof(value), "%04x:%04x", obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+    hwloc_info_show_attr(prefix, "attr PCI id", value);
+    if (obj->attr->pcidev.linkspeed) {
+      snprintf(value, sizeof(value), "%f GB/s\n", obj->attr->pcidev.linkspeed);
+      hwloc_info_show_attr(prefix, "attr PCI linkspeed", value);
+    }
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    printf("%s attr osdev type = %s\n", prefix, type);
+    hwloc_info_show_attr(prefix, "attr osdev type", type);
     break;
   default:
     /* nothing to show */
     break;
   }
 
-  printf("%s symmetric subtree = %d\n", prefix, obj->symmetric_subtree);
+  snprintf(value, sizeof(value), "%d", obj->symmetric_subtree);
+  hwloc_info_show_attr(prefix, "symmetric subtree", value);
 
   for(i=0; i<obj->infos.count; i++) {
     struct hwloc_info_s *info = &obj->infos.array[i];
-    printf("%s info %s = %s\n", prefix, info->name, info->value);
+    snprintf(name, sizeof(name), "info %s", info->name);
+    hwloc_info_show_attr(prefix, name, info->value);
   }
 
   if (hwloc_obj_type_is_normal(obj->type)) {
@@ -283,14 +325,16 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
         partial = 1;
       else
         continue;
-      printf("%s cpukind = %u%s\n",
-             prefix, i, partial ? " (partially)" : "");
-      if (efficiency != -1)
-        printf("%s cpukind efficiency = %d\n",
-               prefix, efficiency);
-      for(j=0; j<infosp->count; j++)
-        printf("%s cpukind info %s = %s\n",
-               prefix, infosp->array[j].name, infosp->array[j].value);
+      snprintf(value, sizeof(value), "%u%s", i, partial ? " (partially)" : "");
+      hwloc_info_show_attr(prefix, "cpukind", value);
+      if (efficiency != -1) {
+        snprintf(value, sizeof(value), "%d", efficiency);
+        hwloc_info_show_attr(prefix, "cpukind efficiency", value);
+      }
+      for(j=0; j<infosp->count; j++) {
+        snprintf(name, sizeof(name), "cpukind info %s", infosp->array[j].name);
+        hwloc_info_show_attr(prefix, name, infosp->array[j].value);
+      }
     }
     hwloc_bitmap_free(cpuset);
   }
@@ -301,22 +345,24 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
      */
     unsigned id;
     for(id=0; ; id++) {
-      const char *name;
+      const char *mname;
       unsigned long flags;
       int err;
 
-      err = hwloc_memattr_get_name(topology, id, &name);
+      err = hwloc_memattr_get_name(topology, id, &mname);
       if (err < 0)
         break;
       err = hwloc_memattr_get_flags(topology, id, &flags);
       assert(!err);
 
       if (!(flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR)) {
-        hwloc_uint64_t value;
-        err = hwloc_memattr_get_value(topology, id, obj, NULL, 0, &value);
-        if (!err)
-          printf("%s memory attribute %s = %llu\n",
-                 prefix, name, (unsigned long long) value);
+        hwloc_uint64_t mvalue;
+        err = hwloc_memattr_get_value(topology, id, obj, NULL, 0, &mvalue);
+        if (!err) {
+          snprintf(name, sizeof(name), "memory attribute %s", mname);
+          snprintf(value, sizeof(value), "%llu", (unsigned long long) mvalue);
+          hwloc_info_show_attr(prefix, name, value);
+        }
       } else {
         unsigned nr_initiators = 0;
         err = hwloc_memattr_get_initiators(topology, id, obj, 0, &nr_initiators, NULL, NULL);
@@ -342,8 +388,9 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
                 } else {
                   assert(0);
                 }
-                printf("%s memory attribute %s from initiator %s = %llu\n",
-                       prefix, name, inits, (unsigned long long) values[j]);
+                snprintf(name, sizeof(name), "memory attribute %s from initiator %s", mname, inits);
+                snprintf(value, sizeof(value), "%llu", (unsigned long long) values[j]);
+                hwloc_info_show_attr(prefix, name, value);
                 if (inits != _inits)
                   free(inits);
               }
@@ -364,17 +411,19 @@ hwloc_info_show_ancestor(hwloc_topology_t topology, hwloc_obj_t ancestor,
 {
   char ancestors[128];
   hwloc_obj_type_snprintf(ancestors, sizeof(ancestors), ancestor, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, ancestors, ancestor->logical_index);
-  else if (level > 0)
-    printf("%s%s L#%u = parent #%u of %s L#%u\n",
-           prefix, ancestors, ancestor->logical_index, level, objs, obj->logical_index);
-  else if (level == 0) /* the object itself, don't show it twice */
-    printf("%s%s L#%u\n",
-           prefix, ancestors, ancestor->logical_index);
-  else /* single ancestor */
-    printf("%s%s L#%u = parent of %s L#%u\n",
-           prefix, ancestors, ancestor->logical_index, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, ancestors, ancestor->logical_index);
+    else if (level > 0)
+      printf("%s%s L#%u = parent #%u of %s L#%u\n",
+             prefix, ancestors, ancestor->logical_index, level, objs, obj->logical_index);
+    else if (level == 0) /* the object itself, don't show it twice */
+      printf("%s%s L#%u\n",
+             prefix, ancestors, ancestor->logical_index);
+    else /* single ancestor */
+      printf("%s%s L#%u = parent of %s L#%u\n",
+             prefix, ancestors, ancestor->logical_index, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, ancestor, ancestors, prefix, verbose);
 }
 
@@ -385,11 +434,13 @@ hwloc_info_show_descendant(hwloc_topology_t topology, hwloc_obj_t descendant,
 {
   char descendants[128];
   hwloc_obj_type_snprintf(descendants, sizeof(descendants), descendant, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, descendants, descendant->logical_index);
-  else
-    printf("%s%s L#%u = descendant #%u of %s L#%u\n",
-           prefix, descendants, descendant->logical_index, number, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, descendants, descendant->logical_index);
+    else
+      printf("%s%s L#%u = descendant #%u of %s L#%u\n",
+             prefix, descendants, descendant->logical_index, number, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, descendant, descendants, prefix, verbose);
 }
 
@@ -400,11 +451,13 @@ hwloc_info_show_child(hwloc_topology_t topology, hwloc_obj_t child,
 {
   char childs[128];
   hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, childs, child->logical_index);
-  else
-    printf("%s%s L#%u = child #%u of %s L#%u\n",
-           prefix, childs, child->logical_index, number, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, childs, child->logical_index);
+    else
+      printf("%s%s L#%u = child #%u of %s L#%u\n",
+             prefix, childs, child->logical_index, number, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, child, childs, prefix, verbose);
 }
 
@@ -415,11 +468,13 @@ hwloc_info_show_local_memory(hwloc_topology_t topology, hwloc_obj_t node,
 {
   char nodes[128];
   hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, nodes, node->logical_index);
-  else
-    printf("%s%s L#%u = local memory #%u of %s L#%u\n",
-           prefix, nodes, node->logical_index, number, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, nodes, node->logical_index);
+    else
+      printf("%s%s L#%u = local memory #%u of %s L#%u\n",
+             prefix, nodes, node->logical_index, number, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, node, nodes, prefix, verbose);
 }
 
@@ -428,10 +483,12 @@ hwloc_info_show_single_obj(hwloc_topology_t topology,
                            hwloc_obj_t obj, const char *objs,
                            const char *prefix, int verbose)
 {
-  if (verbose < 0)
-    printf("%s%s:%u\n", prefix, objs, obj->logical_index);
-  else
-    printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+  if (!only_attr_name) {
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, objs, obj->logical_index);
+    else
+      printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+  }
   hwloc_info_show_obj(topology, obj, objs, prefix, verbose);
 }
 
@@ -630,6 +687,81 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   current_obj++;
 }
 
+static void
+hwloc_info_show_levels(FILE *output, hwloc_topology_t topology)
+{
+  hwloc_lstopo_show_summary(output, topology);
+}
+
+static void
+hwloc_info_show_topology_infos(hwloc_topology_t topology)
+{
+  struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
+  unsigned i;
+  for(i=0; i<infos->count; i++)
+    if (!only_attr_name)
+      printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
+    else {
+      char name[256];
+      snprintf(name, sizeof(name), "info %s", infos->array[i].name);
+      if (!strcmp(only_attr_name, name))
+        printf("%s\n", infos->array[i].value);
+    }
+}
+
+static void
+hwloc_info_show_support(hwloc_topology_t topology)
+{
+  const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
+
+#ifdef HWLOC_DEBUG
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
+#endif
+
+#define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
+  DO(discovery, pu);
+  DO(discovery, disallowed_pu);
+  DO(discovery, numa);
+  DO(discovery, numa_memory);
+  DO(discovery, disallowed_numa);
+  DO(discovery, cpukind_efficiency);
+
+  DO(cpubind, set_thisproc_cpubind);
+  DO(cpubind, get_thisproc_cpubind);
+  DO(cpubind, set_proc_cpubind);
+  DO(cpubind, get_proc_cpubind);
+  DO(cpubind, set_thisthread_cpubind);
+  DO(cpubind, get_thisthread_cpubind);
+  DO(cpubind, set_thread_cpubind);
+  DO(cpubind, get_thread_cpubind);
+  DO(cpubind, get_thisproc_last_cpu_location);
+  DO(cpubind, get_proc_last_cpu_location);
+  DO(cpubind, get_thisthread_last_cpu_location);
+
+  DO(membind, set_thisproc_membind);
+  DO(membind, get_thisproc_membind);
+  DO(membind, set_proc_membind);
+  DO(membind, get_proc_membind);
+  DO(membind, set_thisthread_membind);
+  DO(membind, get_thisthread_membind);
+  DO(membind, set_area_membind);
+  DO(membind, get_area_membind);
+  DO(membind, alloc_membind);
+  DO(membind, firsttouch_membind);
+  DO(membind, bind_membind);
+  DO(membind, interleave_membind);
+  DO(membind, nexttouch_membind);
+  DO(membind, migrate_membind);
+  DO(membind, get_area_memlocation);
+
+  DO(misc, imported_support);
+#undef DO
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -676,11 +808,11 @@ main (int argc, char *argv[])
   while (argc >= 1) {
     opt = 0;
     if (*argv[0] == '-') {
-      if (!strcmp (argv[0], "--objects"))
+      if (!strcmp (argv[0], "--objects")) /* backward compat with v2 */
 	mode = HWLOC_INFO_MODE_OBJECTS;
-      else if (!strcmp (argv[0], "--topology"))
+      else if (!strcmp (argv[0], "--topology")) /* backward compat with v2 */
 	mode = HWLOC_INFO_MODE_TOPOLOGY;
-      else if (!strcmp (argv[0], "--support"))
+      else if (!strcmp (argv[0], "--support")) /* backward compat with v2 */
 	mode = HWLOC_INFO_MODE_SUPPORT;
       else if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose"))
         verbose_mode++;
@@ -690,6 +822,14 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
+      }
+      else if (!strcmp (argv[0], "--get-attr")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	only_attr_name = argv[1];
+	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))
 	show_index_prefix = 1;
@@ -976,63 +1116,12 @@ main (int argc, char *argv[])
   }
 
   if (mode == HWLOC_INFO_MODE_TOPOLOGY) {
-    hwloc_lstopo_show_summary(stdout, topology);
-    if (verbose_mode > 0) {
-      struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
-      unsigned i;
-      for(i=0; i<infos->count; i++)
-        printf("info %s = %s\n", infos->array[i].name, infos->array[i].value);
-    }
+    hwloc_info_show_levels(stdout, topology);
+    if (verbose_mode > 0)
+      hwloc_info_show_topology_infos(topology);
 
   } else if (mode == HWLOC_INFO_MODE_SUPPORT) {
-    const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
-
-#ifdef HWLOC_DEBUG
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
-#endif
-
-#define DO(x,y) printf(#x ":" #y " = %u\n", (unsigned char) support->x->y);
-    DO(discovery, pu);
-    DO(discovery, disallowed_pu);
-    DO(discovery, numa);
-    DO(discovery, numa_memory);
-    DO(discovery, disallowed_numa);
-    DO(discovery, cpukind_efficiency);
-
-    DO(cpubind, set_thisproc_cpubind);
-    DO(cpubind, get_thisproc_cpubind);
-    DO(cpubind, set_proc_cpubind);
-    DO(cpubind, get_proc_cpubind);
-    DO(cpubind, set_thisthread_cpubind);
-    DO(cpubind, get_thisthread_cpubind);
-    DO(cpubind, set_thread_cpubind);
-    DO(cpubind, get_thread_cpubind);
-    DO(cpubind, get_thisproc_last_cpu_location);
-    DO(cpubind, get_proc_last_cpu_location);
-    DO(cpubind, get_thisthread_last_cpu_location);
-
-    DO(membind, set_thisproc_membind);
-    DO(membind, get_thisproc_membind);
-    DO(membind, set_proc_membind);
-    DO(membind, get_proc_membind);
-    DO(membind, set_thisthread_membind);
-    DO(membind, get_thisthread_membind);
-    DO(membind, set_area_membind);
-    DO(membind, get_area_membind);
-    DO(membind, alloc_membind);
-    DO(membind, firsttouch_membind);
-    DO(membind, bind_membind);
-    DO(membind, interleave_membind);
-    DO(membind, nexttouch_membind);
-    DO(membind, migrate_membind);
-    DO(membind, get_area_memlocation);
-
-    DO(misc, imported_support);
-#undef DO
+    hwloc_info_show_support(topology);
 
   } else if (mode == HWLOC_INFO_MODE_OBJECTS) {
     struct hwloc_calc_location_context_s lcontext;
@@ -1043,7 +1132,13 @@ main (int argc, char *argv[])
     lcontext.verbose = verbose_mode;
     current_obj = 0;
     while (argc >= 1) {
-      if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
+      if (!strcmp(argv[0], "levels")) {
+        hwloc_info_show_levels(stdout, topology);
+      } else if (!strcmp(argv[0], "topology")) {
+        hwloc_info_show_topology_infos(topology);
+      } else if (!strcmp(argv[0], "support")) {
+        hwloc_info_show_support(topology);
+      } else if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
 	hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
       } else if (*argv[0] == '-') {
         fprintf(stderr, "Cannot handle command-line option %s after some locations.\n", argv[0]);

@@ -54,6 +54,8 @@ Version 3.0.0
 * Tools
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.
+  + hwloc-info --objects, --topology and --support are deprecated in
+    favor of passing levels, topology and support as targets.
 * Removed features
   + Netloc.
   + Importing and exporting from/to hwloc 1.x XML.

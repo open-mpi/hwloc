@@ -1,5 +1,5 @@
 #
-# Copyright © 2018-2023 Inria.  All rights reserved.
+# Copyright © 2018-2024 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -163,6 +163,7 @@ _hwloc_info(){
 		   --support
 		   -v --verbose
 		   -q --quiet -s --silent
+		   --get-attr
 		   --ancestors
 		   --ancestor
 		   --children
@@ -226,6 +227,9 @@ _hwloc_info(){
 		;;
 	    --best-memattr)
 		COMPREPLY=( "<memattr>" "" )
+		;;
+	    --get-attr)
+		COMPREPLY=( "<name>" "" )
 		;;
 	esac
     fi

@@ -5,7 +5,7 @@
 .\" See COPYING in top-level directory.
 .TH HWLOC-INFO "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
-hwloc-info \- Show some information about some objects or about a topology or about support features
+hwloc-info \- Show some information about some objects, a topology or supported features
 .
 .\" **************************
 .\"    Synopsis Section
@@ -18,8 +18,43 @@ hwloc-info \- Show some information about some objects or about a topology or ab
 \fI<object>\fR...
 .PP
 .B hwloc-info
-[ \fIoptions \fR]...
+[ \fIoptions \fR] root
 .
+.B hwloc-info
+[ \fIoptions \fR] [ topology | levels | support ]
+.
+.PP
+\fI<object>\fR... may be a space-separated list of target objects to query.
+The program reports all information about one object before looking at the next one:
+
+    $ hwloc-info core:2 package:1 pu:all
+    Core L#2
+     type = Core
+     ...
+    Package L#1
+     ...
+    PU L#0
+     ...
+    PU L#1
+     ...
+
+The list may also contain special keywords such as:
+
+    \fBroot\fR for the topology root object.
+
+    \fBlevels\fR for information about topology levels (default if no target object is given, supersedes \fB\-\-topology\fR in hwloc 2.x).
+
+    \fBtopology\fR for info attributes attached to the topology (formerly included in \fB\-\-topology \-v\fR in hwloc 2.x).
+
+    \fBsupport\fR for information about supported features (supersedes \fB\-\-support\fR in hwloc 2.x).
+    The features are those available through the \fBhwloc_topology_get_support()\fR function.
+    This is useful for verifying which CPU or memory binding options are supported
+    by the current hwloc installation.
+
+Real targets and special keywords may be combined:
+
+    $ hwloc-info core:2 topology pu:3 levels
+
 .PP
 Note that hwloc(7) provides a detailed explanation of the hwloc system
 and of valid <object> formats;
@@ -29,21 +64,6 @@ it should be read before reading this man page.
 .\" **************************
 .SH OPTIONS
 .
-.TP
-\fB\-\-objects\fR
-Report information specific objects.
-This is the default if some objects are given on the command-line.
-.TP
-\fB\-\-topology\fR
-Report a summary of the topology instead of about some specific objects.
-This is the default if no object is given on the command-line.
-If \-v is also given, topology info attributes are also shown.
-.TP
-\fB\-\-support\fR
-Report the features that are supported by hwloc on the topology.
-The features are those available through the \fBhwloc_topology_get_support()\fR function.
-This is useful for verifying which CPU or memory binding options are supported
-by the current hwloc installation.
 .TP
 \fB\-i\fR <path>, \fB\-\-input\fR <path>
 Read the topology from <path> instead of discovering the topology of the local machine.
@@ -77,6 +97,17 @@ Include additional detail.
 \fB\-q\fR \fB\-\-quiet\fR \fB\-s\fR \fB\-\-silent\fR
 Reduce the amount of details to show.
 A single summary line per object is displayed.
+.TP
+\fB\-\-get\-attr\fR <name>
+Only report the attribute of name <name> for each object (instead of all attributes).
+The name must exactly match what is usually reported by the program,
+for instance "complete cpuset" in "0.1: complete cpuset = %0x00ffff00".
+
+Only the value is reported, any other prefix or object name is ignored,
+so that the output may easily be used by other tools.
+
+This option also works on topology information but it is ignored for
+\fBlevels\fR and \fBsupport\fR keywords.
 .TP
 \fB\-\-ancestors\fR
 Display information about the object as well as
@@ -265,12 +296,12 @@ Display help message and exit.
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-info displays information about the specified object.
+hwloc-info displays information about the specified objects.
 It is intended to be used with tools such as grep for filtering
 certain attribute lines.
-When no object is specified, or when \fB\-\-topology\fR is passed,
-hwloc-info prints a summary of the topology.
-When \fB\-\-support\fR is passed, hwloc-info lists the supported
+When no object is specified, hwloc-info prints a summary of the topology
+(as if \fBlevels\fR was given).
+When \fBsupport\fR is given, hwloc-info lists the supported
 features for the topology.
 .
 .PP
@@ -310,6 +341,12 @@ To list the OS devices that are of subtype OpenCL:
     OSDev[Co-Processor,GPU]:6
     OSDev[Co-Processor,GPU]:8
 
+To find the PCI bus ID of PCI devices containing OpenCL devices:
+
+    $ hwloc-info --ancestor PCI --get-attr "attr PCI bus id" 'os[opencl]:all'
+    0000:05:00.0
+    0000:42:00.0
+
 To list the NUMA nodes that are local a PU:
 
     $ hwloc-info --local-memory pu:25
@@ -332,9 +369,9 @@ to find where a NUMA node is attached in the hierarchy of CPU cores:
     $ hwloc-info --ancestor kind=normal --first -s numa:1
     Package:0
 
-To see info attributes of the topology:
+To see levels and info attributes of the topology:
 
-    $ hwloc-info --topology --verbose
+    $ hwloc-info levels topology
     depth 0:           1 Machine (type #0)
      depth 1:          1 Package (type #1)
       depth 2:         2 Core (type #2)
