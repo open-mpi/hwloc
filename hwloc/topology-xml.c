@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -458,6 +458,7 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
           if (!strcmp(infoname, "Backend")
               || !strcmp(infoname, "SyntheticDescription")
               || !strcmp(infoname, "LinuxCgroup")
+              || !strcmp(infoname, "MemoryTiersNr")
               || !strcmp(infoname, "WindowsBuildEnvironment")
               || !strcmp(infoname, "OSName")
               || !strcmp(infoname, "OSRelease")

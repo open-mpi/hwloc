@@ -155,5 +155,5 @@ Memory attribute #2 name `Bandwidth' flags 5
   NUMANode L#5 = 90000 from cpuset 0x0f000f00,0x0f000f00 (Group0 L#2)
   NUMANode L#6 = 22500 from cpuset 0xf000f000,0xf000f000 (Group0 L#3)
   NUMANode L#7 = 90000 from cpuset 0xf000f000,0xf000f000 (Group0 L#3)
-Topology infos: Backend=Linux OSName=Linux OSRelease=3.10.0-327.el7.x86_64 OSVersion="#1 SMP Thu Oct 29 17:29:29 EDT 2015" HostName=localhost.localdomain Architecture=x86_64
+Topology infos: Backend=Linux OSName=Linux OSRelease=3.10.0-327.el7.x86_64 OSVersion="#1 SMP Thu Oct 29 17:29:29 EDT 2015" HostName=localhost.localdomain Architecture=x86_64 MemoryTiersNr=2
 Topology not from this system

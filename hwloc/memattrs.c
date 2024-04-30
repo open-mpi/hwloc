@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2023 Inria.  All rights reserved.
+ * Copyright © 2020-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -1801,11 +1801,16 @@ hwloc__apply_memory_tiers_subtypes(hwloc_topology_t topology,
         if (nr_tiers > 1) {
           char tmp[20];
           snprintf(tmp, sizeof(tmp), "%u", j);
-          hwloc__replace_infos(&node->infos, "MemoryTier", tmp);
+          hwloc__add_info(&node->infos, "MemoryTier", tmp);
         }
         break; /* each node is in a single tier */
       }
     }
+  }
+  if (nr_tiers > 1) {
+    char tmp[20];
+    snprintf(tmp, sizeof(tmp), "%u", nr_tiers);
+    hwloc__replace_infos(&topology->infos, "MemoryTiersNr", tmp);
   }
 }
 
@@ -1813,9 +1818,16 @@ int
 hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology, int force_subtype)
 {
   struct hwloc_memory_tier_s *tiers;
+  hwloc_obj_t node = NULL;
   unsigned nr_tiers;
   unsigned i;
   const char *env;
+
+  /* removing existing info attrs */
+  while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
+    hwloc__remove_infos(&node->infos, "MemoryTier", NULL);
+  }
+  hwloc__remove_infos(&topology->infos, "MemoryTiersNr", NULL);
 
   env = getenv("HWLOC_MEMTIERS");
   if (env) {

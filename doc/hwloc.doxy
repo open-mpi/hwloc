@@ -2034,6 +2034,10 @@ placed.
 These info attributes are attached to the topology itself.
 
 <dl>
+<dt>MemoryTiersNr</dt>
+<dd>The number of different memory tiers in the topology, if any.
+See \ref heteromem.
+</dd>
 <dt>Backend</dt>
 <dd>The name of a hwloc backend/component that added objects in the topology.
 If several components were combined, multiple Backend pairs may exist,
@@ -2572,6 +2576,12 @@ To list all the physical indexes of Tier-0 NUMA nodes (HBM P\#2 and P\#3 not sho
 \verbatim
 $ hwloc-calc -I 'numa[tier=0]' -p all
 2,3
+\endverbatim
+
+The number of tiers may be retrieved at looking in topology attributes:
+\verbatim
+$ hwloc-info --get-attr "info MemoryTiersNr" topology
+2
 \endverbatim
 
 hwloc-calc and hwloc-bind also have options such as

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2022 IBM Corporation.  All rights reserved.
@@ -607,8 +607,8 @@ int hwloc__replace_infos(struct hwloc_infos_s *infos,
   }
 }
 
-static int hwloc__remove_infos(struct hwloc_infos_s *infos,
-                               const char *name, const char *value)
+int hwloc__remove_infos(struct hwloc_infos_s *infos,
+                        const char *name, const char *value)
 {
   struct hwloc_info_s *array = infos->array;
   unsigned count = infos->count;
