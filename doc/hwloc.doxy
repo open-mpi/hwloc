@@ -2578,7 +2578,7 @@ $ hwloc-calc -I 'numa[tier=0]' -p all
 2,3
 \endverbatim
 
-The number of tiers may be retrieved at looking in topology attributes:
+The number of tiers may be retrieved by looking at topology attributes:
 \verbatim
 $ hwloc-info --get-attr "info MemoryTiersNr" topology
 2
