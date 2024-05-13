@@ -52,7 +52,7 @@ pipeline {
 	}
 
 	options {
-		buildDiscarder(logRotator(numToKeepStr: '25', daysToKeepStr: '25'))
+		buildDiscarder(logRotator(numToKeepStr: '25', daysToKeepStr: '50'))
 	}
 
         stages {
