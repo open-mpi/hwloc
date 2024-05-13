@@ -51,6 +51,10 @@ pipeline {
 		pollSCM(isExtendedJob ? '30 5 * * *' : '')
 	}
 
+	options {
+		buildDiscarder(logRotator(numToKeepStr: '25', daysToKeepStr: '50'))
+	}
+
         stages {
 		stage('Tarball') {
 			steps {
