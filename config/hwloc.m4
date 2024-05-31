@@ -1218,6 +1218,7 @@ char nvmlInit ();
         tmp_save_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$CPPFLAGS $HWLOC_NVML_CPPFLAGS"
         AC_CHECK_DECLS([nvmlDeviceGetCurrPcieLinkGeneration],,[:],[[#include <nvml.h>]])
+        AC_CHECK_DECLS([nvmlDeviceGetNvLinkRemoteDeviceType],,[:],[[#include <nvml.h>]])
         CPPFLAGS="$tmp_save_CPPFLAGS"
       fi
 
