@@ -12,6 +12,8 @@
 #endif
 #undef HAVE_DECL_NVMLDEVICEGETCURRPCIELINKGENERATION
 #define HAVE_DECL_NVMLDEVICEGETCURRPCIELINKGENERATION 1
+#undef HAVE_DECL_NVMLDEVICEGETNVLINKREMOTEDEVICETYPE
+#define HAVE_DECL_NVMLDEVICEGETNVLINKREMOTEDEVICETYPE 1
 
 
 typedef int nvmlReturn_t;
@@ -22,6 +24,13 @@ typedef struct nvmlPciInfo_st {
   unsigned int bus;
   unsigned int device;
 } nvmlPciInfo_t;
+
+typedef enum nvmlIntNvLinkDeviceType_enum {
+  NVML_NVLINK_DEVICE_TYPE_GPU     = 0x00,
+  NVML_NVLINK_DEVICE_TYPE_IBMNPU  = 0x01,
+  NVML_NVLINK_DEVICE_TYPE_SWITCH  = 0x02,
+  NVML_NVLINK_DEVICE_TYPE_UNKNOWN = 0xFF
+} nvmlIntNvLinkDeviceType_t;
 
 struct nvmlDevice_st;
 typedef struct nvmlDevice_st* nvmlDevice_t;
@@ -44,5 +53,6 @@ typedef unsigned nvmlEnableState_t;
 nvmlReturn_t nvmlDeviceGetNvLinkState(nvmlDevice_t device, unsigned int link, nvmlEnableState_t * isActive);
 nvmlReturn_t nvmlDeviceGetNvLinkVersion(nvmlDevice_t device, unsigned int  link, unsigned int* version);
 nvmlReturn_t nvmlDeviceGetNvLinkRemotePciInfo(nvmlDevice_t device, unsigned int link, nvmlPciInfo_t * pci);
+nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(nvmlDevice_t device, unsigned int link, nvmlIntNvLinkDeviceType_t *pNvLinkDeviceType);
 
 #endif /* HWLOC_PORT_NVML_NVML_H */
