@@ -358,13 +358,13 @@ its even numbered logical processors:
 To convert a cpu mask to human-readable output, the -H option can be
 used to emit a space-delimited list of locations:
 
-    $ echo 0x000000f0 | hwloc-calc -H package.core
+    $ echo 0x000000f0 | hwloc-calc -q -H package.core
     Package:1.Core1 Package:1.Core:1 Package:1.Core:2 Package:1.Core:3
 
 To use some other character (e.g., a comma) instead of spaces in
 output, use the --sep option:
 
-    $ echo 0x000000f0 | hwloc-calc -H package.core --sep ,
+    $ echo 0x000000f0 | hwloc-calc -q -H package.core --sep ,
     Package:1.Core1,Package:1.Core:1,Package:1.Core:2,Package:1.Core:3
 
 To combine two (physical) CPU masks:
