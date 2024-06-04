@@ -30,6 +30,8 @@ Version 2.11.0
   + hwloc-info has a new --get-attr option to get a single attribute.
   + hwloc-info now supports "levels", "support" and "topology"
     special keywords for backward compatibility for hwloc 3.0.
+  + The --taskset command-line option is superseded by the new
+    --cpuset-output-format which also allows to export as list.
 
 
 Version 2.10.0

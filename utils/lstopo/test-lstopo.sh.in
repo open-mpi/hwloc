@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2024 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
 # See COPYING in top-level directory.
@@ -51,7 +51,7 @@ $ls -v > $tmp/test.console_verbose
 echo "** Verbose with cpusets in $tmp/test.cpuset_verbose ..."
 $ls -c -v > $tmp/test.cpuset_verbose
 echo "** Verbose with taskset sets in $tmp/test.taskset ..."
-$ls --taskset -v > $tmp/test.taskset
+$ls --cpuset-output-format taskset -v > $tmp/test.taskset
 
 echo "** Merged topology in $tmp/test.merge ..."
 $ls --merge > $tmp/test.merge

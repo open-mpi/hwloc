@@ -213,11 +213,16 @@ This option does not apply to the output, see \fB\-\-get\fR above.
 Interpret input locations with logical indexes instead of physical/OS indexes (default).
 This option does not apply to the output, see \fB\-\-get\fR above.
 .TP
-\fB\-\-taskset\fR
-Display CPU set strings in the format recognized by the taskset command-line
-program instead of hwloc-specific CPU set string format.
+\fB\-\-cpuset\-output\-format\fR <hwloc|list|taskset> \fB\-\-cof\fR <hwloc|list|taskset>
+Change the format of CPUset or nodeset strings displayed by \fB\-\-get\fR, \fB\-e\fR, etc.
+By default, the hwloc-specific format is used.
+If \fIlist\fR is given, the output is a comma-separated of numbers or ranges,
+e.g. 2,4-5,8 .
+If \fItaskset\fR is given, the output is compatible with the taskset program
+(replaces the former \fB--taskset\fR option).
+
 This option has no impact on the format of input CPU set strings,
-both formats are always accepted.
+both hwloc and taskset formats are always accepted.
 .TP
 \fB\-f\fR \fB\-\-force\fR
 Launch the executable even if binding failed.

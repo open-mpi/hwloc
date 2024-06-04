@@ -31,7 +31,7 @@ _lstopo() {
 		   --windows-processor-groups
 		   -c --cpuset
 		   -C --cpuset-only
-		   --taskset
+		   --cpuset-output-format --cof
 		   --filter --ignore
 		   --no-caches
 		   --no-useless-caches
@@ -146,6 +146,9 @@ _lstopo() {
 	    --distances-transform)
 	        COMPREPLY=( `compgen -W "links merge-switch-ports transitive-closure" -- "$cur"` )
 		;;
+	    --cpuset-output-format | --cof)
+	        COMPREPLY=( "hwloc" "list" taskset" )
+		;;
 	esac
     fi
 }
@@ -250,7 +253,7 @@ _hwloc_bind(){
 		   --nodeset
 		   --pid
 		   --tid
-		   --taskset
+		   --cpuset-output-format --cof
 		   --restrict
 		   --restrict-flags
 		   --disallowed --whole-system
@@ -288,6 +291,9 @@ _hwloc_bind(){
 	    --best-memattr)
 		COMPREPLY=( "<memattr>" "" )
 		;;
+	    --cpuset-output-format | --cof)
+	        COMPREPLY=( "hwloc" "list" taskset" )
+		;;
 	esac
     fi
 }
@@ -314,7 +320,7 @@ _hwloc_calc(){
 		   --no --nodeset-output
                    --oo --object-output
 		   --sep
-		   --taskset
+		   --cpuset-output-format --cof
 		   --single
 		   --restrict
 		   --restrict-flags
@@ -364,6 +370,9 @@ _hwloc_calc(){
 		;;
 	    --cpukind)
 		COMPREPLY=( "<name>=<value>" "<n>" "" )
+		;;
+	    --cpuset-output-format | --cof)
+	        COMPREPLY=( "hwloc" "list" taskset" )
 		;;
 	esac
     fi
@@ -450,7 +459,7 @@ _hwloc_distrib(){
 		   --input -i
 		   --input-format --if
 		   --single
-		   --taskset
+		   --cpuset-output-format --cof
 		   -v --verbose
 		   --version
 		   -h --help
@@ -476,6 +485,9 @@ _hwloc_distrib(){
 		;;
 	    --restrict-flags)
 		COMPREPLY=( "<integer>" "" )
+		;;
+	    --cpuset-output-format | --cof)
+	        COMPREPLY=( "hwloc" "list" taskset" )
 		;;
 	esac
     fi

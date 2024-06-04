@@ -58,7 +58,9 @@ void usage(const char *name, FILE *where)
 #ifdef HWLOC_LINUX_SYS
   fprintf(where, "  --tid <tid>    Operate on thread <tid>\n");
 #endif
-  fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
+  fprintf(where, "  --cpuset-output-format <hwloc|list|taskset>\n"
+                 "  --cof <hwloc|list|taskset>\n"
+                 "                 Change the format of cpuset outputs\n");
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -f --force     Launch the command even if binding failed\n");
   fprintf(where, "  -q --quiet     Hide non-fatal error messages\n");
@@ -85,7 +87,7 @@ int main(int argc, char *argv[])
   int no_smt = -1;
   int only_hbm = -1;
   int logical = 1;
-  int taskset = 0;
+  enum hwloc_utils_cpuset_format_e cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
   unsigned cpubind_flags = 0;
   hwloc_membind_policy_t membind_policy = HWLOC_MEMBIND_BIND;
   int got_mempolicy = 0;
@@ -270,8 +272,21 @@ int main(int argc, char *argv[])
         logical = 0;
         goto next;
       }
+      if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        cpuset_output_format = hwloc_utils_parse_cpuset_format(argv[1]);
+        if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == cpuset_output_format) {
+          fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
+          exit(EXIT_FAILURE);
+        }
+        opt = 1;
+        goto next;
+      }
       if (!strcmp(argv[0], "--taskset")) {
-        taskset = 1;
+        cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
         goto next;
       }
       if (!strcmp (argv[0], "-e") || !strncmp (argv[0], "--get-last-cpu-location", 10)) {
@@ -417,16 +432,10 @@ int main(int argc, char *argv[])
       if (use_nodeset) {
 	hwloc_bitmap_t nset = hwloc_bitmap_alloc();
 	hwloc_cpuset_to_nodeset(topology, cpubind_set, nset);
-	if (taskset)
-	  hwloc_bitmap_taskset_asprintf(&s, nset);
-	else
-	  hwloc_bitmap_asprintf(&s, nset);
+        hwloc_utils_cpuset_format_asprintf(&s, nset, cpuset_output_format);
 	hwloc_bitmap_free(nset);
       } else {
-	if (taskset)
-	  hwloc_bitmap_taskset_asprintf(&s, cpubind_set);
-	else
-	  hwloc_bitmap_asprintf(&s, cpubind_set);
+        hwloc_utils_cpuset_format_asprintf(&s, cpubind_set, cpuset_output_format);
       }
 
       } else {
@@ -446,10 +455,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
 	return EXIT_FAILURE;
       }
-      if (taskset)
-	hwloc_bitmap_taskset_asprintf(&s, membind_set);
-      else
-	hwloc_bitmap_asprintf(&s, membind_set);
+      hwloc_utils_cpuset_format_asprintf(&s, membind_set, cpuset_output_format);
       switch (policy) {
       case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
       case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
