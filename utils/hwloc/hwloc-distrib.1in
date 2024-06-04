@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2023 Inria.  All rights reserved.
+.\" Copyright © 2010-2024 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-DISTRIB "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
@@ -129,6 +129,15 @@ by options \fB\-\-ignore\fR.
 .PP
 This can e.g. be used to distribute a set of processes hierarchically according
 to the topology of a machine. These masks can be used with hwloc-bind(1).
+.
+.PP
+On hybrid CPUs (or asymmetric platforms), distribution may be suboptimal
+since the number of cores or PUs inside packages or below caches may vary
+(the top-down recursive partitioning ignores these numbers until reaching their levels).
+Hence it is recommended to distribute only inside a single homogeneous domain.
+For instance on a CPU with energy-efficient E-cores and high-performance P-cores,
+one should distribute separately N tasks on E-cores and M tasks on P-cores
+instead of trying to distribute directly M+N tasks on the entire CPUs.
 .
 .PP
 .B NOTE:
