@@ -190,7 +190,7 @@ Each output line may be converted independently with hwloc-calc:
 To convert the output into a list of processors that may be passed to
 dplace -c inside a mpirun command line:
 
-    $ hwloc-distrib 4 --single | xargs hwloc-calc -I list
+    $ hwloc-distrib 4 --single | xargs hwloc-calc -I pu
     0,8,4,16
 .
 .
