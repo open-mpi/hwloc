@@ -181,11 +181,11 @@ of binding)
 
 Each output line may be converted independently with hwloc-calc:
 
-    $ hwloc-distrib 4 --single | hwloc-calc --taskset
-    0x1
-    0x100
-    0x10
-    0x1000
+    $ hwloc-distrib 4 --single | hwloc-calc --oo -I pu
+    PU:0
+    PU:8
+    PU:4
+    PU:12
 
 To convert the output into a list of processors that may be passed to
 dplace -c inside a mpirun command line:
