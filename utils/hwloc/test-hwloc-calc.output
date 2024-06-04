@@ -1,7 +1,10 @@
-# root
+# root --cpuset-output-format hwloc
 0xffffffff,0xffffffff
 
-# all --taskset
+# all --cof list
+0-63
+
+# all --cpuset-output-format taskset
 0xffffffffffffffff
 
 # hex

@@ -37,11 +37,14 @@ file="$tmp/test-hwloc-calc.output"
 
 set -e
 (
-  echo "# root"
-  $calc --if synthetic --input "node:4 core:4 pu:4" root
+  echo "# root --cpuset-output-format hwloc"
+  $calc --if synthetic --input "node:4 core:4 pu:4" root --cpuset-output-format hwloc
   echo
-  echo "# all --taskset"
-  $calc --if synthetic --input "node:4 core:4 pu:4" all --taskset
+  echo "# all --cof list"
+  $calc --if synthetic --input "node:4 core:4 pu:4" all --cof list
+  echo
+  echo "# all --cpuset-output-format taskset"
+  $calc --if synthetic --input "node:4 core:4 pu:4" all --cpuset-output-format taskset
   echo
 
   echo "# hex"
@@ -296,7 +299,7 @@ EOF
 EOF
   echo
   echo "# Reading infinite cpusets from stdin and exporting to taskset"
-  cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4" --taskset
+  cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4" --cpuset-output-format taskset
   0xf...f
 0xf...f,abcd00
 0xf...f,abcd,ef00

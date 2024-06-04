@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -118,10 +118,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
     fprintf(output, " cpuset=");
   if (loutput->show_cpuset) {
     char *cpusetstr;
-    if (loutput->show_taskset)
-      hwloc_bitmap_taskset_asprintf(&cpusetstr, l->cpuset);
-    else
-      hwloc_bitmap_asprintf(&cpusetstr, l->cpuset);
+    hwloc_utils_cpuset_format_asprintf(&cpusetstr, l->cpuset, loutput->cpuset_output_format);
     fprintf(output, "%s", cpusetstr);
     free(cpusetstr);
   }

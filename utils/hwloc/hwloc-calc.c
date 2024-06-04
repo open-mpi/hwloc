@@ -57,7 +57,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --no --nodeset-output     Manipulate nodesets instead of cpusets for outputs\n");
   fprintf(where, "  --oo --object-output      Report objects instead of object indexes\n");
   fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
-  fprintf(where, "  --taskset                 Use taskset-specific format when displaying cpuset strings\n");
+  fprintf(where, "  --cpuset-output-format <hwloc|list|taskset>\n"
+                 "  --cof <hwloc|list|taskset>\n"
+                 "                            Change the format of cpuset outputs\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -q --quiet                Hide non-fatal error messages\n");
@@ -83,7 +85,7 @@ static unsigned long best_node_flags = 0;
 static int showobjs = 0;
 static int no_smt = -1;
 static int singlify = 0;
-static int taskset = 0;
+static enum hwloc_utils_cpuset_format_e cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
 static hwloc_bitmap_t cpukind_cpuset = NULL;
 
 static int
@@ -276,10 +278,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
 
   } else {
     char *string = NULL;
-    if (taskset)
-      hwloc_bitmap_taskset_asprintf(&string, set);
-    else
-      hwloc_bitmap_asprintf(&string, set);
+    hwloc_utils_cpuset_format_asprintf(&string, set, cpuset_output_format);
     printf("%s\n", string);
     free(string);
   }
@@ -593,9 +592,22 @@ int main(int argc, char *argv[])
 	singlify = 1;
 	goto next;
       }
-      if (!strcmp(argv[0], "--taskset")) {
-	taskset = 1;
+      if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        cpuset_output_format = hwloc_utils_parse_cpuset_format(argv[1]);
+        if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == cpuset_output_format) {
+          fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
+          exit(EXIT_FAILURE);
+        }
+	opt = 1;
 	goto next;
+      }
+      if (!strcmp(argv[0], "--taskset")) {
+        cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
+        goto next;
       }
 
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);

@@ -3058,8 +3058,9 @@ enabled for the current topology.
   See for instance hwloc_bitmap_taskset_snprintf() in
   \ref hwlocality_bitmap().
 
-  Most hwloc command-line tools also support the <tt>\--taskset</tt>
-  option to manipulate taskset-specific strings.
+  Most hwloc command-line tools also support the option
+  <tt>\--cpuset-output-format taskset</tt>
+  to manipulate taskset-specific strings.
  </dd>
 
 </dl>

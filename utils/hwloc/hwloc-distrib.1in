@@ -21,9 +21,13 @@ hwloc-distrib \- Build a number of cpu masks distributed on the system
 \fB\-\-single\fR
 Singlify each output to a single CPU.
 .TP
-\fB\-\-taskset\fR
-Show CPU set strings in the format recognized by the taskset command-line
-program instead of hwloc-specific CPU set string format.
+\fB\-\-cpuset\-output\-format\fR <hwloc|list|taskset> \fB\-\-cof\fR <hwloc|list|taskset>
+Change the format of displayed CPU set strings.
+By default, the hwloc-specific format is used.
+If \fIlist\fR is given, the output is a comma-separated of numbers or ranges,
+e.g. 2,4-5,8 .
+If \fItaskset\fR is given, the output is compatible with the taskset program
+(replaces the former \fB--taskset\fR option).
 .TP
 \fB\-v\fR \fB\-\-verbose\fR
 Verbose messages.

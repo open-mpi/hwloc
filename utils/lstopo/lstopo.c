@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -575,7 +575,9 @@ void usage(const char *name, FILE *where)
 #endif
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
-  fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
+  fprintf (where, "  --cpuset-output-format <hwloc|list|taskset>\n"
+                  "  --cof <hwloc|list|taskset>\n"
+                  "                        Change the format of cpuset outputs\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --filter <type>:<knd> Filter objects of the given type, or all.\n");
   fprintf (where, "     <knd> may be `all' (keep all), `none' (remove all), `structure' or `important'\n");
@@ -961,7 +963,7 @@ main (int argc, char *argv[])
   loutput.show_cpukinds_only = 0;
   loutput.show_windows_processor_groups_only = 0;
   loutput.show_cpuset = 0;
-  loutput.show_taskset = 0;
+  loutput.cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
   loutput.transform_distances = -1;
   loutput.obj_snprintf_flags = HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES;
 
@@ -1073,8 +1075,22 @@ main (int argc, char *argv[])
 	loutput.show_cpuset = 1;
       else if (!strcmp (argv[0], "-C") || !strcmp (argv[0], "--cpuset-only"))
 	loutput.show_cpuset = 2;
+      else if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")) {
+        if (argc < 2) {
+          usage (callname, stderr);
+          exit(EXIT_FAILURE);
+        }
+        loutput.cpuset_output_format = hwloc_utils_parse_cpuset_format(argv[1]);
+        if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == loutput.cpuset_output_format) {
+          fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
+          goto out_usagefailure;
+        }
+        if (!loutput.show_cpuset)
+	  loutput.show_cpuset = 1;
+        opt = 1;
+      }
       else if (!strcmp (argv[0], "--taskset")) {
-	loutput.show_taskset = 1;
+	loutput.cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
 	if (!loutput.show_cpuset)
 	  loutput.show_cpuset = 1;
       } else if (!strcmp (argv[0], "--only")) {

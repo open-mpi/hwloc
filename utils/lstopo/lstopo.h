@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2015 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -103,7 +103,7 @@ struct lstopo_output {
   int show_windows_processor_groups_only;
   struct hwloc_calc_level show_only;
   int show_cpuset;
-  int show_taskset;
+  enum hwloc_utils_cpuset_format_e cpuset_output_format;
   int transform_distances;
   unsigned long obj_snprintf_flags;
 
