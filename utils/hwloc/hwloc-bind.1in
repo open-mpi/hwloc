@@ -383,7 +383,7 @@ the process was actually bound, and then uses hwloc-calc to display
 the resulting cpu mask in space-delimited list of human-readable
 locations:
 
-    $ hwloc-bind package:1.core:2 -- hwloc-bind --get | hwloc-calc -H package.core.pu
+    $ hwloc-bind package:1.core:2 -- hwloc-bind --get | hwloc-calc -q -H package.core.pu
     Package:1.Core:2.PU:0 Package:1.Core:2.PU:1
 
 hwloc-calc may convert this output into actual objects, either with logical or physical indexes:
