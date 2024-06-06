@@ -245,6 +245,7 @@ int hwloc_bitmap_copy(struct hwloc_bitmap_s * dst, const struct hwloc_bitmap_s *
 /* Strings always use 32bit groups */
 #define HWLOC_PRIxSUBBITMAP		"%08lx"
 #define HWLOC_BITMAP_SUBSTRING_SIZE	32
+#define HWLOC_BITMAP_SUBSTRING_FULL_VALUE 0xFFFFFFFFUL
 #define HWLOC_BITMAP_SUBSTRING_LENGTH	(HWLOC_BITMAP_SUBSTRING_SIZE/4)
 #define HWLOC_BITMAP_STRING_PER_LONG	(HWLOC_BITS_PER_LONG/HWLOC_BITMAP_SUBSTRING_SIZE)
 
@@ -362,7 +363,8 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
 {
   const char * current = string;
   unsigned long accum = 0;
-  int count=0;
+  int count = 0;
+  int ulongcount;
   int infinite = 0;
 
   /* count how many substrings there are */
@@ -383,9 +385,20 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
     count--;
   }
 
-  if (hwloc_bitmap_reset_by_ulongs(set, (count + HWLOC_BITMAP_STRING_PER_LONG - 1) / HWLOC_BITMAP_STRING_PER_LONG) < 0)
+  ulongcount = (count + HWLOC_BITMAP_STRING_PER_LONG - 1) / HWLOC_BITMAP_STRING_PER_LONG;
+  if (hwloc_bitmap_reset_by_ulongs(set, ulongcount) < 0)
     return -1;
-  set->infinite = 0;
+
+  set->infinite = 0; /* will be updated later */
+
+#if HWLOC_BITS_PER_LONG != HWLOC_BITMAP_SUBSTRING_SIZE
+  if (infinite && (count % HWLOC_BITMAP_STRING_PER_LONG) != 0) {
+    /* accumulate substrings of the first ulong that are hidden in the infinite prefix */
+    int i;
+    for(i = (count % HWLOC_BITMAP_STRING_PER_LONG); i < HWLOC_BITMAP_STRING_PER_LONG; i++)
+      accum |= (HWLOC_BITMAP_SUBSTRING_FULL_VALUE << (i*HWLOC_BITMAP_SUBSTRING_SIZE));
+  }
+#endif
 
   while (*current != '\0') {
     unsigned long val;
