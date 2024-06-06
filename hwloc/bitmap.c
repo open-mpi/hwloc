@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2020 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -679,6 +679,10 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
       goto failed;
 
     set->ulongs[count-1] = val;
+    if (infinite && tmpchars != HWLOC_BITS_PER_LONG/4) {
+      /* infinite prefix with partial substring, fill remaining bits */
+      set->ulongs[count-1] |= (~0ULL)<<(4*tmpchars);
+    }
 
     current += tmpchars;
     chars -= tmpchars;
