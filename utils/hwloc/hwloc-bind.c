@@ -349,6 +349,7 @@ int main(int argc, char *argv[])
     lcontext.verbose = verbose;
     scontext.nodeset_input = use_nodeset || nodeset_location;
     scontext.nodeset_output = working_on_cpubind ? 0 : 1;
+    scontext.cpuset_input_format = HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
     scontext.output_set = working_on_cpubind ? cpubind_set : membind_set;
     ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, location);
     if (ret < 0) {

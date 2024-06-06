@@ -57,6 +57,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --no --nodeset-output     Manipulate nodesets instead of cpusets for outputs\n");
   fprintf(where, "  --oo --object-output      Report objects instead of object indexes\n");
   fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
+  fprintf(where, "  --cpuset-input-format <hwloc|list|taskset>\n"
+                 "  --cif <hwloc|list|taskset>\n"
+                 "                            Change the format of cpuset inputs\n");
   fprintf(where, "  --cpuset-output-format <hwloc|list|taskset>\n"
                  "  --cof <hwloc|list|taskset>\n"
                  "                            Change the format of cpuset outputs\n");
@@ -305,6 +308,7 @@ int main(int argc, char *argv[])
   int cpukind_index = -1;
   char *cpukind_infoname = NULL;
   char *cpukind_infovalue = NULL;
+  enum hwloc_utils_cpuset_format_e cpuset_input_format = HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
   int opt;
   int i;
   int err;
@@ -605,6 +609,19 @@ int main(int argc, char *argv[])
 	opt = 1;
 	goto next;
       }
+      if (!strcmp(argv[0], "--cpuset-input-format") || !strcmp(argv[0], "--cif")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        cpuset_input_format = hwloc_utils_parse_cpuset_format(argv[1]);
+        if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == cpuset_input_format) {
+          fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
+          exit(EXIT_FAILURE);
+        }
+	opt = 1;
+	goto next;
+      }
       if (!strcmp(argv[0], "--taskset")) {
         cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
         goto next;
@@ -624,6 +641,7 @@ int main(int argc, char *argv[])
     scontext.output_set = set;
     scontext.nodeset_input = nodeseti;
     scontext.nodeset_output = nodeseto;
+    scontext.cpuset_input_format = cpuset_input_format;
     if (hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
 
@@ -757,6 +775,7 @@ int main(int argc, char *argv[])
 	scontext.output_set = set;
 	scontext.nodeset_input = nodeseti;
 	scontext.nodeset_output = nodeseto;
+        scontext.cpuset_input_format = cpuset_input_format;
 	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }

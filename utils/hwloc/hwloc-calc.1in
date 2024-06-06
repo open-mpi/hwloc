@@ -291,7 +291,17 @@ If \fItaskset\fR is given, the output is compatible with the taskset program
 (replaces the former \fB--taskset\fR option).
 
 This option has no impact on the format of input CPU set strings,
-hwloc, list and taskset formats are always accepted.
+see \fB\-\-cpuset\-input\-format\fR.
+.TP
+\fB\-\-cpuset\-input\-format\fR <hwloc|list|taskset> \fB\-\-cif\fR <hwloc|list|taskset>
+Change the format of input CPU set strings.
+By default, the tool tries to guess the type automatically between hwloc, list or taskset
+formats.
+This option forces the parsing format to avoid ambiguity for instance when "1,3,5" may
+be parsed as a hwloc cpuset "0x1,0x00000003,0x00000005" or as list "1-1,3-3,5-5".
+
+This option has no impact on the format of output CPU set strings,
+see \fB\-\-cpuset\-output\-format\fR.
 .TP
 \fB\-q\fR \fB\-\-quiet\fR
 Hide non-fatal error messages.
