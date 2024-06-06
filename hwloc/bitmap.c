@@ -295,16 +295,18 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
   }
 
   while (i>=0 || accumed) {
+    unsigned long value;
+
     /* Refill accumulator */
     if (!accumed) {
       accum = set->ulongs[i--];
       accumed = HWLOC_BITS_PER_LONG;
     }
+    value = (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_BITMAP_SUBSTRING_SIZE);
 
-    if (accum & accum_mask) {
+    if (value) {
       /* print the whole subset if not empty */
-        res = hwloc_snprintf(tmp, size, needcomma ? ",0x" HWLOC_PRIxSUBBITMAP : "0x" HWLOC_PRIxSUBBITMAP,
-		     (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_BITMAP_SUBSTRING_SIZE));
+      res = hwloc_snprintf(tmp, size, needcomma ? ",0x" HWLOC_PRIxSUBBITMAP : "0x" HWLOC_PRIxSUBBITMAP, value);
       needcomma = 1;
     } else if (i == -1 && accumed == HWLOC_BITMAP_SUBSTRING_SIZE) {
       /* print a single 0 to mark the last subset */
