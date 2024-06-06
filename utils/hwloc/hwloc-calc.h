@@ -729,66 +729,6 @@ hwloc_calc_process_location_set_cb(struct hwloc_calc_location_context_s *lcontex
 }
 
 static __hwloc_inline int
-hwloc_calc_check_cpuset_taskset(const char *string)
-{
-  const char *tmp = string;
-
-  /* infinite set */
-  if (!strcasecmp(tmp, "0xf...f"))
-    return 0;
-
-  /* optional 0x prefix */
-  if (!hwloc_strncasecmp(tmp, "0x", 2) != 0)
-    tmp += 2;
-
-  /* infinite prefix */
-  if (hwloc_strncasecmp(tmp, "f...f", 5) == 0)
-    tmp += 5;
-
-  /* hexadecimal string */
-  if (0 == *tmp)
-    return -1;
-
-  if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF"))
-    return -1;
-
-  return 0;
-}
-
-static __hwloc_inline int
-hwloc_calc_check_cpuset_hwloc(const char *string)
-{
-  const char *tmp = string;
-
-  /* infinite set */
-  if (!strcasecmp(tmp, "0xf...f"))
-    return 0;
-
-  /* infinite prefix */
-  if (hwloc_strncasecmp(tmp, "0xf...f,", 8) == 0)
-    tmp += 8;
-
-  /* comma-separated list of hexadecimal integer with 0x as an optional prefix */
-  while (1) {
-    char *next = strchr(tmp, ',');
-    size_t len;
-    if (hwloc_strncasecmp(tmp, "0x", 2) == 0) {
-      tmp += 2;
-      if (',' == *tmp || 0 == *tmp)
-        return -1;
-    }
-    len = next ? (size_t) (next-tmp) : strlen(tmp);
-    if (len != strspn(tmp, "0123456789abcdefABCDEF"))
-      return -1;
-    if (!next)
-      break;
-    tmp = next+1;
-  }
-
-  return 0;
-}
-
-static __hwloc_inline int
 hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontext,
 				   struct hwloc_calc_set_context_s *scontext,
 				   const char *arg)
@@ -836,23 +776,16 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
     hwloc_bitmap_t newset;
     int taskset = (strchr(arg, ',') == NULL); /* single bitmask or long bitmask for taskset tool */
 
-    if (taskset) {
-      if (hwloc_calc_check_cpuset_taskset(arg) < 0) {
-        err = -1;
-        goto out;
-      }
-    } else {
-      if (hwloc_calc_check_cpuset_hwloc(arg) < 0) {
-        err = -1;
-        goto out;
-      }
-    }
-
     newset = hwloc_bitmap_alloc();
     if (taskset)
-      hwloc_bitmap_taskset_sscanf(newset, arg);
+      err = hwloc_bitmap_taskset_sscanf(newset, arg);
     else
-      hwloc_bitmap_sscanf(newset, arg);
+      err = hwloc_bitmap_sscanf(newset, arg);
+    if (err < 0) {
+      hwloc_bitmap_free(newset);
+      goto out;
+    }
+
     if (nodeset_output && !nodeset_input) {
       hwloc_bitmap_t newnset = hwloc_bitmap_alloc();
       hwloc_cpuset_to_nodeset(topology, newset, newnset);
