@@ -33,6 +33,8 @@ Version 2.10.1
 * Fix the enabling of CUDA in Windows CMake build,
   Thanks to Moritz Kreutzer for the patch.
 * Don't hide the GPU NUMA node on NVIDIA Grace Hopper.
+* Fix the management of infinite cpusets in the bitmap printf/sscanf
+  API as well as in command-line tools.
 
 
 Version 2.10.0
