@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -729,6 +729,66 @@ hwloc_calc_process_location_set_cb(struct hwloc_calc_location_context_s *lcontex
 }
 
 static __hwloc_inline int
+hwloc_calc_check_cpuset_taskset(const char *string)
+{
+  const char *tmp = string;
+
+  /* infinite set */
+  if (!strcasecmp(tmp, "0xf...f"))
+    return 0;
+
+  /* optional 0x prefix */
+  if (!hwloc_strncasecmp(tmp, "0x", 2) != 0)
+    tmp += 2;
+
+  /* infinite prefix */
+  if (hwloc_strncasecmp(tmp, "f...f", 5) == 0)
+    tmp += 5;
+
+  /* hexadecimal string */
+  if (0 == *tmp)
+    return -1;
+
+  if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF"))
+    return -1;
+
+  return 0;
+}
+
+static __hwloc_inline int
+hwloc_calc_check_cpuset_hwloc(const char *string)
+{
+  const char *tmp = string;
+
+  /* infinite set */
+  if (!strcasecmp(tmp, "0xf...f"))
+    return 0;
+
+  /* infinite prefix */
+  if (hwloc_strncasecmp(tmp, "0xf...f,", 8) == 0)
+    tmp += 8;
+
+  /* comma-separated list of hexadecimal integer with 0x as an optional prefix */
+  while (1) {
+    char *next = strchr(tmp, ',');
+    size_t len;
+    if (hwloc_strncasecmp(tmp, "0x", 2) == 0) {
+      tmp += 2;
+      if (',' == *tmp || 0 == *tmp)
+        return -1;
+    }
+    len = next ? (size_t) (next-tmp) : strlen(tmp);
+    if (len != strspn(tmp, "0123456789abcdefABCDEF"))
+      return -1;
+    if (!next)
+      break;
+    tmp = next+1;
+  }
+
+  return 0;
+}
+
+static __hwloc_inline int
 hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontext,
 				   struct hwloc_calc_set_context_s *scontext,
 				   const char *arg)
@@ -773,55 +833,18 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 
   } else {
     /* try to match a cpuset */
-    char *tmp = (char*) arg;
     hwloc_bitmap_t newset;
-    int taskset = ( strchr(tmp, ',') == NULL );
-
-    /* check the infinite prefix */
-    if (hwloc_strncasecmp(tmp, "0xf...f,", 7+!taskset) == 0) {
-      tmp += 7+!taskset;
-      if (0 == *tmp) {
-        err = -1;
-        goto out;
-      }
-    }
+    int taskset = (strchr(arg, ',') == NULL); /* single bitmask or long bitmask for taskset tool */
 
     if (taskset) {
-      /* check that the remaining is 0x followed by a huge hexadecimal number */
-      if (hwloc_strncasecmp(tmp, "0x", 2) != 0) {
+      if (hwloc_calc_check_cpuset_taskset(arg) < 0) {
         err = -1;
         goto out;
       }
-      tmp += 2;
-      if (0 == *tmp) {
-        err = -1;
-        goto out;
-      }
-      if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF")) {
-        err = -1;
-        goto out;
-      }
-
     } else {
-      /* check that the remaining is a comma-separated list of hexadecimal integer with 0x as an optional prefix */
-      while (1) {
-	char *next = strchr(tmp, ',');
-	size_t len;
-        if (hwloc_strncasecmp(tmp, "0x", 2) == 0) {
-	  tmp += 2;
-	  if (',' == *tmp || 0 == *tmp) {
-	    err = -1;
-	    goto out;
-	  }
-	}
-	len = next ? (size_t) (next-tmp) : strlen(tmp);
-	if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
-	  err = -1;
-	  goto out;
-	}
-	if (!next)
-	  break;
-	tmp = next+1;
+      if (hwloc_calc_check_cpuset_hwloc(arg) < 0) {
+        err = -1;
+        goto out;
       }
     }
 
