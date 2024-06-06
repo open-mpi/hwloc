@@ -262,6 +262,7 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
   const unsigned long accum_mask = ~0UL;
 #else /* HWLOC_BITS_PER_LONG != HWLOC_BITMAP_SUBSTRING_SIZE */
   const unsigned long accum_mask = ((1UL << HWLOC_BITMAP_SUBSTRING_SIZE) - 1) << (HWLOC_BITS_PER_LONG - HWLOC_BITMAP_SUBSTRING_SIZE);
+  int merge_with_infinite_prefix = 0;
 #endif /* HWLOC_BITS_PER_LONG != HWLOC_BITMAP_SUBSTRING_SIZE */
 
   HWLOC__BITMAP_CHECK(set);
@@ -280,6 +281,9 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       res = size>0 ? (int)size - 1 : 0;
     tmp += res;
     size -= res;
+#if HWLOC_BITS_PER_LONG > HWLOC_BITMAP_SUBSTRING_SIZE
+    merge_with_infinite_prefix = 1;
+#endif
   }
 
   i=(int) set->ulongs_count-1;
@@ -304,6 +308,12 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
     }
     value = (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_BITMAP_SUBSTRING_SIZE);
 
+#if HWLOC_BITS_PER_LONG > HWLOC_BITMAP_SUBSTRING_SIZE
+    if (merge_with_infinite_prefix && value == HWLOC_BITMAP_SUBSTRING_FULL_VALUE) {
+      /* first full subbitmap merged with infinite prefix */
+      res = 0;
+    } else
+#endif
     if (value) {
       /* print the whole subset if not empty */
       res = hwloc_snprintf(tmp, size, needcomma ? ",0x" HWLOC_PRIxSUBBITMAP : "0x" HWLOC_PRIxSUBBITMAP, value);
@@ -326,6 +336,7 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
 #else
     accum <<= HWLOC_BITMAP_SUBSTRING_SIZE;
     accumed -= HWLOC_BITMAP_SUBSTRING_SIZE;
+    merge_with_infinite_prefix = 0;
 #endif
 
     if (res >= size)
