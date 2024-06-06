@@ -228,3 +228,19 @@ Waiting for locations to process on stdin...
 0x00000001,,0x0
 0xffffffff,0xffffffff
 
+# Reading infinite cpusets from stdin
+Waiting for locations to process on stdin...
+0xf...f
+0xf...f,0x00abcd00
+0xf...f,0x0000abcd,0x0000ef00
+0xf...f,0xffffff00
+0xf...f,0xffff0000,0xffff0000
+
+# Reading infinite cpusets from stdin and exporting to taskset
+Waiting for locations to process on stdin...
+0xf...f
+0xf...f00abcd00
+0xf...f0000abcd0000ef00
+0xf...fffffff00
+0xf...fffff0000ffff0000
+
