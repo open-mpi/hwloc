@@ -320,7 +320,7 @@ _hwloc_calc(){
 		   --no --nodeset-output
                    --oo --object-output
 		   --sep
-		   --cpuset-output-format --cof
+		   --cpuset-input-format --cif --cpuset-output-format --cof
 		   --single
 		   --restrict
 		   --restrict-flags
@@ -371,7 +371,7 @@ _hwloc_calc(){
 	    --cpukind)
 		COMPREPLY=( "<name>=<value>" "<n>" "" )
 		;;
-	    --cpuset-output-format | --cof)
+	    --cpuset-input-format | --cif | --cpuset-output-format | --cof)
 	        COMPREPLY=( "hwloc" "list" taskset" )
 		;;
 	esac

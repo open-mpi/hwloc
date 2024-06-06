@@ -32,6 +32,8 @@ Version 2.11.0
     special keywords for backward compatibility for hwloc 3.0.
   + The --taskset command-line option is superseded by the new
     --cpuset-output-format which also allows to export as list.
+  + hwloc-calc may now import bitmasks described as a list of bits
+    with the new "--cpuset-input-format list".
 
 
 Version 2.10.0

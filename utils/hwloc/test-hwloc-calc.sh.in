@@ -278,6 +278,25 @@ set -e
   $calc -i "node:4 pu:4" --restrict-flags cpuless --restrict 0xff0 all -I numa --po
   echo
 
+  echo "# Converting from hwloc cpusets to taskset"
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format taskset 0xf,0xf0,f00f
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format taskset --cpuset-input-format hwloc 1,3,5
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format taskset 1,3,5
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format taskset --cif hwloc 0xf...f
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cof taskset 0xf...f,0x1
+  echo
+  echo "# Converting from list cpusets to hwloc"
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format hwloc 3-
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format hwloc 3-4,7-34,62,66
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format hwloc --cpuset-input-format list 7
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cof hwloc --cif list 1,3,5
+  echo
+  echo "# Converting from taskset cpusets to list"
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format list 0xf000000f00000f00f
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format list --cif taskset 0x1234567
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cof list 0xf...f00
+  echo
+
   echo "# Reading from stdin"
   cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4"
 pu:0

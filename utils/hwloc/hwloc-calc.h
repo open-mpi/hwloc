@@ -703,6 +703,7 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 struct hwloc_calc_set_context_s {
   int nodeset_input;
   int nodeset_output;
+  enum hwloc_utils_cpuset_format_e cpuset_input_format;
   hwloc_bitmap_t output_set;
 };
 
@@ -775,15 +776,17 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
   } else {
     /* try to match a cpuset */
     hwloc_bitmap_t newset;
-    enum hwloc_utils_cpuset_format_e cpuset_format;
+    enum hwloc_utils_cpuset_format_e cpuset_format = scontext->cpuset_input_format;
 
-    /* ambiguity list and hwloc if list of singleton like 1,3,5 which can be parsed as 0x1,0x3,0x5 or 1-1,3-3,5-5 */
-    if (hwloc_strncasecmp(arg, "0x", 2) && strchr(arg, '-'))
-      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_LIST;
-    else if (strchr(arg, ','))
-      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
-    else
-      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
+    if (cpuset_format == HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN) {
+      /* ambiguity list and hwloc if list of singleton like 1,3,5 which can be parsed as 0x1,0x3,0x5 or 1-1,3-3,5-5 */
+      if (hwloc_strncasecmp(arg, "0x", 2) && strchr(arg, '-'))
+        cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_LIST;
+      else if (strchr(arg, ','))
+        cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
+      else
+        cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
+    }
 
     newset = hwloc_bitmap_alloc();
 

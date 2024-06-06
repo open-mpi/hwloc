@@ -221,6 +221,24 @@ NUMANode:1
 8
 1,2
 
+# Converting from hwloc cpusets to taskset
+0xf000000f00000f00f
+0x10000000300000005
+0x10000000300000005
+0xf...f
+0xf...f00000001
+
+# Converting from list cpusets to hwloc
+0xf...f,0xfffffff8
+0x00000004,0x40000007,0xffffff98
+0x00000080
+0x0000002a
+
+# Converting from taskset cpusets to list
+0-3,12-15,36-39,64-67
+0-2,5-6,8,10,14,16-17,21,24
+8-
+
 # Reading from stdin
 Waiting for locations to process on stdin...
 0x00000001
