@@ -544,6 +544,9 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
   ssize_t size = buflen;
   char *tmp = buf;
   int res, ret = 0;
+#if HWLOC_BITS_PER_LONG == 64
+  int merge_with_infinite_prefix = 0;
+#endif
   int started = 0;
   int i;
 
@@ -563,6 +566,9 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       res = size>0 ? (int)size - 1 : 0;
     tmp += res;
     size -= res;
+#if HWLOC_BITS_PER_LONG == 64
+    merge_with_infinite_prefix = 1;
+#endif
   }
 
   i=set->ulongs_count-1;
@@ -582,7 +588,11 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
     if (started) {
       /* print the whole subset */
 #if HWLOC_BITS_PER_LONG == 64
-      res = hwloc_snprintf(tmp, size, "%016lx", val);
+      if (merge_with_infinite_prefix && (val & 0xffffffff00000000UL) == 0xffffffff00000000UL) {
+        res = hwloc_snprintf(tmp, size, "%08lx", val & 0xffffffffUL);
+      } else  {
+        res = hwloc_snprintf(tmp, size, "%016lx", val);
+      }
 #else
       res = hwloc_snprintf(tmp, size, "%08lx", val);
 #endif
@@ -599,6 +609,9 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       res = size>0 ? (int)size - 1 : 0;
     tmp += res;
     size -= res;
+#if HWLOC_BITS_PER_LONG == 64
+    merge_with_infinite_prefix = 0;
+#endif
   }
 
   /* if didn't display anything, display 0x0 */
