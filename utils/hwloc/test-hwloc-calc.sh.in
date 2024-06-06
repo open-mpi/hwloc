@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2024 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -284,6 +284,24 @@ node:0 node:3
 0x0000000000000000000000000000000000000000000000000000000000000000000000000000001
 0x1,0x0,0x0
 root
+EOF
+  echo
+  echo "# Reading infinite cpusets from stdin"
+  cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4" -q
+  0xf...f
+0xf...f,abcd00
+0xf...f,abcd,ef00
+0xf...ff00
+0xf...fff0000ffff0000
+EOF
+  echo
+  echo "# Reading infinite cpusets from stdin and exporting to taskset"
+  cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4" --taskset
+  0xf...f
+0xf...f,abcd00
+0xf...f,abcd,ef00
+0xf...ff00
+0xf...fff0000ffff0000
 EOF
   echo
 ) > "$file"
