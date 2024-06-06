@@ -10,7 +10,8 @@
 #define HWLOC_CALC_H
 
 #include "hwloc.h"
-#include "private/misc.h" /* for HWLOC_OBJ_TYPE_NONE */
+#include "private/misc.h" /* for HWLOC_OBJ_TYPE_NONE and for hwloc_strncasecmp() */
+#include "misc.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -774,13 +775,31 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
   } else {
     /* try to match a cpuset */
     hwloc_bitmap_t newset;
-    int taskset = (strchr(arg, ',') == NULL); /* single bitmask or long bitmask for taskset tool */
+    enum hwloc_utils_cpuset_format_e cpuset_format;
+
+    /* ambiguity list and hwloc if list of singleton like 1,3,5 which can be parsed as 0x1,0x3,0x5 or 1-1,3-3,5-5 */
+    if (hwloc_strncasecmp(arg, "0x", 2) && strchr(arg, '-'))
+      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_LIST;
+    else if (strchr(arg, ','))
+      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
+    else
+      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
 
     newset = hwloc_bitmap_alloc();
-    if (taskset)
-      err = hwloc_bitmap_taskset_sscanf(newset, arg);
-    else
+
+    switch (cpuset_format) {
+    case HWLOC_UTILS_CPUSET_FORMAT_HWLOC:
       err = hwloc_bitmap_sscanf(newset, arg);
+      break;
+    case HWLOC_UTILS_CPUSET_FORMAT_LIST:
+      err = hwloc_bitmap_list_sscanf(newset, arg);
+      break;
+    case HWLOC_UTILS_CPUSET_FORMAT_TASKSET:
+      err = hwloc_bitmap_taskset_sscanf(newset, arg);
+      break;
+    default:
+      abort();
+    }
     if (err < 0) {
       hwloc_bitmap_free(newset);
       goto out;
