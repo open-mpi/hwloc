@@ -75,62 +75,65 @@ Notes to developers:
   /bin/sh ../libtool  --tag=CC   --mode=compile gcc [...] -c -o topology.lo topology.c
 
 
+
+
+Building on Windows
+
+- hwloc may be built natively on Windows using CMake (see contrib/windows-cmake/)
+  or a MSVC solution (see contrib/windows/).
+
+- Otherwise, hwloc's usual Autotools build system supports Cygwin as well as
+  MinGW (used below for building official zipballs for Windows releases).
+
+
 Building the Windows zipballs on Windows with MinGW:
 
+- Based on the install of a hwloc Windows CI machine in 2020.
+
+- See also job-3-mingw.bat and job-3-mingw.sh for in contrib/ci.inria.fr/
+  for details on how the hwloc CI runs on such a platform.
+
 - Install prerequisites:
-  - Visual C++ Express, currently available at:
-     http://www.microsoft.com/visualstudio/en-us/products/2010-editions/express)
-  - mingw-w64-bin_i686-mingw_<date>.zip if building a 64bits zipball:
-     http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Automated%20Builds/
-  - mingw-w32-bin_i686-mingw_<date>.zip If building a 32bits zipball,
-     or if building a 64bits zipball on a 32bits Windows:
-     http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Automated%20Builds/
-  - MSYS-<date>.zip
-     http://sourceforge.net/projects/mingw-w64/files/External%20binary%20packages%20%28Win64%20hosted%29/MSYS%20%2832-bit%29/
-  - findutils-<version>-bin.zip
-     http://sourceforge.net/projects/ezwinports/files/
-  Unpack all these ZIPs in a path that does not contain spaces,
-  to avoid problems later.
+  - MSYS2 from https://www.msys2.org/
+  - Run a MSYS2 terminal and install MinGW compilers and some tools:
+    $ pacman -Suy
+    $ pacman -S tar zip coreutils diffutils findutils make mingw-w64-i686-gcc mingw-w64-x86_64-gcc
+  - Visual Studio (e.g. 2019 Community Edition)
+    During installation, make sure you activate
+    - C++ Desktop Development,
+    - Windows 10 SDK (or more recent)
+    - x64/x86 Build Tools (e.g. version v142),
+    - C++ Modules for Build Tools (e.g. v142),
+    - C++/CLI for Build Tools (e.g. v142),
+    - C++ Clang and CMake tools (not needed for MinGW-only builds).
 
-- Launch msys.bat (in the root directory of the extracted MSYS ZIP).
+- Start a 64bits build msys2 terminal with
+  > C:\msys64\usr\bin\env MSYSTEM=MINGW32 HOME=%cd% /usr/bin/bash -li
+- or 32bits with
+  > C:\msys64\usr\bin\env MSYSTEM=MINGW64 HOME=%cd% /usr/bin/bash -li
 
-- Your path must contain:
-  - The bin directory of the extracted MinGW ZIP
-    (it contains <arch>-gcc)
-  - The <arch>/lib directory of the extracted MinGW ZIP
-    (it contains libgcc*.DLL, needed for C++ tests during make check)
-  - Visual C++ Express bin and IDE directories
-  - The bin directory of the non-cross-compiling MinGW ZIP
-    when building a 64bits zipball on a 32bits Windows
-  - The bin directory of the findutils ZIP to find the "find" command
-    (the Windows find command cannot be used)
-- Examples of PATH (depends on where ZIPs were extracted and were Visual Studio was installed):
-  - For a 32bits zipball:
-    $ PATH=/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
-  - For a 64bits zipball:
-    $ PATH=/c/hwloc/mingw64/bin:/c/hwloc/mingw64/x86_64-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
-  - For a 64bits zipball on a 32bits Windows:
-    $ PATH=/c/hwloc/mingw64/bin:/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
-- Check that running "lib", "link" and "cl" finds the right tools (installed by Visual Studio)
-  and displays their usage output (list of command-line options).
+- Configuration of the MSYS2 terminal environment:
+  - Your path must contain:
+    - The MSYS bin directories (for MinGW gcc, etc)
+      - For instance /mingw64/bin/ for 64bits build, /mingw32/bin/ for 32bits.
+    - The directory of the some MSVC command-line tools such as "lib.exe", "cl.exe", etc
+      - For instance, for 64bits build: "/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/"
+      - and for 32bits build: "/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx86/x86/"
+  - Check that running "lib", "link" and "cl" finds the right tools (installed by Visual Studio)
+    and displays their usage output (list of command-line options).
 
-- Download a hwloc tarball (building from SVN requires autotools, doxygen, LaTeX, etc.),
+- Download a hwloc tarball
+  (don't use GIT unless you want to install autotools, doxygen, LaTeX, etc on Windows),
   extract it and enter the directory.
 
 - Set the install prefix to what the zipball name must be:
   $ prefix=$PWD/hwloc-win<size>-build-<version>
 - Configure
-  - For a 32bits zipball:
-    $ ./configure --prefix=$prefix --enable-static --host=i686-w64-mingw32
-  - For a 64bits zipball:
-    $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32
-
+  $ ./configure --prefix=$prefix --enable-static CC="gcc -static-libgcc"
 - Build
   $ make
 - If not building a 64bits zipball on a 32bits machine, test things:
   $ make check
-  If your Windows is not configured in English, some failure may occur in tests/xml
-  because floats are localized.
 
 - Install
   $ make install
