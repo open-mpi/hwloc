@@ -10,7 +10,7 @@
 #define HWLOC_CALC_H
 
 #include "hwloc.h"
-#include "private/misc.h" /* for HWLOC_OBJ_TYPE_NONE */
+#include "private/misc.h" /* for HWLOC_OBJ_TYPE_NONE and for hwloc_strncasecmp() */
 #include "misc.h"
 
 #include <stdlib.h>
@@ -749,7 +749,7 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 
     if (cpuset_format == HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN) {
       /* ambiguity list and hwloc if list of singleton like 1,3,5 which can be parsed as 0x1,0x3,0x5 or 1-1,3-3,5-5 */
-      if (strncasecmp(arg, "0x", 2) && strchr(arg, '-'))
+      if (hwloc_strncasecmp(arg, "0x", 2) && strchr(arg, '-'))
         cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_LIST;
       else if (strchr(arg, ','))
         cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
