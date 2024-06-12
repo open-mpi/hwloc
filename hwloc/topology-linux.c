@@ -2231,6 +2231,9 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->bind_membind = 1;
   support->membind->interleave_membind = 1;
   support->membind->migrate_membind = 1;
+  /* if weighted interleave is supported, weights are exposed in sysfs */
+  if (access("/sys/kernel/mm/mempolicy/weighted_interleave", F_OK) == 0)
+    support->membind->weighted_interleave_membind = 1;
 #endif
   hooks->get_allowed_resources = hwloc_linux_get_allowed_resources_hook;
 

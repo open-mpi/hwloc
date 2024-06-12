@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017-2023 Inria.  All rights reserved.
+ * Copyright © 2017-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -156,7 +156,7 @@ int main(void)
     size = sizeof(struct hwloc_topology_cpubind_support);
     assert(size == 11);
     size = sizeof(struct hwloc_topology_membind_support);
-    assert(size == 15);
+    assert(size == 16);
     size = sizeof(struct hwloc_topology_misc_support);
     assert(size == 1);
 

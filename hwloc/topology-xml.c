@@ -1053,7 +1053,7 @@ hwloc__xml_import_support(hwloc_topology_t topology,
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 16);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
 #endif
 
@@ -1087,6 +1087,7 @@ hwloc__xml_import_support(hwloc_topology_t topology,
     else DO(membind,firsttouch_membind);
     else DO(membind,bind_membind);
     else DO(membind,interleave_membind);
+    else DO(membind,weighted_interleave_membind);
     else DO(membind,nexttouch_membind);
     else DO(membind,migrate_membind);
     else DO(membind,get_area_memlocation);
@@ -2470,7 +2471,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 16);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
 #endif
 
@@ -2515,6 +2516,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   DO(membind,firsttouch_membind);
   DO(membind,bind_membind);
   DO(membind,interleave_membind);
+  DO(membind,weighted_interleave_membind);
   DO(membind,nexttouch_membind);
   DO(membind,migrate_membind);
   DO(membind,get_area_memlocation);
