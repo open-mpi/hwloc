@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -945,6 +945,14 @@ enum hwloc_distrib_flags_e {
  * \p flags should be 0 or a OR'ed set of ::hwloc_distrib_flags_e.
  *
  * \return 0 on success, -1 on error.
+ *
+ * \note On hybrid CPUs (or asymmetric platforms), distribution may be suboptimal
+ * since the number of cores or PUs inside packages or below caches may vary
+ * (the top-down recursive partitioning ignores these numbers until reaching their levels).
+ * Hence it is recommended to distribute only inside a single homogeneous domain.
+ * For instance on a CPU with energy-efficient E-cores and high-performance P-cores,
+ * one should distribute separately N tasks on E-cores and M tasks on P-cores
+ * instead of trying to distribute directly M+N tasks on the entire CPUs.
  *
  * \note This function requires the \p roots objects to have a CPU set.
  */
