@@ -1544,13 +1544,6 @@ typedef enum {
    * \hideinitializer */
   HWLOC_MEMBIND_INTERLEAVE =	3,
 
-  /** \brief For each page bound with this policy, by next time
-   * it is touched (and next time only), it is moved from its current
-   * location to the local NUMA node of the thread where the memory
-   * reference occurred (if it needs to be moved at all).
-   * \hideinitializer */
-  HWLOC_MEMBIND_NEXTTOUCH =	4,
-
   /** \brief Allocate memory on the given nodes in an interleaved
    * / weighted manner.  The precise layout of the memory across
    * multiple NUMA nodes is OS/system specific. Weighted interleaving
@@ -1560,6 +1553,13 @@ typedef enum {
    * balance the memory references.
    * \hideinitializer */
   HWLOC_MEMBIND_WEIGHTED_INTERLEAVE = 5,
+
+  /** \brief For each page bound with this policy, by next time
+   * it is touched (and next time only), it is moved from its current
+   * location to the local NUMA node of the thread where the memory
+   * reference occurred (if it needs to be moved at all).
+   * \hideinitializer */
+  HWLOC_MEMBIND_NEXTTOUCH =	4,
 
   /** \brief Returned by get_membind() functions when multiple
    * threads or parts of a memory area have differing memory binding
