@@ -2372,6 +2372,8 @@ struct hwloc_topology_membind_support {
   unsigned char migrate_membind;
   /** Getting the last NUMA nodes where a memory area was allocated is supported */
   unsigned char get_area_memlocation;
+  /** Interleave policy is supported. */
+  unsigned char weighted_interleave_membind;
 };
 
 /** \brief Flags describing miscellaneous features.
