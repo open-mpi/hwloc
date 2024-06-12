@@ -42,7 +42,7 @@ void usage(const char *name, FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "  --cpubind      Use following arguments for cpu binding (default)\n");
   fprintf(where, "  --membind      Use following arguments for memory binding\n");
-  fprintf(where, "  --mempolicy <default|firsttouch|bind|interleave|nexttouch>\n"
+  fprintf(where, "  --mempolicy <default|firsttouch|bind|interleave|weighted|nexttouch>\n"
 		 "                 Change policy that --membind applies (default is bind)\n");
   fprintf(where, "  --best-memattr <attr>\n");
   fprintf(where, "                 Select the best target node in the given memory binding\n");
@@ -318,6 +318,8 @@ int main(int argc, char *argv[])
 	  membind_policy = HWLOC_MEMBIND_BIND;
 	else if (!strncmp(argv[1], "interleave", 2))
 	  membind_policy = HWLOC_MEMBIND_INTERLEAVE;
+	else if (!strncmp(argv[1], "weighted", 2))
+	  membind_policy = HWLOC_MEMBIND_WEIGHTED_INTERLEAVE;
 	else if (!strncmp(argv[1], "nexttouch", 2))
 	  membind_policy = HWLOC_MEMBIND_NEXTTOUCH;
 	else {
@@ -461,6 +463,7 @@ int main(int argc, char *argv[])
       case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
       case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
       case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
+      case HWLOC_MEMBIND_WEIGHTED_INTERLEAVE: policystr = "weighted interleave"; break;
       case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
       default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
       }
