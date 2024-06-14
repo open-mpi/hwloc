@@ -1746,6 +1746,18 @@ hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_
     hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
 }
 
+static __hwloc_inline void
+warn_preferred_many_fallback(hwloc_const_bitmap_t nodeset)
+{
+  static int warned = 0;
+  if (!warned && HWLOC_SHOW_ALL_ERRORS() && hwloc_bitmap_weight(nodeset) > 1) {
+    fprintf(stderr, "[hwloc/membind] MPOL_PREFERRED_MANY not supported by the kernel.\n");
+    fprintf(stderr, "If *all* given nodes must be used, use strict binding or the interleave policy.\n");
+    fprintf(stderr, "Otherwise the old MPOL_PREFERRED will only use the first given node.\n");
+    warned = 1;
+  }
+}
+
 static int
 hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
@@ -1802,7 +1814,7 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
       err = hwloc_mbind((void *) addr, len, MPOL_PREFERRED, linuxmask, max_os_index+1, linuxflags);
       if (!err) {
         /* worked fine, MPOL_PREFERRED_MANY isn't supported */
-        hwloc_debug("MPOL_PREFERRED_MANY not supported, reverting to MPOL_PREFERRED (with a single node)\n");
+        warn_preferred_many_fallback(nodeset);
         preferred_many_notsupported = 1;
       }
     }
@@ -1895,7 +1907,7 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
       err = hwloc_set_mempolicy(MPOL_PREFERRED, linuxmask, max_os_index+1);
       if (!err) {
         /* worked fine, MPOL_PREFERRED_MANY isn't supported */
-        hwloc_debug("MPOL_PREFERRED_MANY not supported, reverting to MPOL_PREFERRED (with a single node)\n");
+        warn_preferred_many_fallback(nodeset);
         preferred_many_notsupported = 1;
       }
     }
