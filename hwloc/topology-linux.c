@@ -178,6 +178,9 @@ struct hwloc_linux_backend_data_s {
 #ifndef MPOL_PREFERRED_MANY
 # define MPOL_PREFERRED_MANY 5
 #endif
+#ifndef MPOL_WEIGHTED_INTERLEAVE
+# define MPOL_WEIGHTED_INTERLEAVE 6
+#endif
 #ifndef MPOL_F_ADDR
 # define  MPOL_F_ADDR (1<<1)
 #endif
@@ -1674,6 +1677,9 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t p
   case HWLOC_MEMBIND_INTERLEAVE:
     *linuxpolicy = MPOL_INTERLEAVE;
     break;
+  case HWLOC_MEMBIND_WEIGHTED_INTERLEAVE:
+    *linuxpolicy = MPOL_WEIGHTED_INTERLEAVE;
+    break;
   /* TODO: next-touch when (if?) patch applied upstream */
   default:
     errno = ENOSYS;
@@ -1973,6 +1979,9 @@ hwloc_linux_membind_policy_to_hwloc(int linuxpolicy, hwloc_membind_policy_t *pol
   case MPOL_INTERLEAVE:
     *policy = HWLOC_MEMBIND_INTERLEAVE;
     return 0;
+  case MPOL_WEIGHTED_INTERLEAVE:
+    *policy = HWLOC_MEMBIND_WEIGHTED_INTERLEAVE;
+    return 0;
   default:
     errno = EINVAL;
     return -1;
@@ -2222,6 +2231,9 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->bind_membind = 1;
   support->membind->interleave_membind = 1;
   support->membind->migrate_membind = 1;
+  /* if weighted interleave is supported, weights are exposed in sysfs */
+  if (access("/sys/kernel/mm/mempolicy/weighted_interleave", F_OK) == 0)
+    support->membind->weighted_interleave_membind = 1;
 #endif
   hooks->get_allowed_resources = hwloc_linux_get_allowed_resources_hook;
 

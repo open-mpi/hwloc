@@ -718,7 +718,7 @@ hwloc_info_show_support(hwloc_topology_t topology)
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 15);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 16);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
 #endif
 
@@ -754,6 +754,7 @@ hwloc_info_show_support(hwloc_topology_t topology)
   DO(membind, firsttouch_membind);
   DO(membind, bind_membind);
   DO(membind, interleave_membind);
+  DO(membind, weighted_interleave_membind);
   DO(membind, nexttouch_membind);
   DO(membind, migrate_membind);
   DO(membind, get_area_memlocation);

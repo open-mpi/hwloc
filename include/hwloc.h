@@ -1698,6 +1698,16 @@ typedef enum {
    * \hideinitializer */
   HWLOC_MEMBIND_INTERLEAVE =	3,
 
+  /** \brief Allocate memory on the given nodes in an interleaved
+   * / weighted manner.  The precise layout of the memory across
+   * multiple NUMA nodes is OS/system specific. Weighted interleaving
+   * can be useful when threads distributed across the specified NUMA
+   * nodes with different bandwidth capabilities will all be accessing
+   * the whole memory range concurrently, since the interleave will then
+   * balance the memory references.
+   * \hideinitializer */
+  HWLOC_MEMBIND_WEIGHTED_INTERLEAVE = 5,
+
   /** \brief For each page bound with this policy, by next time
    * it is touched (and next time only), it is moved from its current
    * location to the local NUMA node of the thread where the memory
@@ -2516,6 +2526,8 @@ struct hwloc_topology_membind_support {
   unsigned char migrate_membind;
   /** Getting the last NUMA nodes where a memory area was allocated is supported */
   unsigned char get_area_memlocation;
+  /** Interleave policy is supported. */
+  unsigned char weighted_interleave_membind;
 };
 
 /** \brief Flags describing miscellaneous features.
