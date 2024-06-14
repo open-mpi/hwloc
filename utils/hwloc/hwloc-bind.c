@@ -182,6 +182,10 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
+  /* show all error messages, e.g. PREFERRED_MANY not supported by Linux kernel */
+  if (!getenv("HWLOC_HIDE_ERRORS"))
+    putenv((char *) "HWLOC_HIDE_ERRORS=0");
+
   hwloc_topology_init(&topology);
   hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
   hwloc_topology_set_flags(topology, flags);
