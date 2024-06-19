@@ -24,7 +24,7 @@ Version 2.11.0
     Linux 6.9+. Thanks to Honggyu Kim for the patch.
     - weighted_interleave_membind is added to membind support bits.
     - The "weighted" policy is added to the hwloc-bind tool.
-  + Add hwloc_obj_set_subtype().
+  + Add hwloc_obj_set_subtype(). Thanks to Hadrien Grasland for the report.
 * GPU support
   + Don't hide the GPU NUMA node on NVIDIA Grace Hopper.
   + Get Intel GPU OpenCL device locality.
@@ -33,7 +33,7 @@ Version 2.11.0
   + Fix PCI Gen4+ link speed of NVIDIA GPU obtained from NVML,
     thanks to Akram Sbaih for the report.
 * Windows support
-  * Fix Windows support when UNICODE is enabled, several hwloc features
+  + Fix Windows support when UNICODE is enabled, several hwloc features
     were missing, thanks to Martin for the report.
   + Fix the enabling of CUDA in Windows CMake build,
     Thanks to Moritz Kreutzer for the patch.
