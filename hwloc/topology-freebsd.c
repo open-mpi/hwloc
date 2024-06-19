@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2020 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -416,7 +416,7 @@ set_locality_info(hwloc_topology_t topology, int ndomains, hwloc_obj_t *nodes){
     free(nodes);
     free(distances);
   } else
-    hwloc_internal_distances_add(topology, "NUMALatency", ndomains, nodes, distances, HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY, HWLOC_DISTANCES_ADD_FLAG_GROUP);
+    hwloc_internal_distances_add(topology, "NUMALatency", ndomains, nodes, distances, HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY, HWLOC_DISTANCES_ADD_FLAG_GROUP);
   return 0;
 }
 

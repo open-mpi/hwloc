@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2021 Inria.  All rights reserved.
+ * Copyright © 2011-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -32,7 +32,7 @@ int main(void)
       node_distances[i*3+j] = (i == j ? 10 : 20);
   }
   handle = hwloc_distances_add_create(oldtopology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(oldtopology, handle, 3, nodes, node_distances, 0);
@@ -47,7 +47,7 @@ int main(void)
       core_distances[i*6+j] = (i == j ? 4 : 8);
   }
   handle = hwloc_distances_add_create(oldtopology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(oldtopology, handle, 6, cores, core_distances, 0);
@@ -76,7 +76,7 @@ int main(void)
   assert(!err);
   assert(nr == 1);
   assert(distances->nbobjs == 2);
-  assert(distances->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
+  assert(distances->kind == (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   hwloc_distances_release(topology, distances);
 
   nr = 1;
@@ -84,7 +84,7 @@ int main(void)
   assert(!err);
   assert(nr == 1);
   assert(distances->nbobjs == 4);
-  assert(distances->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
+  assert(distances->kind == (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   hwloc_distances_release(topology, distances);
 
   hwloc_topology_destroy(topology);

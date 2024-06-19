@@ -4175,7 +4175,7 @@ annotate_sysfsnode(struct hwloc_topology *topology,
       && !hwloc_parse_nodes_distances(nbnodes, indexes, distances, data->root_fd)
       && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
     hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
-				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY,
 				 HWLOC_DISTANCES_ADD_FLAG_GROUP);
   } else {
     free(nodes);
@@ -4463,7 +4463,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       /* Inserted distances now that nodes are properly inserted */
       if (distances)
 	hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
-				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+				     HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY,
 				     HWLOC_DISTANCES_ADD_FLAG_GROUP);
       else
 	free(nodes);

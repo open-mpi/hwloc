@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2021 Inria.  All rights reserved.
+ * Copyright © 2011-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -71,7 +71,7 @@ static int adopt(int fd, unsigned long fileoffset, unsigned long mmap_address, u
   if (synthetic_with_distances) {
     assert(nr == 1);
     assert(distances->nbobjs == 3);
-    assert(distances->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
+    assert(distances->kind == (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
     hwloc_distances_release(adopted, distances);
     printf(" distances OK\n");
   }
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
       node_distances[i*3+j] = (i == j ? 10 : 20);
   }
   handle = hwloc_distances_add_create(orig, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(orig, handle, 3, nodes, node_distances, 0);

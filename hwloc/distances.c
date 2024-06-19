@@ -607,8 +607,8 @@ int hwloc_internal_distances_add(hwloc_topology_t topology, const char *name,
  */
 
 #define HWLOC_DISTANCES_KIND_FROM_ALL (HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_FROM_USER)
-#define HWLOC_DISTANCES_KIND_MEANS_ALL (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH)
-#define HWLOC_DISTANCES_KIND_ALL (HWLOC_DISTANCES_KIND_FROM_ALL|HWLOC_DISTANCES_KIND_MEANS_ALL|HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES)
+#define HWLOC_DISTANCES_KIND_VALUE_ALL (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH)
+#define HWLOC_DISTANCES_KIND_ALL (HWLOC_DISTANCES_KIND_FROM_ALL|HWLOC_DISTANCES_KIND_VALUE_ALL|HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES)
 #define HWLOC_DISTANCES_ADD_FLAG_ALL (HWLOC_DISTANCES_ADD_FLAG_GROUP|HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE)
 
 void * hwloc_distances_add_create(hwloc_topology_t topology,
@@ -625,7 +625,7 @@ void * hwloc_distances_add_create(hwloc_topology_t topology,
   }
   if ((kind & ~HWLOC_DISTANCES_KIND_ALL)
       || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_FROM_ALL) > 1
-      || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_MEANS_ALL) > 1) {
+      || hwloc_weight_long(kind & HWLOC_DISTANCES_KIND_VALUE_ALL) > 1) {
     errno = EINVAL;
     return NULL;
   }
@@ -959,7 +959,7 @@ hwloc__distances_get(hwloc_topology_t topology,
 
   for(dist = topology->first_dist; dist; dist = dist->next) {
     unsigned long kind_from = kind & HWLOC_DISTANCES_KIND_FROM_ALL;
-    unsigned long kind_means = kind & HWLOC_DISTANCES_KIND_MEANS_ALL;
+    unsigned long kind_means = kind & HWLOC_DISTANCES_KIND_VALUE_ALL;
 
     if (name && (!dist->name || strcmp(name, dist->name)))
       continue;
@@ -1203,7 +1203,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
   if (nbobjs <= 2)
       return;
 
-  if (!(kind & HWLOC_DISTANCES_KIND_MEANS_LATENCY))
+  if (!(kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY))
     /* don't know use to use those for grouping */
     /* TODO hwloc__find_groups_by_max_distance() for bandwidth */
     return;
@@ -1349,7 +1349,7 @@ hwloc__distances_transform_links(struct hwloc_distances_s *distances)
   hwloc_uint64_t divider, *values = distances->values;
   unsigned i, nbobjs = distances->nbobjs;
 
-  if (!(distances->kind & HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH)) {
+  if (!(distances->kind & HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH)) {
     errno = EINVAL;
     return -1;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2023 Inria.  All rights reserved.
+ * Copyright © 2012-2024 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -23,7 +23,7 @@ hwloc__rsmi_add_xgmi_bandwidth(hwloc_topology_t topology,
   int err;
 
   handle = hwloc_backend_distances_add_create(topology, "XGMIBandwidth",
-                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH,
+                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH,
                                               0);
   if (!handle)
     goto out;
@@ -55,7 +55,7 @@ hwloc__rsmi_add_xgmi_hops(hwloc_topology_t topology,
   int err;
 
   handle = hwloc_backend_distances_add_create(topology, "XGMIHops",
-                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_LATENCY,
+                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY,
                                               0);
   if (!handle)
     goto out;
