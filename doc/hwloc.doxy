@@ -4783,6 +4783,10 @@ of in each object.
 
 HWLOC_DISTANCES_KIND_MEANS_LATENCY and HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH
 are renamed to ::HWLOC_DISTANCES_KIND_VALUE_LATENCY and ::HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH.
+<br/>
+
+The XGMIHops distance matrix is now of the new kind
+::HWLOC_DISTANCES_KIND_VALUE_HOPS instead of latency.
 
 
 \section upgrade_to_api_3x_xml XML changes

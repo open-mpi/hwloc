@@ -649,6 +649,7 @@ man3_distances_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_FROM_USER.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_VALUE_LATENCY.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTANCES_KIND_VALUE_HOPS.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_get.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_get_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_get_by_type.3 \

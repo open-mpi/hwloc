@@ -55,7 +55,7 @@ hwloc__rsmi_add_xgmi_hops(hwloc_topology_t topology,
   int err;
 
   handle = hwloc_backend_distances_add_create(topology, "XGMIHops",
-                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY,
+                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_HOPS,
                                               0);
   if (!handle)
     goto out;

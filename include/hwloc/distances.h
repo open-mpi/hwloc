@@ -36,8 +36,9 @@ extern "C" {
  * The corresponding kind is ::HWLOC_DISTANCES_KIND_MEANS_LATENCY | ::HWLOC_DISTANCES_KIND_FROM_USER.
  * The name of this distances structure is "NUMALatency".
  *
- * The matrix may also contain bandwidths between random sets of objects,
- * possibly provided by the user, as specified in the \p kind attribute.
+ * The matrix may also contain bandwidths or number of hops between
+ * random sets of objects, possibly provided by the user, as specified
+ * in the \p kind attribute.
  * Others common distance structures include and "XGMIBandwidth", "XGMIHops",
  * "XeLinkBandwidth" and "NVLinkBandwidth".
  *
@@ -73,7 +74,8 @@ struct hwloc_distances_s {
  * Each distance matrix may have only one kind among HWLOC_DISTANCES_KIND_FROM_*
  * specifying where distance information comes from,
  * and one kind among HWLOC_DISTANCES_KIND_VALUE_* specifying
- * whether values are latencies or bandwidths.
+ * and exactly one kind HWLOC_DISTANCES_KIND_VALUE_* specifying
+ * whether values are latencies or bandwidths, etc.
  */
 enum hwloc_distances_kind_e {
   /** \brief These distances were obtained from the operating system or hardware.
@@ -88,7 +90,6 @@ enum hwloc_distances_kind_e {
   /** \brief Distance values are similar to latencies between objects.
    * Values are smaller for closer objects, hence minimal on the diagonal
    * of the matrix (distance between an object and itself).
-   * It could also be the number of network hops between objects, etc.
    * \hideinitializer
    */
   HWLOC_DISTANCES_KIND_VALUE_LATENCY = (1UL<<2),
@@ -99,6 +100,12 @@ enum hwloc_distances_kind_e {
    * \hideinitializer
    */
   HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH = (1UL<<3),
+  /** \brief Distance values are numbers of hops between objects.
+   * Values are smaller for closer objects, zero on the diagonal
+   * of the matrix (no hop between an object and itself).
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_KIND_VALUE_HOPS = (1UL<<5),
 
   /** \brief This distances structure covers objects of different types.
    * This may apply to the "NVLinkBandwidth" structure in presence
@@ -117,8 +124,8 @@ enum hwloc_distances_kind_e {
  * \p kind serves as a filter. If \c 0, all distance matrices are returned.
  * If it contains some HWLOC_DISTANCES_KIND_FROM_*, only distance matrices
  * whose kind matches one of these are returned.
- * If it contains HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH or LATENCY, only distance
- * matrices whose kind matches these are returned.
+ * If it contains some HWLOC_DISTANCES_KIND_VALUE_*, only distance matrices
+ * whose kind matches one of these are returned.
  *
  * On input, \p nr points to the number of distance matrices that may be stored
  * in \p distances.

@@ -233,8 +233,16 @@ static void output_distances(struct lstopo_output *loutput)
   err = hwloc_distances_get(topology, &nr, dist, 0, 0);
   if (!err) {
     for(j=0; j<nr; j++) {
-      const char *kindmeans = (dist[j]->kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY) ? "latency" : (dist[j]->kind & HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH) ? "bandwidth" : "distance";
+      const char *kindmeans;
       const char *name = hwloc_distances_get_name(topology, dist[j]);
+      if (dist[j]->kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY)
+        kindmeans = "latency";
+      else if (dist[j]->kind & HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH)
+        kindmeans = "bandwidth";
+      else if (dist[j]->kind & HWLOC_DISTANCES_KIND_VALUE_HOPS)
+        kindmeans = "hops";
+      else
+        kindmeans = "distance";
       if (!name)
         name = "(null)";
       if (loutput->transform_distances != -1)
