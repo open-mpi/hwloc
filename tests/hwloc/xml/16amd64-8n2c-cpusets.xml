@@ -131,8 +131,8 @@
   <support name="membind.set_thisthread_membind"/>
   <support name="membind.get_thisthread_membind"/>
   <support name="membind.alloc_membind"/>
+  <support name="membind.get_area_memlocation"/>
   <support name="membind.firsttouch_membind"/>
   <support name="membind.bind_membind"/>
-  <support name="membind.get_area_memlocation"/>
   <support name="custom.exported_support"/>
 </topology>

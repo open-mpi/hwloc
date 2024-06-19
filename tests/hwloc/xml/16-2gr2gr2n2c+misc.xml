@@ -128,14 +128,14 @@
   <support name="cpubind.get_thisthread_last_cpu_location"/>
   <support name="membind.set_thisthread_membind"/>
   <support name="membind.get_thisthread_membind"/>
+  <support name="membind.alloc_membind"/>
   <support name="membind.set_area_membind"/>
   <support name="membind.get_area_membind"/>
-  <support name="membind.alloc_membind"/>
+  <support name="membind.get_area_memlocation"/>
   <support name="membind.firsttouch_membind"/>
   <support name="membind.bind_membind"/>
   <support name="membind.interleave_membind"/>
   <support name="membind.migrate_membind"/>
-  <support name="membind.get_area_memlocation"/>
   <support name="custom.exported_support"/>
   <info name="Backend" value="Synthetic"/>
   <info name="SyntheticDescription" value="group:2 group:2 node:2 core:2 1"/>
