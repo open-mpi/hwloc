@@ -1081,16 +1081,16 @@ hwloc__xml_import_support(hwloc_topology_t topology,
     else DO(membind,get_proc_membind);
     else DO(membind,set_thisthread_membind);
     else DO(membind,get_thisthread_membind);
+    else DO(membind,alloc_membind);
     else DO(membind,set_area_membind);
     else DO(membind,get_area_membind);
-    else DO(membind,alloc_membind);
+    else DO(membind,get_area_memlocation);
     else DO(membind,firsttouch_membind);
     else DO(membind,bind_membind);
     else DO(membind,interleave_membind);
     else DO(membind,weighted_interleave_membind);
     else DO(membind,nexttouch_membind);
     else DO(membind,migrate_membind);
-    else DO(membind,get_area_memlocation);
 
     else if (!strcmp("custom.exported_support", name))
       /* support was exported in a custom/fake field, mark it as imported here */
@@ -2510,16 +2510,16 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   DO(membind,get_proc_membind);
   DO(membind,set_thisthread_membind);
   DO(membind,get_thisthread_membind);
+  DO(membind,alloc_membind);
   DO(membind,set_area_membind);
   DO(membind,get_area_membind);
-  DO(membind,alloc_membind);
+  DO(membind,get_area_memlocation);
   DO(membind,firsttouch_membind);
   DO(membind,bind_membind);
   DO(membind,interleave_membind);
   DO(membind,weighted_interleave_membind);
   DO(membind,nexttouch_membind);
   DO(membind,migrate_membind);
-  DO(membind,get_area_memlocation);
 
   /* misc.imported_support would be meaningless in the remote importer,
    * but the importer needs to know whether we exported support or not

@@ -748,16 +748,16 @@ hwloc_info_show_support(hwloc_topology_t topology)
   DO(membind, get_proc_membind);
   DO(membind, set_thisthread_membind);
   DO(membind, get_thisthread_membind);
+  DO(membind, alloc_membind);
   DO(membind, set_area_membind);
   DO(membind, get_area_membind);
-  DO(membind, alloc_membind);
+  DO(membind, get_area_memlocation);
   DO(membind, firsttouch_membind);
   DO(membind, bind_membind);
   DO(membind, interleave_membind);
   DO(membind, weighted_interleave_membind);
   DO(membind, nexttouch_membind);
   DO(membind, migrate_membind);
-  DO(membind, get_area_memlocation);
 
   DO(misc, imported_support);
 #undef DO

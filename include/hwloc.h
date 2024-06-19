@@ -2508,26 +2508,28 @@ struct hwloc_topology_membind_support {
   unsigned char set_thisthread_membind;
   /** Getting the binding of the current thread only is supported.  */
   unsigned char get_thisthread_membind;
+
+  /** Allocating a bound memory area is supported. */
+  unsigned char alloc_membind;
   /** Binding a given memory area is supported. */
   unsigned char set_area_membind;
   /** Getting the binding of a given memory area is supported.  */
   unsigned char get_area_membind;
-  /** Allocating a bound memory area is supported. */
-  unsigned char alloc_membind;
+  /** Getting the last NUMA nodes where a memory area was allocated is supported */
+  unsigned char get_area_memlocation;
+
   /** First-touch policy is supported. */
   unsigned char firsttouch_membind;
   /** Bind policy is supported. */
   unsigned char bind_membind;
   /** Interleave policy is supported. */
   unsigned char interleave_membind;
+  /** Weighted interleave policy is supported. */
+  unsigned char weighted_interleave_membind;
   /** Next-touch migration policy is supported. */
   unsigned char nexttouch_membind;
   /** Migration flags is supported. */
   unsigned char migrate_membind;
-  /** Getting the last NUMA nodes where a memory area was allocated is supported */
-  unsigned char get_area_memlocation;
-  /** Weighted interleave policy is supported. */
-  unsigned char weighted_interleave_membind;
 };
 
 /** \brief Flags describing miscellaneous features.
