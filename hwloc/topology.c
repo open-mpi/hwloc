@@ -54,9 +54,10 @@
 #endif
 
 
-#ifdef HWLOC_HAVE_LEVELZERO
+#if (defined HWLOC_HAVE_LEVELZERO) && !(defined HWLOC_HAVE_ZESINIT)
 /*
  * Define ZES_ENABLE_SYSMAN=1 early so that the LevelZero backend gets Sysman enabled.
+ * This is only for old releases (<1.5) without zesInit().
  *
  * Only if the levelzero was enabled in this build so that we don't enable sysman
  * for external levelzero users when hwloc doesn't need it. If somebody ever loads
@@ -101,7 +102,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   return TRUE;
 }
 #endif
-#endif /* HWLOC_HAVE_LEVELZERO */
+#endif /* HWLOC_HAVE_LEVELZERO && !HWLOC_HAVE_ZESINIT */
 
 
 unsigned hwloc_get_api_version(void)
