@@ -411,7 +411,7 @@ HWLOC_DECLSPEC int hwloc_distances_add_values(hwloc_topology_t topology,
 /** \brief Flags for adding a new distances to a topology. */
 enum hwloc_distances_add_flag_e {
   /** \brief Try to group objects based on the newly provided distance information.
-   * Grouping is only performed when the distances structure contains latencies,
+   * Grouping is only performed when the distances structure contains latencies or hops,
    * and when all objects are of the same type.
    * \hideinitializer
    */

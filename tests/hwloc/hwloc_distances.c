@@ -170,7 +170,7 @@ int main(void)
   for(i=0; i<16; i++)
     values[i+16*i] = 1;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -197,7 +197,7 @@ int main(void)
   assert(nr == 1);
   assert(distances[0]);
   assert(distances[0]->values);
-  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
+  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
   assert(distances[0]->values[0] == 1); /* diagonal */
   assert(distances[0]->values[1] == 2); /* same group */
@@ -289,11 +289,11 @@ int main(void)
   assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER|HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES));
   hwloc_distances_release(topology, distances[1]);
   nr = 2;
-  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_OS, 0);
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_OS, 0);
   assert(!err);
   assert(nr == 0);
   nr = 2;
-  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER, 0);
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_USER, 0);
   assert(!err);
   assert(nr == 2);
   hwloc_distances_release(topology, distances[0]);

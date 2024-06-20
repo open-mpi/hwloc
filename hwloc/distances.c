@@ -1203,8 +1203,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
   if (nbobjs <= 2)
       return;
 
-  if (!(kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY))
-    /* don't know use to use those for grouping */
+  if (!(kind & (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_VALUE_HOPS)))
     /* TODO hwloc__find_groups_by_max_distance() for bandwidth */
     return;
 
