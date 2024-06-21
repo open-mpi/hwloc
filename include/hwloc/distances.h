@@ -28,18 +28,18 @@ extern "C" {
 
 /** \brief Matrix of distances between a set of objects.
  *
- * This matrix often contains latencies between NUMA nodes
+ * The most common matrix contains latencies between NUMA nodes
  * (as reported in the System Locality Distance Information Table (SLIT)
  * in the ACPI specification), which may or may not be physically accurate.
  * It corresponds to the latency for accessing the memory of one node
  * from a core in another node.
- * The corresponding kind is ::HWLOC_DISTANCES_KIND_FROM_OS | ::HWLOC_DISTANCES_KIND_FROM_USER.
+ * The corresponding kind is ::HWLOC_DISTANCES_KIND_MEANS_LATENCY | ::HWLOC_DISTANCES_KIND_FROM_USER.
  * The name of this distances structure is "NUMALatency".
- * Others distance structures include and "XGMIBandwidth", "XGMIHops",
- * "XeLinkBandwidth" and "NVLinkBandwidth".
  *
  * The matrix may also contain bandwidths between random sets of objects,
  * possibly provided by the user, as specified in the \p kind attribute.
+ * Others common distance structures include and "XGMIBandwidth", "XGMIHops",
+ * "XeLinkBandwidth" and "NVLinkBandwidth".
  *
  * Pointers \p objs and \p values should not be replaced, reallocated, freed, etc.
  * However callers are allowed to modify \p kind as well as the contents
