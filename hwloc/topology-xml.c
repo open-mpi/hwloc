@@ -1437,6 +1437,10 @@ hwloc__xml_v2import_distances(hwloc_topology_t topology,
     }
     else if (!strcmp(attrname, "kind")) {
       kind = strtoul(attrvalue, NULL, 10);
+      /* forward compat with "HOPS" kind in v3 */
+      if (kind & (1UL<<5))
+        /* hops becomes latency */
+        kind = (kind & ~(1UL<<5)) | HWLOC_DISTANCES_KIND_MEANS_LATENCY;
     }
     else if (!strcmp(attrname, "name")) {
       name = attrvalue;
