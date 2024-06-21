@@ -70,9 +70,9 @@ struct hwloc_distances_s {
  * The \p kind attribute of struct hwloc_distances_s is a OR'ed set
  * of kinds.
  *
- * Each distance matrix has exactly one kind HWLOC_DISTANCES_KIND_FROM_*
+ * Each distance matrix may have only one kind among HWLOC_DISTANCES_KIND_FROM_*
  * specifying where distance information comes from,
- * and exactly one kind HWLOC_DISTANCES_KIND_MEANS_* specifying
+ * and one kind among HWLOC_DISTANCES_KIND_MEANS_* specifying
  * whether values are latencies or bandwidths.
  */
 enum hwloc_distances_kind_e {
@@ -356,7 +356,7 @@ typedef void * hwloc_distances_add_handle_t;
  * Otherwise, it will be copied internally and may later be freed by the caller.
  *
  * \p kind specifies the kind of distance as a OR'ed set of ::hwloc_distances_kind_e.
- * Exactly one kind of meaning and one kind of provenance must be given
+ * Only one kind of meaning and one kind of provenance may be given if appropriate
  * (e.g. ::HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH and ::HWLOC_DISTANCES_KIND_FROM_USER).
  * Kind ::HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES will be automatically set
  * according to objects having different types in hwloc_distances_add_values().
