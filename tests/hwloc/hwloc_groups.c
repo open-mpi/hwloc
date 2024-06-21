@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2023 Inria.  All rights reserved.
+ * Copyright © 2011-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -182,7 +182,7 @@ int main(void)
   values[3] = 4; values[4] = 1; values[5] = 2;
   values[6] = 4; values[7] = 2; values[8] = 1;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 3, objs, values, 0);
@@ -238,7 +238,7 @@ int main(void)
   values[15] = 4; values[16] = 4; values[17] = 4; values[18] = 1; values[19] = 2;
   values[20] = 4; values[21] = 4; values[22] = 4; values[23] = 2; values[24] = 1;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 5, objs, values, 0);
@@ -318,7 +318,7 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -352,7 +352,7 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -371,7 +371,7 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -389,7 +389,7 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -408,7 +408,7 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -427,7 +427,7 @@ int main(void)
   for(i=0; i<16; i++)
     objs[i] = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, i);
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -467,7 +467,7 @@ int main(void)
         values[i+8*j] = values[j+8*i] = 8;
   }
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 8, objs, values, 0);
@@ -489,7 +489,7 @@ int main(void)
         values[i+8*j] = values[j+8*i] = 8;
   }
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 8, objs, values, 0);
@@ -523,7 +523,7 @@ int main(void)
         values[i+32*j] = values[j+32*i] = 8;
   }
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 32, objs, values, 0);

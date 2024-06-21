@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2021 Inria.  All rights reserved.
+ * Copyright © 2010-2024 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -96,7 +96,7 @@ int main(void)
   for(i=0; i<4; i++)
     values[i+4*i] = 1;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 4, objs, values, 0);
@@ -126,7 +126,7 @@ int main(void)
   assert(distances[0]);
   assert(distances[0]->objs);
   assert(distances[0]->values);
-  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
+  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check helpers */
   assert(hwloc_distances_obj_index(distances[0], hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2)) == 2);
   err = hwloc_distances_obj_pair_values(distances[0],
@@ -170,7 +170,7 @@ int main(void)
   for(i=0; i<16; i++)
     values[i+16*i] = 1;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 16, objs, values, 0);
@@ -197,7 +197,7 @@ int main(void)
   assert(nr == 1);
   assert(distances[0]);
   assert(distances[0]->values);
-  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER));
+  assert(distances[0]->kind == (HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
   assert(distances[0]->values[0] == 1); /* diagonal */
   assert(distances[0]->values[1] == 2); /* same group */
@@ -218,7 +218,7 @@ int main(void)
   for(i=0; i<4; i++)
     values[i+4*i] = 7;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 4, objs, values, 0);
@@ -245,7 +245,7 @@ int main(void)
   assert(nr == 2);
   assert(distances[1]);
   assert(distances[1]->values);
-  assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER));
+  assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER));
   /* check that some random values are ok */
   assert(distances[1]->values[0] == 7); /* diagonal */
   assert(distances[1]->values[1] == 3); /* other */
@@ -265,7 +265,7 @@ int main(void)
     values[i*3+i] = 5;
   }
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 3, objs, values, 0);
@@ -276,7 +276,7 @@ int main(void)
 
   /* check distances by kind */
   nr = 2;
-  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH, 0);
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH, 0);
   assert(!err);
   assert(nr == 2);
   hwloc_distances_release(topology, distances[0]);
@@ -286,14 +286,14 @@ int main(void)
   assert(distances[1]->objs[1]->logical_index == 1);
   assert(distances[1]->objs[2]->type == HWLOC_OBJ_GROUP);
   assert(distances[1]->objs[2]->logical_index == 0);
-  assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER|HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES));
+  assert(distances[1]->kind == (HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER|HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES));
   hwloc_distances_release(topology, distances[1]);
   nr = 2;
-  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_OS, 0);
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_OS, 0);
   assert(!err);
   assert(nr == 0);
   nr = 2;
-  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_LATENCY|HWLOC_DISTANCES_KIND_FROM_USER, 0);
+  err = hwloc_distances_get(topology, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_LATENCY|HWLOC_DISTANCES_KIND_VALUE_HOPS|HWLOC_DISTANCES_KIND_FROM_USER, 0);
   assert(!err);
   assert(nr == 2);
   hwloc_distances_release(topology, distances[0]);
@@ -365,7 +365,7 @@ int main(void)
   for(i=0; i<4; i++)
     values[i+4*i] = 1000;
   handle = hwloc_distances_add_create(topology, NULL,
-                                      HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
+                                      HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH|HWLOC_DISTANCES_KIND_FROM_USER,
                                       0);
   assert(handle);
   err = hwloc_distances_add_values(topology, handle, 4, objs, values, 0);
@@ -375,7 +375,7 @@ int main(void)
   assert(!err);
 
   nr = 1;
-  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH, 0);
+  err = hwloc_distances_get_by_type(topology, HWLOC_OBJ_NUMANODE, &nr, distances, HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH, 0);
   assert(!err);
   assert(nr == 1);
   printf("make it links\n");

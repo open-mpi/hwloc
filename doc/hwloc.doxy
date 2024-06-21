@@ -4779,6 +4779,16 @@ in the topology root object together with other backends instead
 of in each object.
 
 
+\section upgrade_to_api_3x_distances Distances structure kinds
+
+HWLOC_DISTANCES_KIND_MEANS_LATENCY and HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH
+are renamed to ::HWLOC_DISTANCES_KIND_VALUE_LATENCY and ::HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH.
+<br/>
+
+The XGMIHops distance matrix is now of the new kind
+::HWLOC_DISTANCES_KIND_VALUE_HOPS instead of latency.
+
+
 \section upgrade_to_api_3x_xml XML changes
 
 hwloc 3.x can load XML topology files exported by hwloc 2.x.

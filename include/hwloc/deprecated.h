@@ -21,6 +21,10 @@
 extern "C" {
 #endif
 
+/* backward compat with v2.x before _MEANS_ became _VALUE_ */
+#define HWLOC_DISTANCES_KIND_MEANS_LATENCY HWLOC_DISTANCES_KIND_VALUE_LATENCY
+#define HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH
+
 /* backward compat with v2.x before BLOCK renaming */
 #define HWLOC_OBJ_OSDEV_BLOCK HWLOC_OBJ_OSDEV_STORAGE
 /* backward compat with v2.0 before WHOLE_SYSTEM renaming */

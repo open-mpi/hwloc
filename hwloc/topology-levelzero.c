@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2023 Inria.  All rights reserved.
+ * Copyright © 2020-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -489,7 +489,7 @@ hwloc__levelzero_ports_add_xelink_bandwidth(struct hwloc_topology *topology,
   int err;
 
   handle = hwloc_backend_distances_add_create(topology, "XeLinkBandwidth",
-                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH,
+                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH,
                                               0);
   if (!handle)
     goto out;

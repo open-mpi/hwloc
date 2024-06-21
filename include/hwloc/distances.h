@@ -36,8 +36,9 @@ extern "C" {
  * The corresponding kind is ::HWLOC_DISTANCES_KIND_MEANS_LATENCY | ::HWLOC_DISTANCES_KIND_FROM_USER.
  * The name of this distances structure is "NUMALatency".
  *
- * The matrix may also contain bandwidths between random sets of objects,
- * possibly provided by the user, as specified in the \p kind attribute.
+ * The matrix may also contain bandwidths or number of hops between
+ * random sets of objects, possibly provided by the user, as specified
+ * in the \p kind attribute.
  * Others common distance structures include and "XGMIBandwidth", "XGMIHops",
  * "XeLinkBandwidth" and "NVLinkBandwidth".
  *
@@ -70,10 +71,11 @@ struct hwloc_distances_s {
  * The \p kind attribute of struct hwloc_distances_s is a OR'ed set
  * of kinds.
  *
- * Each distance matrix has exactly one kind HWLOC_DISTANCES_KIND_FROM_*
+ * Each distance matrix may have only one kind among HWLOC_DISTANCES_KIND_FROM_*
  * specifying where distance information comes from,
- * and exactly one kind HWLOC_DISTANCES_KIND_MEANS_* specifying
- * whether values are latencies or bandwidths.
+ * and one kind among HWLOC_DISTANCES_KIND_VALUE_* specifying
+ * and exactly one kind HWLOC_DISTANCES_KIND_VALUE_* specifying
+ * whether values are latencies or bandwidths, etc.
  */
 enum hwloc_distances_kind_e {
   /** \brief These distances were obtained from the operating system or hardware.
@@ -88,17 +90,22 @@ enum hwloc_distances_kind_e {
   /** \brief Distance values are similar to latencies between objects.
    * Values are smaller for closer objects, hence minimal on the diagonal
    * of the matrix (distance between an object and itself).
-   * It could also be the number of network hops between objects, etc.
    * \hideinitializer
    */
-  HWLOC_DISTANCES_KIND_MEANS_LATENCY = (1UL<<2),
+  HWLOC_DISTANCES_KIND_VALUE_LATENCY = (1UL<<2),
   /** \brief Distance values are similar to bandwidths between objects.
    * Values are higher for closer objects, hence maximal on the diagonal
    * of the matrix (distance between an object and itself).
    * Such values are currently ignored for distance-based grouping.
    * \hideinitializer
    */
-  HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH = (1UL<<3),
+  HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH = (1UL<<3),
+  /** \brief Distance values are numbers of hops between objects.
+   * Values are smaller for closer objects, zero on the diagonal
+   * of the matrix (no hop between an object and itself).
+   * \hideinitializer
+   */
+  HWLOC_DISTANCES_KIND_VALUE_HOPS = (1UL<<5),
 
   /** \brief This distances structure covers objects of different types.
    * This may apply to the "NVLinkBandwidth" structure in presence
@@ -117,7 +124,7 @@ enum hwloc_distances_kind_e {
  * \p kind serves as a filter. If \c 0, all distance matrices are returned.
  * If it contains some HWLOC_DISTANCES_KIND_FROM_*, only distance matrices
  * whose kind matches one of these are returned.
- * If it contains some HWLOC_DISTANCES_KIND_MEANS_*, only distance matrices
+ * If it contains some HWLOC_DISTANCES_KIND_VALUE_*, only distance matrices
  * whose kind matches one of these are returned.
  *
  * On input, \p nr points to the number of distance matrices that may be stored
@@ -356,8 +363,8 @@ typedef void * hwloc_distances_add_handle_t;
  * Otherwise, it will be copied internally and may later be freed by the caller.
  *
  * \p kind specifies the kind of distance as a OR'ed set of ::hwloc_distances_kind_e.
- * Exactly one kind of meaning and one kind of provenance must be given
- * (e.g. ::HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH and ::HWLOC_DISTANCES_KIND_FROM_USER).
+ * Only one kind of meaning and one kind of provenance may be given if appropriate
+ * (e.g. ::HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH and ::HWLOC_DISTANCES_KIND_FROM_USER).
  * Kind ::HWLOC_DISTANCES_KIND_HETEROGENEOUS_TYPES will be automatically set
  * according to objects having different types in hwloc_distances_add_values().
  *
@@ -404,7 +411,7 @@ HWLOC_DECLSPEC int hwloc_distances_add_values(hwloc_topology_t topology,
 /** \brief Flags for adding a new distances to a topology. */
 enum hwloc_distances_add_flag_e {
   /** \brief Try to group objects based on the newly provided distance information.
-   * Grouping is only performed when the distances structure contains latencies,
+   * Grouping is only performed when the distances structure contains latencies or hops,
    * and when all objects are of the same type.
    * \hideinitializer
    */

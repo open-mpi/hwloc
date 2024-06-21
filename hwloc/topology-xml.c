@@ -1104,6 +1104,7 @@ hwloc__xml_import_support(hwloc_topology_t topology,
 
 static int
 hwloc__xml_import_distances(hwloc_topology_t topology,
+                            struct hwloc_xml_backend_data_s *data,
                             hwloc__xml_import_state_t state,
                             int heterotypes)
 {
@@ -1346,6 +1347,12 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
     goto out_ignore;
+
+  if (data->version_major < 3) {
+    /* XGMIHops was latency in v2 */
+    if ((kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY) && !strcmp(name, "XGMIHops"))
+      kind = (kind & ~HWLOC_DISTANCES_KIND_VALUE_LATENCY) | HWLOC_DISTANCES_KIND_VALUE_HOPS;
+  }
 
   hwloc_internal_distances_add_by_index(topology, name, unique_type, different_types, nbobjs, indexes, u64values, kind, 0 /* assume grouping was applied when this matrix was discovered before exporting to XML */);
 
@@ -1859,11 +1866,11 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       if (!ret)
 	break;
       if (!strcmp(tag, "distances2")) {
-	ret = hwloc__xml_import_distances(topology, &childstate, 0);
+	ret = hwloc__xml_import_distances(topology, data, &childstate, 0);
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "distances2hetero")) {
-	ret = hwloc__xml_import_distances(topology, &childstate, 1);
+	ret = hwloc__xml_import_distances(topology, data, &childstate, 1);
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "support")) {
@@ -2413,11 +2420,12 @@ hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 } while (0)
 
 static void
-hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwloc_internal_distances_s *dist)
+hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwloc_internal_distances_s *dist, unsigned long flags)
 {
   char tmp[255];
   unsigned nbobjs = dist->nbobjs;
   struct hwloc__xml_export_state_s state;
+  unsigned long kind = dist->kind;
 
   if (dist->different_types) {
     parentstate->new_child(parentstate, &state, "distances2hetero");
@@ -2428,7 +2436,12 @@ hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwl
 
   sprintf(tmp, "%u", nbobjs);
   state.new_prop(&state, "nbobjs", tmp);
-  sprintf(tmp, "%lu", dist->kind);
+  if (flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2) {
+    /* HOPS was LATENCY in v2 */
+    if (kind & HWLOC_DISTANCES_KIND_VALUE_HOPS)
+      kind = (kind & ~HWLOC_DISTANCES_KIND_VALUE_HOPS) | HWLOC_DISTANCES_KIND_VALUE_LATENCY;
+  }
+  sprintf(tmp, "%lu", kind);
   state.new_prop(&state, "kind", tmp);
   if (dist->name)
     state.new_prop(&state, "name", dist->name);
@@ -2449,16 +2462,16 @@ hwloc___xml_v2export_distances(hwloc__xml_export_state_t parentstate, struct hwl
 }
 
 static void
-hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology)
+hwloc__xml_v2export_distances(hwloc__xml_export_state_t parentstate, hwloc_topology_t topology, unsigned long flags)
 {
   struct hwloc_internal_distances_s *dist;
   for(dist = topology->first_dist; dist; dist = dist->next)
     if (!dist->different_types)
-      hwloc___xml_v2export_distances(parentstate, dist);
+      hwloc___xml_v2export_distances(parentstate, dist, flags);
   /* export homogeneous distances first in case the importer doesn't support heterogeneous and stops there */
   for(dist = topology->first_dist; dist; dist = dist->next)
     if (dist->different_types)
-      hwloc___xml_v2export_distances(parentstate, dist);
+      hwloc___xml_v2export_distances(parentstate, dist, flags);
 }
 
 static void
@@ -2659,7 +2672,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
   hwloc_obj_t root = hwloc_get_root_obj(topology);
 
     hwloc__xml_v2export_object (state, topology, root, flags);
-    hwloc__xml_v2export_distances (state, topology);
+    hwloc__xml_v2export_distances (state, topology, flags);
     env = getenv("HWLOC_XML_EXPORT_SUPPORT");
     if (!env || atoi(env))
       hwloc__xml_v2export_support(state, topology);

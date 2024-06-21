@@ -51,6 +51,8 @@ Version 3.0.0
         See "Custom string infos" in the documentation for details.
     - hwloc_cpukinds_get_info() and hwloc_cpukinds_register() now manipulate
       infos as such a structure.
+  + Distances structure "MEANS" kinds are renamed to "VALUE", and the new
+    "HOPS" kind is used for the XGMIHops matrix instead of "LATENCY.
 * Tools
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.

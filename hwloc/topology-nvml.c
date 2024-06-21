@@ -137,7 +137,7 @@ hwloc__nvml_add_nvlink_bandwidth(hwloc_topology_t topology,
   int err;
 
   handle = hwloc_backend_distances_add_create(topology, "NVLinkBandwidth",
-                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_MEANS_BANDWIDTH,
+                                              HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_BANDWIDTH,
                                               0);
   if (!handle)
     goto out;
