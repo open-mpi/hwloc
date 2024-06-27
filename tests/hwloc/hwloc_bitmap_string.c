@@ -41,6 +41,12 @@ static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *
   free(string);
   assert(hwloc_bitmap_isequal(set, set2));
 
+  hwloc_bitmap_systemd_asprintf(&string, set);
+  fprintf(stderr, "exported to systemd %s\n", string);
+  if (expected3 && strcmp(string, expected3)) {
+    fprintf(stderr, "got %s instead of %s\n", string, expected3);
+    assert(0);
+  }
   hwloc_bitmap_taskset_asprintf(&string, set);
   fprintf(stderr, "exported to taskset %s\n", string);
   if (expected3 && strcmp(string, expected3)) {
