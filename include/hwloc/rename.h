@@ -301,6 +301,8 @@ extern "C" {
 #define hwloc_bitmap_list_snprintf HWLOC_NAME(bitmap_list_snprintf)
 #define hwloc_bitmap_list_asprintf HWLOC_NAME(bitmap_list_asprintf)
 #define hwloc_bitmap_list_sscanf HWLOC_NAME(bitmap_list_sscanf)
+#define hwloc_bitmap_systemd_snprintf HWLOC_NAME(bitmap_systemd_snprintf)
+#define hwloc_bitmap_systemd_asprintf HWLOC_NAME(bitmap_systemd_asprintf)
 #define hwloc_bitmap_taskset_snprintf HWLOC_NAME(bitmap_taskset_snprintf)
 #define hwloc_bitmap_taskset_asprintf HWLOC_NAME(bitmap_taskset_asprintf)
 #define hwloc_bitmap_taskset_sscanf HWLOC_NAME(bitmap_taskset_sscanf)
