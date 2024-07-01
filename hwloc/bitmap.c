@@ -581,7 +581,7 @@ int hwloc_bitmap_systemd_snprintf(char * __hwloc_restrict buf, size_t buflen, co
 {
   char *tmp = buf;
   int res, ret = 0;
-  int bytes_count = (set->ulongs_count - 1) * 8 + 1;
+  int bytes_count = (set->ulongs_count - 1) * HWLOC_SIZEOF_UNSIGNED_LONG + 1;
   unsigned long ulongs_current = set->ulongs[set->ulongs_count -1];
 
   while ((ulongs_current >>= 8) > 0)
@@ -597,7 +597,7 @@ int hwloc_bitmap_systemd_snprintf(char * __hwloc_restrict buf, size_t buflen, co
   for (unsigned int i = 0; i < set->ulongs_count; i++) {
     ulongs_current = set->ulongs[i];
     unsigned int j = 0;
-    while (j++ < 8 && (i < (set->ulongs_count - 1) || ulongs_current > 0)) {
+    while (j++ < HWLOC_SIZEOF_UNSIGNED_LONG && (i < (set->ulongs_count - 1) || ulongs_current > 0)) {
       tmp = buf + ret;
       res = hwloc_snprintf(tmp, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE + 1, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT, (unsigned char) ulongs_current & 0xFF);
       if (res < 0)
