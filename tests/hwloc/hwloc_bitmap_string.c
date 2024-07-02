@@ -16,7 +16,7 @@
 
 /* check hwloc_bitmap_asprintf(), hwloc_bitmap_snprintf() and hwloc_bitmap_sscanf() */
 
-static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *expected2, const char *expected3)
+static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *expected2, const char *expected3, const char *expected4)
 {
   hwloc_bitmap_t set2 = hwloc_bitmap_alloc();
   char *string = NULL;
@@ -51,6 +51,13 @@ static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *
   free(string);
   assert(hwloc_bitmap_isequal(set, set2));
 
+  hwloc_bitmap_systemd_asprintf(&string, set);
+  fprintf(stderr, "exported to systemd %s\n", string);
+  if (expected4 && strcmp(string, expected3)) {
+    fprintf(stderr, "got %s instead of %s\n", string, expected4);
+    assert(0);
+  }
+
   hwloc_bitmap_free(set2);
 }
 
@@ -65,33 +72,33 @@ int main(void)
 
   /* check an empty cpuset */
   set = hwloc_bitmap_alloc();
-  check_cpuset(set, "0x0", "", "0x0");
+  check_cpuset(set, "0x0", "", "0x0", "");
   printf("empty cpuset converted back and forth, ok\n");
 
   /* make sure the first ulong is allocated even if empty */
   hwloc_bitmap_set_ith_ulong(set, 0, 0UL);
-  check_cpuset(set, "0x0", "", "0x0");
+  check_cpuset(set, "0x0", "", "0x0", "");
   printf("uselessly modified empty cpuset converted back and forth, ok\n");
 
   /* make sure the 6th ulong is allocated even if empty */
   hwloc_bitmap_set_ith_ulong(set, 5, 0UL);
-  check_cpuset(set, "0x0", "", "0x0");
+  check_cpuset(set, "0x0", "", "0x0", "");
   printf("twice uselessly modified empty cpuset converted back and forth, ok\n");
   hwloc_bitmap_free(set);
 
   /* check a full (and infinite) cpuset */
   set = hwloc_bitmap_alloc_full();
-  check_cpuset(set, "0xf...f", "0-", "0xf...f");
+  check_cpuset(set, "0xf...f", "0-", "0xf...f", "ay");
   printf("full cpuset converted back and forth, ok\n");
 
   /* make sure the first ulong is allocated even if full */
   hwloc_bitmap_set_ith_ulong(set, 0, ~0UL);
-  check_cpuset(set, "0xf...f", "0-", "0xf...f");
+  check_cpuset(set, "0xf...f", "0-", "0xf...f", "ay);
   printf("uselessly modified full cpuset converted back and forth, ok\n");
 
   /* make sure the 9th ulong is allocated even if full */
   hwloc_bitmap_set_ith_ulong(set, 8, ~0UL);
-  check_cpuset(set, "0xf...f", "0-", "0xf...f");
+  check_cpuset(set, "0xf...f", "0-", "0xf...f", "ay");
   printf("twice uselessly modified full cpuset converted back and forth, ok\n");
   hwloc_bitmap_free(set);
 
@@ -99,7 +106,7 @@ int main(void)
   set = hwloc_bitmap_alloc_full();
   hwloc_bitmap_clr(set, 173);
   hwloc_bitmap_clr_range(set, 60, 70);
-  check_cpuset(set, "0xf...f,0xffffdfff,0xffffffff,0xffffffff,0xffffff80,0x0fffffff,0xffffffff", "0-59,71-172,174-", "0xf...fffffdfffffffffffffffffffffffff800fffffffffffffff");
+  check_cpuset(set, "0xf...f,0xffffdfff,0xffffffff,0xffffffff,0xffffff80,0x0fffffff,0xffffffff", "0-59,71-172,174-", "0xf...fffffdfffffffffffffffffffffffff800fffffffffffffff", "ay");
   hwloc_bitmap_free(set);
   printf("infinite/nonfull cpuset converted back and forth, ok\n");
 
@@ -107,7 +114,7 @@ int main(void)
   set = hwloc_bitmap_alloc_full();
   hwloc_bitmap_clr_range(set, 0, 127);
   hwloc_bitmap_set_range(set, 4, 7);
-  check_cpuset(set, "0xf...f,,,,0x000000f0", "4-7,128-", "0xf...f000000000000000000000000000000f0");
+  check_cpuset(set, "0xf...f,,,,0x000000f0", "4-7,128-", "0xf...f000000000000000000000000000000f0", "ay");
   hwloc_bitmap_free(set);
   printf("infinite/nonfull cpuset with even number of substrings converted back and forth, ok\n");
 
@@ -115,7 +122,7 @@ int main(void)
   set = hwloc_bitmap_alloc_full();
   hwloc_bitmap_clr_range(set, 0, 159);
   hwloc_bitmap_set_range(set, 4, 7);
-  check_cpuset(set, "0xf...f,,,,,0x000000f0", "4-7,160-", "0xf...f00000000000000000000000000000000000000f0");
+  check_cpuset(set, "0xf...f,,,,,0x000000f0", "4-7,160-", "0xf...f00000000000000000000000000000000000000f0", "ay");
   hwloc_bitmap_free(set);
   printf("infinite/nonfull cpuset with odd number of substrings converted back and forth, ok\n");
 
@@ -123,7 +130,7 @@ int main(void)
   set = hwloc_bitmap_alloc();
   hwloc_bitmap_set(set, 2);
   hwloc_bitmap_set_range(set, 67, 70);
-  check_cpuset(set, "0x00000078,,0x00000004", "2,67-70", "0x780000000000000004");
+  check_cpuset(set, "0x00000078,,0x00000004", "2,67-70", "0x780000000000000004", "ay");
   hwloc_bitmap_free(set);
   printf("finite/nonnull cpuset converted back and forth, ok\n");
 
@@ -135,7 +142,7 @@ int main(void)
   obj = hwloc_get_root_obj(topology);
   stringlen = hwloc_bitmap_asprintf(&string, obj->cpuset);
   printf("system cpuset is %s\n", string);
-  check_cpuset(obj->cpuset, NULL, NULL, NULL);
+  check_cpuset(obj->cpuset, NULL, NULL, NULL, NULL);
   printf("system cpuset converted back and forth, ok\n");
 
   printf("truncating system cpuset to NULL buffer\n");
@@ -203,13 +210,13 @@ printf("%d == %d (%c)\n", len, stringlen, string[0]);
   obj = hwloc_get_obj_by_depth(topology, depth-1, 0);
   hwloc_bitmap_snprintf(string, stringlen+1, obj->cpuset);
   printf("first cpu cpuset is %s\n", string);
-  check_cpuset(obj->cpuset, NULL, NULL, NULL);
+  check_cpuset(obj->cpuset, NULL, NULL, NULL, NULL);
   printf("first cpu cpuset converted back and forth, ok\n");
 
   obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1) - 1);
   hwloc_bitmap_snprintf(string, stringlen+1, obj->cpuset);
   printf("last cpu cpuset is %s\n", string);
-  check_cpuset(obj->cpuset, NULL, NULL, NULL);
+  check_cpuset(obj->cpuset, NULL, NULL, NULL, NULL);
   printf("last cpu cpuset converted back and forth, ok\n");
 
   free(string);

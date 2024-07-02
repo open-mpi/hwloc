@@ -540,6 +540,8 @@ man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_singlify.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_sscanf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_systemd_asprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_systemd_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_sscanf.3 \
