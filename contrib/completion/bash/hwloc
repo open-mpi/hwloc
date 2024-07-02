@@ -147,7 +147,7 @@ _lstopo() {
 	        COMPREPLY=( `compgen -W "links merge-switch-ports transitive-closure" -- "$cur"` )
 		;;
 	    --cpuset-output-format | --cof)
-	        COMPREPLY=( "hwloc" "list" taskset" )
+	        COMPREPLY=( "hwloc" "list" "taskset" )
 		;;
 	esac
     fi
@@ -292,7 +292,7 @@ _hwloc_bind(){
 		COMPREPLY=( "<memattr>" "" )
 		;;
 	    --cpuset-output-format | --cof)
-	        COMPREPLY=( "hwloc" "list" taskset" )
+	        COMPREPLY=( "hwloc" "list" "taskset" )
 		;;
 	esac
     fi
@@ -372,7 +372,7 @@ _hwloc_calc(){
 		COMPREPLY=( "<name>=<value>" "<n>" "" )
 		;;
 	    --cpuset-input-format | --cif | --cpuset-output-format | --cof)
-	        COMPREPLY=( "hwloc" "list" taskset" )
+	        COMPREPLY=( "hwloc" "list" "taskset" )
 		;;
 	esac
     fi
@@ -487,7 +487,7 @@ _hwloc_distrib(){
 		COMPREPLY=( "<integer>" "" )
 		;;
 	    --cpuset-output-format | --cof)
-	        COMPREPLY=( "hwloc" "list" taskset" )
+	        COMPREPLY=( "hwloc" "list" "taskset" )
 		;;
 	esac
     fi
