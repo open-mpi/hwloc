@@ -50,7 +50,7 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
-            version "3.7.2+"
+            version "3.18.1+"
         }
     }
     namespace "com.hwloc.lstopo"
