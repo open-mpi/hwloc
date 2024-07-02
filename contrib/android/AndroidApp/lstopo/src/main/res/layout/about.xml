@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView
-            android:id="@+id/open-mpi"
+            android:id="@+id/open_mpi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <TextView
