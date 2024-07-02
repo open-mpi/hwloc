@@ -207,11 +207,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.share:
+        if (item.getItemId() == R.id.share) {
                 share();
                 return true;
-            default:
+        } else {
                 return super.onOptionsItemSelected(item);
         }
     }
@@ -225,8 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuItems.setCheckedItems(item);
         zoomView.resetZoom();
 
-        switch (id){
-            case R.id.activity_main_drawer_draw :
+        if (id == R.id.activity_main_drawer_draw) {
                 if(topology.equals("phone") && !menuItems.isInputPhoneSelected())
                     menuItems.setPhoneInput();
 
@@ -238,8 +236,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 else
                     startWithInput(lstopo, 1, "", topology, options);
                 setMode("draw");
-                break;
-            case R.id.activity_main_drawer_text:
+        } else if (id == R.id.activity_main_drawer_text) {
                 if(topology.equals("phone") && !menuItems.isInputPhoneSelected())
                     menuItems.setPhoneInput();
 
@@ -255,12 +252,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setMode("txt");
                     String lstopoText = readFile(txtFile);
                     lstopo.text(lstopoText, 0, 0, 0, 0, 0, -1);
-                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
-                    break;
                 }
-            case R.id.activity_main_drawer_xml:
+        } else if (id == R.id.activity_main_drawer_xml) {
                 if(topology.equals("phone") && !menuItems.isInputPhoneSelected())
                     menuItems.setPhoneInput();
 
@@ -276,46 +271,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setMode("xml");
                     String lstopoText = readFile(xmlFile);
                     lstopo.text(lstopoText, 0, 0, 0, 0, 0, -1);
-                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
-                    break;
                 }
-            case R.id.activity_main_drawer_MyPhone:
+        } else if (id == R.id.activity_main_drawer_MyPhone) {
                 topology = "phone";
                 layout.removeAllViews();
 
                 start(lstopo, 1, "", options);
                 menuItems.setDrawFormat();
                 mode = "draw";
-                break;
-            case R.id.activity_main_drawer_database:
+        } else if (id == R.id.activity_main_drawer_database) {
                 /* menuItems.setDrawFormat();
                 downloadTopology(); */
                 Uri uriDatabase = Uri.parse("https://hwloc.gitlabpages.inria.fr/xmls/");
                 Intent intentDatabase = new Intent(Intent.ACTION_VIEW, uriDatabase);
                 startActivity(intentDatabase);
-                break;
-            case R.id.activity_main_drawer_LocalXML:
+        } else if (id == R.id.activity_main_drawer_LocalXML) {
                 file_picker();
-                break;
-            case R.id.activity_main_drawer_Synthetic_Topology:
+        } else if (id == R.id.activity_main_drawer_Synthetic_Topology) {
                 createSyntheticLayout();
-                break;
-            case R.id.activity_main_drawer_debug:
+        } else if (id == R.id.activity_main_drawer_debug) {
                 final Uri data = FileProvider.getUriForFile(this, "com.hwloc.lstopo.fileprovider", debugFile);
                 this.grantUriPermission(this.getPackageName(), data, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 final Intent intent = new Intent(Intent.ACTION_VIEW)
                         .setDataAndType(data, "text/plain")
                         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 this.startActivity(intent);
-                break;
-            case R.id.activity_main_drawer_about:
+        } else if (id == R.id.activity_main_drawer_about) {
                 Intent intentAbout = new Intent(MainActivity.this, About.class);
                 startActivityForResult(intentAbout, 5);
-                break;
-            default:
-                break;
         }
 
         this.drawerLayout.closeDrawer(GravityCompat.START);
