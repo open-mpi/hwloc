@@ -53,6 +53,9 @@ android {
             version "3.7.2+"
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 // map for the version code that gives each ABI a value. make sure to list all ABIs mentioned in splits block, an keep the order.
