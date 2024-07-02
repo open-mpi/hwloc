@@ -53,6 +53,7 @@ android {
             version "3.7.2+"
         }
     }
+    namespace "com.hwloc.lstopo"
     buildFeatures {
         buildConfig = true
     }
