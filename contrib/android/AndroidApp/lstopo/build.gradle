@@ -6,6 +6,7 @@ android {
         applicationId "com.hwloc.lstopo"
         minSdkVersion 21
         targetSdkVersion 33
+        ndkVersion "26.1.10909125"
         // Increase versionCode whenever you publish a new Android release
         versionCode 273
         // Official hwloc version - snapshot number - android apk version
