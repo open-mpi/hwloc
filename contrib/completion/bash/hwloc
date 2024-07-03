@@ -405,7 +405,7 @@ complete -F _hwloc_diff hwloc-diff
 
 
 _hwloc_patch(){
-    local OPTIONS=(--R --reverse
+    local OPTIONS=(-R --reverse
 		   --version
 		   -h --help
 		  )
