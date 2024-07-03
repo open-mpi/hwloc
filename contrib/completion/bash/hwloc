@@ -224,7 +224,8 @@ _hwloc_info(){
 		COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
 		;;
 	    --ancestor | --descendants)
-		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` kind=normal kind=cpu kind=cache kind=memory kind=io kind=all )
+		COMPREPLY=( `compgen -W "${TYPES[*]} kind=normal kind=cpu kind=cache kind=memory kind=io kind=all" -- "$cur"` )
+		# TODO "kind=<tab>" doesn't complete with kinds
 		;;
 	    --local-memory-flags)
 		COMPREPLY=( "<flags>" "" )
