@@ -86,6 +86,7 @@ _lstopo() {
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -136,7 +137,7 @@ _lstopo() {
 		COMPREPLY=( "<line of text>" "" )
 		;;
 	    --palette)
-		COMPREPLY=( `compgen -W "grey" "greyscale" "default" "colors" "white" "none" -- "$cur"` )
+		COMPREPLY=( `compgen -W "grey greyscale default colors white none" -- "$cur"` )
 		;;
 	    --binding-color | --disallowed-color | --top-color)
 		COMPREPLY=( `compgen -W "none <#rrggbb>" -- "$cur"` )
@@ -159,6 +160,7 @@ complete -F _lstopo hwloc-ls
 
 
 _hwloc_info(){
+    local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(--objects
@@ -195,6 +197,7 @@ _hwloc_info(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -223,7 +226,8 @@ _hwloc_info(){
 		COMPREPLY=( `compgen -W "${TYPES[*]/%/:} cache: icache: io:" -- "$cur"` ) && compopt -o nospace
 		;;
 	    --ancestor | --descendants)
-		COMPREPLY=( `compgen -W "${TYPES[*]}" -- "$cur"` kind=normal kind=cpu kind=cache kind=memory kind=io kind=all )
+		COMPREPLY=( `compgen -W "${TYPES[*]} kind=normal kind=cpu kind=cache kind=memory kind=io kind=all" -- "$cur"` )
+		# TODO "kind=<tab>" doesn't complete with kinds
 		;;
 	    --local-memory-flags)
 		COMPREPLY=( "<flags>" "" )
@@ -269,6 +273,7 @@ _hwloc_bind(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -302,6 +307,7 @@ complete -F _hwloc_bind hwloc-bind
 
 
 _hwloc_calc(){
+    local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(-N --number-of
 		   -I --intersect
@@ -337,6 +343,7 @@ _hwloc_calc(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -384,6 +391,7 @@ complete -F _hwloc_calc hwloc-calc
 _hwloc_annotate(){
     local OPTIONS=(--ci --ri --cu --cd --version -h --help)
     local cur=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"`)
@@ -400,6 +408,7 @@ _hwloc_diff(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -417,11 +426,12 @@ complete -F _hwloc_diff hwloc-diff
 
 
 _hwloc_patch(){
-    local OPTIONS=(--R --reverse
+    local OPTIONS=(-R --reverse
 		   --version
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -438,6 +448,7 @@ _hwloc_compress_dir(){
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -448,6 +459,7 @@ complete -F _hwloc_compress_dir hwloc-compress-dir
 
 
 _hwloc_distrib(){
+    local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(--ignore
 		   --from
@@ -467,6 +479,7 @@ _hwloc_distrib(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -520,6 +533,7 @@ _hwloc_ps(){
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -554,6 +568,7 @@ _hwloc_gather_cpuid(){
 		   )
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
@@ -578,6 +593,7 @@ _hwloc_gather_topology(){
 		   -h --help
 		  )
     local cur=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=()
 
     if [[ $COMP_CWORD == 1 || $cur == -* ]] ; then
 	COMPREPLY=( `compgen -W "${OPTIONS[*]}" -- "$cur"` )
