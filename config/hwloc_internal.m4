@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2010-2023 Inria.  All rights reserved.
+dnl Copyright © 2010-2024 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -518,6 +518,7 @@ int foo(void) {
         hwloc_config_prefix[contrib/hwloc-ps.www/Makefile]
         hwloc_config_prefix[contrib/systemd/Makefile]
         hwloc_config_prefix[contrib/completion/Makefile]
+        hwloc_config_prefix[contrib/completion/test-bash-completion.sh]
         hwloc_config_prefix[contrib/misc/Makefile]
         hwloc_config_prefix[contrib/windows/Makefile]
     )
@@ -543,7 +544,8 @@ int foo(void) {
       hwloc_config_prefix[utils/hwloc/test-parsing-flags.sh] \
       hwloc_config_prefix[utils/hwloc/test-hwloc-dump-hwdata/test-hwloc-dump-hwdata.sh] \
       hwloc_config_prefix[utils/lstopo/test-lstopo.sh] \
-      hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh])
+      hwloc_config_prefix[utils/lstopo/test-lstopo-shmem.sh] \
+      hwloc_config_prefix[contrib/completion/test-bash-completion.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried
