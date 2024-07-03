@@ -136,7 +136,7 @@ _lstopo() {
 		COMPREPLY=( "<line of text>" "" )
 		;;
 	    --palette)
-		COMPREPLY=( `compgen -W "grey" "greyscale" "default" "colors" "white" "none" -- "$cur"` )
+		COMPREPLY=( `compgen -W "grey greyscale default colors white none" -- "$cur"` )
 		;;
 	    --binding-color | --disallowed-color | --top-color)
 		COMPREPLY=( `compgen -W "none <#rrggbb>" -- "$cur"` )
