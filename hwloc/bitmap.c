@@ -584,6 +584,9 @@ int hwloc_bitmap_systemd_snprintf(char * __hwloc_restrict buf, size_t buflen, co
   int bytes_count = 0;
   unsigned long ulongs_current = set->ulongs[set->ulongs_count -1];
 
+  /* infinite set are not supported */
+  assert(set->infinite == 0);
+
   if (set->ulongs_count > 0 && set->ulongs[0] > 0) {
     bytes_count = (set->ulongs_count - 1) * HWLOC_SIZEOF_UNSIGNED_LONG + 1;
     while ((ulongs_current >>= 8) > 0)
@@ -591,7 +594,10 @@ int hwloc_bitmap_systemd_snprintf(char * __hwloc_restrict buf, size_t buflen, co
 
     if (buf == NULL || buflen == 0) {
 #ifdef HWLOC_SYSTEMD_ALLOWEDCPUS_DEBUG
-      fprintf(stderr, "ulongs_count: %u, ulongs[0]: 0x%lx, bytes_count: %u\n", set->ulongs_count, set->ulongs[0], bytes_count); 
+      for (unsigned int i = 0; i < set->ulongs_count; i++) {
+        fprintf(stderr, "(%u) 0x%016lx\n", i, set->ulongs[i]);
+      }
+      fprintf(stderr, "ulongs_count: %u, ulong_allocated: %u, infinite: %d, ulongs[0]: 0x%lx, bytes_count: %u\n", set->ulongs_count, set->ulongs_allocated, set->infinite, set->ulongs[0], bytes_count);
 #endif
       return HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE + bytes_count * HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE;
     }
