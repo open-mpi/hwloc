@@ -155,6 +155,7 @@ complete -F _lstopo hwloc-ls
 
 
 _hwloc_info(){
+    local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local FILTERKINDS=("none" "all" "structure" "important")
     local OPTIONS=(--objects
@@ -291,6 +292,7 @@ complete -F _hwloc_bind hwloc-bind
 
 
 _hwloc_calc(){
+    local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(-N --number-of
 		   -I --intersect
@@ -434,6 +436,7 @@ complete -F _hwloc_compress_dir hwloc-compress-dir
 
 
 _hwloc_distrib(){
+    local INPUT_FORMAT=(xml synthetic fsroot cpuid)
     local TYPES=("Machine" "Misc" "Group" "NUMANode" "MemCache" "Package" "Die" "L1" "L2" "L3" "L4" "L5" "L1i" "L2i" "L3i" "Core" "Bridge" "PCIDev" "OSDev" "PU")
     local OPTIONS=(--ignore
 		   --from
