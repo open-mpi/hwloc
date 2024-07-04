@@ -82,6 +82,11 @@ Version 3.0.0
     possible with the new V2 XML export flag.
 
 
+Version 2.11.1
+--------------
+* Fix bash completions, thanks Tavis Rudd.
+
+
 Version 2.11.0
 --------------
 * API
