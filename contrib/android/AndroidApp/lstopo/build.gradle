@@ -8,7 +8,7 @@ android {
         targetSdkVersion 33
         ndkVersion "26.1.10909125"
         // Increase versionCode whenever you publish a new Android release
-        versionCode 264
+        versionCode 80274
         // Official hwloc version - snapshot number - android apk version
         // Set snapshot number to 1 when the hwloc version is increased.
         // Increase the snapshot number when the hwloc code changed but not its version
@@ -57,20 +57,6 @@ android {
     namespace "com.hwloc.lstopo"
     buildFeatures {
         buildConfig = true
-    }
-}
-
-// map for the version code that gives each ABI a value. make sure to list all ABIs mentioned in splits block, an keep the order.
-ext.versionCodes = ['armeabi': 3, 'armeabi-v7a': 4, 'arm64-v8a': 5, mips: 6, 'x86': 7, 'x86_64': 8]
-import com.android.build.OutputFile
-
-// For each APK output variant, override versionCode with a combination of
-// ABI APK value * 100xx + defaultConfig.versionCode
-android.applicationVariants.all { variant ->
-    // assign different version code for each output
-    variant.outputs.each { output ->
-        output.versionCodeOverride =
-                project.ext.versionCodes.get(output.getFilter(OutputFile.ABI)) * 10000 + android.defaultConfig.versionCode
     }
 }
 
