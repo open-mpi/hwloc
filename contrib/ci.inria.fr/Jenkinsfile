@@ -230,7 +230,7 @@ pipeline {
 								}
 							}
 						} else if (it == 'AndroidStudio') {
-							node('android') {
+							node('android2024') {
 								dir('check-android') {
 									unstash 'script-android'
 									unstash 'tar-android'
