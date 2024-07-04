@@ -12,10 +12,10 @@
 #ifndef HWLOC_CONFIG_H
 #define HWLOC_CONFIG_H
 
-#define HWLOC_VERSION "2.11.1rc1"
+#define HWLOC_VERSION "2.11.2rc1"
 #define HWLOC_VERSION_MAJOR 2
 #define HWLOC_VERSION_MINOR 11
-#define HWLOC_VERSION_RELEASE 1
+#define HWLOC_VERSION_RELEASE 2
 #define HWLOC_VERSION_GREEK "rc1"
 
 #if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
