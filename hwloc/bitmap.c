@@ -565,6 +565,100 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
   return -1;
 }
 
+/* The AllowedCPUs systemd DBus API syntax expects a string as follows:
+ * "ay 0xNNNN 0xAA [0xBB [...]]"
+ * where:
+ *   "0xNNNN" is the size of the array, max size 2^26.
+ *   "0xAA [0xBB [...]]" is the cpuset mask given bytes after bytes, little endian order.
+ * e.g. the output of `hwloc-calc pu:0 pu:31 pu:32 pu:63 pu:64 pu:77 --cpuset-output-format systemd` is
+ *   "AllowedCPUs ay 0x0a 0x01 0x00 0x00 x80 0x01 0x00 0x00 0x80 0x01 0x20
+ * */
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_FORMAT "AllowedCPUs ay 0x%02x"
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE 19
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT " 0x%02x"
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE 5
+int hwloc_bitmap_systemd_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  char *tmp = buf;
+  int res, ret = 0;
+  int bytes_count = 0;
+  unsigned long ulongs_current = set->ulongs[set->ulongs_count -1];
+
+  /* infinite set are not supported */
+  assert(set->infinite == 0);
+
+  if (set->ulongs_count > 0 && set->ulongs[0] > 0) {
+    bytes_count = (set->ulongs_count - 1) * HWLOC_SIZEOF_UNSIGNED_LONG + 1;
+    while ((ulongs_current >>= 8) > 0)
+      bytes_count++;
+
+    if (buf == NULL || buflen == 0) {
+#ifdef HWLOC_SYSTEMD_ALLOWEDCPUS_DEBUG
+      for (unsigned int i = 0; i < set->ulongs_count; i++) {
+        fprintf(stderr, "(%u) 0x%016lx\n", i, set->ulongs[i]);
+      }
+      fprintf(stderr, "ulongs_count: %u, ulong_allocated: %u, infinite: %d, ulongs[0]: 0x%lx, bytes_count: %u\n", set->ulongs_count, set->ulongs_allocated, set->infinite, set->ulongs[0], bytes_count);
+#endif
+      return HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE + bytes_count * HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE;
+    }
+
+    res = hwloc_snprintf(tmp, HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE + 1, HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_FORMAT, bytes_count);
+    if (res < 0)
+      return -1;
+    ret += res;
+    for (unsigned int i = 0; i < set->ulongs_count; i++) {
+      ulongs_current = set->ulongs[i];
+#ifdef HWLOC_SYSTEMD_ALLOWEDCPUS_DEBUG
+        fprintf(stderr, "(%u) 0x%016lx\n", i, ulongs_current);
+#endif
+      unsigned int j = 0;
+      while (j++ < HWLOC_SIZEOF_UNSIGNED_LONG && (i < (set->ulongs_count - 1) || ulongs_current > 0)) {
+        tmp = buf + ret;
+        res = hwloc_snprintf(tmp, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE + 1, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT, (unsigned char) ulongs_current & 0xFF);
+        if (res < 0)
+          return -1;
+        ret += res;
+#ifdef HWLOC_SYSTEMD_ALLOWEDCPUS_DEBUG
+        fprintf(stderr, "(%u,%u) 0x%16lx tmp: '%s' @%u, buf: '%s' @%u\n", i, j, ulongs_current, tmp, res, buf, ret);
+#endif
+        ulongs_current >>= 8;
+        bytes_count--;
+      }
+    }
+    ret++; /* +1 for \0  written at the end by the last snprintf */
+  } else {
+    if (buf == NULL || buflen == 0)
+      return 0;
+    else {
+      buf[0] = '\0';
+      return 0;
+    }
+  }
+
+#ifdef HWLOC_SYSTEMD_ALLOWEDCPUS_DEBUG
+  fprintf(stderr, "ret: %u, buflen: %lu, bytes_count: %d\n", ret, buflen, bytes_count);
+#endif
+  assert(bytes_count == 0);
+  assert(((size_t) ret) == buflen);
+
+  return ret;
+}
+
+int hwloc_bitmap_systemd_asprintf(char ** strp, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  int len;
+  char *buf;
+
+  HWLOC__BITMAP_CHECK(set);
+
+  len = hwloc_bitmap_systemd_snprintf(NULL, 0, set);
+  buf = malloc(len+1);
+  if (!buf)
+    return -1;
+  *strp = buf;
+  return hwloc_bitmap_systemd_snprintf(buf, len+1, set);
+}
+
 int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
 {
   ssize_t size = buflen;

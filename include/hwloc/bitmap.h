@@ -163,6 +163,26 @@ HWLOC_DECLSPEC int hwloc_bitmap_list_asprintf(char ** strp, hwloc_const_bitmap_t
  */
 HWLOC_DECLSPEC int hwloc_bitmap_list_sscanf(hwloc_bitmap_t bitmap, const char * __hwloc_restrict string);
 
+/** \brief Stringify a bitmap in the systemd-specific format.
+ *
+ * The systemd command manipulates bitmap strings that contain a single
+ * (possible very long) hexadecimal number starting with 0x.
+ *
+ * Up to \p buflen characters may be written in buffer \p buf.
+ *
+ * If \p buflen is 0, \p buf may safely be \c NULL.
+ *
+ * \return the number of characters that were actually written if not truncating,
+ * or that would have been written (not including the ending \\0).
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_systemd_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
+
+/** \brief Stringify a bitmap into a newly allocated systemd-specific string.
+ *
+ * \return 0 on success, -1 on error.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_systemd_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
+
 /** \brief Stringify a bitmap in the taskset-specific format.
  *
  * The taskset command manipulates bitmap strings that contain a single

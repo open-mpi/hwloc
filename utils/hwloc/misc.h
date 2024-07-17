@@ -935,8 +935,9 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
 enum hwloc_utils_cpuset_format_e {
   HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN,
   HWLOC_UTILS_CPUSET_FORMAT_HWLOC,
-  HWLOC_UTILS_CPUSET_FORMAT_TASKSET,
-  HWLOC_UTILS_CPUSET_FORMAT_LIST
+  HWLOC_UTILS_CPUSET_FORMAT_LIST,
+  HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD,
+  HWLOC_UTILS_CPUSET_FORMAT_TASKSET
 };
 
 static __hwloc_inline enum hwloc_utils_cpuset_format_e
@@ -946,6 +947,8 @@ hwloc_utils_parse_cpuset_format(const char *string)
     return HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
   else if (!strcmp(string, "list"))
     return HWLOC_UTILS_CPUSET_FORMAT_LIST;
+  else if (!strcmp(string, "systemd"))
+    return HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD;
   else if (!strcmp(string, "taskset"))
     return HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
   else
@@ -958,8 +961,9 @@ hwloc_utils_cpuset_format_asprintf(char **string, hwloc_const_bitmap_t set,
 {
   switch (cpuset_output_format) {
   case HWLOC_UTILS_CPUSET_FORMAT_HWLOC: return hwloc_bitmap_asprintf(string, set);
-  case HWLOC_UTILS_CPUSET_FORMAT_TASKSET: return hwloc_bitmap_taskset_asprintf(string, set);
   case HWLOC_UTILS_CPUSET_FORMAT_LIST: return hwloc_bitmap_list_asprintf(string, set);
+  case HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD: return hwloc_bitmap_systemd_asprintf(string, set);
+  case HWLOC_UTILS_CPUSET_FORMAT_TASKSET: return hwloc_bitmap_taskset_asprintf(string, set);
   default: abort();
   }
 }
