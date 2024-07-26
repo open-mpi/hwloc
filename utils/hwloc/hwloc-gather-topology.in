@@ -285,7 +285,8 @@ if ! test -d "$destdir/$basename/var/run/hwloc"; then
     ln -sr "$destdir/$basename/var/run/hwloc.HWLOC_DUMPED_HWDATA_DIR" "$destdir/$basename/var/run/hwloc"
   else if test -e "$destdir/$basename/$runstatedir/hwloc"; then
     ln -sr "$destdir/$basename/var/run/hwloc.runstatedir" "$destdir/$basename/var/run/hwloc"
-  fi fi
+  fi
+  fi
 fi
 
 # Gather cgroup/cpuset mntpnts

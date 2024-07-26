@@ -24,7 +24,10 @@ else if test -d "$dst/$EXAMPLE/"; then
 else
   echo "ERROR: Cannot find doc subdirectory in destination path."
   exit 1
-fi fi fi fi
+fi
+fi
+fi
+fi
 echo "Will copy documentation to $dst"
 
 while test `pwd` != /; do
@@ -52,7 +55,9 @@ else if ! test -e doc/doxygen-doc/hwloc-letter.pdf; then
 else if ! test -d doc/www.open-mpi.org/html/; then
   echo "ERROR: doc/www.open-mpi.org/html/ not found."
   exit 1
-fi fi fi
+fi
+fi
+fi
 
 echo "Installing hwloc-v${VERSION}-a4.pdf ..."
 cp -f doc/doxygen-doc/hwloc-a4.pdf "$dst/hwloc-v${VERSION}-a4.pdf"
