@@ -1052,7 +1052,9 @@ return 0;
 	AC_MSG_NOTICE([using default CUDA install path /usr/local/cuda ...])
         HWLOC_CUDA_COMMON_LDFLAGS="-L/usr/local/cuda/lib64/ -L/usr/local/cuda/lib64/stubs/"
         HWLOC_CUDA_COMMON_CPPFLAGS="-I/usr/local/cuda/include/"
-      fi fi fi
+      fi
+      fi
+      fi
 
       AC_MSG_NOTICE([common CUDA/OpenCL/NVML CPPFLAGS: $HWLOC_CUDA_COMMON_CPPFLAGS])
       AC_MSG_NOTICE([common CUDA/OpenCL/NVML LDFLAGS: $HWLOC_CUDA_COMMON_LDFLAGS])
@@ -1276,7 +1278,9 @@ char nvmlInit ();
         AC_MSG_NOTICE([using standard ROCm install path $rocm_dir ...])
       else
         AC_MSG_NOTICE([assuming ROCm is installed in standard directories ...])
-      fi fi fi
+      fi
+      fi
+      fi
       if test "x$rocm_dir" != x; then
          if test -d "$rocm_dir/include/rocm_smi"; then
            HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/include/"
@@ -1604,7 +1608,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       requested_plugins=`echo $enable_plugins | sed -e 's/,/ /g'`
     else
       hwloc_have_plugins=no
-    fi fi
+    fi
+    fi
     AC_MSG_RESULT($hwloc_have_plugins)
 
     if test "x$hwloc_have_plugins" = xyes; then
@@ -1617,7 +1622,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         else if test "x$hwloc_windows" = "xyes"; then
           AC_MSG_WARN([dlopen not supported on non-native Windows build, disabled by default.])
           enable_plugin_dlopen=no
-        fi fi
+        fi
+        fi
       fi
       if test "x$enable_plugin_ltdl" = x; then
         if test "x$hwloc_aix" = "xyes"; then
@@ -1626,7 +1632,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         else if test "x$hwloc_windows" = "xyes"; then
           AC_MSG_WARN([ltdl not supported on non-native Windows build, disabled by default.])
           enable_plugin_dlopen=no
-        fi fi
+        fi
+        fi
       fi
 
       # Look for dlopen
@@ -1659,7 +1666,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
         AC_MSG_RESULT([none])
         AC_MSG_WARN([Plugin support requested, but could not enable dlopen or ltdl])
         AC_MSG_ERROR([Cannot continue])
-      fi fi
+      fi
+      fi
 
       AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])
     fi
