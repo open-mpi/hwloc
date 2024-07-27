@@ -458,6 +458,8 @@ EOF
 		   ])
     ])
 
+    AC_PATH_PROG([BASH], [bash])
+
     AC_CHECK_PROGS(XMLLINT, [xmllint])
 
     AC_CHECK_PROGS(BUNZIPP, bunzip2, false)
