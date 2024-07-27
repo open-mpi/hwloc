@@ -856,8 +856,6 @@ return 0;
       AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
     fi
 
-    AC_PATH_PROG([BASH], [bash])
-
     AC_CHECK_FUNCS([ffs], [
       _HWLOC_CHECK_DECL([ffs],[
         AC_DEFINE([HWLOC_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
@@ -1871,6 +1869,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_GL_BUILD_STATIC], [test "x$hwloc_gl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
+        AM_CONDITIONAL([HWLOC_HAVE_BASH], [test "x$BASH" != "x"])
         AM_CONDITIONAL([HWLOC_HAVE_CXX], [test "x$hwloc_have_cxx" = "xyes"])
         AM_CONDITIONAL([HWLOC_CROSS_COMPILING], [test "x$cross_compiling" = "xyes"])
     ])
