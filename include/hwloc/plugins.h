@@ -26,7 +26,7 @@ struct hwloc_backend;
 
 
 
-/** \defgroup hwlocality_disc_components Components and Plugins: Discovery components
+/** \defgroup hwlocality_disc_components Components and Plugins: Discovery components and backends
  *
  * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
  *
@@ -89,18 +89,6 @@ struct hwloc_disc_component {
    */
   struct hwloc_disc_component * next;
 };
-
-/** @} */
-
-
-
-
-/** \defgroup hwlocality_disc_backends Components and Plugins: Discovery backends
- *
- * \note These structures and functions may change when ::HWLOC_COMPONENT_ABI is modified.
- *
- * @{
- */
 
 /** \brief Discovery phase */
 typedef enum hwloc_disc_phase_e {
