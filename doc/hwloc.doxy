@@ -4683,9 +4683,6 @@ and/or running against.
 
 \section upgrade_to_api_3x_osdev OS device type is now a bitmask
 
-<b>This change does not *imply compile failures but things will very likely break at runtime.</b>
-<br/>
-
 The OS device "type" attribute is now a bitmask instead of a single value,
 and many existing devices now combine two values.
 <ul>
@@ -4699,6 +4696,7 @@ and many existing devices now combine two values.
 See \ref iodevices_osdev for details.
 <br/>
 
+<b>This change does not cause compile failures but things will very likely break at runtime.</b>
 Codes looking OS device types should be updated as follows:
 \verbatim
 #if HWLOC_API_VERSION >= 0x30000
