@@ -4700,7 +4700,7 @@ Type hwloc_obj_osdev_type_t is also renamed to ::hwloc_obj_osdev_types_t.
 Codes looking OS device types should be updated as follows:
 \verbatim
 #if HWLOC_API_VERSION >= 0x30000
-  if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.types & HWLOC_OSDEV_TYPE_GPU)
+  if (obj->type == HWLOC_OBJ_OS_DEVICE && (obj->attr->osdev.types & HWLOC_OSDEV_TYPE_GPU))
     /* obj is a 3.x GPU OS device */
 #else
   if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OSDEV_TYPE_GPU)
