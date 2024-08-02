@@ -1390,7 +1390,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	}
 
       }
-      if (HWLOC_OBJ_OSDEV_MEMORY) {
+      if (HWLOC_OBJ_OSDEV_MEMORY & obj->attr->osdev.type) {
 	/* Memory
          * Size was printed above in STORAGE|MEMORY.
          */
