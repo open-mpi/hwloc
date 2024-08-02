@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -56,8 +56,8 @@ int main(void)
       if (os) {
 	assert(os->type == HWLOC_OBJ_OS_DEVICE);
 	printf("found OS object subtype %lu lindex %u name %s\n",
-	       (unsigned long) os->attr->osdev.type, os->logical_index, os->name);
-	assert(os->attr->osdev.type == (HWLOC_OBJ_OSDEV_OPENFABRICS|HWLOC_OBJ_OSDEV_NETWORK));
+	       (unsigned long) os->attr->osdev.types, os->logical_index, os->name);
+	assert(os->attr->osdev.types == (HWLOC_OBJ_OSDEV_OPENFABRICS|HWLOC_OBJ_OSDEV_NETWORK));
 	if (strcmp(ibv_get_device_name(dev), os->name))
 	  assert(0);
       }

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012 Blue Brain Project, EPFL. All rights reserved.
- * Copyright © 2012-2023 Inria.  All rights reserved.
+ * Copyright © 2012-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -57,7 +57,7 @@ hwloc_gl_get_display_osdev_by_port_device(hwloc_topology_t topology,
         unsigned x = (unsigned) -1, y = (unsigned) -1;
         hwloc_obj_t osdev = NULL;
         while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-          if ((osdev->attr->osdev.type & HWLOC_OBJ_OSDEV_GPU) /* assume future GL devices will be at least GPU */
+          if ((osdev->attr->osdev.types & HWLOC_OBJ_OSDEV_GPU) /* assume future GL devices will be at least GPU */
                     && osdev->name
                     && sscanf(osdev->name, ":%u.%u", &x, &y) == 2
                     && port == x && device == y)
@@ -87,7 +87,7 @@ hwloc_gl_get_display_osdev_by_name(hwloc_topology_t topology,
 {
         hwloc_obj_t osdev = NULL;
         while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-          if ((osdev->attr->osdev.type & HWLOC_OBJ_OSDEV_GPU) /* assume future GL devices will be at least GPU */
+          if ((osdev->attr->osdev.types & HWLOC_OBJ_OSDEV_GPU) /* assume future GL devices will be at least GPU */
                     && osdev->name
                     && !strcmp(name, osdev->name))
                         return osdev;
@@ -115,7 +115,7 @@ hwloc_gl_get_display_by_osdev(hwloc_topology_t topology __hwloc_attribute_unused
 			      unsigned *port, unsigned *device)
 {
 	unsigned x = -1, y = -1;
-        if ((osdev->attr->osdev.type & HWLOC_OBJ_OSDEV_GPU) /* assume future GL devices will be at least GPU */
+        if ((osdev->attr->osdev.types & HWLOC_OBJ_OSDEV_GPU) /* assume future GL devices will be at least GPU */
 	    && sscanf(osdev->name, ":%u.%u", &x, &y) == 2) {
 		*port = x;
 		*device = y;

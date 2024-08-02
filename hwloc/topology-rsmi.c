@@ -294,7 +294,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
     osdev->name = strdup(buffer);
     osdev->subtype = strdup("RSMI");
     osdev->depth = HWLOC_TYPE_DEPTH_UNKNOWN;
-    osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU | HWLOC_OBJ_OSDEV_COPROC;
+    osdev->attr->osdev.types = HWLOC_OBJ_OSDEV_GPU | HWLOC_OBJ_OSDEV_COPROC;
 
     hwloc_obj_add_info(osdev, "GPUVendor", "AMD");
 

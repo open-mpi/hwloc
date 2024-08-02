@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -328,7 +328,7 @@ hwloc__type_match(const char *string,
 }
 
 static int
-hwloc__osdev_type_sscanf(const char *string, hwloc_obj_osdev_type_t *ostype)
+hwloc__osdev_type_sscanf(const char *string, hwloc_obj_osdev_types_t *ostype)
 {
   if (hwloc__type_match(string, "storage", 4)
       || hwloc__type_match(string, "block", 4)) { /* backward compat with v2.x */
@@ -386,7 +386,7 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
   unsigned depthattr = (unsigned) -1;
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
   hwloc_obj_bridge_type_t ubtype = (hwloc_obj_bridge_type_t) -1;
-  hwloc_obj_osdev_type_t ostype = 0; /* none */
+  hwloc_obj_osdev_types_t ostype = 0; /* none */
   char *end;
 
   /* Never match the ending \0 since we want to match things like core:2 too.
@@ -499,7 +499,7 @@ hwloc_type_sscanf(const char *string, hwloc_obj_type_t *typep,
       /* if downstream_type can ever be non-PCI, we'll have to make strings more precise,
        * or relax the hwloc_type_sscanf test */
     } else if (type == HWLOC_OBJ_OS_DEVICE && attrsize >= sizeof(attrp->osdev)) {
-      attrp->osdev.type = ostype;
+      attrp->osdev.types = ostype;
     }
   }
   return 0;
@@ -562,7 +562,7 @@ static const char* hwloc_obj_cache_type_letter(hwloc_obj_cache_type_t type)
 }
 
 struct _hwloc_osdev_type_names {
-  hwloc_obj_osdev_type_t type;
+  hwloc_obj_osdev_types_t type;
   const char *name;
   const char *longname;
 };
@@ -580,7 +580,7 @@ struct _hwloc_osdev_type_names names[_HWLOC_OSDEV_TYPE_NAMES_NR] = {
 
 static int
 hwloc__osdev_type_snprintf_short(char * __hwloc_restrict string, size_t size,
-                                 hwloc_obj_osdev_type_t ostype, int longnames)
+                                 hwloc_obj_osdev_types_t ostype, int longnames)
 {
   unsigned i;
   for(i=0; i<_HWLOC_OSDEV_TYPE_NAMES_NR; i++)
@@ -592,7 +592,7 @@ hwloc__osdev_type_snprintf_short(char * __hwloc_restrict string, size_t size,
 
 static int
 hwloc__osdev_type_snprintf_normal(char * __hwloc_restrict string, size_t size,
-                                  hwloc_obj_osdev_type_t ostype, int longnames)
+                                  hwloc_obj_osdev_types_t ostype, int longnames)
 {
   char prefix = '[';
   char *tmp = string;
@@ -682,9 +682,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, "PCI");
   case HWLOC_OBJ_OS_DEVICE:
     if (shortnames)
-      return hwloc__osdev_type_snprintf_short(string, size, obj->attr->osdev.type, longnames);
+      return hwloc__osdev_type_snprintf_short(string, size, obj->attr->osdev.types, longnames);
     else
-      return hwloc__osdev_type_snprintf_normal(string, size, obj->attr->osdev.type, longnames);
+      return hwloc__osdev_type_snprintf_normal(string, size, obj->attr->osdev.types, longnames);
   default:
     if (size > 0)
       *string = '\0';

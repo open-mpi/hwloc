@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 Inria.  All rights reserved.
+ * Copyright © 2010-2024 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -77,7 +77,7 @@ int main(void)
 
     assert(has_cuda_backend);
 
-    assert(osdev->attr->osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
+    assert(osdev->attr->osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
 
     value = osdev->subtype;
     assert(value);

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2023 Inria.  All rights reserved.
+ * Copyright © 2016-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -33,12 +33,12 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
     } else if (type == HWLOC_OBJ_OS_DEVICE) {
       if (shortnames) {
         /* shortname single type must be non-0 and included in actual types, or both are 0 */
-        if (obj->attr->osdev.type)
-          assert(attr.osdev.type && (attr.osdev.type & obj->attr->osdev.type) == attr.osdev.type);
+        if (obj->attr->osdev.types)
+          assert(attr.osdev.types && (attr.osdev.types & obj->attr->osdev.types) == attr.osdev.types);
         else
-          assert(!attr.osdev.type);
+          assert(!attr.osdev.types);
       } else {
-        assert(attr.osdev.type == obj->attr->osdev.type);
+        assert(attr.osdev.types == obj->attr->osdev.types);
       }
     }
   }
@@ -119,47 +119,47 @@ int main(void)
   err = hwloc_type_sscanf("osdev", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("osdev0", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("osdev:", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("osde_", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("osD[", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("os(", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("os[foo]", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("osdev[]", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_type_sscanf("os[gpu]", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == HWLOC_OBJ_OSDEV_GPU);
+  assert(attr.osdev.types == HWLOC_OBJ_OSDEV_GPU);
   err = hwloc_type_sscanf("osdev[dma]", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == HWLOC_OBJ_OSDEV_DMA);
+  assert(attr.osdev.types == HWLOC_OBJ_OSDEV_DMA);
   err = hwloc_type_sscanf("osdev[co-processor,net,gpu,foo]", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
+  assert(attr.osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
   err = hwloc_type_sscanf("os-", &type, &attr, sizeof(attr));
   assert(err == -1);
   err = hwloc_type_sscanf("o1", &type, &attr, sizeof(attr));
@@ -169,45 +169,45 @@ int main(void)
   /* test snprintf followed by sscanf on osdevs */
   sobj.attr = &attr;
   sobj.type = HWLOC_OBJ_OS_DEVICE;
-  attr.osdev.type = 0;
+  attr.osdev.types = 0;
   err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
   assert(!strcmp(tmp, "OS"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0);
   assert(!strcmp(tmp, "OS"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
+  assert(attr.osdev.types == 0);
   err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
   assert(!strcmp(tmp, "OSDev"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == 0);
-  attr.osdev.type = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
+  assert(attr.osdev.types == 0);
+  attr.osdev.types = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
   err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
   assert(!strcmp(tmp, "Net"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == HWLOC_OBJ_OSDEV_NETWORK);
-  attr.osdev.type = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
+  assert(attr.osdev.types == HWLOC_OBJ_OSDEV_NETWORK);
+  attr.osdev.types = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
   err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0);
   assert(!strcmp(tmp, "OS[Net,CoProc,GPU]"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
+  assert(attr.osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
   err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
   assert(!strcmp(tmp, "OSDev[Network,Co-Processor,GPU]"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
+  assert(attr.osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
   err = hwloc_obj_type_snprintf(tmp, 20 /* truncate */, &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
   assert(!strcmp(tmp, "OSDev[Network,Co-Pr"));
   /* don't try to parse the truncated output */

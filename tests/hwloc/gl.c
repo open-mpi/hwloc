@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2023 Inria.  All rights reserved.
+ * Copyright © 2012-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -71,7 +71,7 @@ int main(void)
       err = hwloc_gl_get_display_by_osdev(topology, osdev, &port, &device);
       if (!err) {
         assert(has_gl_backend);
-	assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_GPU);
+	assert(osdev->attr->osdev.types == HWLOC_OBJ_OSDEV_GPU);
 
 	if (!firstgpu)
 	  firstgpu = osdev;

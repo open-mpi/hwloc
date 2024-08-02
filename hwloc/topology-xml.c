@@ -390,7 +390,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	  fprintf(stderr, "%s: ignoring invalid osdev_type format string %s\n",
 		  state->global->msgprefix, value);
       } else {
-	obj->attr->osdev.type = osdev_type; /* v2 types will be updated later in hwloc__xml_import_object() */
+	obj->attr->osdev.types = osdev_type; /* v2 types will be updated later in hwloc__xml_import_object() */
       }
       break;
     }
@@ -870,58 +870,58 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
 
   if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
-    unsigned long oldtype = obj->attr->osdev.type;
+    unsigned long oldtype = obj->attr->osdev.types;
     switch (oldtype) {
     case 0: /* v2 Block */
       if ((obj->name && !strncmp(obj->name, "dax", 3))) {
         /* DAX is MEMORY, and STORAGE if NVM */
-        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
+        obj->attr->osdev.types = HWLOC_OBJ_OSDEV_MEMORY;
         if (obj->subtype && !strcmp(obj->subtype, "NVM"))
-          obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+          obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_STORAGE;
       } else if (obj->subtype && !strcmp(obj->subtype, "CXLMem")) {
         /* CXL is MEMORY, and STORAGE if there's some PMEM */
         const char *info = hwloc_obj_get_info_by_name(obj, "CXLPMEMSize");
-        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_MEMORY;
+        obj->attr->osdev.types = HWLOC_OBJ_OSDEV_MEMORY;
         if (info)
-          obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+          obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_STORAGE;
       } else {
         /* anything else is STORAGE */
-        obj->attr->osdev.type = HWLOC_OBJ_OSDEV_STORAGE;
+        obj->attr->osdev.types = HWLOC_OBJ_OSDEV_STORAGE;
       }
       break;
     case 1: /* v2 GPU */
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+      obj->attr->osdev.types = HWLOC_OBJ_OSDEV_GPU;
       if (obj->name && (!strncmp(obj->name, "rsmi", 4) || !strncmp(obj->name, "nvml", 4) /* no RSMI/NVML subtype for v2.5 */))
-        obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_COPROC;
+        obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_COPROC;
       break;
     case 2: /* v2 Net */
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
+      obj->attr->osdev.types = HWLOC_OBJ_OSDEV_NETWORK;
       break;
     case 3: /* v2 OFED */
       /* everything is NET and OFED, except BXI which became NET only */
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_NETWORK;
+      obj->attr->osdev.types = HWLOC_OBJ_OSDEV_NETWORK;
       if (!obj->subtype || strcmp(obj->subtype, "BXI"))
-        obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_OPENFABRICS;
+        obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_OPENFABRICS;
       break;
     case 4: /* v2 DMA */
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_DMA;
+      obj->attr->osdev.types = HWLOC_OBJ_OSDEV_DMA;
       break;
     case 5: /* v2 COPROC */
-      obj->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
+      obj->attr->osdev.types = HWLOC_OBJ_OSDEV_COPROC;
       if (obj->subtype) {
         /* CUDA and L0 are also GPU, and OpenCL GPU obviously */
         if (!strcmp(obj->subtype, "CUDA") || !strcmp(obj->subtype, "LevelZero"))
-          obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_GPU;
+          obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_GPU;
         else if (!strcmp(obj->subtype, "OpenCL")) {
           const char *info = hwloc_obj_get_info_by_name(obj, "OpenCLDeviceType");
           if (info && !strcmp(info, "GPU"))
-            obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_GPU;
+            obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_GPU;
         }
       }
       break;
     default:
       /* unrecognized, no type */
-      obj->attr->osdev.type = 0;
+      obj->attr->osdev.types = 0;
       break;
     }
   }
@@ -2301,27 +2301,27 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     break;
   case HWLOC_OBJ_OS_DEVICE:
     if (v2export) {
-      if (obj->attr->osdev.type & (HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY)) {
+      if (obj->attr->osdev.types & (HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY)) {
         state->new_prop(state, "osdev_type", "0"); /* v2 Block */
-      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_OPENFABRICS) {
+      } else if (obj->attr->osdev.types & HWLOC_OBJ_OSDEV_OPENFABRICS) {
         state->new_prop(state, "osdev_type", "3"); /* v2 OFED */
-      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_NETWORK) {
+      } else if (obj->attr->osdev.types & HWLOC_OBJ_OSDEV_NETWORK) {
         if (obj->subtype && !strcmp(obj->subtype, "BXI"))
           state->new_prop(state, "osdev_type", "3"); /* v2 OFED */
         else
           state->new_prop(state, "osdev_type", "2"); /* v2 Net */
-      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_DMA) {
+      } else if (obj->attr->osdev.types & HWLOC_OBJ_OSDEV_DMA) {
         state->new_prop(state, "osdev_type", "4"); /* v2 DMA */
-      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_COPROC) {
+      } else if (obj->attr->osdev.types & HWLOC_OBJ_OSDEV_COPROC) {
         if (obj->name && (!strncmp(obj->name, "nvml", 4) || !strncmp(obj->name, "rsmi", 4)))
           state->new_prop(state, "osdev_type", "1"); /* v2 GPU */
         else
           state->new_prop(state, "osdev_type", "5"); /* v2 CoProc */
-      } else if (obj->attr->osdev.type & HWLOC_OBJ_OSDEV_GPU) {
+      } else if (obj->attr->osdev.types & HWLOC_OBJ_OSDEV_GPU) {
         state->new_prop(state, "osdev_type", "1"); /* v2 GPU */
       }
     } else {
-      sprintf(tmp, "%lu", obj->attr->osdev.type);
+      sprintf(tmp, "%lu", obj->attr->osdev.types);
       state->new_prop(state, "osdev_type", tmp);
     }
     break;

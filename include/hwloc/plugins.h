@@ -509,7 +509,7 @@ hwloc_filter_check_pcidev_subtype_important(unsigned classid)
  * \return 1 if important, 0 otherwise.
  */
 static __hwloc_inline int
-hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_type_t subtype)
+hwloc_filter_check_osdev_subtype_important(hwloc_obj_osdev_types_t subtype)
 {
   return (subtype && subtype != HWLOC_OBJ_OSDEV_DMA);
 }
@@ -545,7 +545,7 @@ hwloc_filter_check_keep_object(hwloc_topology_t topology, hwloc_obj_t obj)
     if (type == HWLOC_OBJ_PCI_DEVICE)
       return hwloc_filter_check_pcidev_subtype_important(obj->attr->pcidev.class_id);
     if (type == HWLOC_OBJ_OS_DEVICE)
-      return hwloc_filter_check_osdev_subtype_important(obj->attr->osdev.type);
+      return hwloc_filter_check_osdev_subtype_important(obj->attr->osdev.types);
   }
   return 1;
 }

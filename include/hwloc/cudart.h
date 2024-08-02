@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2023 Inria.  All rights reserved.
+ * Copyright © 2010-2024 Inria.  All rights reserved.
  * Copyright © 2010-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -163,7 +163,7 @@ hwloc_cudart_get_device_osdev_by_index(hwloc_topology_t topology, unsigned idx)
 {
 	hwloc_obj_t osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-          if ((osdev->attr->osdev.type & (HWLOC_OBJ_OSDEV_GPU|HWLOC_OBJ_OSDEV_COPROC)) /* assume future CUDA devices will be at least GPU or COPROC */
+          if ((osdev->attr->osdev.types & (HWLOC_OBJ_OSDEV_GPU|HWLOC_OBJ_OSDEV_COPROC)) /* assume future CUDA devices will be at least GPU or COPROC */
 		    && osdev->name
 		    && !strncmp("cuda", osdev->name, 4)
 		    && atoi(osdev->name + 4) == (int) idx)

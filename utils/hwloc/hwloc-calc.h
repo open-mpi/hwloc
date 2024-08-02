@@ -121,7 +121,7 @@ hwloc_calc_check_object_filtered(hwloc_obj_t obj, struct hwloc_calc_level *level
       return 1;
 
   } else if (level->type == HWLOC_OBJ_OS_DEVICE) {
-    if (level->attr.osdev.type != 0 && !(obj->attr->osdev.type & level->attr.osdev.type))
+    if (level->attr.osdev.types != 0 && !(obj->attr->osdev.types & level->attr.osdev.types))
       return 1;
   }
 
@@ -288,8 +288,8 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
         || level->depth == HWLOC_TYPE_DEPTH_MULTIPLE)
       return -1;
 
-    if (level->type != HWLOC_OBJ_OS_DEVICE || hwloc_strncasecmp(typestring, "os", 2) || !level->attr.osdev.type) {
-      /* don't use filters for OSdev if it was already parsed as "OS*[osdev.type]" */
+    if (level->type != HWLOC_OBJ_OS_DEVICE || hwloc_strncasecmp(typestring, "os", 2) || !level->attr.osdev.types) {
+      /* don't use filters for OSdev if it was already parsed as "OS*[osdev.types]" */
       bracket = strchr(typestring, '[');
       if (bracket) {
         err = hwloc_calc_parse_level_filter(topology, bracket+1, level);

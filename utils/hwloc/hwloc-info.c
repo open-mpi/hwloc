@@ -294,7 +294,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     }
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    hwloc_info_show_attr(prefix, "attr osdev type", type);
+    hwloc_info_show_attr(prefix, "attr osdev types", type);
     break;
   default:
     /* nothing to show */

@@ -30,7 +30,7 @@ Version 3.0.0
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
-  + The OS device "type" attribute is now a bitmask.
+  + The OS device "type" attribute is now a bitmask named "types".
     - "Block" OS devices are now "Storage" (for actual Block devices)
       and/or "Memory" (for Linux DAX and CXL devices, etc).
     - Some "CoProcessors" are also "GPUs" (e.g. CUDA devices),

@@ -3,7 +3,7 @@
  * - getting CUDA and OpenCL attributes
  * - displaying the locality of the GPU
  *
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2011,2017 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -36,7 +36,7 @@ int main(void)
       obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_OS_DEVICE, i);
       printf("%s:\n", obj->name);
 
-      /* obj->attr->osdev.type is HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU */
+      /* obj->attr->osdev.types is HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU */
 
       s = hwloc_obj_get_info_by_name(obj, "Backend");
       /* obj->subtype also contains CUDA or OpenCL since v2.0 */

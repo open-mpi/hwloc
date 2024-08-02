@@ -3957,7 +3957,7 @@ annotate_dax_parent(hwloc_obj_t obj, const char *name, int fsroot_fd)
   if (strstr(begin, "ndbus")) {
     type = "NVM";
     if (obj->type == HWLOC_OBJ_OS_DEVICE)
-      obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+      obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_STORAGE;
   } else {
     type = "SPM";
   }
@@ -6262,12 +6262,12 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 }
 
 static hwloc_obj_t
-hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
+hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcidev, hwloc_obj_osdev_types_t type, const char *name)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
   obj->name = strdup(name);
-  obj->attr->osdev.type = type;
+  obj->attr->osdev.types = type;
 
   hwloc_insert_object_by_parent(topology, pcidev, obj);
   /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
@@ -7076,7 +7076,7 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
       snprintf(tmp, sizeof(tmp), "%lluKiB", value / 1024);
       hwloc_obj_add_info(obj, "CXLPMEMSize", tmp);
     }
-    obj->attr->osdev.type |= HWLOC_OBJ_OSDEV_STORAGE;
+    obj->attr->osdev.types |= HWLOC_OBJ_OSDEV_STORAGE;
   }
 
   snprintf(path, sizeof(path), "%s/serial", osdevpath);

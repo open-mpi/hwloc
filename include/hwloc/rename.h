@@ -83,7 +83,7 @@ extern "C" {
 #define HWLOC_OBJ_BRIDGE_PCI HWLOC_NAME_CAPS(OBJ_BRIDGE_PCI)
 
 #define hwloc_obj_osdev_type_e HWLOC_NAME(obj_osdev_type_e)
-#define hwloc_obj_osdev_type_t HWLOC_NAME(obj_osdev_type_t)
+#define hwloc_obj_osdev_types_t HWLOC_NAME(obj_osdev_types_t)
 #define HWLOC_OBJ_OSDEV_STORAGE HWLOC_NAME_CAPS(OBJ_OSDEV_STORAGE)
 #define HWLOC_OBJ_OSDEV_GPU HWLOC_NAME_CAPS(OBJ_OSDEV_GPU)
 #define HWLOC_OBJ_OSDEV_NETWORK HWLOC_NAME_CAPS(OBJ_OSDEV_NETWORK)

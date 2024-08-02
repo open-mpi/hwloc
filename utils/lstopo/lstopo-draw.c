@@ -1299,7 +1299,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 
   if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {
     if (HWLOC_OBJ_OS_DEVICE == obj->type) {
-      if ((HWLOC_OBJ_OSDEV_COPROC & obj->attr->osdev.type) && obj->subtype) {
+      if ((HWLOC_OBJ_OSDEV_COPROC & obj->attr->osdev.types) && obj->subtype) {
 	/* Coprocessor */
 	if (!strcmp(obj->subtype, "CUDA")) {
 	  /* CUDA */
@@ -1381,7 +1381,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
         }
 
       }
-      if ((HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY) & obj->attr->osdev.type) {
+      if ((HWLOC_OBJ_OSDEV_STORAGE|HWLOC_OBJ_OSDEV_MEMORY) & obj->attr->osdev.types) {
 	/* Storage or Memory size */
         unsigned long long bytes;
         bytes = parse_info_size(obj, "Size");
@@ -1390,7 +1390,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
 	}
 
       }
-      if (HWLOC_OBJ_OSDEV_MEMORY & obj->attr->osdev.type) {
+      if (HWLOC_OBJ_OSDEV_MEMORY & obj->attr->osdev.types) {
 	/* Memory
          * Size was printed above in STORAGE|MEMORY.
          */

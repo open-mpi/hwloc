@@ -4683,8 +4683,8 @@ and/or running against.
 
 \section upgrade_to_api_3x_osdev OS device type is now a bitmask
 
-The OS device "type" attribute is now a bitmask instead of a single value,
-and many existing devices now combine two values.
+The OS device "type" attribute is now a bitmask named "types".
+Instead of a single value, many existing devices now combine two values.
 <ul>
 <li>"Block" OS devices are now "Storage" (for actual Block devices)
     and/or "Memory" (for Linux DAX and CXL devices, etc).
@@ -4696,11 +4696,10 @@ and many existing devices now combine two values.
 See \ref iodevices_osdev for details.
 <br/>
 
-<b>This change does not cause compile failures but things will very likely break at runtime.</b>
 Codes looking OS device types should be updated as follows:
 \verbatim
 #if HWLOC_API_VERSION >= 0x30000
-  if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type & HWLOC_OSDEV_TYPE_GPU)
+  if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.types & HWLOC_OSDEV_TYPE_GPU)
     /* obj is a 3.x GPU OS device */
 #else
   if (obj->type == HWLOC_OBJ_OS_DEVICE && obj->attr->osdev.type == HWLOC_OSDEV_TYPE_GPU)

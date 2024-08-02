@@ -416,10 +416,10 @@ enum hwloc_obj_osdev_type_e {
                                             */
 };
 
-/** \brief Type of a OS device.
+/** \brief Type(s) of a OS device.
  * OR'ed set of ::hwloc_obj_osdev_type_e.
  */
-typedef unsigned long hwloc_obj_osdev_type_t;
+typedef unsigned long hwloc_obj_osdev_types_t;
 
 /** \brief Compare the depth of two object types
  *
@@ -756,7 +756,7 @@ union hwloc_obj_attr_u {
   } bridge;
   /** \brief OS Device specific Object Attributes */
   struct hwloc_osdev_attr_s {
-    hwloc_obj_osdev_type_t type; /**< \brief OR'ed set of at least one ::hwloc_obj_osdev_type_e. */
+    hwloc_obj_osdev_types_t types; /**< \brief OR'ed set of at least one ::hwloc_obj_osdev_type_e. */
   } osdev;
 };
 

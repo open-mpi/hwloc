@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2023 Inria.  All rights reserved.
+ * Copyright © 2021-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -107,7 +107,7 @@ int main(void)
       assert(!err);
       assert(atoi(osdev->name+2) == (int) k);
 
-      assert(osdev->attr->osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
+      assert(osdev->attr->osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
 
       assert(has_levelzero_backend);
 

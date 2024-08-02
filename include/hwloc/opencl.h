@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2023 Inria.  All rights reserved.
+ * Copyright © 2012-2024 Inria.  All rights reserved.
  * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -206,7 +206,7 @@ hwloc_opencl_get_device_osdev_by_index(hwloc_topology_t topology,
 	unsigned x = (unsigned) -1, y = (unsigned) -1;
 	hwloc_obj_t osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-          if ((osdev->attr->osdev.type & HWLOC_OBJ_OSDEV_COPROC) /* assume future OpenCL devices will be at least COPROC */
+          if ((osdev->attr->osdev.types & HWLOC_OBJ_OSDEV_COPROC) /* assume future OpenCL devices will be at least COPROC */
                     && osdev->name
 		    && sscanf(osdev->name, "opencl%ud%u", &x, &y) == 2
 		    && platform_index == x && device_index == y)
