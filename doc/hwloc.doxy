@@ -4696,6 +4696,7 @@ Instead of a single value, many existing devices now combine two values.
 See \ref iodevices_osdev for details.
 <br/>
 
+Type hwloc_obj_osdev_type_t is also renamed to ::hwloc_obj_osdev_types_t.
 Codes looking OS device types should be updated as follows:
 \verbatim
 #if HWLOC_API_VERSION >= 0x30000
