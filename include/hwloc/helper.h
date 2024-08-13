@@ -968,7 +968,7 @@ hwloc_distrib(hwloc_topology_t topology,
   unsigned given, givenweight;
   hwloc_cpuset_t *cpusetp = set;
 
-  if (flags & ~HWLOC_DISTRIB_FLAG_REVERSE) {
+  if (!n || (flags & ~HWLOC_DISTRIB_FLAG_REVERSE)) {
     errno = EINVAL;
     return -1;
   }
