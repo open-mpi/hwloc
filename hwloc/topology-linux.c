@@ -5543,6 +5543,27 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       return -1;
     }
 
+  /* architecture specific or default routine for parsing cpumodel */
+  switch (data->arch) {
+  case HWLOC_LINUX_ARCH_X86:
+    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
+    break;
+  case HWLOC_LINUX_ARCH_ARM:
+    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
+    break;
+  case HWLOC_LINUX_ARCH_POWER:
+    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ppc;
+    break;
+  case HWLOC_LINUX_ARCH_IA64:
+    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ia64;
+    break;
+  case HWLOC_LINUX_ARCH_LOONGARCH:
+    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_loongarch;
+    break;
+  default:
+    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_generic;
+  }
+
 #      define PROCESSOR	"processor"
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
   while (fgets(str, sizeof(str), fd)!=NULL) {
@@ -5611,27 +5632,6 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     Lprocs[curproc].infos.count = 0;
     Lprocs[curproc].infos.allocated = 0;
     getprocnb_end() else {
-
-      /* architecture specific or default routine for parsing cpumodel */
-      switch (data->arch) {
-      case HWLOC_LINUX_ARCH_X86:
-	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
-	break;
-      case HWLOC_LINUX_ARCH_ARM:
-	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
-	break;
-      case HWLOC_LINUX_ARCH_POWER:
-	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ppc;
-	break;
-      case HWLOC_LINUX_ARCH_IA64:
-	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ia64;
-	break;
-      case HWLOC_LINUX_ARCH_LOONGARCH:
-	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_loongarch;
-	break;
-      default:
-	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_generic;
-      }
 
       /* we can't assume that we already got a processor index line:
        * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
