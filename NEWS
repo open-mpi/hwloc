@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.11.2
+--------------
+* Add missing CPU info attrs on aarch64 on Linux.
+
+
 Version 2.11.1
 --------------
 * Fix bash completions, thanks Tavis Rudd.
