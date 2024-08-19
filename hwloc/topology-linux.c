@@ -5781,7 +5781,8 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 	|| (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"))
 	|| !strcmp(data->utsname.machine, "k1om"))
       data->arch = HWLOC_LINUX_ARCH_X86;
-    else if (!strncmp(data->utsname.machine, "arm", 3))
+    else if (!strcmp(data->utsname.machine, "aarch64")
+             || !strncmp(data->utsname.machine, "arm", 3))
       data->arch = HWLOC_LINUX_ARCH_ARM;
     else if (!strncmp(data->utsname.machine, "ppc", 3)
 	     || !strncmp(data->utsname.machine, "power", 5))
