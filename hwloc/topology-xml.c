@@ -694,6 +694,10 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  /* deal with possible future type */
 	  obj->type = HWLOC_OBJ_GROUP;
 	  obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_MODULE;
+	} else if (!strcasecmp(attrvalue, "Cluster")) {
+	  /* deal with possible future type */
+	  obj->type = HWLOC_OBJ_GROUP;
+	  obj->attr->group.kind = HWLOC_GROUP_KIND_LINUX_CLUSTER;
 	} else if (!strcasecmp(attrvalue, "MemCache")) {
 	  /* ignore possible future type */
 	  obj->type = _HWLOC_OBJ_FUTURE;
