@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 CNRS
+ * Copyright © 2009, 2024 CNRS
  * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
@@ -770,6 +770,7 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
       err = hwloc_bitmap_taskset_sscanf(newset, arg);
       break;
     default:
+      /* HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD input not supported */
       abort();
     }
     if (err < 0) {

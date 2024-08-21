@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 CNRS
+ * Copyright © 2009,2024 CNRS
  * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
@@ -60,7 +60,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --cpuset-input-format <hwloc|list|taskset>\n"
                  "  --cif <hwloc|list|taskset>\n"
                  "                            Change the format of cpuset inputs\n");
-  fprintf(where, "  --cpuset-output-format <hwloc|list|taskset>\n"
+  fprintf(where, "  --cpuset-output-format <hwloc|list|taskset|systemd-dbus-api>\n"
                  "  --cof <hwloc|list|taskset>\n"
                  "                            Change the format of cpuset outputs\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
@@ -617,6 +617,10 @@ int main(int argc, char *argv[])
         cpuset_input_format = hwloc_utils_parse_cpuset_format(argv[1]);
         if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == cpuset_input_format) {
           fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
+          exit(EXIT_FAILURE);
+        }
+        if (HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD == cpuset_input_format) {
+          fprintf(stderr, "The systemd-dbus-api format is not supported on input\n");
           exit(EXIT_FAILURE);
         }
 	opt = 1;
