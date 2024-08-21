@@ -30,8 +30,8 @@ Machine (P#0 total=16GiB)
       PU L#15 (P#15)
 depth 0:           1 Machine (type #0)
  depth 1:          4 Package (type #1)
-  depth 2:         8 Core (type #2)
-   depth 3:        16 PU (type #3)
-Special depth -3:  1 NUMANode (type #13)
+  depth 2:         8 Core (type #3)
+   depth 3:        16 PU (type #4)
+Special depth -3:  1 NUMANode (type #14)
 Topology infos: Backend=Linux
 Topology not from this system

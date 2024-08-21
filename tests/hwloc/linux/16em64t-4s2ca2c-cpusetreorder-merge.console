@@ -25,9 +25,9 @@ Machine (P#0 total=16GiB)
       PU L#10 (P#7)
 depth 0:           1 Machine (type #0)
  depth 1:          4 Package (type #1)
-  depth 2:         8 L2Cache (type #5)
-   depth 3:        11 PU (type #3)
-Special depth -3:  1 NUMANode (type #13)
+  depth 2:         8 L2Cache (type #6)
+   depth 3:        11 PU (type #4)
+Special depth -3:  1 NUMANode (type #14)
 5 processors not represented in topology: 0x0000d003
 Topology infos: LinuxCgroup=/prout Backend=Linux
 Topology not from this system

@@ -215,6 +215,16 @@ typedef enum {
 			  * A processor package usually contains multiple cores,
 			  * and possibly some dies.
 			  */
+  HWLOC_OBJ_DIE,	/**< \brief Die within a physical package.
+			 * A subpart of the physical package, that contains multiple cores.
+			 *
+			 * Some operating systems (e.g. Linux) may expose a single die per package
+			 * even if the hardware does not support dies at all. To avoid showing
+			 * such non-existing dies, the corresponding hwloc backend may filter them out.
+			 * This is functionally equivalent to ::HWLOC_TYPE_FILTER_KEEP_STRUCTURE
+			 * being enforced.
+			 */
+
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
 			  * PUs, aka logical processors).
@@ -280,6 +290,19 @@ typedef enum {
 			  * main tree.
 			  */
 
+  HWLOC_OBJ_MEMCACHE,	/**< \brief Memory-side cache (filtered out by default).
+			  * A cache in front of a specific NUMA node.
+			  *
+			  * This object always has at least one NUMA node as a memory child.
+			  *
+			  * Memory objects are not listed in the main children list,
+			  * but rather in the dedicated Memory children list.
+			  *
+			  * Memory-side cache have a special depth ::HWLOC_TYPE_DEPTH_MEMCACHE
+			  * instead of a normal depth just like other objects in the
+			  * main tree.
+			  */
+
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge (filtered out by default).
 			  * Any bridge (or PCI switch) that connects the host or an I/O bus,
 			  * to another I/O bus.
@@ -327,29 +350,6 @@ typedef enum {
 			  * and those are in the dedicated misc children list as well.
 			  * Misc objects have NULL CPU and node sets.
 			  */
-
-  HWLOC_OBJ_MEMCACHE,	/**< \brief Memory-side cache (filtered out by default).
-			  * A cache in front of a specific NUMA node.
-			  *
-			  * This object always has at least one NUMA node as a memory child.
-			  *
-			  * Memory objects are not listed in the main children list,
-			  * but rather in the dedicated Memory children list.
-			  *
-			  * Memory-side cache have a special depth ::HWLOC_TYPE_DEPTH_MEMCACHE
-			  * instead of a normal depth just like other objects in the
-			  * main tree.
-			  */
-
-  HWLOC_OBJ_DIE,	/**< \brief Die within a physical package.
-			 * A subpart of the physical package, that contains multiple cores.
-			 *
-			 * Some operating systems (e.g. Linux) may expose a single die per package
-			 * even if the hardware does not support dies at all. To avoid showing
-			 * such non-existing dies, the corresponding hwloc backend may filter them out.
-			 * This is functionally equivalent to ::HWLOC_TYPE_FILTER_KEEP_STRUCTURE
-			 * being enforced.
-			 */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
 } hwloc_obj_type_t;

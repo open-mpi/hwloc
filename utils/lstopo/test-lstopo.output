@@ -56,10 +56,10 @@ Machine (total=2048MiB)
         PU L#7
 depth 0:           1 Machine (type #0)
  depth 1:          1 Package (type #1)
-  depth 2:         2 Core (type #2)
-   depth 3:        4 L2Cache (type #5)
-    depth 4:       8 PU (type #3)
-Special depth -3:  2 NUMANode (type #13)
+  depth 2:         2 Core (type #3)
+   depth 3:        4 L2Cache (type #6)
+    depth 4:       8 PU (type #4)
+Special depth -3:  2 NUMANode (type #14)
 Memory attribute #0 name `Capacity' flags 1
   NUMANode L#0 = 1073741824
   NUMANode L#1 = 1073741824
@@ -229,9 +229,9 @@ Machine (P#0 total=4096MiB)
     PU L#14 (P#14) (disallowed)
     PU L#15 (P#15) (disallowed)
 depth 0:           1 Machine (type #0)
- depth 1:          4 Group0 (type #12)
-  depth 2:         16 PU (type #3)
-Special depth -3:  4 NUMANode (type #13)
+ depth 1:          4 Group0 (type #13)
+  depth 2:         16 PU (type #4)
+Special depth -3:  4 NUMANode (type #14)
 12 processors represented but not allowed: 0x0000fff0
 Topology infos: Backend=Synthetic SyntheticDescription="node:4 pu:4"
 Topology not from this system

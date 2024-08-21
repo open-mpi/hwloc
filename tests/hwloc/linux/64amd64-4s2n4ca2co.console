@@ -277,13 +277,13 @@ Machine (P#0 total=120GiB DMIProductName="PowerEdge C6145 " DMIProductVersion=" 
               PU L#63 (P#63)
 depth 0:           1 Machine (type #0)
  depth 1:          4 Package (type #1)
-  depth 2:         8 L3Cache (type #6)
-   depth 3:        32 L2Cache (type #5)
-    depth 4:       32 L1iCache (type #9)
-     depth 5:      64 L1dCache (type #4)
-      depth 6:     64 Core (type #2)
-       depth 7:    64 PU (type #3)
-Special depth -3:  8 NUMANode (type #13)
+  depth 2:         8 L3Cache (type #7)
+   depth 3:        32 L2Cache (type #6)
+    depth 4:       32 L1iCache (type #10)
+     depth 5:      64 L1dCache (type #5)
+      depth 6:     64 Core (type #3)
+       depth 7:    64 PU (type #4)
+Special depth -3:  8 NUMANode (type #14)
 Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3) by logical indexes:
  index     0     1     2     3     4     5     6     7
      0    10    16    16    22    16    22    16    22

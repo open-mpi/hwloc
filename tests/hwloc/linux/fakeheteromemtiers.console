@@ -46,15 +46,15 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
         OSDev[Memory,Storage](NVM) L#2 (DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region6/dax6.1 Size=514048KiB LinuxDeviceID=253:6) "dax6.0"
 depth 0:            1 Machine (type #0)
  depth 1:           1 Package (type #1)
-  depth 2:          1 L3Cache (type #6)
-   depth 3:         3 Group0 (type #12)
-    depth 4:        6 L2Cache (type #5)
-     depth 5:       6 L1dCache (type #4)
-      depth 6:      6 L1iCache (type #9)
-       depth 7:     6 Core (type #2)
-        depth 8:    6 PU (type #3)
-Special depth -3:   7 NUMANode (type #13)
-Special depth -6:   3 OSDev (type #16)
+  depth 2:          1 L3Cache (type #7)
+   depth 3:         3 Group0 (type #13)
+    depth 4:        6 L2Cache (type #6)
+     depth 5:       6 L1dCache (type #5)
+      depth 6:      6 L1iCache (type #10)
+       depth 7:     6 Core (type #3)
+        depth 8:    6 PU (type #4)
+Special depth -3:   7 NUMANode (type #14)
+Special depth -6:   3 OSDev (type #18)
 Relative latency matrix (name NUMALatency kind 5) between 7 NUMANodes (depth -3) by logical indexes:
  index     0     2     5     3     4     1     6
      0    10    20    20    20    20    20    20

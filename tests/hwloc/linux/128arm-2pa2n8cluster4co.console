@@ -683,14 +683,14 @@ Machine (P#0 total=503GiB DMIProductName="XA320 V2 " DMIProductVersion="To be fi
                 PU L#127 (P#127)
 depth 0:            1 Machine (type #0)
  depth 1:           2 Package (type #1)
-  depth 2:          4 L3Cache (type #6)
-   depth 3:         32 Group0 (type #12)
-    depth 4:        128 L2Cache (type #5)
-     depth 5:       128 L1dCache (type #4)
-      depth 6:      128 L1iCache (type #9)
-       depth 7:     128 Core (type #2)
-        depth 8:    128 PU (type #3)
-Special depth -3:   4 NUMANode (type #13)
+  depth 2:          4 L3Cache (type #7)
+   depth 3:         32 Group0 (type #13)
+    depth 4:        128 L2Cache (type #6)
+     depth 5:       128 L1dCache (type #5)
+      depth 6:      128 L1iCache (type #10)
+       depth 7:     128 Core (type #3)
+        depth 8:    128 PU (type #4)
+Special depth -3:   4 NUMANode (type #14)
 Relative latency matrix (name NUMALatency kind 5) between 4 NUMANodes (depth -3) by logical indexes:
  index     0     1     2     3
      0    10    16    32    33

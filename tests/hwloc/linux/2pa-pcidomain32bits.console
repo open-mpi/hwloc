@@ -23,14 +23,14 @@ Machine (P#0 total=2004MiB DMIProductName="CloudStack KVM Hypervisor" DMIProduct
         OSDev[Storage] L#2 (Size=20971520KiB SectorSize=512 LinuxDeviceID=254:0) "vda"
 depth 0:           1 Machine (type #0)
  depth 1:          2 Package (type #1)
-  depth 2:         2 L2Cache (type #5)
-   depth 3:        2 L1dCache (type #4)
-    depth 4:       2 L1iCache (type #9)
-     depth 5:      2 Core (type #2)
-      depth 6:     2 PU (type #3)
-Special depth -3:  1 NUMANode (type #13)
-Special depth -4:  2 Bridge (type #14)
-Special depth -5:  4 PCIDev (type #15)
-Special depth -6:  3 OSDev (type #16)
+  depth 2:         2 L2Cache (type #6)
+   depth 3:        2 L1dCache (type #5)
+    depth 4:       2 L1iCache (type #10)
+     depth 5:      2 Core (type #3)
+      depth 6:     2 PU (type #4)
+Special depth -3:  1 NUMANode (type #14)
+Special depth -4:  2 Bridge (type #16)
+Special depth -5:  4 PCIDev (type #17)
+Special depth -6:  3 OSDev (type #18)
 Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=4.9.0-3-amd64 OSVersion="#1 SMP Debian 4.9.30-2+deb9u2 (2017-06-26)" HostName=hwloc-debian9amd64 Architecture=x86_64
 Topology not from this system

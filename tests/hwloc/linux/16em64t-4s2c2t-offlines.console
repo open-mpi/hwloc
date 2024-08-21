@@ -43,12 +43,12 @@ Machine (P#0 total=16GiB)
             PU L#11 (P#10)
 depth 0:           1 Machine (type #0)
  depth 1:          4 Package (type #1)
-  depth 2:         4 L3Cache (type #6)
-   depth 3:        7 L2Cache (type #5)
-    depth 4:       7 L1dCache (type #4)
-     depth 5:      7 Core (type #2)
-      depth 6:     12 PU (type #3)
-Special depth -3:  1 NUMANode (type #13)
+  depth 2:         4 L3Cache (type #7)
+   depth 3:        7 L2Cache (type #6)
+    depth 4:       7 L1dCache (type #5)
+     depth 5:      7 Core (type #3)
+      depth 6:     12 PU (type #4)
+Special depth -3:  1 NUMANode (type #14)
 4 processors not represented in topology: 0x00006024
 Topology infos: Backend=Linux
 Topology not from this system

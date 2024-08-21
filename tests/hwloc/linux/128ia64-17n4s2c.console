@@ -354,11 +354,11 @@ Machine (P#0 total=1535GiB)
   Group0 L#16 (total=996MiB)
     NUMANode L#16 (P#16 local=996MiB total=996MiB)
 depth 0:           1 Machine (type #0)
- depth 1:          17 Group0 (type #12)
+ depth 1:          17 Group0 (type #13)
   depth 2:         64 Package (type #1)
-   depth 3:        128 Core (type #2)
-    depth 4:       128 PU (type #3)
-Special depth -3:  17 NUMANode (type #13)
+   depth 3:        128 Core (type #3)
+    depth 4:       128 PU (type #4)
+Special depth -3:  17 NUMANode (type #14)
 Relative latency matrix (name NUMALatency kind 5) between 17 NUMANodes (depth -3) by logical indexes:
  index     0     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16
      0    10    17    17    17    20    20    20    20    20    20    20    20    20    20    20    20    14

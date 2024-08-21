@@ -40,11 +40,11 @@ Machine (P#0 total=2048MiB DMIProductName=AltixXE320 DMIProductVersion=AltixXE D
             PU L#7 (P#7)
 depth 0:           1 Machine (type #0)
  depth 1:          2 Package (type #1)
-  depth 2:         4 L2Cache (type #5)
-   depth 3:        8 L1dCache (type #4)
-    depth 4:       8 L1iCache (type #9)
-     depth 5:      8 Core (type #2)
-      depth 6:     8 PU (type #3)
-Special depth -3:  1 NUMANode (type #13)
+  depth 2:         4 L2Cache (type #6)
+   depth 3:        8 L1dCache (type #5)
+    depth 4:       8 L1iCache (type #10)
+     depth 5:      8 Core (type #3)
+      depth 6:     8 PU (type #4)
+Special depth -3:  1 NUMANode (type #14)
 Topology infos: LinuxCgroup=/ Backend=Linux
 Topology not from this system

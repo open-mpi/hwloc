@@ -4681,6 +4681,13 @@ All users are strong encouraged to stop using hwloc 1.x.
 See \ref faq5 for detecting the hwloc version that you are compiling
 and/or running against.
 
+\section upgrade_to_api_3x_type_order Object types are reordered
+
+Die and MemCache object types are now near their neighbors in the type enum
+(Die between Package and Core, MemCache after NUMANode).
+One should use helpers such hwloc_obj_type_is_normal() instead of assumptions
+about type ordering in the enum.
+
 \section upgrade_to_api_3x_osdev OS device type is now a bitmask
 
 The OS device "type" attribute is now a bitmask named "types".

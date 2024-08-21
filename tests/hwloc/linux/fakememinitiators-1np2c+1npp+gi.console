@@ -29,10 +29,10 @@ Machine (P#0 total=1861GiB)
         PU L#7 (P#7)
 depth 0:           1 Machine (type #0)
  depth 1:          2 Package (type #1)
-  depth 2:         4 Group0 (type #12)
-   depth 3:        8 Core (type #2)
-    depth 4:       8 PU (type #3)
-Special depth -3:  6 NUMANode (type #13)
+  depth 2:         4 Group0 (type #13)
+   depth 3:        8 Core (type #3)
+    depth 4:       8 PU (type #4)
+Special depth -3:  6 NUMANode (type #14)
 Relative latency matrix (name NUMALatency kind 5) between 6 NUMANodes (depth -3) by logical indexes:
  index     0     1     2     3     4     5
      0    10    13    17    21    21    28

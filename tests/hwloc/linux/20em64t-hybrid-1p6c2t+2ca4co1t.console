@@ -74,13 +74,13 @@ Machine (P#0 total=31GiB DMIProductName="HP EliteBook 840 14 inch G10 Notebook P
               PU L#19 (P#19)
 depth 0:           1 Machine (type #0)
  depth 1:          1 Package (type #1)
-  depth 2:         1 L3Cache (type #6)
-   depth 3:        8 L2Cache (type #5)
-    depth 4:       14 L1dCache (type #4)
-     depth 5:      14 L1iCache (type #9)
-      depth 6:     14 Core (type #2)
-       depth 7:    20 PU (type #3)
-Special depth -3:  1 NUMANode (type #13)
+  depth 2:         1 L3Cache (type #7)
+   depth 3:        8 L2Cache (type #6)
+    depth 4:       14 L1dCache (type #5)
+     depth 5:      14 L1iCache (type #10)
+      depth 6:     14 Core (type #3)
+       depth 7:    20 PU (type #4)
+Special depth -3:  1 NUMANode (type #14)
 CPU kind #0 efficiency 0 cpuset 0x000ff000
   FrequencyMaxMHz = 3900
   FrequencyBaseMHz = 1400
