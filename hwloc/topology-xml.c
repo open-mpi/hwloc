@@ -698,14 +698,19 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  /* deal with possible future type */
 	  obj->type = HWLOC_OBJ_GROUP;
 	  obj->attr->group.kind = HWLOC_GROUP_KIND_LINUX_CLUSTER;
-	} else if (!strcasecmp(attrvalue, "MemCache")) {
+	}
+#if 0
+        /* reenable if there's ever a future type that should be ignored without being an error */
+        else if (!strcasecmp(attrvalue, "MemCache")) {
 	  /* ignore possible future type */
 	  obj->type = _HWLOC_OBJ_FUTURE;
 	  ignored = 1;
 	  if (hwloc__xml_verbose())
 	    fprintf(stderr, "%s: %s object not-supported, will be ignored\n",
 		    state->global->msgprefix, attrvalue);
-	} else {
+	}
+#endif
+        else {
 	  if (hwloc__xml_verbose())
 	    fprintf(stderr, "%s: unrecognized object type string %s\n",
 		    state->global->msgprefix, attrvalue);
