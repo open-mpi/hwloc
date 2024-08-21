@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2023 Inria.  All rights reserved.
+ * Copyright © 2020-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -11,7 +11,7 @@
 
 int main(void)
 {
-  hwloc_topology_t topology;
+  hwloc_topology_t topology, dup;
   int efficiency;
   hwloc_bitmap_t cpuset;
   struct hwloc_info_s info;
@@ -94,6 +94,13 @@ int main(void)
   infos.allocated = 0;
   err = hwloc_cpukinds_register(topology, cpuset, 1000, &infos, 0);
   assert(!err);
+
+  /* duplicate in the middle of adding cpukinds */
+  err = hwloc_topology_dup(&dup, topology);
+  assert(!err);
+  hwloc_topology_destroy(topology);
+  topology = dup;
+
   /* PU 6-9 (third package) are small and less efficient */
   hwloc_bitmap_zero(cpuset);
   hwloc_bitmap_set_range(cpuset, 6, 8);
