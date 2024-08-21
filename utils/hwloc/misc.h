@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 CNRS
+ * Copyright © 2009, 2024 CNRS
  * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
@@ -968,8 +968,9 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
 enum hwloc_utils_cpuset_format_e {
   HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN,
   HWLOC_UTILS_CPUSET_FORMAT_HWLOC,
-  HWLOC_UTILS_CPUSET_FORMAT_TASKSET,
-  HWLOC_UTILS_CPUSET_FORMAT_LIST
+  HWLOC_UTILS_CPUSET_FORMAT_LIST,
+  HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD,
+  HWLOC_UTILS_CPUSET_FORMAT_TASKSET
 };
 
 static __hwloc_inline enum hwloc_utils_cpuset_format_e
@@ -979,10 +980,50 @@ hwloc_utils_parse_cpuset_format(const char *string)
     return HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
   else if (!strcmp(string, "list"))
     return HWLOC_UTILS_CPUSET_FORMAT_LIST;
+  else if (!strcmp(string, "systemd-dbus-api"))
+    return HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD;
   else if (!strcmp(string, "taskset"))
     return HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
   else
     return HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
+}
+
+/* The AllowedCPUs systemd DBus API syntax expects a string as follows:
+ * "ay 0xNNNN 0xAA [0xBB [...]]"
+ * where:
+ *   "0xNNNN" is the size of the array, max size 2^26.
+ *   "0xAA [0xBB [...]]" is the cpuset mask given bytes after bytes, little endian order.
+ * e.g. the output of `hwloc-calc --cpuset-input-format list 0,31-32,63-64,77 --cpuset-output-format systemd-dbus-api` is
+ *   "AllowedCPUs ay 0x0a 0x01 0x00 0x00 x80 0x01 0x00 0x00 0x80 0x01 0x20
+ * */
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_FORMAT "AllowedCPUs ay 0x%04x"
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE 21
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT " 0x%02x"
+#define HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE 5
+static __hwloc_inline int hwloc_utils_systemd_asprintf(char ** strp, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  int last = hwloc_bitmap_last(set);
+  if (last == -1 ) {
+    fprintf(stderr, "Empty and infinite CPU sets are not supported with the systemd-dbus-api output format\n");
+    exit(EXIT_FAILURE);
+  }
+  int bytes = last / 8 + 1; /* how many bytes to represent the cpuset bit mask */
+  int buflen = HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE + HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE * bytes + 1;
+  int ret = 0;
+  char *buf;
+  buf = malloc(buflen);
+  *strp = buf;
+  ret = snprintf(buf, buflen, HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_FORMAT, bytes);
+  unsigned long ith = 0;
+  for (int byte=0; byte < bytes; byte++) {
+    if (byte % HWLOC_SIZEOF_UNSIGNED_LONG == 0) {
+      ith = hwloc_bitmap_to_ith_ulong(set, byte / HWLOC_SIZEOF_UNSIGNED_LONG);
+    }
+    ret += snprintf(buf + ret, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE + 1, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT, (unsigned char) (ith & 0xFF));
+    ith >>= 8;
+  }
+  assert(ith == 0); /* whenever some bytes of the ulong ith may not be consumed, they must be 0 */
+  return ret;
 }
 
 static __hwloc_inline int
@@ -991,8 +1032,9 @@ hwloc_utils_cpuset_format_asprintf(char **string, hwloc_const_bitmap_t set,
 {
   switch (cpuset_output_format) {
   case HWLOC_UTILS_CPUSET_FORMAT_HWLOC: return hwloc_bitmap_asprintf(string, set);
-  case HWLOC_UTILS_CPUSET_FORMAT_TASKSET: return hwloc_bitmap_taskset_asprintf(string, set);
   case HWLOC_UTILS_CPUSET_FORMAT_LIST: return hwloc_bitmap_list_asprintf(string, set);
+  case HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD: return hwloc_utils_systemd_asprintf(string, set);
+  case HWLOC_UTILS_CPUSET_FORMAT_TASKSET: return hwloc_bitmap_taskset_asprintf(string, set);
   default: abort();
   }
 }
