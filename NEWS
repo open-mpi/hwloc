@@ -22,6 +22,9 @@ Version 2.11.2
 * Fix crash when manipulating cpukinds after topology
   duplication, thanks to Hadrien Grasland for the report.
 * Add missing CPU info attrs on aarch64 on Linux.
+* hwloc-calc --cpuset-output-format systemd-dbus-api now allows
+  to generate AllowedCPUs information for systemd slices.
+  See the hwloc-calc manpage for examples. Thanks to Pierre Neyron.
 
 
 Version 2.11.1
