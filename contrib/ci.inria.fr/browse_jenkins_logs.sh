@@ -28,9 +28,9 @@ echo "Reading $URL"
 
 LIST=$(wget -O - $URL \
         | sed -e 's@</tr>@</tr>\n@g' \
-        | egrep '(Shell|Windows Batch) Script' \
+        | egrep '(sh|bat) - ' \
         | egrep 'job-[0-9]-' \
-        | sed -r -e 's#.*href="(/hwloc/[^"]+)".*#https://ci.inria.fr\1/\?consoleFull#')
+        | sed -r -e 's#.*href="(/hwloc/job/[^"]+/log/)".*#https://ci.inria.fr\1/\?consoleFull#')
 
 echo
 if test "x$HWLOC_JENKINS_BROWSER" = x; then
