@@ -585,6 +585,15 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
                     id);
 	infos->apicid = apic_id;
 	infos->otherids[level] = UINT_MAX;
+if (leaf == 0x80000026 && apic_id == 0) {
+  printf("HybridCPU info at level %u\n", apic_type);
+  printf(" AsymmetricCores = %u\n", (eax & 0x80000000)>>31);
+  printf(" HeteroCoreTyopology  = %u\n", (eax & 0x40000000)>>30);
+  printf(" EffRankingAvailable = %u\n", (eax & 0x20000000)>>29);
+  printf(" CoreType = %u\n", (ebx >> 28) & 0xf);
+  printf(" Model = %u\n", (ebx >> 24) & 0xf);
+  printf(" EffRanking = %u\n", (ebx >> 16) & 0xff);
+}
         switch (apic_type) {
         case 1:
           threadid = id;
