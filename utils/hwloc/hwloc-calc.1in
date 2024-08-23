@@ -373,23 +373,22 @@ its even numbered logical processors:
     $ hwloc-calc package:2 ~PU:even
     0x00000c00
 
-To convert a cpu mask to human-readable output, the -H option can be
-used to emit a space-delimited list of locations:
+To display the (physical) CPU mask of the entire topology except the third package:
 
-    $ echo 0x000000f0 | hwloc-calc -q -H package.core
-    Package:1.Core1 Package:1.Core:1 Package:1.Core:2 Package:1.Core:3
-
-To use some other character (e.g., a comma) instead of spaces in
-output, use the --sep option:
-
-    $ echo 0x000000f0 | hwloc-calc -q -H package.core --sep ,
-    Package:1.Core1,Package:1.Core:1,Package:1.Core:2,Package:1.Core:3
+    $ hwloc-calc all ~package:3
+    0x0000f0ff
 
 To combine two (physical) CPU masks:
 
     $ hwloc-calc 0x0000ffff 0xff000000
     0xff00ffff
 
+.
+.\" **************************
+.\"    Examples of listings or counting objects
+.\" **************************
+.SH Examples of listing or counting objects
+.PP
 To display the list of logical numbers of processors included in the second
 package:
 
@@ -414,6 +413,46 @@ To find how many cores are in the second CPU kind
     $ hwloc-calc --cpukind 1 -N core all
     4
 
+To convert a cpu mask to human-readable output, the -H option can be
+used to emit a space-delimited list of locations:
+
+    $ echo 0x000000f0 | hwloc-calc -q -H package.core
+    Package:1.Core1 Package:1.Core:1 Package:1.Core:2 Package:1.Core:3
+
+To use some other character (e.g., a comma) instead of spaces in
+output, use the --sep option:
+
+    $ echo 0x000000f0 | hwloc-calc -q -H package.core --sep ,
+    Package:1.Core1,Package:1.Core:1,Package:1.Core:2,Package:1.Core:3
+
+To synthetize a set of cores into largest objects on a 2-node 2-package 2-core machine:
+
+    $ hwloc-calc core:0 --largest
+    Core:0
+    $ hwloc-calc core:0-1 --largest
+    Package:0
+    $ hwloc-calc core:4-7 --largest
+    L3Cache:1
+    $ hwloc-calc core:2-6 --largest
+    Package:1 Package:2 Core:6
+    $ hwloc-calc pack:2 --largest
+    Package:2
+    $ hwloc-calc package:2-3 --largest
+    L3Cache:1
+
+To get the set of first threads of all cores:
+
+    $ hwloc-calc core:all.pu:0
+    0xffff0000
+    $ hwloc-calc --no-smt all -I pu
+    0,2,4,6,8,10,12,14
+
+.
+.\" **************************
+.\"    Examples of listing or counting NUMA nodes
+.\" **************************
+.SH Examples of listing or counting NUMA nodes
+.PP
 To display the list of NUMA nodes, by physical indexes,
 whose locality is exactly equal to a Package:
 
@@ -442,6 +481,12 @@ To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
     $ hwloc-calc -I "numa[mcdram]" pu:157
     1
 
+.
+.\" **************************
+.\"    Examples with physical and logical indexes
+.\" **************************
+.SH Examples with physical and logical indexes
+.PP
 Converting object logical indexes (default) from/to physical/OS indexes
 may be performed with \fB--intersect\fR combined with either \fB--physical-output\fR
 (logical to physical conversion) or \fB--physical-input\fR (physical to logical):
@@ -460,6 +505,17 @@ with heterogeneous memory:
     $ hwloc-calc --nodeset --physical-input node:3 --intersect node
     2
 
+To combine both physical and logical indexes as input:
+
+    $ hwloc-calc PU:2 --physical-input PU:3
+    0x0000000c
+
+.
+.\" **************************
+.\"    Examples with I/O devices
+.\" **************************
+.SH Examples with I/O devices
+.PP
 To display the set of CPUs near network interface eth0:
 
     $ hwloc-calc os=eth0
@@ -470,43 +526,24 @@ To display the indexes of packages near PCI device whose bus ID is 0000:01:02.0:
     $ hwloc-calc pci=0000:01:02.0 --intersect Package
     1
 
-To display the list of per-package cores that intersect the input:
+OS devices may also be filtered by subtype. In this example, there are
+8 OS devices in the system, 4 of them are near NUMA node #1, and only
+2 of these are CoProcessors:
 
-    $ hwloc-calc 0x00003c00 --hierarchical package.core
-    Package:2.Core:1 Package:3.Core:0
+    $ utils/hwloc/hwloc-calc -I osdev all
+    0,1,2,3,4,5,6,7,8
+    $ utils/hwloc/hwloc-calc -I osdev node:1
+    5,6,7,8
+    $ utils/hwloc/hwloc-calc -I coproc node:1
+    7,8
 
-To display the (physical) CPU mask of the entire topology except the third package:
-
-    $ hwloc-calc all ~package:3
-    0x0000f0ff
-
-To combine both physical and logical indexes as input:
-
-    $ hwloc-calc PU:2 --physical-input PU:3
-    0x0000000c
-
-To synthetize a set of cores into largest objects on a 2-node 2-package 2-core machine:
-
-    $ hwloc-calc core:0 --largest
-    Core:0
-    $ hwloc-calc core:0-1 --largest
-    Package:0
-    $ hwloc-calc core:4-7 --largest
-    NUMANode:1
-    $ hwloc-calc core:2-6 --largest
-    Package:1 Package:2 Core:6
-    $ hwloc-calc pack:2 --largest
-    Package:2
-    $ hwloc-calc package:2-3 --largest
-    NUMANode:1
-
-To get the set of first threads of all cores:
-
-    $ hwloc-calc core:all.pu:0
-    $ hwloc-calc --no-smt all
-
-This can also be very useful in order to make GNU OpenMP use exactly one thread
-per core, and in logical core order:
+.
+.\" **************************
+.\"    Examples with other tools
+.\" **************************
+.SH Examples with other tools
+.PP
+To make GNU OpenMP use exactly one thread per core, and in logical core order:
 
     $ export OMP_NUM_THREADS=`hwloc-calc --number-of core all`
     $ echo $OMP_NUM_THREADS
@@ -526,18 +563,6 @@ To export bitmask in a format that is acceptable by the resctrl Linux subsystem
     # cat /sys/fs/resctrl/test/cpus
     00000000,00000380,00000000,00000380   <the modified bitmask was corrected parsed by resctrl>
 
-OS devices may also be filtered by subtype. In this example, there are
-8 OS devices in the system, 4 of them are near NUMA node #1, and only
-2 of these are CoProcessors:
-
-    $ utils/hwloc/hwloc-calc -I osdev all
-    0,1,2,3,4,5,6,7,8
-    $ utils/hwloc/hwloc-calc -I osdev node:1
-    5,6,7,8
-    $ utils/hwloc/hwloc-calc -I coproc node:1
-    7,8
-
-.
 .
 .\" **************************
 .\"    Example of use of the systemd-dbus-api cpuset output format
