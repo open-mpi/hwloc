@@ -308,6 +308,26 @@ To bind on the first PU of all cores of the first package:
     $ hwloc-bind package:0.core:all.pu:0 -- echo hello
     $ hwloc-bind --no-smt package:0 -- echo hello
 
+The --get option can report current bindings.  This example shows
+nesting hwloc-bind invocations to set a binding and then report it.
+
+    $ hwloc-bind node:1.package:2 -- hwloc-bind --get
+    0x00004444,0x44000000
+
+.
+.\" **************************
+.\"    Examples with memory binding
+.\" *************************
+.SH Examples with memory binding
+.PP
+To bind on a specific node and let the operating system place the execution accordingly:
+
+    $ hwloc-bind --membind node:2 -- echo hello
+
+To bind memory on second memory node and run on first node (when supported by the OS):
+
+    $ hwloc-bind --cpubind node:1 --membind node:0 -- echo hello
+
 To bind on the memory node(s) local to a PU with largest capacity:
 
     $ hwloc-bind --best-memattr capacity --cpubind pu:23 --membind pu:23 -- echo hello
@@ -326,7 +346,17 @@ Note that binding the "echo" command to multiple processors is
 probably meaningless (because "echo" is likely implemented as a
 single-threaded application); these examples just serve to show what
 hwloc-bind can do.
+
+The current memory binding may also be reported:
+
+    $ hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
+    0x000000f0 (interleave)
+
 .
+.\" **************************
+.\"    Examples with advanced resource specification
+.\" *************************
+.SH Examples with advanced resource specification
 .PP
 To run on the first three packages on the second and third nodes:
 
@@ -357,6 +387,12 @@ To run anywhere except on the first package:
 
     $ hwloc-bind all ~package:0 -- echo hello
 
+.
+.\" **************************
+.\"    Examples with I/O devices
+.\" *************************
+.SH Examples with I/O devices
+.PP
 To run on a core near the network interface named eth0:
 
     $ hwloc-bind os=eth0 -- echo hello
@@ -365,23 +401,19 @@ To run on a core near the PCI device whose bus ID is 0000:01:02.0:
 
     $ hwloc-bind pci=0000:01:02.0 -- echo hello
 
-To bind memory on second memory node and run on first node (when supported by the OS):
-
-    $ hwloc-bind --cpubind node:1 --membind node:0 -- echo hello
-
+.
+.\" **************************
+.\"    Examples with hwloc-calc help
+.\" *************************
+.SH Examples with hwloc-calc help
+.PP
 hwloc-bind does not have an option to select a kind of CPU core but it may
 be combined with hwloc-calc to do so. For instance, to bind on the first two
 cores whose kind matches CoreType=IntelAtom:
 
     $ hwloc-bind $(hwloc-calc --restrict $(hwloc-calc --cpukind CoreType=IntelAtom all) core:0-1) -- echo hello
 
-The --get option can report current bindings.  This example shows
-nesting hwloc-bind invocations to set a binding and then report it:
-
-    $ hwloc-bind node:1.package:2 -- hwloc-bind --get
-    0x00004444,0x44000000
-
-hwloc-calc can also be used to convert cpu mask strings to
+hwloc-calc may also be used to convert cpu mask strings to
 human-readable package/core/PU strings; see the description of -H in
 hwloc-calc(1) for more details.  The following example binds to all
 the PUs in a specific core, uses the --get option to retrieve where
@@ -406,11 +438,6 @@ by hwloc-calc).  For example:
 
     $ hwloc-bind 0x00004444,0x44000000 -- echo hello
     $ hwloc-bind `hwloc-calc node:1.package:2` -- echo hello
-
-The current memory binding may also be reported:
-
-    $ hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
-    0x000000f0 (interleave)
 
 .SH HINT
 If the graphics-enabled lstopo is available, use for instance
