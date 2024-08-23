@@ -836,6 +836,12 @@ To export the topology to a PNG file:
 
     $ lstopo file.png
 
+.
+.\" **************************
+.\"    Examples with XML exchange and modification
+.\" **************************
+.SH Examples with XML exchange and modification
+.PP
 To export an XML file on a machine and later display the corresponding
 graphical output on another machine:
 
@@ -858,6 +864,12 @@ To restrict an XML topology to only numa node whose logical index is 1:
 
     $ lstopo --input file.xml --restrict $(hwloc-calc --input file.xml node:1) newfile.xml
 
+.
+.\" **************************
+.\"    Examples with textual output filtering
+.\" **************************
+.SH Examples with textual output filtering
+.PP
 To display a summary of the topology:
 
     $ lstopo -s
@@ -878,6 +890,12 @@ To only show the cpusets of package:
 
     $ lstopo --only package --cpuset-only
 
+.
+.\" **************************
+.\"    More examples
+.\" **************************
+.SH More examples
+.PP
 Simulate a fake hierarchy; this example shows with 2 NUMA nodes of 2
 processor units:
 
