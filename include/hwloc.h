@@ -346,9 +346,10 @@ typedef enum {
 			 *
 			 * Some operating systems (e.g. Linux) may expose a single die per package
 			 * even if the hardware does not support dies at all. To avoid showing
-			 * such non-existing dies, the corresponding hwloc backend may filter them out.
+			 * such non-existing dies, hwloc will filter them out if all of them are
+                         * identical to packages.
 			 * This is functionally equivalent to ::HWLOC_TYPE_FILTER_KEEP_STRUCTURE
-			 * being enforced.
+			 * being enforced for Dies versus Packages.
 			 */
 
   HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */

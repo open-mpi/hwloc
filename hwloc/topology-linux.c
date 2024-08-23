@@ -5055,11 +5055,6 @@ look_sysfscpu(struct hwloc_topology *topology,
       packageset = hwloc__alloc_read_path_as_cpumask(str, data->root_fd);
       if (packageset) {
 	hwloc_bitmap_and(packageset, packageset, cpuset);
-	if (dieset && hwloc_bitmap_isequal(packageset, dieset)) {
-	  /* die is identical to package, ignore it */
-	  hwloc_bitmap_free(dieset);
-	  dieset = NULL;
-	}
 	if (clusterset && hwloc_bitmap_isequal(packageset, clusterset)) {
 	  /* cluster is identical to package, ignore it */
 	  hwloc_bitmap_free(clusterset);

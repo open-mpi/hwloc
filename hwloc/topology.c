@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2022 IBM Corporation.  All rights reserved.
@@ -2591,9 +2591,15 @@ hwloc_filter_levels_keep_structure(hwloc_topology_t topology)
       if (type1 == HWLOC_OBJ_GROUP && hwloc_dont_merge_group_level(topology, i))
 	replacechild = 0;
     }
-    if (!replacechild && !replaceparent)
+    if (!replacechild && !replaceparent) {
+      /* always merge Die into Package when levels are identical */
+      if (type1 == HWLOC_OBJ_PACKAGE && type2 == HWLOC_OBJ_DIE)
+        replacechild = 1;
+    }
+    if (!replacechild && !replaceparent) {
       /* no ignoring */
       continue;
+    }
     /* Decide which one to actually replace */
     if (replaceparent && replacechild) {
       /* If both may be replaced, look at obj_type_priority */
