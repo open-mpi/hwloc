@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
 .\" Copyright © 2010 Jirka Hladky
-.\" Copyright © 2010-2023 Inria.  All rights reserved.
+.\" Copyright © 2010-2024 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-GATHER-TOPOLOGY "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -132,13 +132,13 @@ To see how hwloc would distribute 8 parallel jobs on the original host:
 
 To get the corresponding physical indexes in the previous command:
 
-	hwloc-calc --input myhost --po --li --proclist $(hwloc-distrib --input myhost --single 8)
+	hwloc-calc --input myhost --po --li -I pu $(hwloc-distrib --input myhost --single 8)
 
 Any program may actually override the default topology with a given
 archived one even if it does not have a \fB\-\-input\fR option.
 The \fBHWLOC_FSROOT\fR environment variable should be used to do so:
 
-	HWLOC_FSROOT=myhost hwloc-calc --po --li --proclist $(hwloc-distrib --single 8)
+	HWLOC_FSROOT=myhost hwloc-calc --po --li -I pu $(hwloc-distrib --single 8)
 
 All these commands will produce the same output as if executed
 directly on the host on which the topology information was
