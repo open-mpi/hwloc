@@ -821,75 +821,75 @@ For instance, to display all core objects in blue (with white names):
 .
 To display the machine topology in textual mode:
 
-    lstopo-no-graphics
+    $ lstopo-no-graphics
 
 To display the machine topology in ascii-art mode:
 
-    lstopo-no-graphics -.ascii
+    $ lstopo-no-graphics -.ascii
 
 To display in graphical mode (assuming that the DISPLAY environment
 variable is set to a relevant value):
 
-    lstopo
+    $ lstopo
 
 To export the topology to a PNG file:
 
-    lstopo file.png
+    $ lstopo file.png
 
 To export an XML file on a machine and later display the corresponding
 graphical output on another machine:
 
-    machine1$ lstopo file.xml
+    $ machine1$ lstopo file.xml
     <transfer file.xml from machine1 to machine2>
-    machine2$ lstopo --input file.xml
+    $ machine2$ lstopo --input file.xml
 
 To save the current machine topology to XML and later reload it faster
 while still considering it as the current machine:
 
-   $ lstopo file.xml
-   <...>
-   $ lstopo --input file.xml --thissystem
+    $ lstopo file.xml
+    <...>
+    $ lstopo --input file.xml --thissystem
 
 To restrict an XML topology to only physical processors 0, 1, 4 and 5:
 
-    lstopo --input file.xml --restrict 0x33 newfile.xml
+    $ lstopo --input file.xml --restrict 0x33 newfile.xml
 
 To restrict an XML topology to only numa node whose logical index is 1:
 
-    lstopo --input file.xml --restrict $(hwloc-calc --input file.xml node:1) newfile.xml
+    $ lstopo --input file.xml --restrict $(hwloc-calc --input file.xml node:1) newfile.xml
 
 To display a summary of the topology:
 
-    lstopo -s
+    $ lstopo -s
 
 To get more details about the topology:
 
-    lstopo -v
+    $ lstopo -v
 
 To only show cores:
 
-    lstopo --only core
+    $ lstopo --only core
 
 To show cpusets:
 
-    lstopo --cpuset
+    $ lstopo --cpuset
 
 To only show the cpusets of package:
 
-    lstopo --only package --cpuset-only
+    $ lstopo --only package --cpuset-only
 
 Simulate a fake hierarchy; this example shows with 2 NUMA nodes of 2
 processor units:
 
-    lstopo --input "node:2 2"
+    $ lstopo --input "node:2 2"
 
 To append the kernel release and version to the graphical legend:
 
-   lstopo --append-legend "Kernel release: $(uname -r)" --append-legend "Kernel version: $(uname -v)"
+    $ lstopo --append-legend "Kernel release: $(uname -r)" --append-legend "Kernel version: $(uname -v)"
 
 To show where a process and its children are bound by combining with hwloc-ps:
 
-   hwloc-ps --pid-children 23 --lstopo-misc - | lstopo --misc-from -
+    $ hwloc-ps --pid-children 23 --lstopo-misc - | lstopo --misc-from -
 
 .
 .\" **************************
