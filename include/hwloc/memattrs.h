@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Inria.  All rights reserved.
+ * Copyright © 2019-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -283,6 +283,8 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
  * (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR),
  * location \p initiator is ignored and may be \c NULL.
  *
+ * \p target_node cannot be \c NULL.
+ *
  * \p flags must be \c 0 for now.
  *
  * \return 0 on success.
@@ -352,6 +354,8 @@ hwloc_memattr_get_best_target(hwloc_topology_t topology,
  * The returned initiator should not be modified or freed,
  * it belongs to the topology.
  *
+ * \p target_node cannot be \c NULL.
+ *
  * \p flags must be \c 0 for now.
  *
  * \return 0 on success.
@@ -362,7 +366,7 @@ hwloc_memattr_get_best_target(hwloc_topology_t topology,
 HWLOC_DECLSPEC int
 hwloc_memattr_get_best_initiator(hwloc_topology_t topology,
                                  hwloc_memattr_id_t attribute,
-                                 hwloc_obj_t target,
+                                 hwloc_obj_t target_node,
                                  unsigned long flags,
                                  struct hwloc_location *best_initiator, hwloc_uint64_t *value);
 
@@ -437,6 +441,8 @@ hwloc_memattr_register(hwloc_topology_t topology,
  * The initiator will be copied into the topology,
  * the caller should free anything allocated to store the initiator,
  * for instance the cpuset.
+ *
+ * \p target_node cannot be \c NULL.
  *
  * \p flags must be \c 0 for now.
  *
@@ -518,6 +524,8 @@ hwloc_memattr_get_targets(hwloc_topology_t topology,
  *
  * The returned initiators should not be modified or freed,
  * they belong to the topology.
+ *
+ * \p target_node cannot be \c NULL.
  *
  * \p flags must be \c 0 for now.
  *
