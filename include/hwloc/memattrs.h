@@ -78,6 +78,8 @@ enum hwloc_memattr_id_e {
    *
    * No initiator is involved when looking at this attribute.
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST.
+   *
+   * Capacity values may not be modified using hwloc_memattr_set_value().
    * \hideinitializer
    */
   HWLOC_MEMATTR_ID_CAPACITY = 0,
@@ -93,6 +95,8 @@ enum hwloc_memattr_id_e {
    *
    * No initiator is involved when looking at this attribute.
    * The corresponding attribute flags are ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST.
+
+   * Locality values may not be modified using hwloc_memattr_set_value().
    * \hideinitializer
    */
   HWLOC_MEMATTR_ID_LOCALITY = 1,
@@ -445,6 +449,9 @@ hwloc_memattr_register(hwloc_topology_t topology,
  * for instance the cpuset.
  *
  * \p target_node cannot be \c NULL.
+ *
+ * \p attribute cannot be ::HWLOC_MEMATTR_FLAG_ID_CAPACITY or
+ * ::HWLOC_MEMATTR_FLAG_ID_LOCALITY.
  *
  * \p flags must be \c 0 for now.
  *
