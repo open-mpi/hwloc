@@ -748,7 +748,7 @@ hwloc_memattr_get_initiators(hwloc_topology_t topology,
   struct hwloc_internal_memattr_target_s *imtg;
   unsigned i, max;
 
-  if (flags) {
+  if (flags || !target_node) {
     errno = EINVAL;
     return -1;
   }
@@ -810,7 +810,7 @@ hwloc_memattr_get_value(hwloc_topology_t topology,
   struct hwloc_internal_memattr_s *imattr;
   struct hwloc_internal_memattr_target_s *imtg;
 
-  if (flags) {
+  if (flags || !target_node) {
     errno = EINVAL;
     return -1;
   }
@@ -937,7 +937,7 @@ hwloc_memattr_set_value(hwloc_topology_t topology,
 {
   struct hwloc_internal_location_s iloc, *ilocp;
 
-  if (flags) {
+  if (flags || !target_node) {
     errno = EINVAL;
     return -1;
   }
@@ -1094,7 +1094,7 @@ hwloc_memattr_get_best_initiator(hwloc_topology_t topology,
   int found;
   unsigned i;
 
-  if (flags) {
+  if (flags || !target_node) {
     errno = EINVAL;
     return -1;
   }
