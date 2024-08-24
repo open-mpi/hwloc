@@ -283,7 +283,9 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
  * (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR),
  * location \p initiator is ignored and may be \c NULL.
  *
- * \p target_node cannot be \c NULL.
+ * \p target_node cannot be \c NULL. If \p attribute is ::HWLOC_MEMATTR_ID_CAPACITY,
+ * \p target_node must be a NUMA node. If it is ::HWLOC_MEMATTR_ID_LOCALITY,
+ * \p target_node must have a CPU set.
  *
  * \p flags must be \c 0 for now.
  *
