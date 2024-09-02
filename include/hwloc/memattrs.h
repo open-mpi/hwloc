@@ -376,6 +376,91 @@ hwloc_memattr_get_best_initiator(hwloc_topology_t topology,
                                  unsigned long flags,
                                  struct hwloc_location *best_initiator, hwloc_uint64_t *value);
 
+/** \brief Return the target NUMA nodes that have some values for a given attribute.
+ *
+ * Return targets for the given attribute in the \p targets array
+ * (for the given initiator if any).
+ * If \p values is not \c NULL, the corresponding attribute values
+ * are stored in the array it points to.
+ *
+ * On input, \p nr points to the number of targets that may be stored
+ * in the array \p targets (and \p values).
+ * On output, \p nr points to the number of targets (and values) that
+ * were actually found, even if some of them couldn't be stored in the array.
+ * Targets that couldn't be stored are ignored, but the function still
+ * returns success (\c 0). The caller may find out by comparing the value pointed
+ * by \p nr before and after the function call.
+ *
+ * The returned targets should not be modified or freed,
+ * they belong to the topology.
+ *
+ * Argument \p initiator is ignored if the attribute does not relate to a specific
+ * initiator (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR).
+ * Otherwise \p initiator may be non \c NULL to report only targets
+ * that have a value for that initiator.
+ *
+ * \p flags must be \c 0 for now.
+ *
+ * \note This function is meant for tools and debugging (listing internal information)
+ * rather than for application queries. Applications should rather select useful
+ * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
+ * values.
+ *
+ * \return 0 on success or -1 on error.
+ *
+ * \note The initiator \p initiator should be of type ::HWLOC_LOCATION_TYPE_CPUSET
+ * when referring to accesses performed by CPU cores.
+ * ::HWLOC_LOCATION_TYPE_OBJECT is currently unused internally by hwloc,
+ * but users may for instance use it to provide custom information about
+ * host memory accesses performed by GPUs.
+ */
+HWLOC_DECLSPEC int
+hwloc_memattr_get_targets(hwloc_topology_t topology,
+                          hwloc_memattr_id_t attribute,
+                          struct hwloc_location *initiator,
+                          unsigned long flags,
+                          unsigned *nr, hwloc_obj_t *targets, hwloc_uint64_t *values);
+
+/** \brief Return the initiators that have values for a given attribute for a specific target NUMA node.
+ *
+ * Return initiators for the given attribute and target node in the
+ * \p initiators array.
+ * If \p values is not \c NULL, the corresponding attribute values
+ * are stored in the array it points to.
+ *
+ * On input, \p nr points to the number of initiators that may be stored
+ * in the array \p initiators (and \p values).
+ * On output, \p nr points to the number of initiators (and values) that
+ * were actually found, even if some of them couldn't be stored in the array.
+ * Initiators that couldn't be stored are ignored, but the function still
+ * returns success (\c 0). The caller may find out by comparing the value pointed
+ * by \p nr before and after the function call.
+ *
+ * The returned initiators should not be modified or freed,
+ * they belong to the topology.
+ *
+ * \p target_node cannot be \c NULL.
+ *
+ * \p flags must be \c 0 for now.
+ *
+ * If the attribute does not relate to a specific initiator
+ * (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR),
+ * no initiator is returned.
+ *
+ * \return 0 on success or -1 on error.
+ *
+ * \note This function is meant for tools and debugging (listing internal information)
+ * rather than for application queries. Applications should rather select useful
+ * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
+ * values for some relevant initiators.
+ */
+HWLOC_DECLSPEC int
+hwloc_memattr_get_initiators(hwloc_topology_t topology,
+                             hwloc_memattr_id_t attribute,
+                             hwloc_obj_t target_node,
+                             unsigned long flags,
+                             unsigned *nr, struct hwloc_location *initiators, hwloc_uint64_t *values);
+
 /** @} */
 
 
@@ -471,90 +556,6 @@ hwloc_memattr_set_value(hwloc_topology_t topology,
                         unsigned long flags,
                         hwloc_uint64_t value);
 
-/** \brief Return the target NUMA nodes that have some values for a given attribute.
- *
- * Return targets for the given attribute in the \p targets array
- * (for the given initiator if any).
- * If \p values is not \c NULL, the corresponding attribute values
- * are stored in the array it points to.
- *
- * On input, \p nr points to the number of targets that may be stored
- * in the array \p targets (and \p values).
- * On output, \p nr points to the number of targets (and values) that
- * were actually found, even if some of them couldn't be stored in the array.
- * Targets that couldn't be stored are ignored, but the function still
- * returns success (\c 0). The caller may find out by comparing the value pointed
- * by \p nr before and after the function call.
- *
- * The returned targets should not be modified or freed,
- * they belong to the topology.
- *
- * Argument \p initiator is ignored if the attribute does not relate to a specific
- * initiator (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR).
- * Otherwise \p initiator may be non \c NULL to report only targets
- * that have a value for that initiator.
- *
- * \p flags must be \c 0 for now.
- *
- * \note This function is meant for tools and debugging (listing internal information)
- * rather than for application queries. Applications should rather select useful
- * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
- * values.
- *
- * \return 0 on success or -1 on error.
- *
- * \note The initiator \p initiator should be of type ::HWLOC_LOCATION_TYPE_CPUSET
- * when referring to accesses performed by CPU cores.
- * ::HWLOC_LOCATION_TYPE_OBJECT is currently unused internally by hwloc,
- * but users may for instance use it to provide custom information about
- * host memory accesses performed by GPUs.
- */
-HWLOC_DECLSPEC int
-hwloc_memattr_get_targets(hwloc_topology_t topology,
-                          hwloc_memattr_id_t attribute,
-                          struct hwloc_location *initiator,
-                          unsigned long flags,
-                          unsigned *nr, hwloc_obj_t *targets, hwloc_uint64_t *values);
-
-/** \brief Return the initiators that have values for a given attribute for a specific target NUMA node.
- *
- * Return initiators for the given attribute and target node in the
- * \p initiators array.
- * If \p values is not \c NULL, the corresponding attribute values
- * are stored in the array it points to.
- *
- * On input, \p nr points to the number of initiators that may be stored
- * in the array \p initiators (and \p values).
- * On output, \p nr points to the number of initiators (and values) that
- * were actually found, even if some of them couldn't be stored in the array.
- * Initiators that couldn't be stored are ignored, but the function still
- * returns success (\c 0). The caller may find out by comparing the value pointed
- * by \p nr before and after the function call.
- *
- * The returned initiators should not be modified or freed,
- * they belong to the topology.
- *
- * \p target_node cannot be \c NULL.
- *
- * \p flags must be \c 0 for now.
- *
- * If the attribute does not relate to a specific initiator
- * (it does not have the flag ::HWLOC_MEMATTR_FLAG_NEED_INITIATOR),
- * no initiator is returned.
- *
- * \return 0 on success or -1 on error.
- *
- * \note This function is meant for tools and debugging (listing internal information)
- * rather than for application queries. Applications should rather select useful
- * NUMA nodes with hwloc_get_local_numanode_objs() and then look at their attribute
- * values for some relevant initiators.
- */
-HWLOC_DECLSPEC int
-hwloc_memattr_get_initiators(hwloc_topology_t topology,
-                             hwloc_memattr_id_t attribute,
-                             hwloc_obj_t target_node,
-                             unsigned long flags,
-                             unsigned *nr, struct hwloc_location *initiators, hwloc_uint64_t *values);
 /** @} */
 
 #ifdef __cplusplus
