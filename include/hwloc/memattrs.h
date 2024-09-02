@@ -470,6 +470,8 @@ hwloc_memattr_get_initiators(hwloc_topology_t topology,
 
 /** \brief Return the name of a memory attribute.
  *
+ * The output pointer \p name cannot be \c NULL.
+ *
  * \return 0 on success.
  * \return -1 with errno set to \c EINVAL if the attribute does not exist.
  */
@@ -481,6 +483,8 @@ hwloc_memattr_get_name(hwloc_topology_t topology,
 /** \brief Return the flags of the given attribute.
  *
  * Flags are a OR'ed set of ::hwloc_memattr_flag_e.
+ *
+ * The output pointer \p flags cannot be \c NULL.
  *
  * \return 0 on success.
  * \return -1 with errno set to \c EINVAL if the attribute does not exist.
@@ -510,11 +514,12 @@ enum hwloc_memattr_flag_e {
 
 /** \brief Register a new memory attribute.
  *
- * Add a specific memory attribute that is not defined in ::hwloc_memattr_id_e.
- * Flags are a OR'ed set of ::hwloc_memattr_flag_e. It must contain at least
- * one of ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST or ::HWLOC_MEMATTR_FLAG_LOWER_FIRST.
+ * Add a new custom memory attribute.
+ * Flags are a OR'ed set of ::hwloc_memattr_flag_e. It must contain one of
+ * ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST or ::HWLOC_MEMATTR_FLAG_LOWER_FIRST but not both.
  *
  * \return 0 on success.
+ * \return -1 with errno set to \c EINVAL if an invalid set of flags is given.
  * \return -1 with errno set to \c EBUSY if another attribute already uses this name.
  */
 HWLOC_DECLSPEC int
