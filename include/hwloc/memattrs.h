@@ -69,7 +69,10 @@ extern "C" {
  * @{
  */
 
-/** \brief Memory node attributes. */
+/** \brief Predefined memory attribute IDs.
+ * See ::hwloc_memattr_id_t for the generic definition of IDs
+ * for predefined or custom attributes.
+ */
 enum hwloc_memattr_id_e {
   /** \brief
    * The \"Capacity\" is returned in bytes (local_memory attribute in objects).
@@ -177,11 +180,19 @@ enum hwloc_memattr_id_e {
 
   /* TODO persistence? */
 
-  HWLOC_MEMATTR_ID_MAX /**< \private Sentinel value */
+  HWLOC_MEMATTR_ID_MAX /**< \private
+                        * Sentinel value for predefined attributes.
+                        * Dynamically registered custom attributes start here.
+                        */
 };
 
 /** \brief A memory attribute identifier.
- * May be either one of ::hwloc_memattr_id_e or a new id returned by hwloc_memattr_register().
+ *
+ * hwloc predefines some commonly-used attributes in ::hwloc_memattr_id_e.
+ * One may then dynamically register custom ones with hwloc_memattr_register(),
+ * they will be assigned IDs immediately after the predefined ones.
+ * See \ref hwlocality_memattrs_manage for more information about
+ * existing attribute IDs.
  */
 typedef unsigned hwloc_memattr_id_t;
 
@@ -465,6 +476,26 @@ hwloc_memattr_get_initiators(hwloc_topology_t topology,
 
 
 /** \defgroup hwlocality_memattrs_manage Managing memory attributes
+ *
+ * Memory attribues are identified by an ID (::hwloc_memattr_id_t)
+ * and a name. hwloc_memattr_get_name() and hwloc_memattr_get_by_name()
+ * convert between them (or return error if the attribute does not exist).
+ *
+ * The set of valid ::hwloc_memattr_id_t is a contigous set starting at \c 0.
+ * It first contains predefined attributes, as listed
+ * in ::hwloc_memattr_id_e (from \c 0 to \c HWLOC_MEMATTR_ID_MAX-1).
+ * Then custom attributes may be dynamically registered with
+ * hwloc_memattr_register(). They will get the following IDs
+ * (\c HWLOC_MEMATTR_ID_MAX for the first one, etc.).
+ *
+ * To iterate over all valid attributes
+ * (either predefined or dynamically registered custom ones),
+ * one may iterate over IDs starting from \c 0 until hwloc_memattr_get_name()
+ * or hwloc_memattr_get_flags() returns an error.
+ *
+ * The values for an existing attribute or for custom dynamically registered ones
+ * may be set or modified with hwloc_memattr_set_value().
+ *
  * @{
  */
 
@@ -517,6 +548,10 @@ enum hwloc_memattr_flag_e {
  * Add a new custom memory attribute.
  * Flags are a OR'ed set of ::hwloc_memattr_flag_e. It must contain one of
  * ::HWLOC_MEMATTR_FLAG_HIGHER_FIRST or ::HWLOC_MEMATTR_FLAG_LOWER_FIRST but not both.
+ *
+ * The new attribute \p id is immediately after the last existing attribute ID
+ * (which is either the ID of the last registered attribute if any,
+ * or the ID of the last predefined attribute in ::hwloc_memattr_id_e).
  *
  * \return 0 on success.
  * \return -1 with errno set to \c EINVAL if an invalid set of flags is given.
