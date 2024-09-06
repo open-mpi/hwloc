@@ -27,6 +27,7 @@ Version 2.11.2
 * hwloc-calc --cpuset-output-format systemd-dbus-api now allows
   to generate AllowedCPUs information for systemd slices.
   See the hwloc-calc manpage for examples. Thanks to Pierre Neyron.
+* Fix non-Windows importing of CPUID dumps exported on Windows.
 * Some fixes in manpage EXAMPLES and split them into subsections.
 
 
