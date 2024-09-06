@@ -1105,7 +1105,6 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
             type = HWLOC_OBJ_DIE;
             num = procInfo->Processor.GroupCount;
             GroupMask = procInfo->Processor.GroupMask;
-            /* TODO: have the core filter-out DIE if they *ALL* are identical to packages */
             break;
 	  case RelationProcessorModule:
             type = HWLOC_OBJ_GROUP;
@@ -1234,7 +1233,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	    }
 	    break;
           case HWLOC_OBJ_GROUP:
-            switch (procInfo[i].Relationship) {
+            switch (procInfo->Relationship) {
             case RelationGroup:
               obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
               break;
