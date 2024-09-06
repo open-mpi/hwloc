@@ -1816,7 +1816,7 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
     goto out_with_path;
   }
   fclose(file);
-  if (strcmp(line, "Architecture: x86\n")) {
+  if (strncmp(line, "Architecture: x86", 17)) {
     fprintf(stderr, "hwloc/x86: Found non-x86 dumped cpuid summary in %s: %s\n", path, line);
     goto out_with_path;
   }
