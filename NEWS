@@ -19,16 +19,18 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.11.2
 --------------
+* Add missing CPU info attrs on aarch64 on Linux.
 * Fix crash when manipulating cpukinds after topology
   duplication, thanks to Hadrien Grasland for the report.
 * Fix missing input target checks in memattr functions,
   thanks to Hadrien Grasland for the report.
-* Add missing CPU info attrs on aarch64 on Linux.
+* Fix a memory leak when ignoring NUMA distances on FreeBSD.
+* Fix build failure on old Linux distributions without accessat().
+* Fix non-Windows importing of XML topologies and CPUID dumps exported
+  on Windows.
 * hwloc-calc --cpuset-output-format systemd-dbus-api now allows
   to generate AllowedCPUs information for systemd slices.
   See the hwloc-calc manpage for examples. Thanks to Pierre Neyron.
-* Fix non-Windows importing of XML topologies and CPUID dumps exported
-  on Windows.
 * Some fixes in manpage EXAMPLES and split them into subsections.
 
 
