@@ -488,7 +488,7 @@ static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_
 }
 
 /* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
-static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags, struct cpuiddump *src_cpuiddump)
+static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump)
 {
   unsigned apic_id, nodes_per_proc = 0;
   unsigned eax, ebx, ecx, edx;
@@ -497,7 +497,6 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
   infos->apicid = apic_id = eax;
 
-  if (flags & HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES) {
     if (infos->cpufamilynumber == 0x16) {
       /* ecx is reserved */
       infos->ids[NODE] = 0;
@@ -512,7 +511,6 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
         || (infos->cpufamilynumber == 0x19 && nodes_per_proc > 1)) {
       hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
     }
-  }
 
   if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
     unsigned cores_per_unit;
