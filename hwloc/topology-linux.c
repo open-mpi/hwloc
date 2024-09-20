@@ -4480,8 +4480,8 @@ look_sysfsnode(struct hwloc_topology *topology,
 
 struct hwloc_linux_cpukinds_by_pu {
   unsigned pu;
-  unsigned long max_freq;
-  unsigned long base_freq;
+  unsigned long max_freq; /* kHz */
+  unsigned long base_freq; /* kHz */
   unsigned long capacity;
   int done; /* temporary bit to identify PU that were processed by the current algorithm
              * (only hwloc_linux_cpukinds_adjust_maxfreqs() for now)
@@ -4724,6 +4724,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   char *env;
   hwloc_bitmap_t atom_pmu_set, core_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
+  int use_cppc_nominal_freq = -1; /* -1 means try, 0 no, 1 yes */
   unsigned adjust_max = 10;
   int force_homogeneous;
   const char *info;
@@ -4763,10 +4764,26 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
       by_pu[i].max_freq = maxfreq;
-    /* base_frequency is intel_pstate specific */
+    /* base_frequency is in intel_pstate and works fine */
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", i);
-    if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0)
+    if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
       by_pu[i].base_freq = basefreq;
+      use_cppc_nominal_freq = 0;
+    }
+    /* try acpi_cppc/nominal_freq only if cpufreq/base_frequency failed
+     * acpi_cppc/nominal_freq is widely available, but it returns 0 on some Intel SPR,
+     * same freq for all cores on RPL,
+     * maxfreq for E-cores and LP-E-cores but basefreq for P-cores on MTL.
+     */
+    if (use_cppc_nominal_freq != 0) {
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/acpi_cppc/nominal_freq", i);
+      if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0 && basefreq > 0) {
+        by_pu[i].base_freq = basefreq * 1000; /* nominal_freq is already in MHz */
+        use_cppc_nominal_freq = 1;
+      } else {
+        use_cppc_nominal_freq = 0;
+      }
+    }
     if (maxfreq && !basefreq)
       max_without_basefreq = 1;
     /* capacity */
