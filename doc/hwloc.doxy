@@ -2457,8 +2457,9 @@ These CPU kinds may be annotated with the following native attributes:
 as reported by <tt>cpufreq</tt> drivers on Linux.
 </dd>
 <dt>FrequencyBaseMHz (Linux)</dt>
-<dd>The base operating frequency of the core,
-as reported by some <tt>cpufreq</tt> drivers on Linux (e.g. <tt>intel_pstate</tt>).
+<dd>The base/nominal operating frequency of the core,
+as reported by some <tt>cpufreq</tt> or ACPI drivers on Linux
+(e.g. <tt>cpufreq_cppc</tt> or <tt>intel_pstate</tt>).
 </dd>
 <dt>CoreType (x86)</dt>
 <dd>A string describing the kind of core,
