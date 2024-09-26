@@ -8,11 +8,11 @@ android {
         targetSdkVersion 34
         ndkVersion "26.1.10909125"
         // Increase versionCode whenever you publish a new Android release
-        versionCode 80274
+        versionCode 80278
         // Official hwloc version - snapshot number - android apk version
         // Set snapshot number to 1 when the hwloc version is increased.
         // Increase the snapshot number when the hwloc code changed but not its version
-        versionName "2.12.0rc2-1-1.6.1"
+        versionName "2.12.0-1-1.6.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
