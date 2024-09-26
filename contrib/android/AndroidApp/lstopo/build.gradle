@@ -12,7 +12,7 @@ android {
         targetSdkVersion 35
         ndkVersion "29.0.14206865"
         // Increase versionCode whenever you publish a new Android release
-        versionCode 80280
+        versionCode 80281
         // Official hwloc version - snapshot number - android apk version
         // Set snapshot number to 1 when the hwloc version is increased.
         // Increase the snapshot number when the hwloc code changed but not its version
