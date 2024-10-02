@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2023 Inria.  All rights reserved.
+ * Copyright © 2015-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -379,9 +379,31 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     /* eax is number of subleaves but subleaves aren't documented?! */
   }
 
-  /* 0x21 is reserved on Intel and AMD */
+  /* 0x21 is Unimplemented on Intel (always returns 0) ; Reserved on AMD */
+  if (highest_cpuid >= 0x21) {
+    regs[0] = 0x21; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+  }
 
-  if (highest_cpuid > 0x21) {
+  /* TODO 0x22 is reserved on Intel and AMD? */
+  if (highest_cpuid >= 0x22) {
+    regs[0] = 0x22; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+  }
+
+  /* TODO 0x23 is reserved on Intel and AMD? */
+  if (highest_cpuid >= 0x23) {
+    regs[0] = 0x23; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+  }
+
+  /* TODO 0x24 contains AVX10 features on Intel ; Reserved on AMD? */
+  if (highest_cpuid >= 0x24) {
+    regs[0] = 0x24; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+  }
+
+  if (highest_cpuid > 0x25) {
     static int reported = 0;
     if (!reported)
       fprintf(stderr, "WARNING: Processor supports new CPUID leaves upto 0x%x\n", highest_cpuid);
