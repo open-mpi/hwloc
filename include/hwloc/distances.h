@@ -33,7 +33,7 @@ extern "C" {
  * in the ACPI specification), which may or may not be physically accurate.
  * It corresponds to the latency for accessing the memory of one node
  * from a core in another node.
- * The corresponding kind is ::HWLOC_DISTANCES_KIND_MEANS_LATENCY | ::HWLOC_DISTANCES_KIND_FROM_USER.
+ * The corresponding kind is ::HWLOC_DISTANCES_KIND_VALUE_LATENCY | ::HWLOC_DISTANCES_KIND_FROM_USER.
  * The name of this distances structure is "NUMALatency".
  *
  * The matrix may also contain bandwidths or number of hops between
