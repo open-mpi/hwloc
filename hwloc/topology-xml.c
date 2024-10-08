@@ -840,18 +840,40 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     goto error_with_object;
   }
 
-  /* check special types vs cpuset */
-  if (!obj->cpuset && !hwloc__obj_type_is_special(obj->type)) {
+  /* check special types vs cpuset+nodeset */
+  if ((!obj->cpuset || !obj->nodeset) && !hwloc__obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: invalid normal object %s P#%u without cpuset\n",
+      fprintf(stderr, "%s: invalid normal or memory object %s P#%u without cpuset and nodeset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
-  if (obj->cpuset && hwloc__obj_type_is_special(obj->type)) {
+  if ((obj->cpuset || obj->nodeset) && hwloc__obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: invalid special object %s with cpuset\n",
+      fprintf(stderr, "%s: invalid special object %s with cpuset or nodeset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type));
     goto error_with_object;
+  }
+
+  /* check PUs */
+  if (obj->type == HWLOC_OBJ_PU) {
+    /* obj->cpuset!=NULL was checked above */
+    if (hwloc_bitmap_weight(obj->cpuset) != 1 || !hwloc_bitmap_isset(obj->cpuset, obj->os_index)) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: PU object P#%u with invalid cpuset\n",
+		state->global->msgprefix, obj->os_index);
+      goto error_with_object;
+    }
+  }
+
+  /* check NUMA nodes */
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
+    /* obj->nodeset!=NULL was checked above */
+    if (hwloc_bitmap_weight(obj->nodeset) != 1 || !hwloc_bitmap_isset(obj->nodeset, obj->os_index)) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: NUMA node object P#%u with invalid nodeset\n",
+		state->global->msgprefix, obj->os_index);
+      goto error_with_object;
+    }
   }
 
   /* check parent vs child sets */
@@ -866,16 +888,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       fprintf(stderr, "%s: invalid object %s P#%u with nodeset while parent has none\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
-  }
-
-  /* check NUMA nodes */
-  if (obj->type == HWLOC_OBJ_NUMANODE) {
-    if (!obj->nodeset) {
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "%s: invalid NUMA node object P#%u without nodeset\n",
-		state->global->msgprefix, obj->os_index);
-      goto error_with_object;
-    }
   }
 
   if (data->version_major < 3 && obj->type == HWLOC_OBJ_OS_DEVICE) {
