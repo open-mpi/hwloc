@@ -3567,25 +3567,6 @@ hwloc_discover(struct hwloc_topology *topology,
     hwloc_debug_print_objects(0, topology->levels[0][0]);
   }
 
-  /* see if we should ignore the root now that we know how many children it has */
-  if (!hwloc_filter_check_keep_object(topology, topology->levels[0][0])
-      && topology->levels[0][0]->first_child && !topology->levels[0][0]->first_child->next_sibling) {
-    hwloc_obj_t oldroot = topology->levels[0][0];
-    hwloc_obj_t newroot = oldroot->first_child;
-    /* switch to the new root */
-    newroot->parent = NULL;
-    topology->levels[0][0] = newroot;
-    /* move oldroot memory/io/misc children before newroot children */
-    if (oldroot->memory_first_child)
-      prepend_siblings_list(&newroot->memory_first_child, oldroot->memory_first_child, newroot);
-    if (oldroot->io_first_child)
-      prepend_siblings_list(&newroot->io_first_child, oldroot->io_first_child, newroot);
-    if (oldroot->misc_first_child)
-      prepend_siblings_list(&newroot->misc_first_child, oldroot->misc_first_child, newroot);
-    /* destroy oldroot and use the new one */
-    hwloc_free_unlinked_object(oldroot);
-  }
-
   /*
    * All object cpusets and nodesets are properly set now.
    */
