@@ -774,11 +774,20 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
 
   if (parent && obj->type == HWLOC_OBJ_MACHINE) {
-    /* replace non-root Machine with Groups */
-    obj->type = HWLOC_OBJ_GROUP;
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: Machine object cannot be a child object\n",
+              state->global->msgprefix);
+    goto error_with_object;
   }
 
   if (parent) {
+    if (parent->type == HWLOC_OBJ_PU && hwloc_obj_type_is_normal(obj->type)) {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: PU object cannot be the parent of normal object %s\n",
+                state->global->msgprefix, hwloc_obj_type_string(obj->type));
+      goto error_with_object;
+    }
+
     /* check parent/child types for 2.x */
     if (hwloc__obj_type_is_normal(obj->type)) {
       if (!hwloc__obj_type_is_normal(parent->type)) {
