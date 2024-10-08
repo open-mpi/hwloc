@@ -1907,12 +1907,13 @@ hwloc__attach_memory_object(struct hwloc_topology *topology, hwloc_obj_t parent,
 #endif
 
   result = hwloc___attach_memory_object_by_nodeset(topology, parent, obj, reason);
-  if (result == obj) {
-    /* Add the bit to the top sets, and to the parent CPU-side object */
-    if (obj->type == HWLOC_OBJ_NUMANODE) {
-      hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
-      hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
-    }
+  if (result == obj && result->type == HWLOC_OBJ_NUMANODE) {
+    /* Add the bit to the top sets */
+#ifdef HWLOC_DEBUG
+    assert(hwloc_bitmap_isset(result->nodeset, result->os_index));
+#endif
+    hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+    hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
   }
   if (result != obj) {
     /* either failed to insert, or got merged, free the original object */
@@ -1956,10 +1957,12 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t root
 
   result = hwloc___insert_object_by_cpuset(topology, root, obj, reason);
   if (result && result->type == HWLOC_OBJ_PU) {
-      /* Add the bit to the top sets */
-      if (hwloc_bitmap_isset(result->cpuset, result->os_index))
-	hwloc_bitmap_set(topology->levels[0][0]->cpuset, result->os_index);
-      hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, result->os_index);
+    /* Add the bit to the top sets */
+#ifdef HWLOC_DEBUG
+    assert(hwloc_bitmap_isset(result->cpuset, result->os_index));
+#endif
+    hwloc_bitmap_set(topology->levels[0][0]->cpuset, result->os_index);
+    hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, result->os_index);
   }
   if (result != obj) {
     /* either failed to insert, or got merged, free the original object */
@@ -1986,8 +1989,10 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
     for (current = &parent->memory_first_child; *current; current = &(*current)->next_sibling);
     /* Add the bit to the top sets */
     if (obj->type == HWLOC_OBJ_NUMANODE) {
-      if (hwloc_bitmap_isset(obj->nodeset, obj->os_index))
-	hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
+#ifdef HWLOC_DEBUG
+      assert(hwloc_bitmap_isset(obj->nodeset, obj->os_index));
+#endif
+      hwloc_bitmap_set(topology->levels[0][0]->nodeset, obj->os_index);
       hwloc_bitmap_set(topology->levels[0][0]->complete_nodeset, obj->os_index);
     }
   } else {
@@ -2000,8 +2005,10 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
     for (current = &parent->first_child; *current; current = &(*current)->next_sibling);
     /* Add the bit to the top sets */
     if (obj->type == HWLOC_OBJ_PU) {
-      if (hwloc_bitmap_isset(obj->cpuset, obj->os_index))
-	hwloc_bitmap_set(topology->levels[0][0]->cpuset, obj->os_index);
+#ifdef HWLOC_DEBUG
+      assert(hwloc_bitmap_isset(obj->cpuset, obj->os_index));
+#endif
+      hwloc_bitmap_set(topology->levels[0][0]->cpuset, obj->os_index);
       hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, obj->os_index);
     }
   }
