@@ -783,22 +783,22 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (hwloc__obj_type_is_normal(obj->type)) {
       if (!hwloc__obj_type_is_normal(parent->type)) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "normal object %s cannot be child of non-normal parent %s\n",
-		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
+	  fprintf(stderr, "%s: normal object %s cannot be child of non-normal parent %s\n",
+		  state->global->msgprefix, hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc__obj_type_is_memory(obj->type)) {
       if (hwloc__obj_type_is_io(parent->type) || HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "Memory object %s cannot be child of non-normal-or-memory parent %s\n",
-		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
+	  fprintf(stderr, "%s: Memory object %s cannot be child of non-normal-or-memory parent %s\n",
+		  state->global->msgprefix, hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc__obj_type_is_io(obj->type)) {
       if (hwloc__obj_type_is_memory(parent->type) || HWLOC_OBJ_MISC == parent->type) {
 	if (hwloc__xml_verbose())
-	  fprintf(stderr, "I/O object %s cannot be child of non-normal-or-I/O parent %s\n",
-		  hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
+	  fprintf(stderr, "%s: I/O object %s cannot be child of non-normal-or-I/O parent %s\n",
+		  state->global->msgprefix, hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     }
