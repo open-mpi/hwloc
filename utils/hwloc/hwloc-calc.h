@@ -448,7 +448,7 @@ hwloc_calc_append_object_range(struct hwloc_calc_location_context_s *lcontext,
     size_t typelen;
     const char *nextstring = dot+1;
     typelen = hwloc_calc_parse_level_size(nextstring);
-    if (!typelen || nextstring[typelen] != ':') {
+    if (!typelen || nextstring[typelen] != ':' /* no '=' because osdev=name or pci=busid not possible in hierarchical spec */) {
       if (verbose >= 0)
 	fprintf(stderr, "hierarchical sublocation %s contains types not followed by colon and index range\n", nextstring);
       return -1;
