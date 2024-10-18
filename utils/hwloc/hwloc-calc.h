@@ -775,35 +775,8 @@ hwloc_calc_process_location_as_set(struct hwloc_calc_location_context_s *lcontex
 
   } else {
     /* try to match a cpuset */
-    hwloc_bitmap_t newset;
-    enum hwloc_utils_cpuset_format_e cpuset_format = scontext->cpuset_input_format;
-
-    if (cpuset_format == HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN) {
-      /* ambiguity list and hwloc if list of singleton like 1,3,5 which can be parsed as 0x1,0x3,0x5 or 1-1,3-3,5-5 */
-      if (hwloc_strncasecmp(arg, "0x", 2) && strchr(arg, '-'))
-        cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_LIST;
-      else if (strchr(arg, ','))
-        cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
-      else
-        cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
-    }
-
-    newset = hwloc_bitmap_alloc();
-
-    switch (cpuset_format) {
-    case HWLOC_UTILS_CPUSET_FORMAT_HWLOC:
-      err = hwloc_bitmap_sscanf(newset, arg);
-      break;
-    case HWLOC_UTILS_CPUSET_FORMAT_LIST:
-      err = hwloc_bitmap_list_sscanf(newset, arg);
-      break;
-    case HWLOC_UTILS_CPUSET_FORMAT_TASKSET:
-      err = hwloc_bitmap_taskset_sscanf(newset, arg);
-      break;
-    default:
-      /* HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD input not supported */
-      abort();
-    }
+    hwloc_bitmap_t newset = hwloc_bitmap_alloc();
+    err = hwloc_utils_cpuset_format_sscanf(newset, arg, scontext->cpuset_input_format);
     if (err < 0) {
       hwloc_bitmap_free(newset);
       goto out;

@@ -1039,6 +1039,39 @@ hwloc_utils_cpuset_format_asprintf(char **string, hwloc_const_bitmap_t set,
   }
 }
 
+static __hwloc_inline int
+hwloc_utils_cpuset_format_sscanf(hwloc_bitmap_t set, const char *string, enum hwloc_utils_cpuset_format_e cpuset_format)
+{
+  if (cpuset_format == HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN) {
+    /* If user doesn't enforce a format, try to guess.
+     * There is some ambiguity if a list of singleton like 1,3,5 is given,
+     * it may be parsed as 0x1,0x3,0x5 (hwloc) or 1-1,3-3,5-5 (list).
+     * Assume list first, then hwloc, then taskset.
+     */
+    if (hwloc_strncasecmp(string, "0x", 2) && strchr(string, '-'))
+      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_LIST;
+    else if (strchr(string, ','))
+      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
+    else
+      cpuset_format = HWLOC_UTILS_CPUSET_FORMAT_TASKSET;
+  }
+
+  switch (cpuset_format) {
+  case HWLOC_UTILS_CPUSET_FORMAT_HWLOC:
+    return hwloc_bitmap_sscanf(set, string);
+    break;
+  case HWLOC_UTILS_CPUSET_FORMAT_LIST:
+    return hwloc_bitmap_list_sscanf(set, string);
+    break;
+  case HWLOC_UTILS_CPUSET_FORMAT_TASKSET:
+    return hwloc_bitmap_taskset_sscanf(set, string);
+    break;
+  default:
+    /* HWLOC_UTILS_CPUSET_FORMAT_SYSTEMD input not supported */
+    abort();
+  }
+}
+
 static __hwloc_inline unsigned long
 hwloc_utils_parse_restrict_flags(char * str){
   struct hwloc_utils_parsing_flag possible_flags[] = {
