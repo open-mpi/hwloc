@@ -613,11 +613,14 @@ int main(int argc, char *argv[])
 	singlify = 1;
 	goto next;
       }
-      if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")) {
+      if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")
+        || !strcmp(argv[0], "--nodeset-output-format") || !strcmp(argv[0], "--nof")) {
 	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
+        if (!strcmp(argv[0], "--nodeset-output-format") || !strcmp(argv[0], "--nof"))
+          nodeseto = 1;
         cpuset_output_format = hwloc_utils_parse_cpuset_format(argv[1]);
         if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == cpuset_output_format) {
           fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
