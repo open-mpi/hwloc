@@ -955,38 +955,40 @@ hwloc_utils_parse_cpuset_format(const char *string)
     return HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
 }
 
-/* The AllowedCPUs systemd DBus API syntax expects a string as follows:
+/* The AllowedCPUs and AllowedMemoryNodes systemd DBus API syntax expects a string as follows:
  * "ay 0xNNNN 0xAA [0xBB [...]]"
  * where:
  *   "0xNNNN" is the size of the array, max size 2^26.
- *   "0xAA [0xBB [...]]" is the cpuset mask given bytes after bytes, little endian order.
+ *   "0xAA [0xBB [...]]" is the cpuset or nodeset mask given bytes after bytes, little endian order.
  * e.g. the output of `hwloc-calc --cpuset-input-format list 0,31-32,63-64,77 --cpuset-output-format systemd-dbus-api` is
- *   "AllowedCPUs ay 0x0a 0x01 0x00 0x00 x80 0x01 0x00 0x00 0x80 0x01 0x20
+ *   "ay 0x000a 0x01 0x00 0x00 x80 0x01 0x00 0x00 0x80 0x01 0x20
+ * e.g. the output of `hwloc-calc node:0 node:1 --nodeset-output-format systemd-dbus-api` is
+ *   "ay 0x0001 0x03"
  * */
-#define HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_FORMAT "AllowedCPUs ay 0x%04x"
-#define HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE 21
-#define HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT " 0x%02x"
-#define HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE 5
+#define HWLOC_SYSTEMD_DBUS_API_PREFIX_FORMAT "ay 0x%04x"
+#define HWLOC_SYSTEMD_DBUS_API_PREFIX_SIZE 9
+#define HWLOC_SYSTEMD_DBUS_API_BYTES_FORMAT " 0x%02x"
+#define HWLOC_SYSTEMD_DBUS_API_BYTES_SIZE 5
 static __hwloc_inline int hwloc_utils_systemd_asprintf(char ** strp, const struct hwloc_bitmap_s * __hwloc_restrict set)
 {
   int last = hwloc_bitmap_last(set);
   if (last == -1 ) {
-    fprintf(stderr, "Empty and infinite CPU sets are not supported with the systemd-dbus-api output format\n");
+    fprintf(stderr, "Empty and infinite sets are not supported with the systemd-dbus-api output format\n");
     exit(EXIT_FAILURE);
   }
-  int bytes = last / 8 + 1; /* how many bytes to represent the cpuset bit mask */
-  int buflen = HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_SIZE + HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE * bytes + 1;
+  int bytes = last / 8 + 1; /* how many bytes to represent the bit mask */
+  int buflen = HWLOC_SYSTEMD_DBUS_API_PREFIX_SIZE + HWLOC_SYSTEMD_DBUS_API_BYTES_SIZE * bytes + 1;
   int ret = 0;
   char *buf;
   buf = malloc(buflen);
   *strp = buf;
-  ret = snprintf(buf, buflen, HWLOC_SYSTEMD_ALLOWEDCPUS_PREFIX_FORMAT, bytes);
+  ret = snprintf(buf, buflen, HWLOC_SYSTEMD_DBUS_API_PREFIX_FORMAT, bytes);
   unsigned long ith = 0;
   for (int byte=0; byte < bytes; byte++) {
     if (byte % HWLOC_SIZEOF_UNSIGNED_LONG == 0) {
       ith = hwloc_bitmap_to_ith_ulong(set, byte / HWLOC_SIZEOF_UNSIGNED_LONG);
     }
-    ret += snprintf(buf + ret, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_SIZE + 1, HWLOC_SYSTEMD_ALLOWEDCPUS_BYTES_FORMAT, (unsigned char) (ith & 0xFF));
+    ret += snprintf(buf + ret, HWLOC_SYSTEMD_DBUS_API_BYTES_SIZE + 1, HWLOC_SYSTEMD_DBUS_API_BYTES_FORMAT, (unsigned char) (ith & 0xFF));
     ith >>= 8;
   }
   assert(ith == 0); /* whenever some bytes of the ulong ith may not be consumed, they must be 0 */
