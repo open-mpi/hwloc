@@ -45,7 +45,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --local-memory            Report the memory nodes that are local to the CPU set\n");
   fprintf(where, "  --local-memory flags <x>  Change flags for selecting local memory nodes\n");
   fprintf(where, "  --best-memattr <attr>     Only report the best memory node among the local ones\n");
-  fprintf(where, "Formatting options:\n");
+  fprintf(where, "Input/output set and object options:\n");
   fprintf(where, "  -l --logical              Use logical object indexes (default)\n");
   fprintf(where, "  -p --physical             Use physical object indexes\n");
   fprintf(where, "  --li --logical-input      Use logical indexes for input (default)\n");
@@ -55,6 +55,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  -n --nodeset              Manipulate nodesets instead of cpusets\n");
   fprintf(where, "  --ni --nodeset-input      Manipulate nodesets instead of cpusets for inputs\n");
   fprintf(where, "  --no --nodeset-output     Manipulate nodesets instead of cpusets for outputs\n");
+  fprintf(where, "Formatting options:\n");
   fprintf(where, "  --oo --object-output      Report objects instead of object indexes\n");
   fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
   fprintf(where, "  --cpuset-input-format <hwloc|list|taskset>\n"

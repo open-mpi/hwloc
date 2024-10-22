@@ -241,8 +241,11 @@ both HBMs are the best for their local socket, but not for the remote socket.
 Hence both HBM are also considered best for the entire machine by default,
 but none if \fBstrict\fR.
 .
-.SH OPTIONS
+.SH INPUT / OUTPUT SET AND OBJECT OPTIONS
 .
+These options configure how objects and CPU/node sets are parsed
+on input and formatted on output.
+
 All these options must be given after all topology options above.
 .
 .TP 10
@@ -282,6 +285,11 @@ are properly accumulated.\fR
 .TP
 \fB\-\-ni\fR \fB\-\-nodeset\-input\fR
 Interpret input sets as nodesets instead of CPU sets.
+.
+.SH FORMATTING OPTIONS
+.
+All these options must be given after all topology options above.
+.
 .TP
 \fB\-\-oo\fR \fB\-\-object\-output\fR
 When reporting object indexes (e.g. with \fB\-I\fR or \fB\-\-local\-memory\fR),
