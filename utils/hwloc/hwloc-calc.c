@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
   struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   int depth = 0;
   hwloc_bitmap_t set;
-  int cmdline_args = 0;
+  int cmdline_locations = 0;
   const char * numberof_string = NULL;
   const char * intersect_string = NULL;
   char *restrictstring = NULL;
@@ -637,7 +637,6 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    cmdline_args++;
     lcontext.topology = topology;
     lcontext.topodepth = depth;
     lcontext.only_hbm = -1;
@@ -649,7 +648,8 @@ int main(int argc, char *argv[])
     scontext.cpuset_input_format = cpuset_input_format;
     if (hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
-
+    else
+      cmdline_locations++;
 
     if (showobjs && nodeseto) {
       fprintf(stderr, "ignoring --nodeset-output when --largest output is enabled\n");
@@ -729,7 +729,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (cmdline_args) {
+  if (cmdline_locations) {
     /* process command-line arguments */
     ret = hwloc_calc_output(topology, outsep, set);
 
