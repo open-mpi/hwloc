@@ -116,45 +116,13 @@ The <specification> string must end with a number of PUs.
 Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR,
 \fBcpuid\fR and \fBsynthetic\fR.
 .
-.SH OPTIONS
+.SH OUTPUT CONVERSION OPTIONS
 .
+By default, the output is a CPU set (or nodeset).
+These options convert this set into objects, count them, etc.
+
 All these options must be given after all topology options above.
 .
-.TP 10
-\fB\-p\fR \fB\-\-physical\fR
-Use OS/physical indexes instead of logical indexes for both input and output.
-.TP
-\fB\-l\fR \fB\-\-logical\fR
-Use logical indexes instead of physical/OS indexes for both input and output (default).
-.TP
-\fB\-\-pi\fR \fB\-\-physical\-input\fR
-Use OS/physical indexes instead of logical indexes for input.
-.TP
-\fB\-\-li\fR \fB\-\-logical\-input\fR
-Use logical indexes instead of physical/OS indexes for input (default).
-.TP
-\fB\-\-po\fR \fB\-\-physical\-output\fR
-Use OS/physical indexes instead of logical indexes for output.
-.TP
-\fB\-\-lo\fR \fB\-\-logical\-output\fR
-Use logical indexes instead of physical/OS indexes for output (default, except for cpusets which are always physical).
-.TP
-\fB\-n\fR \fB\-\-nodeset\fR
-Interpret both input and output sets as nodesets instead of CPU sets.
-See \fB\-\-nodeset\-output\fR and \fB\-\-nodeset\-input\fR below for details.
-.TP
-\fB\-\-no\fR \fB\-\-nodeset\-output\fR
-Report nodesets instead of CPU sets.
-This output is more precise than the default CPU set output when memory
-locality matters because it properly describes CPU-less NUMA nodes,
-as well as NUMA-nodes that are local to multiple CPUs.
-.TP
-\fB\-\-ni\fR \fB\-\-nodeset\-input\fR
-Interpret input sets as nodesets instead of CPU sets.
-.TP
-\fB\-\-oo\fR \fB\-\-object\-output\fR
-When reporting object indexes (e.g. with \fB\-I\fR or \fB\-\-local\-memory\fR),
-this option prefixes these indexes with types (e.g. \fICore:0\fR instead of \fI0\fR).
 .TP
 \fB\-N \-\-number\-of <type|depth>\fR
 Report the number of objects of the given type or depth that intersect the CPU set.
@@ -272,6 +240,52 @@ for all the input CPUs. On a dual-socket machine with HBM in each socket,
 both HBMs are the best for their local socket, but not for the remote socket.
 Hence both HBM are also considered best for the entire machine by default,
 but none if \fBstrict\fR.
+.
+.SH OPTIONS
+.
+All these options must be given after all topology options above.
+.
+.TP 10
+\fB\-p\fR \fB\-\-physical\fR
+Use OS/physical indexes instead of logical indexes for both input and output.
+.TP
+\fB\-l\fR \fB\-\-logical\fR
+Use logical indexes instead of physical/OS indexes for both input and output (default).
+.TP
+\fB\-\-pi\fR \fB\-\-physical\-input\fR
+Use OS/physical indexes instead of logical indexes for input.
+.TP
+\fB\-\-li\fR \fB\-\-logical\-input\fR
+Use logical indexes instead of physical/OS indexes for input (default).
+.TP
+\fB\-\-po\fR \fB\-\-physical\-output\fR
+Use OS/physical indexes instead of logical indexes for output.
+.TP
+\fB\-\-lo\fR \fB\-\-logical\-output\fR
+Use logical indexes instead of physical/OS indexes for output (default, except for cpusets which are always physical).
+.TP
+\fB\-n\fR \fB\-\-nodeset\fR
+Interpret both input and output sets as nodesets instead of CPU sets.
+See \fB\-\-nodeset\-output\fR and \fB\-\-nodeset\-input\fR below for details.
+
+\fBThis option must be given before any location so that location nodesets
+are properly accumulated.\fR
+.TP
+\fB\-\-no\fR \fB\-\-nodeset\-output\fR
+Report nodesets instead of CPU sets.
+This output is more precise than the default CPU set output when memory
+locality matters because it properly describes CPU-less NUMA nodes,
+as well as NUMA-nodes that are local to multiple CPUs.
+
+\fBThis option must be given before any location so that location nodesets
+are properly accumulated.\fR
+.TP
+\fB\-\-ni\fR \fB\-\-nodeset\-input\fR
+Interpret input sets as nodesets instead of CPU sets.
+.TP
+\fB\-\-oo\fR \fB\-\-object\-output\fR
+When reporting object indexes (e.g. with \fB\-I\fR or \fB\-\-local\-memory\fR),
+this option prefixes these indexes with types (e.g. \fICore:0\fR instead of \fI0\fR).
 .TP
 \fB\-\-sep <sep>\fR
 Change the field separator in the output.

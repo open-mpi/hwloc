@@ -31,7 +31,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --restrict-flags <n>      Set the flags to be used during restrict\n");
   fprintf(where, "  --disallowed              Include objects disallowed by administrative limitations\n");
   hwloc_utils_input_format_usage(where, 10);
-  fprintf(where, "Conversion options:\n");
+  fprintf(where, "Output conversion options:\n");
   fprintf(where, "  [default]                 Report the combined input locations as a CPU set\n");
   fprintf(where, "  --number-of <type|depth>\n"
                  "  -N <type|depth>           Report the number of objects intersecting the CPU set\n");
