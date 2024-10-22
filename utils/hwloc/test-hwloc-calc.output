@@ -85,8 +85,14 @@ Group0:1.Group2:2 Group0:1.Group2:3
 # List of MCDRAM subtype NUMA Nodes near 2 L3
 3,5
 
-# Hierarchical list of MCDRAM subtype NUMA nodes within Package
+# Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)
 Package:0.NUMANode:1 Package:0.NUMANode:7
+
+# Check that we don't mix a single input NUMA node with other local nodes
+2
+
+# Check that we find CPU-less NUMA nodes like others
+1,2
 
 # List of Machine objects
 0
