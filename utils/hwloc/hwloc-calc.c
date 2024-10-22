@@ -95,7 +95,7 @@ static hwloc_bitmap_t cpukind_cpuset = NULL;
 static int
 hwloc_calc_intersects_set(hwloc_bitmap_t set, int use_nodeset, hwloc_obj_t obj)
 {
-  while (!hwloc_obj_type_is_normal(obj->type))
+  while (hwloc__obj_type_is_special(obj->type))
     obj = obj->parent;
   if (use_nodeset)
     return hwloc_bitmap_intersects(set, obj->nodeset);
