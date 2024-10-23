@@ -86,7 +86,7 @@ static int local_numanodes = 0;
 static unsigned long local_numanode_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static unsigned long best_node_flags = 0;
-static int showobjs = 0;
+static int showlargestobjs = 0;
 static int no_smt = -1;
 static int singlify = 0;
 static enum hwloc_utils_cpuset_format_e cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
@@ -171,7 +171,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   if (singlify)
     hwloc_bitmap_singlify(set);
 
-  if (showobjs) {
+  if (showlargestobjs) {
     hwloc_bitmap_t remaining = hwloc_bitmap_dup(set);
     int first = 1;
     assert(!nodeseto); /* disabled for now, not very useful since the hierarchy of nodes isn't complex */
@@ -239,10 +239,10 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (local_numanodes) {
     unsigned nrnodes;
     hwloc_obj_t *nodes;
-    hwloc_nodeset_t nodeset = hwloc_bitmap_alloc_full(); /* show all nodes by default */
+    hwloc_nodeset_t nodeset_filter = hwloc_bitmap_alloc_full(); /* show all nodes by default */
     nrnodes = hwloc_bitmap_weight(hwloc_topology_get_topology_nodeset(topology));
     nodes = malloc(nrnodes * sizeof(*nodes));
-    if (nodeset && nodes) {
+    if (nodeset_filter && nodes) {
       int err;
       struct hwloc_location loc;
       loc.type = HWLOC_LOCATION_TYPE_CPUSET;
@@ -251,15 +251,15 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       if (!err) {
         unsigned i, first = 1;
         if (best_memattr_id != (hwloc_memattr_id_t) -1) {
-          err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, nodeset);
-          /* on error, nodeset is zeroed, and we report nothing below (except if default flag is set) */
+          err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, nodeset_filter);
+          /* on error, nodeset_filter is zeroed, and we report nothing below (except if default flag is set) */
         }
         if (!sep)
           sep = ",";
         for(i=0; i<nrnodes; i++) {
           char type[64];
           unsigned idx;
-          if (!hwloc_bitmap_isset(nodeset, nodes[i]->os_index))
+          if (!hwloc_bitmap_isset(nodeset_filter, nodes[i]->os_index))
             continue;
           hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
           idx = logicalo ? nodes[i]->logical_index : nodes[i]->os_index;
@@ -277,7 +277,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       }
     }
     free(nodes);
-    hwloc_bitmap_free(nodeset);
+    hwloc_bitmap_free(nodeset_filter);
     printf("\n");
 
   } else {
@@ -431,20 +431,20 @@ int main(int argc, char *argv[])
       /* FALLTHRU */
     }
   } else if (cpukind_infoname && cpukind_infovalue) {
-    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_t tmp_cpuset = hwloc_bitmap_alloc();
     int nr = hwloc_cpukinds_get_nr(topology, 0);
     cpukind_cpuset = hwloc_bitmap_alloc();
     for(i=0; i<nr; i++) {
       struct hwloc_infos_s *infosp;
       unsigned j;
-      hwloc_cpukinds_get_info(topology, i, cpuset, NULL, &infosp, 0);
+      hwloc_cpukinds_get_info(topology, i, tmp_cpuset, NULL, &infosp, 0);
       for(j=0; j<infosp->count; j++)
         if (!strcmp(infosp->array[j].name, cpukind_infoname) && !strcmp(infosp->array[j].value, cpukind_infovalue)) {
-          hwloc_bitmap_or(cpukind_cpuset, cpukind_cpuset, cpuset);
+          hwloc_bitmap_or(cpukind_cpuset, cpukind_cpuset, tmp_cpuset);
           break;
         }
     }
-    hwloc_bitmap_free(cpuset);
+    hwloc_bitmap_free(tmp_cpuset);
     if (hwloc_bitmap_iszero(cpukind_cpuset)) {
       fprintf(stderr, "Couldn't find any CPU kind matching %s=%s, keeping no PU.\n", cpukind_infoname, cpukind_infovalue);
       /* FALLTHRU */
@@ -534,7 +534,7 @@ int main(int argc, char *argv[])
         goto next;
       }
       if (!strcmp(argv[0], "--largest")) {
-	showobjs = 1;
+	showlargestobjs = 1;
         goto next;
       }
       if (!strcmp(argv[0], "--version")) {
@@ -651,7 +651,7 @@ int main(int argc, char *argv[])
     else
       cmdline_locations++;
 
-    if (showobjs && nodeseto) {
+    if (showlargestobjs && nodeseto) {
       fprintf(stderr, "ignoring --nodeset-output when --largest output is enabled\n");
       nodeseto = 0;
     }
