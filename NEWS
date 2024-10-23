@@ -17,6 +17,14 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.11.3
+--------------
+* Don't report multiple local NUMA nodes in hwloc-calc on heterogeneous memory
+  platforms when a single one is requested, broken since 2.9.
+* Split hwloc-calc.1 into more sections to dsitinguish output conversion,
+  I/O set/object and formatting options.
+
+
 Version 2.11.2
 --------------
 * Add missing CPU info attrs on aarch64 on Linux.
