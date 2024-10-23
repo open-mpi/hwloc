@@ -162,7 +162,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
   if (cpukind_cpuset)
     hwloc_bitmap_and(cpuset, cpuset, cpukind_cpuset);
 
-  if (no_smt != -1 && !nodeseto) {
+  if (no_smt != -1) {
     if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
     } else {
@@ -176,7 +176,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
   if (showlargestobjs) {
     hwloc_bitmap_t remaining = hwloc_bitmap_dup(cpuset);
     int first = 1;
-    assert(!nodeseto); /* disabled for now, not very useful since the hierarchy of nodes isn't complex */
+    /* TODO: only cpuset is used, not nodeset */
     if (!sep)
       sep = " ";
     while (!hwloc_bitmap_iszero(remaining)) {
@@ -662,7 +662,6 @@ int main(int argc, char *argv[])
     scontext.output_cpuset = cpuset;
     scontext.output_nodeset = nodeset;
     scontext.nodeset_input = nodeseti;
-    scontext.nodeset_output = nodeseto;
     scontext.cpuset_input_format = cpuset_input_format;
     if (hwloc_calc_process_location_as_set(&lcontext, &scontext, argv[0]) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
@@ -799,7 +798,6 @@ int main(int argc, char *argv[])
 	scontext.output_cpuset = cpuset;
 	scontext.output_nodeset = nodeset;
 	scontext.nodeset_input = nodeseti;
-	scontext.nodeset_output = nodeseto;
         scontext.cpuset_input_format = cpuset_input_format;
 	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", token);

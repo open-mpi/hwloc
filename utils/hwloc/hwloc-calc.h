@@ -702,7 +702,6 @@ hwloc_calc_process_location(struct hwloc_calc_location_context_s *lcontext,
 
 struct hwloc_calc_set_context_s {
   int nodeset_input;
-  int nodeset_output;
   enum hwloc_utils_cpuset_format_e cpuset_input_format;
   hwloc_bitmap_t output_cpuset;
   hwloc_bitmap_t output_nodeset;
