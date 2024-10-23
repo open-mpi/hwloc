@@ -354,9 +354,9 @@ int main(int argc, char *argv[])
     lcontext.logical = logical;
     lcontext.verbose = verbose;
     scontext.nodeset_input = use_nodeset || nodeset_location;
-    scontext.nodeset_output = working_on_cpubind ? 0 : 1;
     scontext.cpuset_input_format = HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
-    scontext.output_set = working_on_cpubind ? cpubind_set : membind_set;
+    scontext.output_cpuset = cpubind_set;
+    scontext.output_nodeset = membind_set;
     ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, location);
     if (ret < 0) {
       fprintf(stderr, "argument `%s' unrecognized, assuming this is the executable.\n", argv[0]);

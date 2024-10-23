@@ -129,8 +129,14 @@ set -e
   echo "# List of MCDRAM subtype NUMA Nodes near 2 L3"
   $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -I 'numa[mcdram]' l3:1-2
   echo
-  echo "# Hierarchical list of MCDRAM subtype NUMA nodes within Package"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -H 'pack.numa[mcdram]' 'numa[mcdram]:0' 'numa[mcdram]:3'
+  echo "# Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -H 'pack.numa[mcdram]' 'numa[mcdram]:0' 'numa[ddr]:1' 'numa[mcdram]:3'
+  echo
+  echo "# Check that we don't mix a single input NUMA node with other local nodes"
+  $calc --if synthetic -i "pack:2 [numa] group:2 [numa] [numa] pu:2" -I node node:2
+  echo
+  echo "# Check that we find CPU-less NUMA nodes like others"
+  $calc --if synthetic -i "pack:4 [numa] pu:2" --restrict 0xc3 -I node node:1 node:2
   echo
 
   echo "# List of Machine objects"
