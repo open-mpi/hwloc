@@ -667,14 +667,16 @@ int main(int argc, char *argv[])
     else
       cmdline_locations++;
 
-    if (showlargestobjs && nodeseto) {
-      fprintf(stderr, "ignoring --nodeset-output when --largest output is enabled\n");
-      nodeseto = 0;
-    }
-
   next:
     argc -= opt+1;
     argv += opt+1;
+  }
+
+  if ((showlargestobjs || numberof_string || intersect_string || hier_string || local_numanodes) && (nodeseto && !nodeseti)) {
+    fprintf(stderr,
+            "ignoring --nodeset-output when output conversion is enabled"
+            " (--largest, -N, -I, -H, --local-memory, etc)\n");
+    nodeseto = 0;
   }
 
   numberof.depth = HWLOC_TYPE_DEPTH_UNKNOWN; /* disable this feature by default */
