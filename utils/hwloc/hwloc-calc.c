@@ -93,27 +93,29 @@ static enum hwloc_utils_cpuset_format_e cpuset_output_format = HWLOC_UTILS_CPUSE
 static hwloc_bitmap_t cpukind_cpuset = NULL;
 
 static int
-hwloc_calc_intersects_set(hwloc_bitmap_t set, int use_nodeset, hwloc_obj_t obj)
+hwloc_calc_intersects_set(hwloc_bitmap_t cpuset, hwloc_bitmap_t nodeset, int use_nodeset, hwloc_obj_t obj)
 {
   while (hwloc__obj_type_is_special(obj->type))
     obj = obj->parent;
   if (use_nodeset)
-    return hwloc_bitmap_intersects(set, obj->nodeset);
+    return hwloc_bitmap_intersects(nodeset, obj->nodeset);
   else
-    return hwloc_bitmap_intersects(set, obj->cpuset);
+    return hwloc_bitmap_intersects(cpuset, obj->cpuset);
 }
 
 /* generalization of hwloc_get_next_obj_covering_cpuset_by_depth() which may also use nodeset instead of cpuset */
 static hwloc_obj_t
 hwloc_calc_get_next_obj_covering_set_by_depth(hwloc_topology_t topology,
-					      hwloc_bitmap_t set, int use_nodeset,
+					      hwloc_bitmap_t cpuset,
+                                              hwloc_bitmap_t nodeset,
+                                              int use_nodeset,
 					      int depth,
 					      hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
   if (!next)
     return NULL;
-  while (next && !hwloc_calc_intersects_set(set, use_nodeset, next))
+  while (next && !hwloc_calc_intersects_set(cpuset, nodeset, use_nodeset, next))
     next = next->next_cousin;
   return next;
 }
@@ -155,24 +157,24 @@ next:
 }
 
 static int
-hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set)
+hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpuset, hwloc_bitmap_t nodeset)
 {
   if (cpukind_cpuset)
-    hwloc_bitmap_and(set, set, cpukind_cpuset);
+    hwloc_bitmap_and(cpuset, cpuset, cpukind_cpuset);
 
   if (no_smt != -1 && !nodeseto) {
     if (hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == HWLOC_TYPE_DEPTH_UNKNOWN) {
       fprintf(stderr, "Topology has no Core object, ignoring --no-smt\n");
     } else {
-      hwloc_bitmap_singlify_per_core(topology, set, no_smt);
+      hwloc_bitmap_singlify_per_core(topology, cpuset, no_smt);
     }
   }
 
   if (singlify)
-    hwloc_bitmap_singlify(set);
+    hwloc_bitmap_singlify(cpuset);
 
   if (showlargestobjs) {
-    hwloc_bitmap_t remaining = hwloc_bitmap_dup(set);
+    hwloc_bitmap_t remaining = hwloc_bitmap_dup(cpuset);
     int first = 1;
     assert(!nodeseto); /* disabled for now, not very useful since the hierarchy of nodes isn't complex */
     if (!sep)
@@ -200,7 +202,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (numberof.depth != -1) {
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
-    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, numberof.depth, obj)) != NULL) {
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, nodeseto, numberof.depth, obj)) != NULL) {
       if (hwloc_calc_check_object_filtered(obj, &numberof))
         continue;
       nb++;
@@ -211,7 +213,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
     int first = 1;
     if (!sep)
       sep = ",";
-    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, set, nodeseto, intersect.depth, obj)) != NULL) {
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, nodeseto, intersect.depth, obj)) != NULL) {
       unsigned idx;
       if (hwloc_calc_check_object_filtered(obj, &intersect))
         continue;
@@ -233,7 +235,8 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (hiernblevels) {
     if (!sep)
       sep = " ";
-    hwloc_calc_hierarch_output(topology, "", sep, hwloc_get_root_obj(topology), set, 0);
+    /* TODO: also use nodeset of heterogeneous memory? */
+    hwloc_calc_hierarch_output(topology, "", sep, hwloc_get_root_obj(topology), cpuset, 0);
     printf("\n");
 
   } else if (local_numanodes) {
@@ -246,7 +249,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       int err;
       struct hwloc_location loc;
       loc.type = HWLOC_LOCATION_TYPE_CPUSET;
-      loc.location.cpuset = set;
+      loc.location.cpuset = cpuset;
       err = hwloc_get_local_numanode_objs(topology, &loc, &nrnodes, nodes, local_numanode_flags);
       if (!err) {
         unsigned i, first = 1;
@@ -282,7 +285,10 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
 
   } else {
     char *string = NULL;
-    hwloc_utils_cpuset_format_asprintf(&string, set, cpuset_output_format);
+    if (nodeseto)
+      hwloc_utils_cpuset_format_asprintf(&string, nodeset, cpuset_output_format);
+    else
+      hwloc_utils_cpuset_format_asprintf(&string, cpuset, cpuset_output_format);
     printf("%s\n", string);
     free(string);
   }
@@ -297,7 +303,7 @@ int main(int argc, char *argv[])
   char *input = NULL;
   struct hwloc_utils_input_format_s input_format = HWLOC_UTILS_INPUT_FORMAT_DEFAULT;
   int depth = 0;
-  hwloc_bitmap_t set;
+  hwloc_bitmap_t cpuset, nodeset;
   int cmdline_locations = 0;
   const char * numberof_string = NULL;
   const char * intersect_string = NULL;
@@ -335,7 +341,8 @@ int main(int argc, char *argv[])
   if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
     putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
 
-  set = hwloc_bitmap_alloc();
+  cpuset = hwloc_bitmap_alloc();
+  nodeset = hwloc_bitmap_alloc();
 
   while (argc >= 1) {
     opt = 0;
@@ -652,7 +659,8 @@ int main(int argc, char *argv[])
     lcontext.only_hbm = -1;
     lcontext.logical = logicali;
     lcontext.verbose = verbose;
-    scontext.output_set = set;
+    scontext.output_cpuset = cpuset;
+    scontext.output_nodeset = nodeset;
     scontext.nodeset_input = nodeseti;
     scontext.nodeset_output = nodeseto;
     scontext.cpuset_input_format = cpuset_input_format;
@@ -741,7 +749,7 @@ int main(int argc, char *argv[])
 
   if (cmdline_locations) {
     /* process command-line arguments */
-    ret = hwloc_calc_output(topology, outsep, set);
+    ret = hwloc_calc_output(topology, outsep, cpuset, nodeset);
 
   } else {
     /* process stdin arguments line-by-line */
@@ -776,7 +784,8 @@ int main(int argc, char *argv[])
       }
       /* parse now that we got everything */
       current = line;
-      hwloc_bitmap_zero(set);
+      hwloc_bitmap_zero(cpuset);
+      hwloc_bitmap_zero(nodeset);
       while (1) {
 	char *token = strtok(current, " \n");
 	if (!token)
@@ -787,14 +796,15 @@ int main(int argc, char *argv[])
 	lcontext.only_hbm = -1;
 	lcontext.logical = logicali;
 	lcontext.verbose = verbose;
-	scontext.output_set = set;
+	scontext.output_cpuset = cpuset;
+	scontext.output_nodeset = nodeset;
 	scontext.nodeset_input = nodeseti;
 	scontext.nodeset_output = nodeseto;
         scontext.cpuset_input_format = cpuset_input_format;
 	if (hwloc_calc_process_location_as_set(&lcontext, &scontext, token) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }
-      hwloc_calc_output(topology, outsep, set);
+      hwloc_calc_output(topology, outsep, cpuset, nodeset);
     }
     free(line);
   }
@@ -802,7 +812,8 @@ int main(int argc, char *argv[])
  out:
   hwloc_topology_destroy(topology);
 
-  hwloc_bitmap_free(set);
+  hwloc_bitmap_free(cpuset);
+  hwloc_bitmap_free(nodeset);
   hwloc_bitmap_free(cpukind_cpuset);
 
   free(hierlevels);
