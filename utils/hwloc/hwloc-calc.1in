@@ -129,10 +129,6 @@ Report the number of objects of the given type or depth that intersect the CPU s
 This is convenient for finding how many cores, NUMA nodes or PUs are available
 in a machine.
 
-When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
-the nodeset is considered instead of the CPU set for finding matching objects.
-This is useful when reporting the output as a number or set of NUMA nodes.
-
 \fI<type\fR may contain a filter to select specific objects among
 the type. For instance \fB\-N "numa[hbm]"\fR counts NUMA nodes marked with subtype "HBM",
 while \fB\-N "numa[mcdram]"\fR only counts MCDRAM NUMA nodes on KNL.
@@ -150,10 +146,6 @@ When combined with \fB\-\-physical\fR, the list is convenient to pass to externa
 tools such as taskset or numactl \fB\-\-physcpubind\fR or \fB\-\-membind\fR.
 This is different from \-\-largest since the latter requires that all reported
 objects are strictly included inside the input objects.
-
-When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
-the nodeset is considered instead of the CPU set for finding matching objects.
-This is useful when reporting the output as a number or set of NUMA nodes.
 
 \fI<type\fR may contain a filter to select specific objects among
 the type. For instance \fB\-N "numa[hbm]"\fR lists NUMA nodes marked with subtype "HBM",
@@ -270,18 +262,12 @@ Use logical indexes instead of physical/OS indexes for output (default, except f
 \fB\-n\fR \fB\-\-nodeset\fR
 Interpret both input and output sets as nodesets instead of CPU sets.
 See \fB\-\-nodeset\-output\fR and \fB\-\-nodeset\-input\fR below for details.
-
-\fBThis option must be given before any location so that location nodesets
-are properly accumulated.\fR
 .TP
 \fB\-\-no\fR \fB\-\-nodeset\-output\fR
 Report nodesets instead of CPU sets.
 This output is more precise than the default CPU set output when memory
 locality matters because it properly describes CPU-less NUMA nodes,
 as well as NUMA-nodes that are local to multiple CPUs.
-
-\fBThis option must be given before any location so that location nodesets
-are properly accumulated.\fR
 .TP
 \fB\-\-ni\fR \fB\-\-nodeset\-input\fR
 Interpret input sets as nodesets instead of CPU sets.
@@ -518,13 +504,12 @@ may be performed with \fB--intersect\fR combined with either \fB--physical-outpu
     $ hwloc-calc --physical-input PU:3 --intersect PU
     2
 
-One should add \fB--nodeset\fR when converting indexes of memory objects
-to make sure a single NUMA node index is returned on platforms
-with heterogeneous memory:
+This may also be used for converting indexes of memory objects,
+even with heterogeneous memory:
 
-    $ hwloc-calc --nodeset --physical-output node:2 --intersect node
+    $ hwloc-calc --physical-output node:2 --intersect node
     3
-    $ hwloc-calc --nodeset --physical-input node:3 --intersect node
+    $ hwloc-calc --physical-input node:3 --intersect node
     2
 
 To combine both physical and logical indexes as input:
