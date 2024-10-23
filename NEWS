@@ -22,6 +22,8 @@ Version 2.12.0
 * Add support for Die objects and Module groups on Windows.
 * Only filter-out Dies that are identical to their Packages
   when it applies to all Dies.
+* Improve hwloc-calc to handle CPU-less NUMA nodes or platforms with
+  heterogeneous memory without requiring --nodeset-output.
 
 
 Version 2.11.2
