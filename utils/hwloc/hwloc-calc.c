@@ -108,14 +108,13 @@ static hwloc_obj_t
 hwloc_calc_get_next_obj_covering_set_by_depth(hwloc_topology_t topology,
 					      hwloc_bitmap_t cpuset,
                                               hwloc_bitmap_t nodeset,
-                                              int use_nodeset,
 					      int depth,
 					      hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
   if (!next)
     return NULL;
-  while (next && !hwloc_calc_intersects_set(cpuset, nodeset, use_nodeset, next))
+  while (next && !hwloc_calc_intersects_set(cpuset, nodeset, hwloc_obj_type_is_memory(next->type), next))
     next = next->next_cousin;
   return next;
 }
@@ -202,7 +201,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
   } else if (numberof.depth != -1) {
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
-    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, nodeseto, numberof.depth, obj)) != NULL) {
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, numberof.depth, obj)) != NULL) {
       if (hwloc_calc_check_object_filtered(obj, &numberof))
         continue;
       nb++;
@@ -213,7 +212,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
     int first = 1;
     if (!sep)
       sep = ",";
-    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, nodeseto, intersect.depth, obj)) != NULL) {
+    while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, intersect.depth, obj)) != NULL) {
       unsigned idx;
       if (hwloc_calc_check_object_filtered(obj, &intersect))
         continue;
