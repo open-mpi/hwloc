@@ -354,7 +354,6 @@ int main(int argc, char *argv[])
     lcontext.logical = logical;
     lcontext.verbose = verbose;
     scontext.nodeset_input = use_nodeset || nodeset_location;
-    scontext.nodeset_output = working_on_cpubind ? 0 : 1;
     scontext.cpuset_input_format = HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
     scontext.output_cpuset = cpubind_set;
     scontext.output_nodeset = membind_set;
