@@ -62,7 +62,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
                  "  --cif <hwloc|list|taskset>\n"
                  "                            Change the format of cpuset inputs\n");
   fprintf(where, "  --cpuset-output-format <hwloc|list|taskset|systemd-dbus-api>\n"
-                 "  --cof <hwloc|list|taskset>\n"
+                 "  --cof <hwloc|list|taskset|systemd-dbus-api>\n"
                  "                            Change the format of cpuset outputs\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "Miscellaneous options:\n");

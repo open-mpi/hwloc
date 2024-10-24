@@ -379,7 +379,7 @@ _hwloc_calc(){
 		COMPREPLY=( "<name>=<value>" "<n>" "" )
 		;;
 	    --cpuset-input-format | --cif | --cpuset-output-format | --cof)
-	        COMPREPLY=( "hwloc" "list" "taskset" )
+	        COMPREPLY=( "hwloc" "list" "taskset" "systemd-dbus-api" )
 		;;
 	esac
     fi
