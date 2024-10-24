@@ -303,14 +303,20 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cof list 0xf...f00
   echo
 
-  echo "# Converting to systemd-dbus-api"
+  echo "# Converting a cpuset to the systemd-dbus-api format"
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api 0x01
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api 0x80000001
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api 0x8000000080000001
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api 0xf000000f00000f00f
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api "" && exit 1
-  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api "0xf...f" && exit 1
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api "0xf...f" && exit 1 # infinite cpuset cannot be represented -> KO
   $calc --if synthetic --input "node:4 core:4 pu:4"  --cpuset-output-format systemd-dbus-api --cpuset-input-format systemd-dbus-api "foo bar" && exit 1
+
+  echo "# Converting a nodeset to the systemd-dbus-api format"
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --nodeset-output-format systemd-dbus-api node:0 node:2
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --nodeset-output-format systemd-dbus-api "" && exit 1
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --nodeset-output-format systemd-dbus-api "0xf...f" # infinite cpuset translates to a finite nodeset -> OK
+  $calc --if synthetic --input "node:4 core:4 pu:4"  --nodeset-output-format systemd-dbus-api --cpuset-input-format systemd-dbus-api "foo bar" && exit 1
   echo
 
   echo "# Reading from stdin"

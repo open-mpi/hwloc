@@ -62,8 +62,11 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
                  "  --cif <hwloc|list|taskset>\n"
                  "                            Change the format of cpuset inputs\n");
   fprintf(where, "  --cpuset-output-format <hwloc|list|taskset|systemd-dbus-api>\n"
-                 "  --cof <hwloc|list|taskset>\n"
+                 "  --cof <hwloc|list|taskset|systemd-dbus-api>\n"
                  "                            Change the format of cpuset outputs\n");
+  fprintf(where, "  --nodeset-output-format <hwloc|list|taskset|systemd-dbus-api>\n"
+                 "  --nof <hwloc|list|taskset|systemd-dbus-api>\n"
+                 "                            Change the format of nodeset outputs\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -q --quiet                Hide non-fatal error messages\n");
@@ -603,11 +606,14 @@ int main(int argc, char *argv[])
 	singlify = 1;
 	goto next;
       }
-      if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")) {
+      if (!strcmp(argv[0], "--cpuset-output-format") || !strcmp(argv[0], "--cof")
+        || !strcmp(argv[0], "--nodeset-output-format") || !strcmp(argv[0], "--nof")) {
 	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
+        if (!strcmp(argv[0], "--nodeset-output-format") || !strcmp(argv[0], "--nof"))
+          nodeseto = 1;
         cpuset_output_format = hwloc_utils_parse_cpuset_format(argv[1]);
         if (HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN == cpuset_output_format) {
           fprintf(stderr, "Unrecognized %s argument %s\n", argv[0], argv[1]);
