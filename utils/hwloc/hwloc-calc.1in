@@ -292,7 +292,7 @@ while a comma is used to separate indexes
 Singlify the output to a single CPU.
 .TP
 \fB\-\-cpuset\-output\-format\fR <hwloc|list|taskset|systemd-dbus-api> \fB\-\-cof\fR <hwloc|list|taskset|systemd-dbus-api>
-Change the format of displayed CPU set strings.
+Change the format of displayed bitmap strings (CPU set or nodeset).
 By default, the hwloc-specific format is used.
 If \fIlist\fR is given, the output is a comma-separated of numbers or ranges,
 e.g. 2,4-5,8 .
@@ -305,7 +305,7 @@ This option has no impact on the format of input CPU set strings,
 see \fB\-\-cpuset\-input\-format\fR.
 .TP
 \fB\-\-cpuset\-input\-format\fR <hwloc|list|taskset> \fB\-\-cif\fR <hwloc|list|taskset>
-Change the format of input CPU set strings.
+Change the format of input bitmap strings (CPU set or nodeset).
 By default, the tool tries to guess the type automatically between hwloc, list or taskset
 formats.
 This option forces the parsing format to avoid ambiguity for instance when "1,3,5" may
