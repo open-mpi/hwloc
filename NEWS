@@ -19,6 +19,7 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.11.3
 --------------
+* Fix Linux cpukind information when some CPUs are offline.
 * Don't report multiple local NUMA nodes in hwloc-calc on heterogeneous memory
   platforms when a single one is requested, broken since 2.9.
 * Split hwloc-calc.1 into more sections to dsitinguish output conversion,
