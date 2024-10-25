@@ -4761,11 +4761,11 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     by_pu[i].pu = pu;
 
     /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
-    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
+    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", pu);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
       by_pu[i].max_freq = maxfreq;
     /* base_frequency is in intel_pstate and works fine */
-    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", i);
+    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", pu);
     if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
       by_pu[i].base_freq = basefreq;
       use_cppc_nominal_freq = 0;
@@ -4776,7 +4776,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
      * maxfreq for E-cores and LP-E-cores but basefreq for P-cores on MTL.
      */
     if (use_cppc_nominal_freq != 0) {
-      sprintf(str, "/sys/devices/system/cpu/cpu%d/acpi_cppc/nominal_freq", i);
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/acpi_cppc/nominal_freq", pu);
       if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0 && basefreq > 0) {
         by_pu[i].base_freq = basefreq * 1000; /* nominal_freq is already in MHz */
         use_cppc_nominal_freq = 1;
