@@ -150,6 +150,8 @@ objects are strictly included inside the input objects.
 \fI<type\fR may contain a filter to select specific objects among
 the type. For instance \fB\-N "numa[hbm]"\fR lists NUMA nodes marked with subtype "HBM",
 while \fB\-N "numa[mcdram]"\fR only lists MCDRAM NUMA nodes on KNL.
+Note that this filter applies when selecting objects, but not when outputting them,
+e.g. MCDRAM NUMA node #3 is outputted as 7 (NUMA node #7) instead of 3.
 
 If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
 only the os devices of that subtype will be returned.
@@ -489,8 +491,8 @@ To find the number of NUMA nodes in memory tier 1
 
 To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
 
-    $ hwloc-calc -I "numa[mcdram]" pu:157
-    1
+    $ hwloc-calc -I "numa[mcdram]" --oo pu:157
+    NUMANode:1
 
 .
 .\" **************************
