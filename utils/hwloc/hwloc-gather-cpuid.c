@@ -391,13 +391,19 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     dump_one_cpuid(output, regs, 0x5);
   }
 
-  /* TODO 0x23 is reserved on Intel and AMD? */
+  /* 0x23 is Architectural Performance Monitoring Extended Leaf on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x23) {
     regs[0] = 0x23; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
+    regs[0] = 0x23; regs[2] = 1;
+    dump_one_cpuid(output, regs, 0x5);
+    regs[0] = 0x23; regs[2] = 2;
+    dump_one_cpuid(output, regs, 0x5);
+    regs[0] = 0x23; regs[2] = 3;
+    dump_one_cpuid(output, regs, 0x5);
   }
 
-  /* TODO 0x24 contains AVX10 features on Intel ; Reserved on AMD? */
+  /* 0x24 is Converged Vector ISA Main Leaf on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x24) {
     regs[0] = 0x24; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
