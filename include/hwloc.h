@@ -1100,7 +1100,7 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * By default, short names are used.
  *
  * \return the number of characters that were actually written if not truncating,
- * or that would have been written (not including the ending \\0).
+ * or that would have been written (not including the ending \c \0).
  */
 HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj,
@@ -1119,7 +1119,7 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  * Sizes are reported in units such as GiB or KiB.
  *
  * \return the number of characters that were actually written if not truncating,
- * or that would have been written (not including the ending \\0).
+ * or that would have been written (not including the ending \c \0).
  *
  * \note By default the output string is reasonably short without being ambiguous
  * so that hwloc_type_sscanf() may parse it back.
@@ -2157,7 +2157,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  * a file, as with hwloc_topology_set_xml()).
  *
  * Gather topology information from the XML memory buffer given at
- * \p buffer and of length \p size (including an ending \0).
+ * \p buffer and of length \p size (including an ending \c \0).
  * This buffer may have been filled earlier with
  * hwloc_topology_export_xmlbuffer() in hwloc/export.h.
  *
