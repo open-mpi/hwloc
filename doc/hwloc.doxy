@@ -491,6 +491,7 @@ The hwloc core may also benefit from the following development packages:
 <li>the oneAPI Level Zero library.
   The relevant development package is usually <tt>level-zero-dev</tt>
   or <tt>level-zero-devel</tt>.
+  The implementation must be recent enough to support <tt>zesDriverGetDeviceByUuidExp()</tt>
 </li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import

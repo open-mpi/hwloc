@@ -814,13 +814,11 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
   hwloc__levelzero_ports_init(&hports);
 
-#ifdef HWLOC_HAVE_ZESINIT
   res = zesInit(0);
   if (res != ZE_RESULT_SUCCESS) {
     hwloc_debug("hwloc/levelzero: Failed to initialize LevelZero Sysman in zesInit(): 0x%x\n", (unsigned)res);
     hwloc_debug("hwloc/levelzero: Continuing. Hopefully ZES_ENABLE_SYSMAN=1\n");
   }
-#endif /* HWLOC_HAVE_ZESINIT */
 
   /* Tell L0 to create sysman devices.
    * If somebody already initialized L0 without Sysman,
