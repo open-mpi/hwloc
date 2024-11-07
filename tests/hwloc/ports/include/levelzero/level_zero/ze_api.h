@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2022 Inria.  All rights reserved.
+ * Copyright © 2020-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -8,6 +8,8 @@
 
 typedef int ze_result_t;
 #define ZE_RESULT_SUCCESS 0
+
+typedef int ze_bool_t;
 
 #define ZE_MAX_DEVICE_NAME 64
 
