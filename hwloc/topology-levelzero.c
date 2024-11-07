@@ -489,6 +489,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
                              int sysman_maybe_missing)
 {
   ze_driver_handle_t *drh;
+  zes_driver_handle_t *zesdrh;
   uint32_t nbdrivers, i, k, zeidx, added = 0;
   ze_result_t res;
 
@@ -496,13 +497,32 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
   res = zeDriverGet(&nbdrivers, NULL);
   if (res != ZE_RESULT_SUCCESS || !nbdrivers)
     return 0;
-  hwloc_debug("hwloc/L0: found %u drivers\n", (unsigned) nbdrivers);
-  drh = malloc(nbdrivers * sizeof(*drh));
-  if (!drh)
+  i = 0;
+  res = zesDriverGet(&i, NULL);
+  if (res != ZE_RESULT_SUCCESS || i != nbdrivers) {
+    if (HWLOC_SHOW_ALL_ERRORS())
+      fprintf(stderr, "hwloc/levelzero: zesDriverGet returned %x and found %u ZES drivers vs %u ZE drivers\n", res, i, nbdrivers);
     return 0;
+  }
+  hwloc_debug("found %u ZE/ZES drivers\n", (unsigned) nbdrivers);
+
+  drh = malloc(nbdrivers * sizeof(*drh));
+  zesdrh = malloc(nbdrivers * sizeof(*zesdrh));
+  if (!drh || !zesdrh) {
+    free(drh);
+    free(zesdrh);
+    return 0;
+  }
   res = zeDriverGet(&nbdrivers, drh);
   if (res != ZE_RESULT_SUCCESS) {
     free(drh);
+    free(zesdrh);
+    return 0;
+  }
+  res = zesDriverGet(&nbdrivers, zesdrh);
+  if (res != ZE_RESULT_SUCCESS) {
+    free(drh);
+    free(zesdrh);
     return 0;
   }
 
@@ -537,11 +557,31 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
 
     for(j=0; j<nbdevices; j++) {
       ze_device_handle_t zeh = dvh[j];
-      zes_device_handle_t zesh = dvh[j];
+      zes_device_handle_t zesh;
       ze_device_handle_t *subzehs = NULL;
       uint32_t nr_subdevices;
       hwloc_obj_t osdev, parent, *subosdevs = NULL;
+      ze_device_properties_t props;
+      zes_uuid_t uuid;
       int is_integrated = 0;
+      ze_bool_t onSubdevice = 0;
+      uint32_t subdeviceId = 0;
+
+      res = zeDeviceGetProperties(zeh, &props);
+      if (res != ZE_RESULT_SUCCESS) {
+        if (HWLOC_SHOW_ALL_ERRORS())
+          fprintf(stderr, "hwloc/levelzero: zeDeviceGetProperties() failed %x, skipping driver %u device %u\n",
+                  res, i, j);
+        continue;
+      }
+      memcpy(uuid.id, props.uuid.id, ZE_MAX_DEVICE_UUID_SIZE);
+      res = zesDriverGetDeviceByUuidExp(zesdrh[i], uuid, &zesh, &onSubdevice, &subdeviceId);
+      if (res != ZE_RESULT_SUCCESS) {
+        if (HWLOC_SHOW_ALL_ERRORS())
+          fprintf(stderr, "hwloc/levelzero: zesDriverGetDeviceByUuidExp() failed %x, skipping driver %u device %u\n",
+                  res, i, j);
+        continue;
+      }
 
       osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
       snprintf(buffer, sizeof(buffer), "ze%u", zeidx); // ze0d0 ?
@@ -572,7 +612,24 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
           zeDeviceGetSubDevices(zeh, &nr_subdevices, subzehs);
           for(k=0; k<nr_subdevices; k++) {
             ze_device_handle_t subzeh = subzehs[k];
-            zes_device_handle_t subzesh = subzehs[k];
+            zes_device_handle_t subzesh = NULL;
+
+            res = zeDeviceGetProperties(subzeh, &props);
+            if (res != ZE_RESULT_SUCCESS) {
+              if (HWLOC_SHOW_ALL_ERRORS())
+                fprintf(stderr, "hwloc/levelzero: subdevice zeDeviceGetProperties() failed %x, skipping driver %u device %u\n",
+                        res, i, j);
+              continue;
+            }
+            memcpy(uuid.id, props.uuid.id, ZE_MAX_DEVICE_UUID_SIZE);
+            res = zesDriverGetDeviceByUuidExp(zesdrh[i], uuid, &subzesh, &onSubdevice, &subdeviceId);
+            if (res != ZE_RESULT_SUCCESS) {
+              if (HWLOC_SHOW_ALL_ERRORS())
+                fprintf(stderr, "hwloc/levelzero: subdevice zesDriverGetDeviceByUuidExp() failed %x, skipping driver %u device %u\n",
+                        res, i, j);
+              continue;
+            }
+
             subosdevs[k] = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
             snprintf(tmp, sizeof(tmp), "ze%u.%u", zeidx, k);
             subosdevs[k]->name = strdup(tmp);
@@ -664,6 +721,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
   }
 
   free(drh);
+  free(zesdrh);
 
   return added;
 }
