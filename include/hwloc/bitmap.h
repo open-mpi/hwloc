@@ -126,6 +126,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_copy(hwloc_bitmap_t dst, hwloc_const_bitmap_t sr
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \c \0).
+ * \return -1 on error.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
@@ -136,7 +137,8 @@ HWLOC_DECLSPEC int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buf
  * Print the bits set inside a bitmap as a comma-separated list of hexadecimal 32-bit blocks.
  * A bitmap containing bits 1, 33, 34, and all from 64 to 95 is printed as <tt>"0xffffffff,0x00000006,0x00000002"</tt>.
  *
- * \return 0 on success, -1 on error.
+ * \return the number of characters that were written (not including the ending \c \0).
+ * \return -1 on error, for instance with \p errno set to \c ENOMEM on failure to allocate the output string.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
 
@@ -167,6 +169,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_sscanf(hwloc_bitmap_t bitmap, const char * __hwl
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \c \0).
+ * \return -1 on error.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
@@ -179,7 +182,8 @@ HWLOC_DECLSPEC int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_
  * A bitmap containing bits 1, 33, 34, and all from 64 to 95 is printed as <tt>"1,33-34,64-95"</tt>.
  * The last range may not have an ending index if the bitmap is infinitely set.
  *
- * \return 0 on success, -1 on error.
+ * \return the number of characters that were written (not including the ending \c \0).
+ * \return -1 on error, for instance with \p errno set to \c ENOMEM on failure to allocate the output string.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_list_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
 
@@ -210,6 +214,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_list_sscanf(hwloc_bitmap_t bitmap, const char * 
  *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \c \0).
+ * \return -1 on error.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
@@ -221,7 +226,8 @@ HWLOC_DECLSPEC int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, si
  * (possible very long) hexadecimal number starting with 0x.
  * A bitmap containing bits 1, 33, 34, and all from 64 to 95 is printed as <tt>"0xffffffff0000000600000002"</tt>.
  *
- * \return 0 on success, -1 on error.
+ * \return the number of characters that were written (not including the ending \c \0).
+ * \return -1 on error, for instance with \p errno set to \c ENOMEM on failure to allocate the output string.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_taskset_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
 
