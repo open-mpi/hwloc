@@ -62,7 +62,8 @@ hwloc__levelzero_osdev_array_find(struct hwloc_osdev_array *array,
 }
 
 static void
-hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
+hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
+                                hwloc_obj_t osdev,
                                 int sysman_maybe_missing,
                                 int *is_integrated_p)
 {
@@ -73,7 +74,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
   int is_integrated = 0;
 
   memset(&prop, 0, sizeof(prop));
-  res = zeDeviceGetProperties(h, &prop);
+  res = zeDeviceGetProperties(zeh, &prop);
   if (res == ZE_RESULT_SUCCESS) {
     /* name is the model name followed by the deviceID
      * flags 1<<0 means integrated (vs discrete).
@@ -124,7 +125,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
 
   /* try to get additional info from sysman if enabled */
   memset(&prop2, 0, sizeof(prop2));
-  res = zesDeviceGetProperties(h, &prop2);
+  res = zesDeviceGetProperties(zesh, &prop2);
   if (res == ZE_RESULT_SUCCESS) {
     /* old implementations may return "Unknown", recent may return "unknown" */
     if (strcasecmp((const char *) prop2.vendorName, "Unknown"))
@@ -151,20 +152,20 @@ hwloc__levelzero_properties_get(ze_device_handle_t h, hwloc_obj_t osdev,
 }
 
 static void
-hwloc__levelzero_cqprops_get(ze_device_handle_t h,
+hwloc__levelzero_cqprops_get(ze_device_handle_t zeh,
                              hwloc_obj_t osdev)
 {
   ze_command_queue_group_properties_t *cqprops;
   unsigned nr_cqprops = 0;
   ze_result_t res;
 
-  res = zeDeviceGetCommandQueueGroupProperties(h, &nr_cqprops, NULL);
+  res = zeDeviceGetCommandQueueGroupProperties(zeh, &nr_cqprops, NULL);
   if (res != ZE_RESULT_SUCCESS || !nr_cqprops)
     return;
 
   cqprops = malloc(nr_cqprops * sizeof(*cqprops));
   if (cqprops) {
-    res = zeDeviceGetCommandQueueGroupProperties(h, &nr_cqprops, cqprops);
+    res = zeDeviceGetCommandQueueGroupProperties(zeh, &nr_cqprops, cqprops);
     if (res == ZE_RESULT_SUCCESS) {
       unsigned k;
       char tmp[32];
@@ -182,7 +183,7 @@ hwloc__levelzero_cqprops_get(ze_device_handle_t h,
 }
 
 static int
-hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
+hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t zesh,
                                         hwloc_obj_t root_osdev,
                                         unsigned nr_osdevs, hwloc_obj_t *sub_osdevs)
 {
@@ -193,7 +194,7 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
   unsigned long long totalDDRkB = 0;
 
   nr_mems = 0;
-  res = zesDeviceEnumMemoryModules(h, &nr_mems, NULL);
+  res = zesDeviceEnumMemoryModules(zesh, &nr_mems, NULL);
   if (res != ZE_RESULT_SUCCESS)
     return -1; /* notify that sysman failed */
 
@@ -204,7 +205,7 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
 
   mh = malloc(nr_mems * sizeof(*mh));
   if (mh) {
-    res = zesDeviceEnumMemoryModules(h, &nr_mems, mh);
+    res = zesDeviceEnumMemoryModules(zesh, &nr_mems, mh);
     if (res == ZE_RESULT_SUCCESS) {
       unsigned m;
       for(m=0; m<nr_mems; m++) {
@@ -290,7 +291,7 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t h,
 }
 
 static void
-hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
+hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t zeh,
                                          hwloc_obj_t osdev,
                                          int ignore_ddr)
 {
@@ -299,7 +300,7 @@ hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
   ze_result_t res;
 
   nr_mems = 0;
-  res = zeDeviceGetMemoryProperties(h, &nr_mems, NULL);
+  res = zeDeviceGetMemoryProperties(zeh, &nr_mems, NULL);
   if (res != ZE_RESULT_SUCCESS || !nr_mems)
     return;
   hwloc_debug("L0/CoreAPI: found %u memories in osdev %s\n",
@@ -307,7 +308,7 @@ hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
 
   mh = malloc(nr_mems * sizeof(*mh));
   if (mh) {
-    res = zeDeviceGetMemoryProperties(h, &nr_mems, mh);
+    res = zeDeviceGetMemoryProperties(zeh, &nr_mems, mh);
     if (res == ZE_RESULT_SUCCESS) {
       unsigned m;
       for(m=0; m<nr_mems; m++) {
@@ -335,8 +336,9 @@ hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t h,
 
 
 static void
-hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev, int is_integrated,
-                            unsigned nr_subdevices, zes_device_handle_t *subh, hwloc_obj_t *sub_osdevs)
+hwloc__levelzero_memory_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
+                            hwloc_obj_t root_osdev, int is_integrated,
+                            unsigned nr_subdevices, zes_device_handle_t *subzehs, hwloc_obj_t *sub_osdevs)
 {
   static int memory_from_coreapi = -1; /* 1 means coreapi, 0 means sysman, -1 means sysman if available or coreapi otherwise */
   static int first = 1;
@@ -348,7 +350,7 @@ hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev, int i
       memory_from_coreapi = atoi(env);
 
     if (memory_from_coreapi == -1) {
-      int ret = hwloc__levelzero_memory_get_from_sysman(h, root_osdev, nr_subdevices, sub_osdevs);
+      int ret = hwloc__levelzero_memory_get_from_sysman(zesh, root_osdev, nr_subdevices, sub_osdevs);
       if (!ret) {
         /* sysman worked, we're done, disable coreapi for next time */
         hwloc_debug("levelzero: sysman/memory succeeded, disabling coreapi memory queries\n");
@@ -366,11 +368,11 @@ hwloc__levelzero_memory_get(zes_device_handle_t h, hwloc_obj_t root_osdev, int i
   if (memory_from_coreapi > 0) {
     unsigned k;
     int ignore_ddr = (memory_from_coreapi != 2) && is_integrated; /* DDR ignored in integrated GPUs, it's like the host DRAM */
-    hwloc__levelzero_memory_get_from_coreapi(h, root_osdev, ignore_ddr);
+    hwloc__levelzero_memory_get_from_coreapi(zeh, root_osdev, ignore_ddr);
     for(k=0; k<nr_subdevices; k++)
-      hwloc__levelzero_memory_get_from_coreapi(subh[k], sub_osdevs[k], ignore_ddr);
+      hwloc__levelzero_memory_get_from_coreapi(subzehs[k], sub_osdevs[k], ignore_ddr);
   } else {
-    hwloc__levelzero_memory_get_from_sysman(h, root_osdev, nr_subdevices, sub_osdevs);
+    hwloc__levelzero_memory_get_from_sysman(zesh, root_osdev, nr_subdevices, sub_osdevs);
     /* no need to call hwloc__levelzero_memory_get() on subdevices,
      * the call on the root device is enough (and identical to a call on subdevices)
      */
@@ -399,7 +401,7 @@ hwloc__levelzero_ports_init(struct hwloc_levelzero_ports *hports)
 }
 
 static void
-hwloc__levelzero_ports_get(zes_device_handle_t dvh,
+hwloc__levelzero_ports_get(zes_device_handle_t zesh,
                            hwloc_obj_t root_osdev,
                            unsigned nr_sub_osdevs, hwloc_obj_t *sub_osdevs,
                            struct hwloc_levelzero_ports *hports)
@@ -409,7 +411,7 @@ hwloc__levelzero_ports_get(zes_device_handle_t dvh,
   unsigned i;
   ze_result_t res;
 
-  res = zesDeviceEnumFabricPorts(dvh, &nr_new, NULL);
+  res = zesDeviceEnumFabricPorts(zesh, &nr_new, NULL);
   if (res != ZE_RESULT_SUCCESS || !nr_new)
     return;
   hwloc_debug("L0 device %s has %u fabric ports\n", root_osdev->name, nr_new);
@@ -432,7 +434,7 @@ hwloc__levelzero_ports_get(zes_device_handle_t dvh,
   ports = malloc(nr_new * sizeof(*ports));
   if (!ports)
     return;
-  res = zesDeviceEnumFabricPorts(dvh, &nr_new, ports);
+  res = zesDeviceEnumFabricPorts(zesh, &nr_new, ports);
 
   for(i=0; i<nr_new; i++) {
     unsigned id = hports->nr;
@@ -534,8 +536,9 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
 #endif
 
     for(j=0; j<nbdevices; j++) {
-      zes_device_handle_t sdvh = dvh[j];
-      zes_device_handle_t *subh = NULL;
+      ze_device_handle_t zeh = dvh[j];
+      zes_device_handle_t zesh = dvh[j];
+      ze_device_handle_t *subzehs = NULL;
       uint32_t nr_subdevices;
       hwloc_obj_t osdev, parent, *subosdevs = NULL;
       int is_integrated = 0;
@@ -552,22 +555,24 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(dvh[j], osdev, sysman_maybe_missing, &is_integrated);
+      hwloc__levelzero_properties_get(zeh, zesh, osdev, sysman_maybe_missing, &is_integrated);
 
-      hwloc__levelzero_cqprops_get(dvh[j], osdev);
+      hwloc__levelzero_cqprops_get(zeh, osdev);
 
       nr_subdevices = 0;
-      res = zeDeviceGetSubDevices(dvh[j], &nr_subdevices, NULL);
+      res = zeDeviceGetSubDevices(zeh, &nr_subdevices, NULL);
       /* returns ZE_RESULT_ERROR_INVALID_ARGUMENT if there are no subdevices */
       if (res == ZE_RESULT_SUCCESS && nr_subdevices > 0) {
         char tmp[64];
         snprintf(tmp, sizeof(tmp), "%u", nr_subdevices);
         hwloc_obj_add_info(osdev, "LevelZeroSubdevices", tmp);
-        subh = malloc(nr_subdevices * sizeof(*subh));
+        subzehs = malloc(nr_subdevices * sizeof(*subzehs));
         subosdevs = malloc(nr_subdevices * sizeof(*subosdevs));
-        if (subosdevs && subh) {
-          zeDeviceGetSubDevices(dvh[j], &nr_subdevices, subh);
+        if (subosdevs && subzehs) {
+          zeDeviceGetSubDevices(zeh, &nr_subdevices, subzehs);
           for(k=0; k<nr_subdevices; k++) {
+            ze_device_handle_t subzeh = subzehs[k];
+            zes_device_handle_t subzesh = subzehs[k];
             subosdevs[k] = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
             snprintf(tmp, sizeof(tmp), "ze%u.%u", zeidx, k);
             subosdevs[k]->name = strdup(tmp);
@@ -577,24 +582,25 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
-            hwloc__levelzero_properties_get(subh[k], subosdevs[k], sysman_maybe_missing, NULL);
+            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k], sysman_maybe_missing, NULL);
 
-            hwloc__levelzero_cqprops_get(subh[k], subosdevs[k]);
+            hwloc__levelzero_cqprops_get(subzeh, subosdevs[k]);
           }
         } else {
           free(subosdevs);
-          free(subh);
+          free(subzehs);
           subosdevs = NULL;
+          subzehs = NULL;
           nr_subdevices = 0;
         }
       }
 
       /* get all memory info at once */
-      hwloc__levelzero_memory_get(dvh[j], osdev, is_integrated, nr_subdevices, subh, subosdevs);
+      hwloc__levelzero_memory_get(zeh, zesh, osdev, is_integrated, nr_subdevices, subzehs, subosdevs);
 
       /* get all ports info at once */
       if (!(hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
-        hwloc__levelzero_ports_get(dvh[j], osdev, nr_subdevices, subosdevs, hports);
+        hwloc__levelzero_ports_get(zesh, osdev, nr_subdevices, subosdevs, hports);
 
       parent = NULL;
 #ifdef HWLOC_HAVE_ZEDEVICEPCIGETPROPERTIESEXT
@@ -602,7 +608,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
         ze_pci_ext_properties_t ext_pci;
         ext_pci.stype =  ZE_STRUCTURE_TYPE_PCI_EXT_PROPERTIES;
         ext_pci.pNext = NULL;
-        res = zeDevicePciGetPropertiesExt(dvh[j], &ext_pci);
+        res = zeDevicePciGetPropertiesExt(zeh, &ext_pci);
         if (res == ZE_RESULT_SUCCESS) {
           parent = hwloc_pci_find_parent_by_busid(topology,
                                                   ext_pci.address.domain,
@@ -619,7 +625,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       if (!parent) {
         /* try getting PCI BDF+speed from sysman */
         zes_pci_properties_t pci;
-        res = zesDevicePciGetProperties(sdvh, &pci);
+        res = zesDevicePciGetProperties(zesh, &pci);
         if (res == ZE_RESULT_SUCCESS) {
           parent = hwloc_pci_find_parent_by_busid(topology,
                                                   pci.address.domain,
@@ -649,7 +655,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             added++;
           }
         free(subosdevs);
-        free(subh);
+        free(subzehs);
       }
       zeidx++;
     }
