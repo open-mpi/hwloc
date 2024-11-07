@@ -9,7 +9,6 @@
 #include <level_zero/ze_api.h>
 #include <level_zero/zes_api.h>
 
-#include "private/autogen/config.h" /* for HWLOC_HAVE_ZESINIT */
 #include "hwloc.h"
 #include "hwloc/levelzero.h"
 
@@ -23,13 +22,11 @@ int main(void)
   ze_result_t res;
   int err = 0;
 
-#ifdef HWLOC_HAVE_ZESINIT
   res = zesInit(0);
   if (res != ZE_RESULT_SUCCESS) {
     fprintf(stderr, "Failed to initialize LevelZero Sysman in zesInit(): %d\n", (int)res);
     /* continuing, assuming ZES_ENABLE_SYSMAN=1 will be enough */
   }
-#endif
 
   putenv((char *) "ZES_ENABLE_SYSMAN=1");
 
@@ -38,7 +35,7 @@ int main(void)
     fprintf(stderr, "Failed to initialize LevelZero in zeInit(): %d\n", (int)res);
     return 0;
   }
-  
+
   hwloc_topology_init(&topology);
   hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
   hwloc_topology_load(topology);
