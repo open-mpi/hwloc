@@ -37,17 +37,15 @@ int main(void)
   /* SKIP until zesInit() support is finalized in the core and helpers */
   return 77;
 
-  res = zesInit(0);
-  if (res != ZE_RESULT_SUCCESS) {
-    fprintf(stderr, "Failed to initialize LevelZero Sysman in zesInit(): %d\n", (int)res);
-    /* continuing, assuming ZES_ENABLE_SYSMAN=1 will be enough */
-  }
-
-  putenv((char *) "ZES_ENABLE_SYSMAN=1");
-
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
     fprintf(stderr, "Failed to initialize LevelZero in zeInit(): %d\n", (int)res);
+    return 0;
+  }
+
+  res = zesInit(0);
+  if (res != ZE_RESULT_SUCCESS) {
+    fprintf(stderr, "Failed to initialize LevelZero Sysman in zesInit(): %d\n", (int)res);
     return 0;
   }
 

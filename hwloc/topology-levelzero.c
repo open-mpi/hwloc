@@ -64,7 +64,6 @@ hwloc__levelzero_osdev_array_find(struct hwloc_osdev_array *array,
 static void
 hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
                                 hwloc_obj_t osdev,
-                                int sysman_maybe_missing,
                                 int *is_integrated_p)
 {
   ze_result_t res;
@@ -138,16 +137,6 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
       hwloc_obj_add_info(osdev, "LevelZeroSerialNumber", (const char *) prop2.serialNumber);
     if (strcasecmp((const char *) prop2.boardNumber, "Unknown"))
       hwloc_obj_add_info(osdev, "LevelZeroBoardNumber", (const char *) prop2.boardNumber);
-  } else {
-    static int warned = 0;
-    if (!warned) {
-      if (sysman_maybe_missing == 1 && HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=1 set too late?).\n");
-      else if (sysman_maybe_missing == 2 && HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc/levelzero: zesDeviceGetProperties() failed (ZES_ENABLE_SYSMAN=0).\n");
-      warned = 1;
-    }
-    /* continue in degraded mode, we'll miss locality and some attributes */
   }
 }
 
@@ -485,8 +474,7 @@ hwloc__levelzero_ports_get(zes_device_handle_t zesh,
 static int
 hwloc__levelzero_devices_get(struct hwloc_topology *topology,
                              struct hwloc_osdev_array *oarray,
-                             struct hwloc_levelzero_ports *hports,
-                             int sysman_maybe_missing)
+                             struct hwloc_levelzero_ports *hports)
 {
   ze_driver_handle_t *drh;
   zes_driver_handle_t *zesdrh;
@@ -595,7 +583,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(zeh, zesh, osdev, sysman_maybe_missing, &is_integrated);
+      hwloc__levelzero_properties_get(zeh, zesh, osdev, &is_integrated);
 
       hwloc__levelzero_cqprops_get(zeh, osdev);
 
@@ -639,7 +627,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             snprintf(tmp, sizeof(tmp), "%u", k);
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
 
-            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k], sysman_maybe_missing, NULL);
+            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k], NULL);
 
             hwloc__levelzero_cqprops_get(subzeh, subosdevs[k]);
           }
@@ -860,8 +848,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
   ze_result_t res;
   struct hwloc_osdev_array oarray;
   struct hwloc_levelzero_ports hports;
-  int sysman_maybe_missing = 0; /* 1 if ZES_ENABLE_SYSMAN=1 was NOT set early, 2 if ZES_ENABLE_SYSMAN=0 */
-  char *env;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -873,32 +859,6 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
   hwloc__levelzero_ports_init(&hports);
 
-  res = zesInit(0);
-  if (res != ZE_RESULT_SUCCESS) {
-    hwloc_debug("hwloc/levelzero: Failed to initialize LevelZero Sysman in zesInit(): 0x%x\n", (unsigned)res);
-    hwloc_debug("hwloc/levelzero: Continuing. Hopefully ZES_ENABLE_SYSMAN=1\n");
-  }
-
-  /* Tell L0 to create sysman devices.
-   * If somebody already initialized L0 without Sysman,
-   * zesDeviceGetProperties() will fail and warn in hwloc__levelzero_properties_get().
-   * The lib constructor and Windows DllMain tried to set ZES_ENABLE_SYSMAN=1 early (see topology.c),
-   * we try again in case they didn't.
-   */
-  env = getenv("ZES_ENABLE_SYSMAN");
-  if (!env) {
-    /* setenv() is safer than putenv() but not available on Windows */
-#ifdef HWLOC_WIN_SYS
-    putenv("ZES_ENABLE_SYSMAN=1");
-#else
-    setenv("ZES_ENABLE_SYSMAN", "1", 1);
-#endif
-    /* we'll warn in hwloc__levelzero_properties_get() if we fail to get zes devices */
-    sysman_maybe_missing = 1;
-  } else if (!atoi(env)) {
-    sysman_maybe_missing = 2;
-  }
-
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
     if (HWLOC_SHOW_ALL_ERRORS()) {
@@ -907,7 +867,15 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
     return 0;
   }
 
-  added = hwloc__levelzero_devices_get(topology, &oarray, &hports, sysman_maybe_missing);
+  res = zesInit(0);
+  if (res != ZE_RESULT_SUCCESS) {
+    if (HWLOC_SHOW_ALL_ERRORS()) {
+      fprintf(stderr, "hwloc/levelzero: Failed to initialize in zesInit(): 0x%x\n", (unsigned)res);
+    }
+    return 0;
+  }
+
+  added = hwloc__levelzero_devices_get(topology, &oarray, &hports);
   hwloc__levelzero_ports_connect(topology, &oarray, &hports);
   hwloc__levelzero_ports_destroy(&hports);
 
