@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2023 Inria.  All rights reserved.
+ * Copyright © 2021-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -131,9 +131,15 @@ hwloc_levelzero_get_device_osdev(hwloc_topology_t topology, ze_device_handle_t d
 
   osdev = NULL;
   while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
-    hwloc_obj_t pcidev = osdev->parent;
+    hwloc_obj_t pcidev;
 
     if (strncmp(osdev->name, "ze", 2))
+      continue;
+
+    pcidev = osdev;
+    while (pcidev && pcidev->type != HWLOC_OBJ_PCI_DEVICE)
+      pcidev = pcidev->parent;
+    if (!pcidev)
       continue;
 
     if (pcidev
