@@ -762,7 +762,9 @@ man3_gpu_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_rsmi_get_device_osdev_by_index.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_levelzero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_levelzero_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_levelzero_get_sysman_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_levelzero_get_device_osdev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_levelzero_get_sysman_device_osdev.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_gl.3 \
         $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_port_device.3 \
         $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_name.3 \
