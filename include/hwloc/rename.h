@@ -616,7 +616,9 @@ extern "C" {
 /* levelzero.h */
 
 #define hwloc_levelzero_get_device_cpuset HWLOC_NAME(levelzero_get_device_cpuset)
+#define hwloc_levelzero_get_sysman_device_cpuset HWLOC_NAME(levelzero_get_sysman_device_cpuset)
 #define hwloc_levelzero_get_device_osdev HWLOC_NAME(levelzero_get_device_osdev)
+#define hwloc_levelzero_get_sysman_device_osdev HWLOC_NAME(levelzero_get_sysman_device_osdev)
 
 /* gl.h */
 
