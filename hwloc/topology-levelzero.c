@@ -63,14 +63,12 @@ hwloc__levelzero_osdev_array_find(struct hwloc_osdev_array *array,
 
 static void
 hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
-                                hwloc_obj_t osdev,
-                                int *is_integrated_p)
+                                hwloc_obj_t osdev)
 {
   ze_result_t res;
   ze_device_properties_t prop;
   zes_device_properties_t prop2;
   int is_subdevice = 0;
-  int is_integrated = 0;
 
   memset(&prop, 0, sizeof(prop));
   res = zeDeviceGetProperties(zeh, &prop);
@@ -110,13 +108,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
 
     if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
       is_subdevice = 1;
-
-    if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_INTEGRATED)
-      is_integrated = 1;
   }
-
-  if (is_integrated_p)
-    *is_integrated_p = is_integrated;
 
   if (is_subdevice)
     /* sysman API on subdevice returns the same as root device, and we don't need those duplicate attributes */
@@ -462,7 +454,6 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       hwloc_obj_t osdev, parent, *subosdevs = NULL;
       ze_device_properties_t props;
       zes_uuid_t uuid;
-      int is_integrated = 0;
       ze_bool_t onSubdevice = 0;
       uint32_t subdeviceId = 0;
 
@@ -495,7 +486,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(zeh, zesh, osdev, &is_integrated);
+      hwloc__levelzero_properties_get(zeh, zesh, osdev);
 
       hwloc__levelzero_cqprops_get(zeh, osdev);
 
@@ -540,7 +531,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
             hwloc_obj_add_info(osdev, "Backend", "LevelZero");
 
-            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k], NULL);
+            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k]);
 
             hwloc__levelzero_cqprops_get(subzeh, subosdevs[k]);
           }
