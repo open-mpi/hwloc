@@ -63,16 +63,21 @@ hwloc__levelzero_osdev_array_find(struct hwloc_osdev_array *array,
 
 static void
 hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
-                                hwloc_obj_t osdev)
+                                hwloc_obj_t osdev, ze_device_properties_t *prop)
 {
   ze_result_t res;
-  ze_device_properties_t prop;
+  ze_device_properties_t _prop;
   zes_device_properties_t prop2;
   int is_subdevice = 0;
 
-  memset(&prop, 0, sizeof(prop));
-  res = zeDeviceGetProperties(zeh, &prop);
-  if (res == ZE_RESULT_SUCCESS) {
+  if (!prop) {
+    /* no properties were given, get ours */
+    memset(&_prop, 0, sizeof(_prop));
+    res = zeDeviceGetProperties(zeh, &_prop);
+    if (res == ZE_RESULT_SUCCESS)
+      prop = &_prop;
+  }
+  if (prop) {
     /* name is the model name followed by the deviceID
      * flags 1<<0 means integrated (vs discrete).
      */
@@ -81,7 +86,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
     unsigned i;
     const char *type;
 
-    switch (prop.type) {
+    switch (prop->type) {
     case ZE_DEVICE_TYPE_GPU: type = "GPU"; break;
     case ZE_DEVICE_TYPE_CPU: type = "CPU"; break;
     case ZE_DEVICE_TYPE_FPGA: type = "FPGA"; break;
@@ -89,24 +94,24 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
     case ZE_DEVICE_TYPE_VPU: type = "VPU"; break;
     default:
       if (HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop.type);
+        fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop->type);
       type = "Unknown";
     }
     hwloc_obj_add_info(osdev, "LevelZeroDeviceType", type);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numSlices);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numSlices);
     hwloc_obj_add_info(osdev, "LevelZeroNumSlices", tmp);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numSubslicesPerSlice);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numSubslicesPerSlice);
     hwloc_obj_add_info(osdev, "LevelZeroNumSubslicesPerSlice", tmp);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numEUsPerSubslice);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numEUsPerSubslice);
     hwloc_obj_add_info(osdev, "LevelZeroNumEUsPerSubslice", tmp);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numThreadsPerEU);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numThreadsPerEU);
     hwloc_obj_add_info(osdev, "LevelZeroNumThreadsPerEU", tmp);
 
     for(i=0; i<ZE_MAX_DEVICE_UUID_SIZE; i++)
-      snprintf(uuid+2*i, 3, "%02x", prop.uuid.id[i]);
+      snprintf(uuid+2*i, 3, "%02x", prop->uuid.id[i]);
     hwloc_obj_add_info(osdev, "LevelZeroUUID", uuid);
 
-    if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
+    if (prop->flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
       is_subdevice = 1;
   }
 
@@ -486,7 +491,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(zeh, zesh, osdev);
+      hwloc__levelzero_properties_get(zeh, zesh, osdev, &props);
 
       hwloc__levelzero_cqprops_get(zeh, osdev);
 
@@ -531,7 +536,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             hwloc_obj_add_info(subosdevs[k], "LevelZeroSubdeviceID", tmp);
             hwloc_obj_add_info(osdev, "Backend", "LevelZero");
 
-            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k]);
+            hwloc__levelzero_properties_get(subzeh, subzesh, subosdevs[k], NULL);
 
             hwloc__levelzero_cqprops_get(subzeh, subosdevs[k]);
           }
