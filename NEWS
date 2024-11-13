@@ -19,6 +19,11 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.12.0
 --------------
+* Rework oneAPI LevelZero support to use zesInit() and avoid the need
+  to set ZES_ENABLE_SYSMAN=1 in the environment.
+  - zesDriverGetDeviceByUuidExp() is now required in the L0 runtime.
+  - ZES/Sysman variants were added in hwloc/levelzero.h to specifically
+    handle ZES/Sysman device handles.
 * Add support for Die objects and Module groups on Windows.
 * Only filter-out Dies that are identical to their Packages
   when it applies to all Dies.
