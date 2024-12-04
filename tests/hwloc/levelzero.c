@@ -152,7 +152,7 @@ int main(void)
     sdvh = malloc(nbdevices * sizeof(*sdvh));
     if (!sdvh)
       continue;
-    res = zeDeviceGet(sdrh[i], &nbdevices, sdvh);
+    res = zesDeviceGet(sdrh[i], &nbdevices, sdvh);
     if (res != ZE_RESULT_SUCCESS) {
       free(sdvh);
       continue;
