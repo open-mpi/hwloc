@@ -2464,7 +2464,7 @@ as reported by some <tt>cpufreq</tt> or ACPI drivers on Linux
 </dd>
 <dt>CoreType (x86)</dt>
 <dd>A string describing the kind of core,
-currently <tt>IntelAtom</tt> or <tt>IntelCore</tt>,
+currently <tt>IntelAtom</tt>, <tt>IntelCore</tt> or <tt>IntelLowPower</tt>,
 as reported by the x86 CPUID instruction and Linux PMU on some Intel processors.
 </dd>
 <dt>LinuxCapacity (Linux)</dt>
