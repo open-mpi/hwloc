@@ -185,18 +185,17 @@ int main(void)
       printf("found OSDev %s\n", osdev->name);
       err = strncmp(osdev->name, "ze", 2);
       assert(!err);
-      assert(atoi(osdev->name+2) == (int) k);
+      /* don't check the index,
+       * ZE and ZES device orders may be different inside a single driver.
+       */
 
       assert(osdev->attr->osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
 
       assert(has_levelzero_backend);
 
-      value = hwloc_obj_get_info_by_name(osdev, "LevelZeroDriverIndex");
-      assert(value);
-      assert(atoi(value) == (int) i);
-      value = hwloc_obj_get_info_by_name(osdev, "LevelZeroDriverDeviceIndex");
-      assert(value);
-      assert(atoi(value) == (int) j);
+      /* don't check LevelZeroDriverIndex and LevelZeroDriverDeviceIndex,
+       * ZE and ZES device orders may be different inside a single driver.
+       */
 
       set = hwloc_bitmap_alloc();
       err = hwloc_levelzero_get_sysman_device_cpuset(topology, sdvh[j], set);
