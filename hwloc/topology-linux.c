@@ -4722,7 +4722,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   int max_without_basefreq = 0; /* any cpu where we have maxfreq without basefreq? */
   char str[293];
   char *env;
-  hwloc_bitmap_t atom_pmu_set, core_pmu_set;
+  hwloc_bitmap_t atom_pmu_set, core_pmu_set, lowp_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   int use_cppc_nominal_freq = -1; /* -1 means try, 0 no, 1 yes */
   unsigned adjust_max = 10;
@@ -4842,6 +4842,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   /* look at Intel core/atom PMUs */
   atom_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_atom/cpus", data->root_fd);
   core_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_core/cpus", data->root_fd);
+  lowp_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_lowpower/cpus", data->root_fd);
   if (atom_pmu_set) {
     hwloc_linux_cpukinds_register_one(topology, atom_pmu_set,
                                       HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
@@ -4857,6 +4858,14 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(core_pmu_set);
+  }
+  if (lowp_pmu_set) {
+    hwloc_linux_cpukinds_register_one(topology, lowp_pmu_set,
+                                      HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                      (char *) "CoreType", (char *) "IntelLowPower");
+    /* the cpuset is given to the callee */
+  } else {
+    hwloc_bitmap_free(lowp_pmu_set);
   }
 
   return 0;
