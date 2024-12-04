@@ -166,6 +166,10 @@ hwloc_levelzero_get_sysman_device_cpuset(hwloc_topology_t topology __hwloc_attri
  * topology. If not, the locality of the object may still be found using
  * hwloc_levelzero_get_device_cpuset().
  *
+ * \note If the input ZE device is actually a subdevice, then its parent
+ * (root device) is actually translated, i.e. the main hwloc OS device
+ * is returned instead of one of its children.
+ *
  * \note The corresponding hwloc PCI device may be found by looking
  * at the result parent pointer (unless PCI devices are filtered out).
  *
@@ -230,6 +234,10 @@ hwloc_levelzero_get_device_osdev(hwloc_topology_t topology, ze_device_handle_t d
  * I/O devices detection and the Level Zero component must be enabled in the
  * topology. If not, the locality of the object may still be found using
  * hwloc_levelzero_get_device_cpuset().
+ *
+ * \note If the input ZES device is actually a subdevice, then its parent
+ * (root device) is actually translated, i.e. the main hwloc OS device
+ * is returned instead of one of its children.
  *
  * \note The corresponding hwloc PCI device may be found by looking
  * at the result parent pointer (unless PCI devices are filtered out).

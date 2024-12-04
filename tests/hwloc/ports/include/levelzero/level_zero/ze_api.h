@@ -28,7 +28,6 @@ typedef enum _ze_device_type {
   ZE_DEVICE_TYPE_VPU = 5
 } ze_device_type_t;
 
-#define ZE_DEVICE_PROPERTY_FLAG_INTEGRATED (1<<0)
 #define ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE (1<<1)
 
 #define ZE_MAX_DEVICE_UUID_SIZE 16
@@ -57,13 +56,6 @@ typedef struct ze_command_queue_group_properties {
 extern ze_result_t zeDeviceGetCommandQueueGroupProperties(ze_driver_handle_t, uint32_t *, ze_command_queue_group_properties_t *);
 
 extern ze_result_t zeDeviceGetSubDevices(ze_device_handle_t, uint32_t *, ze_device_handle_t*);
-
-typedef struct ze_device_memory_properties {
-  uint64_t totalSize;
-  char *name;
-} ze_device_memory_properties_t;
-
-extern ze_result_t zeDeviceGetMemoryProperties(ze_device_handle_t, uint32_t *, ze_device_memory_properties_t*);
 
 typedef struct ze_pci_address_ext {
   uint32_t domain, bus, device, function;

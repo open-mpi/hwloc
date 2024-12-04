@@ -63,18 +63,21 @@ hwloc__levelzero_osdev_array_find(struct hwloc_osdev_array *array,
 
 static void
 hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
-                                hwloc_obj_t osdev,
-                                int *is_integrated_p)
+                                hwloc_obj_t osdev, ze_device_properties_t *prop)
 {
   ze_result_t res;
-  ze_device_properties_t prop;
+  ze_device_properties_t _prop;
   zes_device_properties_t prop2;
   int is_subdevice = 0;
-  int is_integrated = 0;
 
-  memset(&prop, 0, sizeof(prop));
-  res = zeDeviceGetProperties(zeh, &prop);
-  if (res == ZE_RESULT_SUCCESS) {
+  if (!prop) {
+    /* no properties were given, get ours */
+    memset(&_prop, 0, sizeof(_prop));
+    res = zeDeviceGetProperties(zeh, &_prop);
+    if (res == ZE_RESULT_SUCCESS)
+      prop = &_prop;
+  }
+  if (prop) {
     /* name is the model name followed by the deviceID
      * flags 1<<0 means integrated (vs discrete).
      */
@@ -83,7 +86,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
     unsigned i;
     const char *type;
 
-    switch (prop.type) {
+    switch (prop->type) {
     case ZE_DEVICE_TYPE_GPU: type = "GPU"; break;
     case ZE_DEVICE_TYPE_CPU: type = "CPU"; break;
     case ZE_DEVICE_TYPE_FPGA: type = "FPGA"; break;
@@ -91,32 +94,26 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
     case ZE_DEVICE_TYPE_VPU: type = "VPU"; break;
     default:
       if (HWLOC_SHOW_ALL_ERRORS())
-        fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop.type);
+        fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop->type);
       type = "Unknown";
     }
     hwloc_obj_add_info(osdev, "LevelZeroDeviceType", type);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numSlices);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numSlices);
     hwloc_obj_add_info(osdev, "LevelZeroNumSlices", tmp);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numSubslicesPerSlice);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numSubslicesPerSlice);
     hwloc_obj_add_info(osdev, "LevelZeroNumSubslicesPerSlice", tmp);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numEUsPerSubslice);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numEUsPerSubslice);
     hwloc_obj_add_info(osdev, "LevelZeroNumEUsPerSubslice", tmp);
-    snprintf(tmp, sizeof(tmp), "%u", prop.numThreadsPerEU);
+    snprintf(tmp, sizeof(tmp), "%u", prop->numThreadsPerEU);
     hwloc_obj_add_info(osdev, "LevelZeroNumThreadsPerEU", tmp);
 
     for(i=0; i<ZE_MAX_DEVICE_UUID_SIZE; i++)
-      snprintf(uuid+2*i, 3, "%02x", prop.uuid.id[i]);
+      snprintf(uuid+2*i, 3, "%02x", prop->uuid.id[i]);
     hwloc_obj_add_info(osdev, "LevelZeroUUID", uuid);
 
-    if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
+    if (prop->flags & ZE_DEVICE_PROPERTY_FLAG_SUBDEVICE)
       is_subdevice = 1;
-
-    if (prop.flags & ZE_DEVICE_PROPERTY_FLAG_INTEGRATED)
-      is_integrated = 1;
   }
-
-  if (is_integrated_p)
-    *is_integrated_p = is_integrated;
 
   if (is_subdevice)
     /* sysman API on subdevice returns the same as root device, and we don't need those duplicate attributes */
@@ -172,9 +169,9 @@ hwloc__levelzero_cqprops_get(ze_device_handle_t zeh,
 }
 
 static int
-hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t zesh,
-                                        hwloc_obj_t root_osdev,
-                                        unsigned nr_osdevs, hwloc_obj_t *sub_osdevs)
+hwloc__levelzero_memory_get(zes_device_handle_t zesh,
+                            hwloc_obj_t root_osdev,
+                            unsigned nr_osdevs, hwloc_obj_t *sub_osdevs)
 {
   zes_mem_handle_t *mh;
   uint32_t nr_mems;
@@ -277,95 +274,6 @@ hwloc__levelzero_memory_get_from_sysman(zes_device_handle_t zesh,
   }
 
   return 0;
-}
-
-static void
-hwloc__levelzero_memory_get_from_coreapi(ze_device_handle_t zeh,
-                                         hwloc_obj_t osdev,
-                                         int ignore_ddr)
-{
-  ze_device_memory_properties_t *mh;
-  uint32_t nr_mems;
-  ze_result_t res;
-
-  nr_mems = 0;
-  res = zeDeviceGetMemoryProperties(zeh, &nr_mems, NULL);
-  if (res != ZE_RESULT_SUCCESS || !nr_mems)
-    return;
-  hwloc_debug("L0/CoreAPI: found %u memories in osdev %s\n",
-              nr_mems, osdev->name);
-
-  mh = malloc(nr_mems * sizeof(*mh));
-  if (mh) {
-    res = zeDeviceGetMemoryProperties(zeh, &nr_mems, mh);
-    if (res == ZE_RESULT_SUCCESS) {
-      unsigned m;
-      for(m=0; m<nr_mems; m++) {
-        const char *_name = mh[m].name;
-        char name[300], value[64];
-        /* FIXME: discrete GPUs report 95% of the physical memory (what sysman sees)
-         * while integrated GPUs report 80% of the host RAM (sysman sees 0), adjust?
-         */
-        hwloc_debug("L0/CoreAPI: found memory name %s size %llu in osdev %s\n",
-                    mh[m].name, (unsigned long long) mh[m].totalSize, osdev->name);
-        if (!mh[m].totalSize)
-          continue;
-        if (ignore_ddr && !strcmp(_name, "DDR"))
-          continue;
-        if (!_name[0])
-          _name = "Memory";
-        snprintf(name, sizeof(name), "LevelZero%sSize", _name); /* HBM or DDR, or Memory if unknown */
-        snprintf(value, sizeof(value), "%lluKiB", (unsigned long long) mh[m].totalSize >> 10);
-        hwloc_obj_add_info(osdev, name, value);
-      }
-    }
-    free(mh);
-  }
-}
-
-
-static void
-hwloc__levelzero_memory_get(ze_device_handle_t zeh, zes_device_handle_t zesh,
-                            hwloc_obj_t root_osdev, int is_integrated,
-                            unsigned nr_subdevices, zes_device_handle_t *subzehs, hwloc_obj_t *sub_osdevs)
-{
-  static int memory_from_coreapi = -1; /* 1 means coreapi, 0 means sysman, -1 means sysman if available or coreapi otherwise */
-  static int first = 1;
-
-  if (first) {
-    char *env;
-    env = getenv("HWLOC_L0_COREAPI_MEMORY");
-    if (env)
-      memory_from_coreapi = atoi(env);
-
-    if (memory_from_coreapi == -1) {
-      int ret = hwloc__levelzero_memory_get_from_sysman(zesh, root_osdev, nr_subdevices, sub_osdevs);
-      if (!ret) {
-        /* sysman worked, we're done, disable coreapi for next time */
-        hwloc_debug("levelzero: sysman/memory succeeded, disabling coreapi memory queries\n");
-        memory_from_coreapi = 0;
-        return;
-      }
-      /* sysman failed, enable coreapi */
-      hwloc_debug("levelzero: sysman/memory failed, enabling coreapi memory queries\n");
-      memory_from_coreapi = 1;
-    }
-
-    first = 0;
-  }
-
-  if (memory_from_coreapi > 0) {
-    unsigned k;
-    int ignore_ddr = (memory_from_coreapi != 2) && is_integrated; /* DDR ignored in integrated GPUs, it's like the host DRAM */
-    hwloc__levelzero_memory_get_from_coreapi(zeh, root_osdev, ignore_ddr);
-    for(k=0; k<nr_subdevices; k++)
-      hwloc__levelzero_memory_get_from_coreapi(subzehs[k], sub_osdevs[k], ignore_ddr);
-  } else {
-    hwloc__levelzero_memory_get_from_sysman(zesh, root_osdev, nr_subdevices, sub_osdevs);
-    /* no need to call hwloc__levelzero_memory_get() on subdevices,
-     * the call on the root device is enough (and identical to a call on subdevices)
-     */
-  }
 }
 
 struct hwloc_levelzero_ports {
@@ -551,7 +459,6 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       hwloc_obj_t osdev, parent, *subosdevs = NULL;
       ze_device_properties_t props;
       zes_uuid_t uuid;
-      int is_integrated = 0;
       ze_bool_t onSubdevice = 0;
       uint32_t subdeviceId = 0;
 
@@ -583,7 +490,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       snprintf(buffer, sizeof(buffer), "%u", j);
       hwloc_obj_add_info(osdev, "LevelZeroDriverDeviceIndex", buffer);
 
-      hwloc__levelzero_properties_get(zeh, zesh, osdev, &is_integrated);
+      hwloc__levelzero_properties_get(zeh, zesh, osdev, &props);
 
       hwloc__levelzero_cqprops_get(zeh, osdev);
 
@@ -641,7 +548,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       }
 
       /* get all memory info at once */
-      hwloc__levelzero_memory_get(zeh, zesh, osdev, is_integrated, nr_subdevices, subzehs, subosdevs);
+      hwloc__levelzero_memory_get(zesh, osdev, nr_subdevices, subosdevs);
 
       /* get all ports info at once */
       if (!(hwloc_topology_get_flags(topology) & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
