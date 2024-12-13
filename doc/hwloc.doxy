@@ -581,33 +581,18 @@ Here's an example de <tt>CMakeLists.txt</tt> which shows variables
 obtained from <tt>pkg-config</tt> and how to use them:
 
 \verbatim
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.6)
 project(TEST_HWLOC C)
+
 include(FindPkgConfig)
-if(PKG_CONFIG_EXECUTABLE)
-  unset(HWLOC_FOUND CACHE)
-  pkg_search_module(HWLOC hwloc)
-  if(HWLOC_FOUND)
-    message(STATUS "HWLOC_LIBRARIES=${HWLOC_LIBRARIES}")
-    message(STATUS "HWLOC_LINK_LIBRARIES=${HWLOC_LINK_LIBRARIES}")
-    message(STATUS "HWLOC_LIBRARY_DIRS=${HWLOC_LIBRARY_DIRS}")
-    message(STATUS "HWLOC_LDFLAGS=${HWLOC_LDFLAGS}")
-    message(STATUS "HWLOC_LDFLAGS_OTHERS=${HWLOC_LDFLAGS_OTHERS}")
-    message(STATUS "HWLOC_INCLUDE_DIRS=${HWLOC_INCLUDE_DIRS}")
-    message(STATUS "HWLOC_CFLAGS=${HWLOC_CFLAGS}")
-    message(STATUS "HWLOC_CFLAGS_OTHER=${HWLOC_CFLAGS_OTHER}")
-  else()
-    message(FATAL_ERROR "HWLOC not found with pkg-config, add the path to hwloc.pc in PKG_CONFIG_PATH.")
-  endif()
-else()
-  message(FATAL_ERROR "PKG_CONFIG_EXECUTABLE: not found.")
-endif()
+if(PKG_CONFIG_FOUND)
+  pkg_search_module(HWLOC REQUIRED IMPORTED_TARGET hwloc)
+else(PKG_CONFIG_FOUND)
+  message(FATAL_ERROR "FindHWLOC needs pkg-config program and PKG_CONFIG_PATH must contain the path to hwloc.pc file.")
+endif(PKG_CONFIG_FOUND)
 
 add_executable(hwloc-hello hwloc-hello.c)
-target_include_directories(hwloc-hello PRIVATE ${HWLOC_INCLUDE_DIRS})
-target_compile_options(hwloc-hello PRIVATE ${HWLOC_CFLAGS})
-target_link_libraries(hwloc-hello PRIVATE ${HWLOC_LINK_LIBRARIES})
-target_link_options(hwloc-hello PRIVATE ${HWLOC_LDFLAGS})
+target_link_libraries(hwloc-hello PRIVATE PkgConfig::HWLOC)
 \endverbatim
 
 The project may be built with:
