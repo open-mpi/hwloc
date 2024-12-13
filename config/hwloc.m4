@@ -1315,8 +1315,9 @@ return rsmi_init(0);
                          hwloc_rsmi_warning=no],
                         [AC_MSG_RESULT([no])
                          hwloc_rsmi_warning=yes],
-                        [AC_MSG_RESULT([don't know (cross-compiling)])])],
-                      [hwloc_rsmi_happy=no])
+                        [AC_MSG_RESULT([don't know (cross-compiling)])])
+		      AC_CHECK_DECLS([rsmi_dev_partition_id_get],,[:],[[#include <rocm_smi/rocm_smi.h>]])
+		     ], [hwloc_rsmi_happy=no])
         LDFLAGS="$LDFLAGS_save"
         LIBS="$LIBS_save"
       ], [hwloc_rsmi_happy=no])

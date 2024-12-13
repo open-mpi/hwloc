@@ -24,7 +24,9 @@ Version 2.12.0
   - zesDriverGetDeviceByUuidExp() is now required in the L0 runtime.
   - ZES/Sysman variants were added in hwloc/levelzero.h to specifically
     handle ZES/Sysman device handles.
-* Better detect Cray Slingshot NICs, thanks to Edgar Leon for the report.
+* Fix the locality of AMD GPU partitions, thanks to Edgar Leon for
+  reporting and debugging the issue.
+* Better detect Cray Slingshot NICs, thanks to Edgar Leon.
 * Add support for Die objects and Module groups on Windows.
 * Only filter-out Dies that are identical to their Packages
   when it applies to all Dies.
