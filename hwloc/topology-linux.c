@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -6617,9 +6617,9 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
       }
     }
   }
-  if (!strncmp(obj->name, "hsn", 3)) {
+  if (!strncmp(obj->name, "hs", 2)) {
     /* Cray Cassini HSN for Slingshot networks are Ethernet-based,
-     * named hsnX with a "cxi" (and "cxi_user") class.
+     * named "hsnX" or "hsiX" with a "cxi" (and "cxi_user") class.
      */
     snprintf(path, sizeof(path), "%s/device/cxi", osdevpath);
     if (!hwloc_access(path, R_OK|X_OK, root_fd)) {
