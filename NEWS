@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2024 Inria.  All rights reserved.
+Copyright © 2009-2025 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -24,6 +24,7 @@ Version 2.12.0
   - zesDriverGetDeviceByUuidExp() is now required in the L0 runtime.
   - ZES/Sysman variants were added in hwloc/levelzero.h to specifically
     handle ZES/Sysman device handles.
+* Better detect Cray Slingshot NICs, thanks to Edgar Leon for the report.
 * Add support for Die objects and Module groups on Windows.
 * Only filter-out Dies that are identical to their Packages
   when it applies to all Dies.
