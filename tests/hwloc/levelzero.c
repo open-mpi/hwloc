@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2024 Inria.  All rights reserved.
+ * Copyright © 2021-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -175,7 +175,6 @@ int main(void)
     for (j=0; j<nbdevices; j++, k++) {
       hwloc_bitmap_t set;
       hwloc_obj_t osdev, ancestor;
-      const char *value;
 
       osdev = hwloc_levelzero_get_sysman_device_osdev(topology, sdvh[j]);
       assert(osdev);
