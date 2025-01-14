@@ -6005,7 +6005,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
    * which requires the NUMA level to be connected.
    */
   if (already_numanodes)
-    hwloc_topology_reconnect(topology, 0);
+    hwloc__reconnect(topology, 0);
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
