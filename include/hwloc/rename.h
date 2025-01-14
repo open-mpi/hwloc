@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2024 Inria.  All rights reserved.
+ * Copyright © 2010-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -824,6 +824,8 @@ extern "C" {
 
 #define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
+
+#define hwloc__reconnect HWLOC_NAME(_reconnect)
 
 #define hwloc__attach_memory_object HWLOC_NAME(insert_memory_object)
 

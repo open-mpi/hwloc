@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2024 Inria.  All rights reserved.
+ * Copyright © 2010-2025 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -699,7 +699,7 @@ hwloc_distances_add_commit(hwloc_topology_t topology,
   }
 
   /* in case we added some groups, see if we need to reconnect */
-  hwloc_topology_reconnect(topology, 0);
+  hwloc__reconnect(topology, 0);
 
   return 0;
 

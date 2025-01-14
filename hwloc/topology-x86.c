@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2024 Inria.  All rights reserved.
+ * Copyright © 2010-2025 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1751,7 +1751,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   if (topology->levels[0][0]->cpuset) {
     /* somebody else discovered things, reconnect levels so that we can look at them */
-    hwloc_topology_reconnect(topology, 0);
+    hwloc__reconnect(topology, 0);
     if (topology->nb_levels == 2 && topology->level_nbobjects[1] == data->nbprocs) {
       /* only PUs were discovered, as much as we would, complete the topology with everything else */
       alreadypus = 1;
