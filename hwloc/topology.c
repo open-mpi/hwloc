@@ -5161,6 +5161,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   unsigned i;
   int j, depth;
 
+  assert(!topology->modified);
+
   /* make sure we can use ranges to check types */
 
   /* hwloc__obj_type_is_{,d,i}cache() want cache types to be ordered like this */
