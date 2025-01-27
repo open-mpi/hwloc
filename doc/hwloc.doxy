@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -1888,7 +1888,7 @@ subtype <tt>DRAM</tt> (for usual main memory),
 <tt>SPM</tt> (specific-purpose memory, usually reserved for some custom applications),
 <tt>NVM</tt> (non-volatile memory when used as main memory),
 <tt>MCDRAM</tt> (on KNL),
-<tt>GPUMemory</tt> (on POWER architecture with NVIDIA GPU memory shared over NVLink),
+<tt>GPUMemory</tt> (NVIDIA GPU memory shared over NVLink on POWER, over NVLink-C2C on Grace Hopper, etc.),
 <tt>CXL-DRAM</tt> or <tt>CXL-NVM</tt> for CXL DRAM or non-volatile memory.
 Note that some of these subtypes are guessed by the library,
 they might be missing or slightly wrong in some corner cases.
