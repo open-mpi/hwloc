@@ -35,6 +35,7 @@ Version 2.12.0
 * The systemd-dbus-api output of hwloc-calc has changed, and
   --nodeset-output-format was added, to support NUMA node outputs.
   Thanks to Pierre Neyron.
+* Update NVLink bandwidth and CUDA capabilities up to NVIDIA Blackwell.
 
 
 Version 2.11.2
