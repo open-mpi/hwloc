@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009,2024 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -198,7 +198,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
     }
     printf("\n");
     hwloc_bitmap_free(remaining);
-  } else if (numberof.depth != -1) {
+  } else if (numberof.depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
     while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, cpuset, nodeset, numberof.depth, obj)) != NULL) {
@@ -207,7 +207,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
       nb++;
     }
     printf("%u\n", nb);
-  } else if (intersect.depth != -1) {
+  } else if (intersect.depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     hwloc_obj_t obj = NULL;
     int first = 1;
     if (!sep)
