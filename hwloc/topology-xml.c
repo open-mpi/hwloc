@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -410,6 +410,20 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     default:
       if (hwloc__xml_verbose())
 	fprintf(stderr, "%s: ignoring osdev_type attribute for non-osdev object\n",
+		state->global->msgprefix);
+      break;
+    }
+  }
+
+  else if (!strcmp(name, "numanode_type")) {
+    switch (obj->type) {
+    case HWLOC_OBJ_NUMANODE: {
+      /* ignored for now, here for possible forward compat */
+      break;
+    }
+    default:
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "%s: ignoring numanode_type attribute for non-NUMA object\n",
 		state->global->msgprefix);
       break;
     }
