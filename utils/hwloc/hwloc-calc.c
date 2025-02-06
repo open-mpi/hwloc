@@ -8,6 +8,7 @@
  */
 
 #include "private/autogen/config.h"
+#include "private/private.h" /* for cpukind easier use */
 #include "hwloc-calc.h"
 #include "hwloc.h"
 #include "misc.h"
@@ -155,6 +156,27 @@ next:
   }
 }
 
+static hwloc_bitmap_t hwloc_calc_get_memtier_bitmap(hwloc_topology_t topology, hwloc_bitmap_t nodeset)
+{
+  hwloc_bitmap_t mtset = hwloc_bitmap_alloc();
+  hwloc_obj_t obj;
+
+  if (!mtset)
+    return NULL;
+
+  obj = NULL;
+  while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, NULL /* unneeded for NUMANODE */, nodeset, HWLOC_TYPE_DEPTH_NUMANODE, obj)) != NULL) {
+    const char *tier = hwloc_obj_get_info_by_name(obj, "MemoryTier");
+    if (tier)
+      hwloc_bitmap_set(mtset, atoi(tier));
+  }
+
+  return mtset;
+}
+
+#define _HWLOC_CALC_DEPTH_MEMORYTIER -998
+#define _HWLOC_CALC_DEPTH_CPUKIND -999
+
 static int
 hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpuset, hwloc_bitmap_t nodeset)
 {
@@ -198,6 +220,42 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
     }
     printf("\n");
     hwloc_bitmap_free(remaining);
+
+  } else if (numberof.depth == _HWLOC_CALC_DEPTH_CPUKIND) {
+    unsigned i, nb = 0;
+    for(i=0; i<topology->nr_cpukinds; i++)
+      if (hwloc_bitmap_intersects(cpuset, topology->cpukinds[i].cpuset))
+        nb++;
+    printf("%u\n", nb);
+  } else if (intersect.depth == _HWLOC_CALC_DEPTH_CPUKIND) {
+    unsigned i;
+    int first = 1;
+    if (!sep)
+      sep = ",";
+    for(i=0; i<topology->nr_cpukinds; i++)
+      if (hwloc_bitmap_intersects(cpuset, topology->cpukinds[i].cpuset)) {
+	printf("%s%s%u", first ? "" : sep, objecto ? "cpukind:" : "", i);
+        first = 0;
+      }
+    printf("\n");
+
+  } else if (numberof.depth == _HWLOC_CALC_DEPTH_MEMORYTIER) {
+    hwloc_bitmap_t mtset = hwloc_calc_get_memtier_bitmap(topology, nodeset);
+    printf("%u\n", hwloc_bitmap_weight(mtset));
+    hwloc_bitmap_free(mtset);
+  } else if (intersect.depth == _HWLOC_CALC_DEPTH_MEMORYTIER) {
+    hwloc_bitmap_t mtset = hwloc_calc_get_memtier_bitmap(topology, nodeset);
+    unsigned i;
+    int first = 1;
+    if (!sep)
+      sep = ",";
+    hwloc_bitmap_foreach_begin(i, mtset) {
+	printf("%s%s%u", first ? "" : sep, objecto ? "MemoryTier:" : "", i);
+        first = 0;
+    } hwloc_bitmap_foreach_end();
+    printf("\n");
+    hwloc_bitmap_free(mtset);
+
   } else if (numberof.depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     unsigned nb = 0;
     hwloc_obj_t obj = NULL;
@@ -673,25 +731,37 @@ int main(int argc, char *argv[])
   }
 
   numberof.depth = HWLOC_TYPE_DEPTH_UNKNOWN; /* disable this feature by default */
-  if (numberof_string && hwloc_calc_parse_level(NULL, topology, numberof_string, strlen(numberof_string), &numberof) < 0) {
-    if (numberof.depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-      fprintf(stderr, "cannot use --number-of type %s with multiple depth, please use the relevant depth\n",
-              numberof_string);
-    else if (numberof.depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-      fprintf(stderr, "cannot use --number-of type %s, unavailable\n",
-              numberof_string);
-    goto out;
+  if (numberof_string) {
+    if (!hwloc_strncasecmp(numberof_string, "memorytier", 10))
+      numberof.depth = _HWLOC_CALC_DEPTH_MEMORYTIER;
+    else if (!hwloc_strncasecmp(numberof_string, "cpukind", 7))
+      numberof.depth = _HWLOC_CALC_DEPTH_CPUKIND;
+    else if (hwloc_calc_parse_level(NULL, topology, numberof_string, strlen(numberof_string), &numberof) < 0) {
+      if (numberof.depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+        fprintf(stderr, "cannot use --number-of type %s with multiple depth, please use the relevant depth\n",
+                numberof_string);
+      else if (numberof.depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+        fprintf(stderr, "cannot use --number-of type %s, unavailable\n",
+                numberof_string);
+      goto out;
+    }
   }
 
   intersect.depth = HWLOC_TYPE_DEPTH_UNKNOWN; /* disable this feature by default */
-  if (intersect_string && hwloc_calc_parse_level(NULL, topology, intersect_string, strlen(intersect_string), &intersect) < 0) {
-    if (intersect.depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-      fprintf(stderr, "cannot use --intersect type %s with multiple depth, please use the relevant depth\n",
-              intersect_string);
-    else if (intersect.depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-      fprintf(stderr, "cannot use --intersect type %s, unavailable\n",
-              intersect_string);
-    goto out;
+  if (intersect_string) {
+    if (!hwloc_strncasecmp(intersect_string, "memorytier", 10))
+      intersect.depth = _HWLOC_CALC_DEPTH_MEMORYTIER;
+    else if (!hwloc_strncasecmp(intersect_string, "cpukind", 7))
+      intersect.depth = _HWLOC_CALC_DEPTH_CPUKIND;
+    else if (hwloc_calc_parse_level(NULL, topology, intersect_string, strlen(intersect_string), &intersect) < 0) {
+      if (intersect.depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+        fprintf(stderr, "cannot use --intersect type %s with multiple depth, please use the relevant depth\n",
+                intersect_string);
+      else if (intersect.depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+        fprintf(stderr, "cannot use --intersect type %s, unavailable\n",
+                intersect_string);
+      goto out;
+    }
   }
 
   hiernblevels = 0; /* disable this feature by default */

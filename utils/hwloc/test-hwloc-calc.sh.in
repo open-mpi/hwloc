@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009, 2024 CNRS
-# Copyright © 2009-2024 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -132,6 +132,12 @@ set -e
   echo "# Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)"
   $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -H 'pack.numa[mcdram]' 'numa[mcdram]:0' 'numa[ddr]:1' 'numa[mcdram]:3'
   echo
+  echo "# Number of Memory Tiers"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -N memorytier all
+  echo
+  echo "# Memory Tier of a single node"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -I memorytier node:4
+  echo
   echo "# Check that we don't mix a single input NUMA node with other local nodes"
   $calc --if synthetic -i "pack:2 [numa] group:2 [numa] [numa] pu:2" -I node node:2
   echo
@@ -234,6 +240,12 @@ set -e
   echo
   echo "# CPU kind by info attr"
   $calc --if xml --input $linuxdir/fakeheterocpunuma.xml --cpukind FrequencyMaxMHz=3000 all
+  echo
+  echo "# Number of CPU kinds"
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml -N cpukind 0xf0f0
+  echo
+  echo "# List of CPU kinds"
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml -I cpukind 0xff00
   echo
 
   echo "# Caches with attributes"

@@ -88,6 +88,12 @@ Group0:1.Group2:2 Group0:1.Group2:3
 # Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)
 Package:0.NUMANode:1 Package:0.NUMANode:7
 
+# Number of Memory Tiers
+2
+
+# Memory Tier of a single node
+1
+
 # Check that we don't mix a single input NUMA node with other local nodes
 2
 
@@ -180,6 +186,12 @@ NUMANode:1
 
 # CPU kind by info attr
 0x00000fff
+
+# Number of CPU kinds
+2
+
+# List of CPU kinds
+0,2
 
 # Caches with attributes
 0x0000000b
