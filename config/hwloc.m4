@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2024 Inria.  All rights reserved.
+dnl Copyright © 2009-2025 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020, 2023 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -934,7 +934,7 @@ return 0;
 
     AS_IF([test "x$hwloc_pthread_mutex_happy" != xyes -a "x$hwloc_windows" != xyes],
       [AC_MSG_WARN([pthread_mutex_lock not available, required for thread-safe initialization on non-Windows platforms.])
-       AC_MSG_WARN([Please report this to the hwloc-devel mailing list.])
+       AC_MSG_WARN([Please report this to the hwloc-users mailing list or at https://github.com/open-mpi/hwloc])
        AC_MSG_ERROR([Cannot continue])])
 
     dnl Don't check for valgrind in embedded mode because this may conflict
