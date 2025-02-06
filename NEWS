@@ -32,6 +32,8 @@ Version 2.12.0
   when it applies to all Dies.
 * Improve hwloc-calc to handle CPU-less NUMA nodes or platforms with
   heterogeneous memory without requiring --nodeset-output.
+* hwloc-calc now accepts counting/listing cpukinds and memory tiers
+  with -N and -I cpukind/memorytier.
 * The systemd-dbus-api output of hwloc-calc has changed, and
   --nodeset-output-format was added, to support NUMA node outputs.
   Thanks to Pierre Neyron.

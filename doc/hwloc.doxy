@@ -2471,6 +2471,15 @@ and <tt>apple,firestorm;ARM,v8</tt> on performance cores on Apple M1 CPU.
 </dd>
 </dl>
 
+The hwloc-calc tool may be used to query the number of cpukinds
+or which ones exist in some cores:
+\verbatim
+$ hwloc-calc -N cpukind all
+2
+$ hwloc-calc -I cpukind package:0
+0,1
+\endverbatim
+
 See \ref hwlocality_cpukinds for details.
 
 
@@ -2555,11 +2564,21 @@ To list all the physical indexes of Tier-0 NUMA nodes (HBM P\#2 and P\#3 not sho
 $ hwloc-calc -I 'numa[tier=0]' -p all
 2,3
 \endverbatim
+To find the memory kind of a NUMA node, one may look at its info attribute
+or use hwloc-calc:
+\verbatim
+$ hwloc-info --get-attr "info MemoryTier" numa:1
+1
+$ hwloc-calc -I memorytier numa:1
+1
+\endverbatim
 
 The number of tiers may be retrieved by looking at topology attributes
-in the root object:
+in the root object, of by counting tiers inside it:
 \verbatim
 $ hwloc-info --get-attr "info MemoryTiersNr" topology
+2
+$ hwloc-calc --N memorytier all
 2
 \endverbatim
 

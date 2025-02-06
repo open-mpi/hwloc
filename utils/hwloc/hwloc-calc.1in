@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2024 Inria.  All rights reserved.
+.\" Copyright © 2010-2025 Inria.  All rights reserved.
 .\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" Copyright © 2024 CNRS
 .\" See COPYING in top-level directory.
@@ -135,6 +135,9 @@ while \fB\-N "numa[mcdram]"\fR only counts MCDRAM NUMA nodes on KNL.
 
 If an OS device subtype such as \fIgpu\fR  is given instead of \fIosdev\fR,
 only the os devices of that subtype will be counted.
+
+Special values such as \fIcpukind\fR and \fImemorytier\fR may be given
+to return the number of cpukinds or memory tiers matching the input location.
 .TP
 \fB\-I \-\-intersect <type|depth>\fR
 Find the list of objects of the given type or depth that intersect the CPU set and
@@ -155,6 +158,9 @@ e.g. MCDRAM NUMA node #3 is outputted as 7 (NUMA node #7) instead of 3.
 
 If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
 only the os devices of that subtype will be returned.
+
+Special values such as \fIcpukind\fR and \fImemorytier\fR may be given
+to return the list of cpukind or memory tier indexes matching the input location.
 
 If combined with \fB\-\-object\-output\fR, object indexes are prefixed
 with types (e.g. \fICore:0\fR instead of \fI0\fR).
@@ -460,6 +466,11 @@ To get the set of first threads of all cores:
     $ hwloc-calc --no-smt all -I pu
     0,2,4,6,8,10,12,14
 
+To get the number of cpukinds inside a package:
+
+    $ hwloc-calc -N cpukind package:0
+    2
+
 .
 .\" **************************
 .\"    Examples of listing or counting NUMA nodes
@@ -493,6 +504,11 @@ To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
 
     $ hwloc-calc -I "numa[mcdram]" --oo pu:157
     NUMANode:1
+
+To find the memory tier of a NUMA node:
+
+    $ hwloc-calc -I memorytier node:2
+    1
 
 .
 .\" **************************
