@@ -427,6 +427,7 @@ extern "C" {
 #define HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY)
 #define HWLOC_LOCAL_NUMANODE_FLAG_ALL HWLOC_NAME_CAPS(LOCAL_NUMANODE_FLAG_ALL)
 #define hwloc_get_local_numanode_objs HWLOC_NAME(get_local_numanode_objs)
+#define hwloc_topology_get_default_nodeset HWLOC_NAME(topology_get_default_nodeset)
 
 #define hwloc_memattr_get_name HWLOC_NAME(memattr_get_name)
 #define hwloc_memattr_get_flags HWLOC_NAME(memattr_get_flags)

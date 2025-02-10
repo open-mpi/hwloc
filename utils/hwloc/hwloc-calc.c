@@ -27,6 +27,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --no-smt                  Only keep a single PU per core\n");
   fprintf(where, "  --cpukind <n>             Only keep PUs in the CPU kind <n>\n");
   fprintf(where, "  --cpukind <name>=<value>  Only keep PUs whose CPU kind match info <name>=<value>\n");
+  fprintf(where, "  --default-nodes           Only keep default memory nodes\n");
   fprintf(where, "  --restrict [nodeset=]<bitmap>\n");
   fprintf(where, "                            Restrict the topology to some processors or NUMA nodes.\n");
   fprintf(where, "  --restrict-flags <n>      Set the flags to be used during restrict\n");
@@ -89,6 +90,7 @@ static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static unsigned long best_node_flags = 0;
 static int showlargestobjs = 0;
 static int no_smt = -1;
+static int default_nodes = 0;
 static int singlify = 0;
 static enum hwloc_utils_cpuset_format_e cpuset_output_format = HWLOC_UTILS_CPUSET_FORMAT_HWLOC;
 static hwloc_bitmap_t cpukind_cpuset = NULL;
@@ -189,6 +191,20 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
     } else {
       hwloc_bitmap_singlify_per_core(topology, cpuset, no_smt);
     }
+  }
+
+  if (default_nodes) {
+    hwloc_bitmap_t dnset = hwloc_bitmap_alloc();
+    if (dnset) {
+      int err = hwloc_topology_get_default_nodeset(topology, dnset, 0);
+      if (err < 0)
+        perror("Failed to apply --default-nodes");
+      else
+        hwloc_bitmap_and(nodeset, nodeset, dnset);
+    } else {
+        perror("Failed to apply --default-nodes");
+    }
+    hwloc_bitmap_free(dnset);
   }
 
   if (singlify)
@@ -545,6 +561,10 @@ int main(int argc, char *argv[])
       if (!strncmp(argv[0], "--no-smt=", 9)) {
 	no_smt = atoi(argv[0] + 9);
 	goto next;
+      }
+      if (!strcmp(argv[0], "--default-nodes")) {
+        default_nodes = 1;
+        goto next;
       }
       if (!strcmp(argv[0], "--number-of") || !strcmp(argv[0], "-N")) {
 	if (argc < 2) {
