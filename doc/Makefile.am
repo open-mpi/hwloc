@@ -1,4 +1,4 @@
-# Copyright © 2009-2024 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009-2013, 2021 Université Bordeaux
 # Copyright © 2009-2016 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -689,6 +689,7 @@ man3_memattrs_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_LOCAL_NUMANODE_FLAG_ALL.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_local_numanode_objs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_default_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_value.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_best_target.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_best_initiator.3 \

@@ -61,6 +61,20 @@ combine invocations:
   hwloc-calc --restrict $(hwloc-calc --cpukind 0 all) core:1
 
 .TP
+\fB\-\-default\-nodes\fR
+Only keep NUMA nodes that are considered default nodes on
+heterogeneous memory platforms.
+This usually includes DRAM memory nodes (or nodes of the
+same memory tier) rather than nodes with specific characteristics
+(HBM, NVM, CXL, etc).
+
+This option is useful for splitting the topology by NUMA domain
+when binding one task per domain even if some NUMA domains have the
+same locality (e.g. one DRAM and one HBM node per socket).
+
+See hwloc_topology_get_default_nodeset() for details.
+
+.TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
 This removes some PUs and their now-child-less parents.
@@ -482,6 +496,12 @@ whose locality is exactly equal to a Package:
 
     $ hwloc-calc --local-memory-flags 0 --physical-output pack:1
     4,7
+
+To display the list of default NUMA nodes, by logical indexes,
+in the entire machine:
+
+    $ hwloc-calc --default-nodes -I numa all
+    0,2,4,6
 
 To display the best-capacity NUMA node(s), by physical indexes,
 whose locality is exactly equal to a Package:

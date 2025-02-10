@@ -1,5 +1,5 @@
 #
-# Copyright © 2018-2024 Inria.  All rights reserved.
+# Copyright © 2018-2025 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -335,6 +335,7 @@ _hwloc_calc(){
 		   --input -i
 		   --input-format --if
 		   --no-smt --no-smt=N
+		   --default-nodes
 		   -q --quiet
 		   -v --verbose
 		   --version

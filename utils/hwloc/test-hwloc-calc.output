@@ -88,6 +88,9 @@ Group0:1.Group2:2 Group0:1.Group2:3
 # Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)
 Package:0.NUMANode:1 Package:0.NUMANode:7
 
+# List of default NUMA Nodes in a Package
+0,1,2,3
+
 # Number of Memory Tiers
 2
 

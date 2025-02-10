@@ -132,6 +132,9 @@ set -e
   echo "# Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)"
   $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -H 'pack.numa[mcdram]' 'numa[mcdram]:0' 'numa[ddr]:1' 'numa[mcdram]:3'
   echo
+  echo "# List of default NUMA Nodes in a Package"
+  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml --default-nodes -I NUMANode -p Package:0
+  echo
   echo "# Number of Memory Tiers"
   $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -N memorytier all
   echo

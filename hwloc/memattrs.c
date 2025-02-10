@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020-2024 Inria.  All rights reserved.
+ * Copyright © 2020-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -1224,6 +1224,93 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
 
   *nrp = i;
   return 0;
+}
+
+static int compare_nodes_by_os_index(const void *_a, const void *_b)
+{
+  const hwloc_obj_t * a = _a, * b = _b;
+  return (*a)->os_index - (*b)->os_index;
+}
+
+int
+hwloc_topology_get_default_nodeset(hwloc_topology_t topology,
+                                   hwloc_nodeset_t nodeset,
+                                   unsigned long flags)
+{
+  hwloc_obj_t *nodes;
+  hwloc_bitmap_t remainingcpuset;
+  unsigned nrnodes, i;
+  const char *first_subtype;
+
+  if (flags) {
+    errno = EINVAL;
+    goto out;
+  }
+
+  remainingcpuset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
+  if (!remainingcpuset)
+    goto out;
+
+  nrnodes = topology->slevels[HWLOC_SLEVEL_NUMANODE].nbobjs;
+  nodes = malloc(nrnodes * sizeof(*nodes));
+  if (!nodes)
+    goto out_with_remainingcpuset;
+
+  memcpy(nodes, topology->slevels[HWLOC_SLEVEL_NUMANODE].objs, nrnodes * sizeof(*nodes));
+  qsort(nodes, nrnodes, sizeof(*nodes), compare_nodes_by_os_index);
+
+  hwloc_bitmap_zero(nodeset);
+
+  /* always take the first node (FIXME: except if unexpected subtype?) */
+  first_subtype = nodes[0]->subtype;
+  hwloc_bitmap_set(nodeset, nodes[0]->os_index);
+  hwloc_bitmap_andnot(remainingcpuset, remainingcpuset, nodes[0]->cpuset);
+
+  /* use all non-intersecting nodes with same subtype */
+  for(i=1; i<nrnodes; i++) {
+    /* check same or no subtype */
+    if (first_subtype) {
+      if (!nodes[i]->subtype || strcmp(first_subtype, nodes[i]->subtype))
+        continue;
+    } else if (nodes[i]->subtype) {
+      continue;
+    }
+    /* take non-overlapping nodes */
+    if (hwloc_bitmap_isincluded(nodes[i]->cpuset, remainingcpuset) /* can be empty */) {
+      hwloc_bitmap_set(nodeset, nodes[i]->os_index);
+      hwloc_bitmap_andnot(remainingcpuset, remainingcpuset, nodes[i]->cpuset);
+    }
+    /* more needed? */
+    if (hwloc_bitmap_iszero(remainingcpuset))
+      goto done;
+  }
+
+  /* find more nodes to cover the entire topology cpuset.
+   * only take what's necessary: first nodes, non-empty */
+  for(i=1; i<nrnodes; i++) {
+    /* already taken? */
+    if (hwloc_bitmap_isset(nodeset, i))
+      continue;
+    /* take non-overlapping nodes, except empty  */
+    if (hwloc_bitmap_isincluded(nodes[i]->cpuset, remainingcpuset)
+        && !hwloc_bitmap_iszero(nodes[i]->cpuset)) {
+      hwloc_bitmap_set(nodeset, nodes[i]->os_index);
+      hwloc_bitmap_andnot(remainingcpuset, remainingcpuset, nodes[i]->cpuset);
+    }
+    /* more needed? */
+    if (hwloc_bitmap_iszero(remainingcpuset))
+      goto done;
+  }
+
+ done:
+  free(nodes);
+  hwloc_bitmap_free(remainingcpuset);
+  return 0;
+
+ out_with_remainingcpuset:
+  hwloc_bitmap_free(remainingcpuset);
+ out:
+  return -1;
 }
 
 

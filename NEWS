@@ -19,6 +19,9 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.12.0
 --------------
+* Add hwloc_topology_get_default_nodeset() for the set of default
+  NUMA nodes.
+  - hwloc-calc now has --default-nodes option.
 * Rework oneAPI LevelZero support to use zesInit() and avoid the need
   to set ZES_ENABLE_SYSMAN=1 in the environment.
   - zesDriverGetDeviceByUuidExp() is now required in the L0 runtime.
