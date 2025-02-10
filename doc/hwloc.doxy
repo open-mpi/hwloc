@@ -2514,7 +2514,7 @@ Hence there is a need to explicit memory technologies and performance
 to help users decide where to allocate.
 
 
-\section heteromem_memtiers Memory Tiers
+\section heteromem_memtiers Memory Tiers and Default nodes
 
 hwloc builds <i>Memory Tiers</i> to identify different kinds of
 NUMA nodes.
@@ -2550,6 +2550,15 @@ is ranked first, etc.
 If hwloc fails to build tiers properly, see <tt>HWLOC_MEMTIERS</tt>
 and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar.
 
+<br/>
+
+hwloc also tries to identify "default" memory nodes.
+They usually correspond the tier containing DRAM nodes.
+These are where normal data buffers should be allocated from,
+but they may also be used when placing tasks per NUMA domain
+(to hide NUMA nodes with overlapping localities,
+ e.g. HBM and CXL in our example above).
+
 
 \section heteromem_use_cli Using Heterogeneous Memory from the command-line
 
@@ -2569,6 +2578,13 @@ $ hwloc-calc -N 'numa[dram]' package:0
 $ hwloc-calc -N 'numa' package:0
 2
 \endverbatim
+
+To list all default NUMA nodes:
+\verbatim
+$ hwloc-calc --default-nodes all
+0,2
+\endverbatim
+
 To list all the physical indexes of Tier-0 NUMA nodes (HBM P\#2 and P\#3 not shown on the figure):
 \verbatim
 $ hwloc-calc -I 'numa[tier=0]' -p all
@@ -2647,6 +2663,10 @@ then select DRAM L\#2 but ignore HBM L\#3 and CXL L\#4
 (overlap wih DRAM L\#2).
 </li>
 </ul>
+<b>hwloc set of default nodes</b> (returned by hwloc_topology_get_default_nodeset())
+<b>was designed for this purpose</b>: it ignores NUMA nodes with overlapping
+CPU set (only the first one is kept), and also tries to return nodes with
+similar subtypes.
 
 <br/>
 
