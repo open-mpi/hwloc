@@ -2486,8 +2486,9 @@ CXL memory connected to the entire machine.
 \image html heteromem.png
 \image latex heteromem.png "" width=\textwidth
 
-The hardware usually exposes "normal" memory first because it is
+The hardware usually exposes "default" memory first because it is
 where "normal" data buffers should be allocated by default.
+
 However there is no guarantee about whether HBM, NVM, CXL will appear
 second.
 Hence there is a need to explicit memory technologies and performance
@@ -2533,7 +2534,7 @@ and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar.
 
 \section heteromem_use_cli Using Heterogeneous Memory from the command-line
 
-Tiers may be specified in location filters when using NUMA nodes
+Specific kinds or tiers of memory may be specified in location filters when using NUMA nodes
 in hwloc command-line tools.
 For instance, binding memory on the first HBM node (<tt>numa[hbm]:0</tt>)
 is actually equivalent to binding on the second node (<tt>numa:1</tt>)
@@ -2603,15 +2604,20 @@ or for finding a node that is local to some objects.
 With heterogeneous memory, one should remember that multiple nodes may
 now have the same locality (HBM and DRAM above) or overlapping localities
 (e.g. DRAM and CXL above).
+<ul>
+<li>
 Checking NUMA node subtype or tier attributes is a good way to avoid
 this issue by ignoring nodes of different kinds.
-
-Another solution consists in ignoring nodes whose cpuset overlap the
+</li>
+<li>
+Another solution consists in ignoring nodes whose CPU set overlap the
 previously selected ones.
 For instance, in the above example, one could first select DRAM L\#0
 but ignore HBM L\#1 (because it overlaps with DRAM L\#0),
 then select DRAM L\#2 but ignore HBM L\#3 and CXL L\#4
 (overlap wih DRAM L\#2).
+</li>
+</ul>
 
 <br/>
 
