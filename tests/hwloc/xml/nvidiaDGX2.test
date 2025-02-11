@@ -1,0 +1,3 @@
+# NVIDIA DGX-2 with NVLink and NVSwitch
+source: nvidiaDGX2.xml
+target: nvidiaDGX2.xml

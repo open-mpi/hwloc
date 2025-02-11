@@ -1,4 +1,4 @@
-# Copyright © 2009-2023 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -32,6 +32,7 @@ xml_tests = \
         192em64t-12gr2n8c2t.test \
         192em64t-24n8c2t.test \
         power8gpudistances.test \
+        nvidiaDGX2.test \
         fakeheterodistances.test \
         fakecpukinds.test \
         memorysidecaches.test \
@@ -57,6 +58,7 @@ xml_xml_outputs = \
         192em64t-12gr2n8c2t.xml \
         192em64t-24n8c2t.xml \
         power8gpudistances.xml \
+        nvidiaDGX2.xml \
         fakeheterodistances.xml \
         fakecpukinds.xml \
         memorysidecaches.xml \
