@@ -1395,7 +1395,7 @@ hwloc__distances_transform_merge_switch_ports(hwloc_topology_t topology,
   hwloc_uint64_t *values = distances->values;
   unsigned first, i, j, nbobjs = distances->nbobjs;
 
-  if (strcmp(dist->name, "NVLinkBandwidth")) {
+  if (!dist || strcmp(dist->name, "NVLinkBandwidth")) {
     errno = EINVAL;
     return -1;
   }
@@ -1444,7 +1444,7 @@ hwloc__distances_transform_transitive_closure(hwloc_topology_t topology,
   unsigned nbobjs = distances->nbobjs;
   unsigned i, j, k;
 
-  if (strcmp(dist->name, "NVLinkBandwidth")) {
+  if (!dist || strcmp(dist->name, "NVLinkBandwidth")) {
     errno = EINVAL;
     return -1;
   }
