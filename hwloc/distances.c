@@ -1452,8 +1452,8 @@ hwloc__distances_transform_transitive_closure(struct hwloc_distances_s *distance
         if (is_nvswitch(objs[k]))
           bw_sw2j += values[k*nbobjs+j];
 
-      /* bandwidth from i to j is now min(i2sw,sw2j) */
-      values[i*nbobjs+j] = bw_i2sw > bw_sw2j ? bw_sw2j : bw_i2sw;
+      /* bandwidth from i to j now gets indirect bandwidth too, min(i2sw,sw2j) */
+      values[i*nbobjs+j] += bw_i2sw > bw_sw2j ? bw_sw2j : bw_i2sw;
     }
   }
 
