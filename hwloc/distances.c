@@ -1386,18 +1386,11 @@ static __hwloc_inline int is_nvswitch(hwloc_obj_t obj)
 }
 
 static int
-hwloc__distances_transform_merge_switch_ports(hwloc_topology_t topology,
-                                              struct hwloc_distances_s *distances)
+hwloc__distances_transform_merge_switch_ports(struct hwloc_distances_s *distances)
 {
-  struct hwloc_internal_distances_s *dist = hwloc__internal_distances_from_public(topology, distances);
   hwloc_obj_t *objs = distances->objs;
   hwloc_uint64_t *values = distances->values;
   unsigned first, i, j, nbobjs = distances->nbobjs;
-
-  if (!dist || strcmp(dist->name, "NVLinkBandwidth")) {
-    errno = EINVAL;
-    return -1;
-  }
 
   /* find the first port */
   first = (unsigned) -1;
@@ -1434,19 +1427,12 @@ hwloc__distances_transform_merge_switch_ports(hwloc_topology_t topology,
 }
 
 static int
-hwloc__distances_transform_transitive_closure(hwloc_topology_t topology,
-                                              struct hwloc_distances_s *distances)
+hwloc__distances_transform_transitive_closure(struct hwloc_distances_s *distances)
 {
-  struct hwloc_internal_distances_s *dist = hwloc__internal_distances_from_public(topology, distances);
   hwloc_obj_t *objs = distances->objs;
   hwloc_uint64_t *values = distances->values;
   unsigned nbobjs = distances->nbobjs;
   unsigned i, j, k;
-
-  if (!dist || strcmp(dist->name, "NVLinkBandwidth")) {
-    errno = EINVAL;
-    return -1;
-  }
 
   for(i=0; i<nbobjs; i++) {
     hwloc_uint64_t bw_i2sw = 0;
@@ -1475,7 +1461,7 @@ hwloc__distances_transform_transitive_closure(hwloc_topology_t topology,
 }
 
 int
-hwloc_distances_transform(hwloc_topology_t topology,
+hwloc_distances_transform(hwloc_topology_t topology __hwloc_attribute_unused,
                           struct hwloc_distances_s *distances,
                           enum hwloc_distances_transform_e transform,
                           void *transform_attr,
@@ -1494,13 +1480,13 @@ hwloc_distances_transform(hwloc_topology_t topology,
   case HWLOC_DISTANCES_TRANSFORM_MERGE_SWITCH_PORTS:
   {
     int err;
-    err = hwloc__distances_transform_merge_switch_ports(topology, distances);
+    err = hwloc__distances_transform_merge_switch_ports(distances);
     if (!err)
       err = hwloc__distances_transform_remove_null(distances);
     return err;
   }
   case HWLOC_DISTANCES_TRANSFORM_TRANSITIVE_CLOSURE:
-    return hwloc__distances_transform_transitive_closure(topology, distances);
+    return hwloc__distances_transform_transitive_closure(distances);
   default:
     errno = EINVAL;
     return -1;
