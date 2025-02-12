@@ -88,7 +88,7 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_setaffinity 211
 #       elif defined(__alpha__)
 #         define __NR_sched_setaffinity 395
-#       elif defined(__s390__)
+#       elif defined(__s390__) || defined(__s390x__)
 #         define __NR_sched_setaffinity 239
 #       elif defined(__sparc__)
 #         define __NR_sched_setaffinity 261
@@ -125,7 +125,7 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_getaffinity 212
 #       elif defined(__alpha__)
 #         define __NR_sched_getaffinity 396
-#       elif defined(__s390__)
+#       elif defined(__s390__) || defined(__s390x__)
 #         define __NR_sched_getaffinity 240
 #       elif defined(__sparc__)
 #         define __NR_sched_getaffinity 260
@@ -197,8 +197,16 @@ struct hwloc_linux_backend_data_s {
 #  define __NR_mbind 237
 # elif defined(__ia64__)
 #  define __NR_mbind 1259
+# elif defined(__hppa__)
+#  define __NR_mbind 260
+# elif defined(__alpha__)
+   /* sys_ni_syscall */
+# elif defined(__s390) || defined(__s390x__)
+#  define __NR_mbind 268
 # elif defined(__sparc__)
 #  define __NR_mbind 353
+# elif defined(__m68k__)
+#  define __NR_mbind 268
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #  define __NR_mbind 259
 # elif defined(__aarch64__)
@@ -207,6 +215,8 @@ struct hwloc_linux_backend_data_s {
 #  define __NR_mbind 235
 # elif defined(__arm__)
 #  define __NR_mbind 319
+# elif defined(__cris__)
+   /* sys_ni_syscall when CRIS removed in 4.17 */
 # endif
 #endif
 static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
@@ -232,8 +242,16 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 #  define __NR_set_mempolicy 238
 # elif defined(__ia64__)
 #  define __NR_set_mempolicy 1261
+# elif defined(__hppa__)
+#  define __NR_set_mempolicy 262
+# elif defined(__alpha__)
+   /* sys_ni_syscall */
+# elif defined(__s390) || defined(__s390x__)
+#  define __NR_set_mempolicy 270
 # elif defined(__sparc__)
 #  define __NR_set_mempolicy 305
+# elif defined(__m68k__)
+#  define __NR_set_mempolicy 270
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #  define __NR_set_mempolicy 261
 # elif defined(__aarch64__)
@@ -242,6 +260,8 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 #  define __NR_set_mempolicy 237
 # elif defined(__arm__)
 #  define __NR_set_mempolicy 321
+# elif defined(__cris__)
+   /* sys_ni_syscall when CRIS removed in 4.17 */
 # endif
 #endif
 static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused,
@@ -264,8 +284,16 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 #  define __NR_get_mempolicy 239
 # elif defined(__ia64__)
 #  define __NR_get_mempolicy 1260
+# elif defined(__hppa__)
+#  define __NR_get_mempolicy 261
+# elif defined(__alpha__)
+   /* sys_ni_syscall */
+# elif defined(__s390) || defined(__s390x__)
+#  define __NR_get_mempolicy 269
 # elif defined(__sparc__)
 #  define __NR_get_mempolicy 304
+# elif defined(__m68k__)
+#  define __NR_get_mempolicy 269
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #  define __NR_get_mempolicy 260
 # elif defined(__aarch64__)
@@ -274,6 +302,8 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 #  define __NR_get_mempolicy 236
 # elif defined(__arm__)
 #  define __NR_get_mempolicy 320
+# elif defined(__cris__)
+   /* sys_ni_syscall when CRIS removed in 4.17 */
 # endif
 #endif
 static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unused,
@@ -298,8 +328,16 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #  define __NR_migrate_pages 256
 # elif defined(__ia64__)
 #  define __NR_migrate_pages 1280
+# elif defined(__hppa__)
+#  define __NR_migrate_pages 272
+# elif defined(__alpha__)
+   /* sys_ni_syscall */
+# elif defined(__s390) || defined(__s390x__)
+#  define __NR_migrate_pages 287
 # elif defined(__sparc__)
 #  define __NR_migrate_pages 302
+# elif defined(__m68k__)
+#  define __NR_migrate_pages 287
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #  define __NR_migrate_pages 258
 # elif defined(__aarch64__)
@@ -308,6 +346,8 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #  define __NR_migrate_pages 238
 # elif defined(__arm__)
 #  define __NR_migrate_pages 400
+# elif defined(__cris__)
+#  define __NR_migrate_pages 294
 # endif
 #endif
 static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
@@ -331,8 +371,16 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 #  define __NR_move_pages 279
 # elif defined(__ia64__)
 #  define __NR_move_pages 1276
+# elif defined(__hppa__)
+#  define __NR_move_pages 295
+# elif defined(__alpha__)
+   /* sys_ni_syscall */
+# elif defined(__s390__) || defined(__s390x__)
+#  define __NR_move_pages 310
 # elif defined(__sparc__)
 #  define __NR_move_pages 307
+# elif defined(__m68k__)
+#  define __NR_move_pages 310
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
 #  define __NR_move_pages 301
 # elif defined(__aarch64__)
@@ -341,6 +389,8 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 #  define __NR_move_pages 239
 # elif defined(__arm__)
 #  define __NR_move_pages 344
+# elif defined(__cris__)
+#  define __NR_migrate_pages 317
 # endif
 #endif
 static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
