@@ -105,6 +105,8 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_setaffinity 241
 #       elif defined(__cris__)
 #         define __NR_sched_setaffinity 241
+#       elif defined(__loongarch__)
+#         define __NR_sched_setaffinity 122
 /*#       elif defined(__mips__)
   #         define __NR_sched_setaffinity TODO (32/64/nabi) */
 #       else
@@ -142,6 +144,8 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_getaffinity 242
 #       elif defined(__cris__)
 #         define __NR_sched_getaffinity 242
+#       elif defined(__loongarch__)
+#         define __NR_sched_getaffinity 123
 /*#       elif defined(__mips__)
   #         define __NR_sched_getaffinity TODO (32/64/nabi) */
 #       else
@@ -218,6 +222,8 @@ struct hwloc_linux_backend_data_s {
 #  define __NR_mbind 319
 # elif defined(__cris__)
    /* sys_ni_syscall when CRIS removed in 4.17 */
+# elif defined(__loongarch__)
+#  define __NR_mbind 235
 # endif
 #endif
 static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
@@ -263,6 +269,8 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 #  define __NR_set_mempolicy 321
 # elif defined(__cris__)
    /* sys_ni_syscall when CRIS removed in 4.17 */
+# elif defined(__loongarch__)
+#  define __NR_set_mempolicy 237
 # endif
 #endif
 static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused,
@@ -305,6 +313,8 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 #  define __NR_get_mempolicy 320
 # elif defined(__cris__)
    /* sys_ni_syscall when CRIS removed in 4.17 */
+# elif defined(__loongarch__)
+#  define __NR_get_mempolicy 236
 # endif
 #endif
 static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unused,
@@ -349,6 +359,8 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #  define __NR_migrate_pages 400
 # elif defined(__cris__)
 #  define __NR_migrate_pages 294
+# elif defined(__loongarch__)
+#  define __NR_migrate_pages 238
 # endif
 #endif
 static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
@@ -392,6 +404,8 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 #  define __NR_move_pages 344
 # elif defined(__cris__)
 #  define __NR_migrate_pages 317
+# elif defined(__loongarch__)
+#  define __NR_move_pages 239
 # endif
 #endif
 static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
