@@ -106,8 +106,12 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_setaffinity 241
 #       elif defined(__loongarch__)
 #         define __NR_sched_setaffinity 122
-/*#       elif defined(__mips__)
-  #         define __NR_sched_setaffinity TODO (32/64/nabi) */
+#       elif defined(__mips__) && _MIPS_SIM == _ABI64
+#         define __NR_sched_setaffinity 5195
+#       elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#         define __NR_sched_setaffinity 6195
+#       elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#         define __NR_sched_setaffinity 4239
 #       else
 #         warning "don't know the syscall number for sched_setaffinity on this architecture, will not support binding"
 #         define sched_setaffinity(pid, lg, mask) (errno = ENOSYS, -1)
@@ -145,8 +149,12 @@ struct hwloc_linux_backend_data_s {
 #         define __NR_sched_getaffinity 242
 #       elif defined(__loongarch__)
 #         define __NR_sched_getaffinity 123
-/*#       elif defined(__mips__)
-  #         define __NR_sched_getaffinity TODO (32/64/nabi) */
+#       elif defined(__mips__) && _MIPS_SIM == _ABI64
+#         define __NR_sched_getaffinity 5196
+#       elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#         define __NR_sched_getaffinity 6196
+#       elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#         define __NR_sched_getaffinity 4240
 #       else
 #         warning "don't know the syscall number for sched_getaffinity on this architecture, will not support getting binding"
 #         define sched_getaffinity(pid, lg, mask) (errno = ENOSYS, -1)
@@ -223,6 +231,12 @@ struct hwloc_linux_backend_data_s {
    /* sys_ni_syscall when CRIS removed in 4.17 */
 # elif defined(__loongarch__)
 #  define __NR_mbind 235
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_mbind 5227
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_mbind 6231
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_mbind 4268
 # endif
 #endif
 static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
@@ -270,6 +284,12 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
    /* sys_ni_syscall when CRIS removed in 4.17 */
 # elif defined(__loongarch__)
 #  define __NR_set_mempolicy 237
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_set_mempolicy 5229
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_set_mempolicy 6233
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_set_mempolicy 4270
 # endif
 #endif
 static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused,
@@ -314,6 +334,12 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
    /* sys_ni_syscall when CRIS removed in 4.17 */
 # elif defined(__loongarch__)
 #  define __NR_get_mempolicy 236
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_get_mempolicy 5228
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_get_mempolicy 6232
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_get_mempolicy 4269
 # endif
 #endif
 static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unused,
@@ -360,6 +386,12 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 #  define __NR_migrate_pages 294
 # elif defined(__loongarch__)
 #  define __NR_migrate_pages 238
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_migrate_pages 5246
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_migrate_pages 6250
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_migrate_pages 4287
 # endif
 #endif
 static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
@@ -405,6 +437,12 @@ static __hwloc_inline long hwloc_migrate_pages(int pid __hwloc_attribute_unused,
 #  define __NR_migrate_pages 317
 # elif defined(__loongarch__)
 #  define __NR_move_pages 239
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_move_pages 5267
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_move_pages 6271
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_move_pages 4308
 # endif
 #endif
 static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
