@@ -230,7 +230,7 @@ static __hwloc_inline long hwloc_mbind(void *addr __hwloc_attribute_unused,
 # ifdef __i386__
 #  define __NR_set_mempolicy 276
 # elif defined(__x86_64__)
-#  define __NR_set_mempolicy 239
+#  define __NR_set_mempolicy 238
 # elif defined(__ia64__)
 #  define __NR_set_mempolicy 1261
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
@@ -262,7 +262,7 @@ static __hwloc_inline long hwloc_set_mempolicy(int mode __hwloc_attribute_unused
 # ifdef __i386__
 #  define __NR_get_mempolicy 275
 # elif defined(__x86_64__)
-#  define __NR_get_mempolicy 238
+#  define __NR_get_mempolicy 239
 # elif defined(__ia64__)
 #  define __NR_get_mempolicy 1260
 # elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
@@ -294,7 +294,7 @@ static __hwloc_inline long hwloc_get_mempolicy(int *mode __hwloc_attribute_unuse
 
 #ifndef __NR_migrate_pages
 # ifdef __i386__
-#  define __NR_migrate_pages 204
+#  define __NR_migrate_pages 294
 # elif defined(__x86_64__)
 #  define __NR_migrate_pages 256
 # elif defined(__ia64__)
