@@ -41,6 +41,8 @@ Version 2.12.0
   --nodeset-output-format was added, to support NUMA node outputs.
   Thanks to Pierre Neyron.
 * Update NVLink bandwidth and CUDA capabilities up to NVIDIA Blackwell.
+* Fix some NUMA syscalls on Linux for platforms with old libc headers.
+* Some minor fixes in distances.
 
 
 Version 2.11.2
