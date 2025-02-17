@@ -207,6 +207,7 @@ test-suite.log
 
 /contrib/systemd/hwloc-dump-hwdata.service
 /contrib/misc/hwloc-tweak-osindex
+/contrib/completion/test-bash-completion.sh
 
 /contrib/android/AndroidApp/.gradle
 /contrib/android/AndroidApp/.idea
