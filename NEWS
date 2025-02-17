@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2024 Inria.  All rights reserved.
+Copyright © 2009-2025 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -80,6 +80,34 @@ Version 3.0.0
     suffixed by "KiB".
   + XML format switches to 3.0 by default. Exporting to 2.x is
     possible with the new V2 XML export flag.
+
+
+Version 2.12.0
+--------------
+* Add hwloc_topology_get_default_nodeset() for the set of default
+  NUMA nodes.
+  - hwloc-calc now has --default-nodes option.
+* Rework oneAPI LevelZero support to use zesInit() and avoid the need
+  to set ZES_ENABLE_SYSMAN=1 in the environment.
+  - zesDriverGetDeviceByUuidExp() is now required in the L0 runtime.
+  - ZES/Sysman variants were added in hwloc/levelzero.h to specifically
+    handle ZES/Sysman device handles.
+* Fix the locality of AMD GPU partitions, thanks to Edgar Leon for
+  reporting and debugging the issue.
+* Better detect Cray Slingshot NICs, thanks to Edgar Leon.
+* Add support for Die objects and Module groups on Windows.
+* Only filter-out Dies that are identical to their Packages
+  when it applies to all Dies.
+* Improve hwloc-calc to handle CPU-less NUMA nodes or platforms with
+  heterogeneous memory without requiring --nodeset-output.
+* hwloc-calc now accepts counting/listing cpukinds and memory tiers
+  with -N and -I cpukind/memorytier.
+* The systemd-dbus-api output of hwloc-calc has changed, and
+  --nodeset-output-format was added, to support NUMA node outputs.
+  Thanks to Pierre Neyron.
+* Update NVLink bandwidth and CUDA capabilities up to NVIDIA Blackwell.
+* Fix some NUMA syscalls on Linux for platforms with old libc headers.
+* Some minor fixes in distances.
 
 
 Version 2.11.2
