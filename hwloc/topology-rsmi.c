@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2025 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -128,7 +128,7 @@ static int get_device_pci_info(uint32_t dv_ind, uint64_t *bdfid)
  * dv_ind  (IN) The device index
  * partid   (OUT) partition ID of GPU devices
  */
-static int get_device_partition_id(uint32_t dv_ind, uint32_t *partid)
+static int get_device_partition_id(uint32_t dv_ind __hwloc_attribute_unused, uint32_t *partid __hwloc_attribute_unused)
 {
 #if HAVE_DECL_RSMI_DEV_PARTITION_ID_GET
   rsmi_status_t rsmi_rc = rsmi_dev_partition_id_get(dv_ind, partid);
