@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009, 2024 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -892,22 +892,26 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
 
       nbi = 0;
       err = hwloc_memattr_get_initiators(topology, id, nodes[i], 0, &nbi, NULL, NULL);
-      if (err < 0)
-        goto out;
+      if (err < 0) {
+        hwloc_bitmap_zero(best_nodeset);
+        goto none;
+      }
 
       initiators = malloc(nbi * sizeof(*initiators));
       values = malloc(nbi * sizeof(*values));
       if (!initiators || !values) {
+        hwloc_bitmap_zero(best_nodeset);
         free(initiators);
         free(values);
-        goto out;
+        goto none;
       }
 
       err = hwloc_memattr_get_initiators(topology, id, nodes[i], 0, &nbi, initiators, values);
       if (err < 0) {
+        hwloc_bitmap_zero(best_nodeset);
         free(initiators);
         free(values);
-        goto out;
+        goto none;
       }
 
       for(j=0; j<nbi; j++) {
@@ -953,15 +957,16 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
     }
   }
 
-  if ((flags & HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT)
-      && hwloc_bitmap_iszero(best_nodeset)) {
-    for(i=0; i<nbnodes; i++)
-      hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+  if (hwloc_bitmap_iszero(best_nodeset)) {
+  none:
+    if (flags & HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT) {
+      for(i=0; i<nbnodes; i++)
+        hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+    }
   }
   return 0;
 
  out:
-  hwloc_bitmap_zero(best_nodeset);
   return -1;
 }
 
