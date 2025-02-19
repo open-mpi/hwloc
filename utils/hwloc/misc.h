@@ -971,8 +971,24 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
       } else {
         fprintf(stderr, "couldn't find attribute values for all nodes, falling back to default\n");
       }
-      for(i=0; i<nbnodes; i++)
-        hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+
+      /* try to get default nodes only */
+      hwloc_bitmap_t default_nodeset = hwloc_bitmap_alloc();
+      if (default_nodeset) {
+        err = hwloc_topology_get_default_nodeset(topology, default_nodeset, 0);
+        if (!err) {
+          hwloc_bitmap_zero(best_nodeset);
+          for(i=0; i<nbnodes; i++)
+            if (hwloc_bitmap_isset(default_nodeset, nodes[i]->os_index))
+              hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+        }
+      }
+      free(default_nodeset);
+      /* if still empty, use all local nodes */
+      if (hwloc_bitmap_iszero(best_nodeset))
+        for(i=0; i<nbnodes; i++)
+          hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+
     } else {
       if (!nb) {
         if (verbose > 0)
