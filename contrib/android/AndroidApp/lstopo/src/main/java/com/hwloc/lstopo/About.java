@@ -42,12 +42,8 @@ public class About extends Activity {
         tvVersion.setText("Version: " + versionName);
         tvVersion.setTextSize(20);
 
-        TextView ppWebsite = findViewById(R.id.privacy);
-        ppWebsite.setText("Privacy Policy: ");
-        ppWebsite.setTextSize(20);
-
-        TextView ppWebsiteLink = findViewById(R.id.privacy_link);
-        ppWebsiteLink.setText(privacy);
+        TextView ppWebsiteLink = findViewById(R.id.privacy);
+        ppWebsiteLink.setText("Privacy Policy");
         ppWebsiteLink.setTextColor(Color.parseColor("#4295f7"));
         ppWebsiteLink.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         ppWebsiteLink.setTextSize(20);
@@ -58,12 +54,8 @@ public class About extends Activity {
             }
         });
 
-        TextView tvWebsite = findViewById(R.id.open_mpi);
-        tvWebsite.setText("Project Website: ");
-        tvWebsite.setTextSize(20);
-
-        TextView tvWebsiteLink = findViewById(R.id.open_mpi_link);
-        tvWebsiteLink.setText(website);
+        TextView tvWebsiteLink = findViewById(R.id.open_mpi);
+        tvWebsiteLink.setText("Project Website");
         tvWebsiteLink.setTextColor(Color.parseColor("#4295f7"));
         tvWebsiteLink.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         tvWebsiteLink.setTextSize(20);
@@ -74,18 +66,11 @@ public class About extends Activity {
             }
         });
 
-        TextView tvGithub = findViewById(R.id.github);
-        tvGithub.setText("GitHub Repository: ");
-        tvGithub.setTextSize(20);
-
-        TextView tvGithubLink = findViewById(R.id.github_link);
-        tvGithubLink.setText(github);
+        TextView tvGithubLink = findViewById(R.id.github);
+        tvGithubLink.setText("GitHub Repository");
         tvGithubLink.setTextColor(Color.parseColor("#4295f7"));
         tvGithubLink.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         tvGithubLink.setTextSize(20);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0,0,0,dpToPx(30));
-        tvGithubLink.setLayoutParams(params);
         tvGithubLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,16 +78,8 @@ public class About extends Activity {
             }
         });
 
-        LinearLayout.LayoutParams paramsDebug = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        paramsDebug.setMargins(0,0,0,dpToPx(10));
-        tvGithubLink.setLayoutParams(paramsDebug);
-
-        TextView tvCi = findViewById(R.id.ci);
-        tvCi.setText("CI with latest APKs: ");
-        tvCi.setTextSize(20);
-
-        TextView tvCiLink = findViewById(R.id.ci_link);
-        tvCiLink.setText(ci);
+        TextView tvCiLink = findViewById(R.id.ci);
+        tvCiLink.setText("CI with latest APKs");
         tvCiLink.setTextColor(Color.parseColor("#4295f7"));
         tvCiLink.setTextAlignment(TEXT_ALIGNMENT_CENTER);
         tvCiLink.setTextSize(20);
