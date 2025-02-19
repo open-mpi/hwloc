@@ -15,6 +15,7 @@ import static android.view.View.TEXT_ALIGNMENT_CENTER;
 
 public class About extends Activity {
 
+    private final String privacy = "https://people.bordeaux.inria.fr/goglin/hwloc-android-privacy-policy.html";
     private final String github = "https://github.com/open-mpi/hwloc";
     private final String website = "https://www.open-mpi.org/projects/hwloc";
     private final String ci = "https://ci.inria.fr/hwloc/job/extended/job/master";
@@ -40,6 +41,22 @@ public class About extends Activity {
         TextView tvVersion = findViewById(R.id.version);
         tvVersion.setText("Version: " + versionName);
         tvVersion.setTextSize(20);
+
+        TextView ppWebsite = findViewById(R.id.privacy);
+        ppWebsite.setText("Privacy Policy: ");
+        ppWebsite.setTextSize(20);
+
+        TextView ppWebsiteLink = findViewById(R.id.privacy_link);
+        ppWebsiteLink.setText(privacy);
+        ppWebsiteLink.setTextColor(Color.parseColor("#4295f7"));
+        ppWebsiteLink.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+        ppWebsiteLink.setTextSize(20);
+        ppWebsiteLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToLink(privacy);
+            }
+        });
 
         TextView tvWebsite = findViewById(R.id.open_mpi);
         tvWebsite.setText("Project Website: ");
