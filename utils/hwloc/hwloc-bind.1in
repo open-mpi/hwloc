@@ -83,7 +83,11 @@ All existing attributes in the current topology may be listed with
 
 \fI<name>\fR may be suffixed with flags to tune the selection of best nodes,
 for instance as \fBbandwidth,strict,default\fR.
-\fBdefault\fR means that all local nodes are reported if no best could be found.
+
+\fBdefault\fR means that default nodes are reported if no best could
+be found (see \fI\--default-nodes\fR). If neither best nor default nodes
+could be found, all local nodes are reported.
+
 \fBstrict\fR means that nodes are selected only if their performance is the best
 for all the input CPUs. On a dual-socket machine with HBM in each socket,
 both HBMs are the best for their local socket, but not for the remote socket.
