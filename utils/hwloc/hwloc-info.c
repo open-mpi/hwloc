@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -653,7 +653,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
       loc.location.object = obj;
       err = hwloc_get_local_numanode_objs(topology, &loc, &nrnodes, nodes, show_local_memory_flags);
       if (!err) {
-        unsigned i;
+        unsigned i, j;
         if (best_memattr_id != (hwloc_memattr_id_t) -1) {
           /* only keep the best ones for that memattr */
 
@@ -668,14 +668,15 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
             /* on error, nodeset is zeroed, and we report nothing below (except if default flag is set) */
           }
         }
-        for(i=0; i<nrnodes; i++) {
+        for(i=0, j=0; i<nrnodes; i++) {
           if (!hwloc_bitmap_isset(nodeset, nodes[i]->os_index))
             continue;
           if (show_index_prefix)
-	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, i);
-          hwloc_info_show_local_memory(topology, nodes[i], obj, objs, i, prefix, verbose);
+	    snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, j);
+          hwloc_info_show_local_memory(topology, nodes[i], obj, objs, j, prefix, verbose);
           if (show_first_only)
             break;
+          j++;
         }
       }
     } else {
