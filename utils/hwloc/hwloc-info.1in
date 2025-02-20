@@ -195,6 +195,14 @@ both HBMs are the best for their local socket, but not for the remote socket.
 Hence both HBM are also considered best for the entire machine by default,
 but none if \fBstrict\fR.
 .TP
+\fB\-\-default\-nodes\fR
+Display information about the default NUMA nodes that are local to the given
+object.
+This usually includes DRAM memory nodes (or nodes of the
+same memory tier) rather than nodes with specific characteristics
+(HBM, NVM, CXL, etc).
+See hwloc_topology_get_default_nodeset() for details.
+.TP
 \fB\-\-first\fR
 For each input object, only report the first matching output object
 (first ancestor, first child, etc.).
