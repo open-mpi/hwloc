@@ -250,6 +250,7 @@ _hwloc_bind(){
 		   --membind
 		   --mempolicy
 		   --best-memattr
+		   --default-nodes
 		   --logical -l
 		   --physical -p
 		   --single
