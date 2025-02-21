@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -530,7 +530,7 @@ int main(int argc, char *argv[])
           i++, j=hwloc_bitmap_next(membind_set, j))
         nodes[i] = hwloc_get_numanode_obj_by_os_index(topology, j);
 
-      ret = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, membind_set);
+      ret = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, membind_set, verbose);
 
       free(nodes);
 

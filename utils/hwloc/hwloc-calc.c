@@ -327,7 +327,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
       if (!err) {
         unsigned i, first = 1;
         if (best_memattr_id != (hwloc_memattr_id_t) -1) {
-          err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, nodeset_filter);
+          err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, nodeset_filter, verbose);
           /* on error, nodeset_filter is zeroed, and we report nothing below (except if default flag is set) */
         }
         if (!sep)
