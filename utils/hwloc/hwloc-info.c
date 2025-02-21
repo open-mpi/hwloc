@@ -677,7 +677,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
           loc.type = HWLOC_LOCATION_TYPE_CPUSET;
           loc.location.cpuset = obj->cpuset;
           err = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id,
-                                                               nrnodes, nodes, &loc, best_node_flags, nodeset);
+                                                              nrnodes, nodes, &loc, best_node_flags, nodeset, verbose);
           if (err < -1) {
             if (verbose > 0)
               fprintf(stderr, "Failed to find a best local node for memory attribute.\n");

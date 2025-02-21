@@ -838,9 +838,10 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
                                               unsigned nbnodes, hwloc_obj_t *nodes,
                                               struct hwloc_location *initiator,
                                               unsigned long flags,
-                                              hwloc_nodeset_t best_nodeset)
+                                              hwloc_nodeset_t best_nodeset,
+                                              int verbose)
 {
-  unsigned i, j;
+  unsigned i, j, nb = 0;
   hwloc_uint64_t *values, bestvalue = 0;
   unsigned long mflags;
   int err;
@@ -853,7 +854,7 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
 
   if (mflags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
     /* iterate over targets, and then on their initiators */
-    for(i=0; i<nbnodes; i++) {
+    for(i=0, nb = 0; i<nbnodes; i++) {
       unsigned nbi;
       struct hwloc_location *initiators;
 
@@ -907,6 +908,8 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
         hwloc_utils__update_best_node(nodes[i], values[j],
                                       &bestvalue, best_nodeset,
                                       mflags);
+        nb++;
+        break; /* there shouldn't be multiple initiators */
       }
 
       free(initiators);
@@ -917,18 +920,33 @@ hwloc_utils_get_best_node_in_array_by_memattr(hwloc_topology_t topology, hwloc_m
     /* no initiator, just iterate over targets */
     for(i=0; i<nbnodes; i++) {
       uint64_t value;
-      if (!hwloc_memattr_get_value(topology, id, nodes[i], NULL, 0, &value))
+      if (!hwloc_memattr_get_value(topology, id, nodes[i], NULL, 0, &value)) {
         hwloc_utils__update_best_node(nodes[i], value,
                                       &bestvalue, best_nodeset,
                                       mflags);
+        nb++;
+      }
     }
   }
 
   if (hwloc_bitmap_iszero(best_nodeset)) {
   none:
     if (flags & HWLOC_UTILS_BEST_NODE_FLAG_DEFAULT) {
+      if (!nb) {
+        if (verbose > 0)
+          printf("found no node with attribute values for this initiator, falling back to default\n");
+      } else {
+        fprintf(stderr, "couldn't find attribute values for all nodes, falling back to default\n");
+      }
       for(i=0; i<nbnodes; i++)
         hwloc_bitmap_set(best_nodeset, nodes[i]->os_index);
+    } else {
+      if (!nb) {
+        if (verbose > 0)
+          printf("found no node with attribute values for this initiator\n");
+      } else {
+        fprintf(stderr, "couldn't find attribute values for all nodes, returning none\n");
+      }
     }
   }
   return 0;
