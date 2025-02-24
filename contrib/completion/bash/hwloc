@@ -176,6 +176,7 @@ _hwloc_info(){
 		   --local-memory
 		   --local-memory-flags
 		   --best-memattr
+		   --default-nodes
 		   --first
 		   -n
 		   --restrict
@@ -249,6 +250,7 @@ _hwloc_bind(){
 		   --membind
 		   --mempolicy
 		   --best-memattr
+		   --default-nodes
 		   --logical -l
 		   --physical -p
 		   --single

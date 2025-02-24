@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -46,6 +46,8 @@ void usage(const char *name, FILE *where)
 		 "                 Change policy that --membind applies (default is bind)\n");
   fprintf(where, "  --best-memattr <attr>\n");
   fprintf(where, "                 Select the best target node in the given memory binding\n");
+  fprintf(where, "  --default-nodes\n");
+  fprintf(where, "                 Keep default memory nodes only\n");
   fprintf(where, "  -l --logical   Take logical object indexes (default)\n");
   fprintf(where, "  -p --physical  Take physical object indexes\n");
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
@@ -99,6 +101,7 @@ int main(int argc, char *argv[])
   hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
   char *best_memattr_str = NULL;
+  int default_nodes = 0;
   char *callname;
   char *restrictstring = NULL;
   struct hwloc_calc_location_context_s lcontext;
@@ -172,6 +175,10 @@ int main(int argc, char *argv[])
       }
       best_memattr_str = argv[1];
       opt = 1;
+      goto next_config;
+    }
+    if (!strcmp (argv[0], "--default-nodes")) {
+      default_nodes = 1;
       goto next_config;
     }
 
@@ -523,7 +530,7 @@ int main(int argc, char *argv[])
           i++, j=hwloc_bitmap_next(membind_set, j))
         nodes[i] = hwloc_get_numanode_obj_by_os_index(topology, j);
 
-      ret = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, membind_set);
+      ret = hwloc_utils_get_best_node_in_array_by_memattr(topology, best_memattr_id, nrnodes, nodes, &loc, best_node_flags, membind_set, verbose);
 
       free(nodes);
 
@@ -538,6 +545,24 @@ int main(int argc, char *argv[])
         fprintf(stderr, "memory binding is now  %s after filtering by best memattr\n", s);
         free(s);
       }
+    }
+
+    if (default_nodes && !hwloc_bitmap_iszero(membind_set)) {
+      hwloc_bitmap_t default_nodeset = hwloc_bitmap_alloc();
+      if (!default_nodeset) {
+        fprintf(stderr, "failed to allocate default nodeset.\n");
+        return EXIT_FAILURE;
+      }
+
+      ret = hwloc_topology_get_default_nodeset(topology, default_nodeset, 0);
+      if (ret < 0) {
+        fprintf(stderr, "failed to get default nodeset.\n");
+        return EXIT_FAILURE;
+      }
+
+      hwloc_bitmap_and(membind_set, membind_set, default_nodeset);
+
+      hwloc_bitmap_free(default_nodeset);
     }
 
     if (verbose > 0) {
