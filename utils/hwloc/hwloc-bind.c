@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
   int default_nodes = 0;
   char *callname;
   char *restrictstring = NULL;
+  const char *env;
   struct hwloc_calc_location_context_s lcontext;
   struct hwloc_calc_set_context_s scontext;
 
@@ -189,9 +190,12 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
-  /* show all error messages, e.g. PREFERRED_MANY not supported by Linux kernel */
-  if (!getenv("HWLOC_HIDE_ERRORS"))
-    putenv((char *) "HWLOC_HIDE_ERRORS=0");
+  /* show binding error messages, e.g. PREFERRED_MANY not supported by Linux kernel */
+  env = getenv("HWLOC_HIDE_ERRORS");
+  if (!env || atoi(env) != 2) {
+    if (!getenv("HWLOC_SHOW_ERRORS"))
+      putenv((char *) "HWLOC_SHOW_ERRORS=bind");
+  }
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);
