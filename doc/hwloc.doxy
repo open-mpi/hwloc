@@ -1076,6 +1076,10 @@ following environment variables.
   Note that additional verbose messages may be enabled with
   other variables such as HWLOC_GROUPING_VERBOSE.
   </dd>
+<!-- since 2.12.1, not stable yet, hence not documented but internally used in hwloc-bind
+ HWLOC_SHOW_ERRORS=bind
+  show binding errors as if HWLOC_HIDE_ERRORS=0 for them
+-->
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
   <dd>enables or disables the use of NUMA distances.
