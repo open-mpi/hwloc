@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2023 Inria.  All rights reserved.
+ * Copyright © 2012-2025 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -73,7 +73,7 @@ int main(void)
 
     assert(has_rsmi_backend);
 
-    assert(osdev->attr->osdev.type == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
+    assert(osdev->attr->osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_GPU));
 
     value = hwloc_obj_get_info_by_name(osdev, "GPUModel");
     printf("found OSDev model %s\n", value);
