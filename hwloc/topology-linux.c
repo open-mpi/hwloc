@@ -7487,7 +7487,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
     /* couldn't read a single full string from that buffer, we're screwed */
     if (!boff) {
       if (HWLOC_SHOW_CRITICAL_ERRORS())
-        fprintf(stderr, "hwloc/linux: hwloc could read a DMI firmware entry #%u in %s\n",
+        fprintf(stderr, "hwloc/linux: hwloc couldn't read a DMI firmware entry #%u in %s\n",
                 i, path);
       break;
     }
