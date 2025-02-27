@@ -129,7 +129,7 @@ static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *ms
     report_insert_error_format_obj(oldstr, sizeof(oldstr), old);
 
     fprintf(stderr, "****************************************************************************\n");
-    fprintf(stderr, "* hwloc %s received invalid information from the operating system.\n", HWLOC_VERSION);
+    fprintf(stderr, "* hwloc %s received invalid information.\n", HWLOC_VERSION);
     fprintf(stderr, "*\n");
     fprintf(stderr, "* Failed with error: %s\n", msg);
     fprintf(stderr, "* while inserting %s\n", newstr);
