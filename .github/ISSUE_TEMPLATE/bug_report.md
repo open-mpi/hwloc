@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report an issue
+about: Report an issue, for instance a warning about invalid topology information
 title: ''
 labels: ''
 assignees: ''
