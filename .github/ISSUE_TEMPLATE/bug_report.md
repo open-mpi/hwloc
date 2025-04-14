@@ -1,3 +1,11 @@
+---
+name: Bug report
+about: Report an issue
+title: ''
+labels: ''
+assignees: ''
+---
+
 ### What version of hwloc are you using?
 
 * Run `which lstopo` to ensure that you are running the desired hwloc installation
