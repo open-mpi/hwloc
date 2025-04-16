@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   int depth = -1;
-  hwloc_bitmap_t cpubind_set, membind_set;
+  hwloc_bitmap_t cpubind_set, membind_set, dummy_set;
   int got_cpubind = 0, got_membind = 0;
   int working_on_cpubind = 1; /* membind if 0 */
   int get_binding = 0;
@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
 
   cpubind_set = hwloc_bitmap_alloc();
   membind_set = hwloc_bitmap_alloc();
+  dummy_set = hwloc_bitmap_alloc();
 
   while (argc >= 1) {
     opt = 0;
@@ -366,8 +367,8 @@ int main(int argc, char *argv[])
     lcontext.verbose = verbose;
     scontext.nodeset_input = use_nodeset || nodeset_location;
     scontext.cpuset_input_format = HWLOC_UTILS_CPUSET_FORMAT_UNKNOWN;
-    scontext.output_cpuset = cpubind_set;
-    scontext.output_nodeset = membind_set;
+    scontext.output_cpuset = working_on_cpubind ? cpubind_set : dummy_set; /* don't modify cpubind_set if adding membind locations */
+    scontext.output_nodeset = working_on_cpubind ? dummy_set : membind_set; /* don't modify membind_set if adding cpubind locations */
     ret = hwloc_calc_process_location_as_set(&lcontext, &scontext, location);
     if (ret < 0) {
       fprintf(stderr, "argument `%s' unrecognized, assuming this is the executable.\n", argv[0]);
@@ -665,6 +666,7 @@ int main(int argc, char *argv[])
 
   hwloc_bitmap_free(cpubind_set);
   hwloc_bitmap_free(membind_set);
+  hwloc_bitmap_free(dummy_set);
 
   hwloc_topology_destroy(topology);
 
@@ -694,6 +696,7 @@ int main(int argc, char *argv[])
 failed_binding:
   hwloc_bitmap_free(cpubind_set);
   hwloc_bitmap_free(membind_set);
+  hwloc_bitmap_free(dummy_set);
   hwloc_topology_destroy(topology);
   return EXIT_FAILURE;
 }
