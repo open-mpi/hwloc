@@ -39,8 +39,6 @@ def doMinGW = (!isBasicJob && env.NO_MINGW != 'true')
 println('MinGW is '+(doMinGW ? 'enabled.' : 'disabled.'))
 def doCygwin = (!isBasicJob && env.NO_CYGWIN != 'true')
 println('Cygwin is '+(doCygwin ? 'enabled.' : 'disabled.'))
-def doAndroid =  (!isBasicJob && env.NO_ANDROID != 'true')
-println('Android is '+(doAndroid ? 'enabled.' : 'disabled.'))
 
 pipeline {
         agent none
@@ -63,10 +61,6 @@ pipeline {
 						tarballgz = sh (script: 'ls *.gz', returnStdout: true).trim()
 						tarballbz2 = sh (script: 'ls *.bz2', returnStdout: true).trim()
 						stash includes: tarballgz, name: 'tarballgz'
-						if (doAndroid) {
-							sh 'tar zcvf android.tar.gz contrib/android'
-							stash includes: "android.tar.gz", name: 'tar-android'
-						}
 					}
 					dir('contrib/ci.inria.fr') {
 						script {
@@ -87,9 +81,6 @@ pipeline {
 							}
 							if (doCygwin) {
 								stash includes: "job-3-cygwin.*", name: 'scripts-cygwin'
-							}
-							if (doAndroid) {
-								stash includes: "job-3-android.sh", name: 'script-android'
 							}
 							if (doEmbedded) {
 								stash includes: "job-3-embedded.sh", name: 'script-embedded'
@@ -126,9 +117,6 @@ pipeline {
 					}
 					if (doCygwin) {
 						listOfNodeNames.push('Cygwin')
-					}
-					if (doAndroid) {
-						listOfNodeNames.push('AndroidStudio')
 					}
 					if (doCoverity) {
 						listOfNodeNames.push('Coverity')
@@ -221,18 +209,6 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-embedded'
 									sh 'chmod 755 job-3-embedded.sh && ./job-3-embedded.sh '+tarballgz
-									if (env.KEEP_WORKING_DIRECTORY != 'true')
-										deleteDir()
-								}
-							}
-						} else if (it == 'AndroidStudio') {
-							node('android') {
-								dir('check-android') {
-									unstash 'script-android'
-									unstash 'tar-android'
-									unstash 'tarballgz'
-									sh 'chmod 755 job-3-android.sh && ./job-3-android.sh '+tarballgz
-									archiveArtifacts artifacts: "lstopo-android/*.apk", fingerprint: true, onlyIfSuccessful: true
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 										deleteDir()
 								}
