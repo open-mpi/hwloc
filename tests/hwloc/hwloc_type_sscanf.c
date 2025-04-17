@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016-2024 Inria.  All rights reserved.
+ * Copyright © 2016-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -247,6 +247,10 @@ int main(void)
   assert(err == -1);
 
   printf("testing the local topology ...\n");
+  check_topo();
+
+  printf("testing synthetic topology group:2 group:2 pu:2 ...\n");
+  putenv((char *) "HWLOC_SYNTHETIC=group:2 group:2 pu:2");
   check_topo();
 
   printf("testing topology 32em64t-2n8c2t-pci-wholeio.xml ...\n");
