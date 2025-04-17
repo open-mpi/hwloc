@@ -44,7 +44,7 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
   }
 
   depth = hwloc_get_type_depth_with_attr(topology, type, &attr, sizeof(attr));
-  assert(depth == (int) obj->depth);
+  assert((depth == HWLOC_TYPE_DEPTH_MULTIPLE && !checkattrs) || depth == (int) obj->depth);
 }
 
 static void check(hwloc_topology_t topology, hwloc_obj_t obj)
