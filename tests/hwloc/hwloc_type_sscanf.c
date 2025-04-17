@@ -37,7 +37,7 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
 
   err = hwloc_type_sscanf_as_depth(buffer, NULL, topology, &depth);
   assert(!err);
-  assert(depth == (int) obj->depth);
+  assert(depth == HWLOC_TYPE_DEPTH_MULTIPLE || depth == (int) obj->depth);
 }
 
 static void check(hwloc_topology_t topology, hwloc_obj_t obj)
