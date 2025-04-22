@@ -235,6 +235,24 @@ set -e
   $calc --if synthetic --input "[numa(memory=1000000)] pack:2 [numa(memory=100000)] die:2 [numa(memory=1000)] pu:2" --best-memattr capacity pu:4
   echo
 
+  echo
+  echo "# no node is local to one pu of each package"
+  $calc --if synthetic --input "pack:2 [numa] pu:2" --local-memory-flags small,large pack:all.pu:0 
+  echo
+  echo "# 1 node is local to one package and one pu of the other"
+  $calc --if synthetic --input "pack:2 [numa] pu:2" --local-memory-flags small,large pack:0 pack:1.pu:0
+  echo
+  echo "# both nodes are local to one pu of each package, if intersecting"
+  $calc --if synthetic --input "pack:2 [numa] pu:2" --local-memory-flags intersect pack:all.pu:0 --oo
+  echo
+  echo "# both nodes are local to one package and one pu of the other, if intersecting"
+  $calc --if synthetic --input "pack:2 [numa] pu:2" --local-memory-flags intersect pack:0 pack:1.pu:0
+  echo
+  echo "# all local nodes"
+  $calc --if synthetic --input "pack:2 [numa] pu:2" --local-memory-flags _all pu:0 --sep "%"
+  echo
+
+  echo
   echo "# CPU kind by index"
   $calc --if xml --input $linuxdir/fakeheterocpunuma.output --cpukind 1 all
   echo

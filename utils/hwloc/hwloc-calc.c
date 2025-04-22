@@ -85,7 +85,7 @@ static struct hwloc_calc_level intersect;
 static int hiernblevels;
 static struct hwloc_calc_level *hierlevels;
 static int local_numanodes = 0;
-static unsigned long local_numanode_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY;
+static unsigned long local_numanode_flags = HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY | HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY;
 static hwloc_memattr_id_t best_memattr_id = (hwloc_memattr_id_t) -1;
 static unsigned long best_node_flags = 0;
 static int showlargestobjs = 0;

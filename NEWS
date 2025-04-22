@@ -26,6 +26,10 @@ Version 2.12.1
   Thanks to Antoine Morvan for the report.
 * Fix CPU and memory binding on different locations,
   thanks to Antoine Morvan for the report.
+* Add HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY and enable it by
+  default in hwloc-calc --local-memory for finding local NUMA nodes
+  that do not exactly match input locations.
+  Thanks to Antoine Morvan for the report.
 
 
 Version 2.12.0

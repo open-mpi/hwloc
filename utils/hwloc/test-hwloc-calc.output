@@ -181,6 +181,23 @@ NUMANode:1
 # Best-capacity local node near a PU (node:6@Machine)
 6
 
+
+# no node is local to one pu of each package
+
+
+# 1 node is local to one package and one pu of the other
+0
+
+# both nodes are local to one pu of each package, if intersecting
+NUMANode:0,NUMANode:1
+
+# both nodes are local to one package and one pu of the other, if intersecting
+0,1
+
+# all local nodes
+0%1
+
+
 # CPU kind by index
 0x000000ff
 
