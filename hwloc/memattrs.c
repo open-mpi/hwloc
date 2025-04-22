@@ -1158,6 +1158,8 @@ match_local_obj_cpuset(hwloc_obj_t node, hwloc_cpuset_t cpuset, unsigned long fl
 {
   if (flags & HWLOC_LOCAL_NUMANODE_FLAG_ALL)
     return 1;
+  if (flags & HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY)
+    return hwloc_bitmap_intersects(node->cpuset, cpuset);
   if ((flags & HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY)
       && hwloc_bitmap_isincluded(cpuset, node->cpuset))
     return 1;
@@ -1180,6 +1182,7 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
 
   if (flags & ~(HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY
                 |HWLOC_LOCAL_NUMANODE_FLAG_LARGER_LOCALITY
+                |HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY
                 | HWLOC_LOCAL_NUMANODE_FLAG_ALL)) {
     errno = EINVAL;
     return -1;

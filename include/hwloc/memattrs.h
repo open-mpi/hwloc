@@ -250,6 +250,16 @@ enum hwloc_local_numanode_flag_e {
    */
   HWLOC_LOCAL_NUMANODE_FLAG_SMALLER_LOCALITY = (1UL<<1),
 
+  /** \breif Select NUMA nodes whose locality intersects the given cpuset.
+   * This includes larger and smaller localities as well as localities
+   * that are partially included.
+   * For instance, if the locality is one core of both packages, a NUMA node
+   * local to one package is neither larger nor smaller than this locality,
+   * but it intersects it.
+   * \hideinitializer
+   */
+  HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY = (1UL<<3),
+
   /** \brief Select all NUMA nodes in the topology.
    * The initiator \p initiator is ignored.
    * \hideinitializer
