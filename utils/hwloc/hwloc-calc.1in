@@ -222,10 +222,10 @@ Change the flags used to select local NUMA nodes.
 Flags may be given as numeric values or as a comma-separated list of flag names
 that are passed to \fIhwloc_get_local_numanode_objs()\fR.
 Those names may be substrings of actual flag names as long as a single one matches.
-The default is \fB3\fR (or \fBsmaller,larger\fR)
+The default is \f0xb\fR (or \fBsmaller,larger,intersects\fR)
 which means NUMA nodes are displayed
-if their locality either contains or is contained
-in the locality of the given object.
+if their locality either contains, is contained, or intersects
+the locality of the given object.
 
 This option enables \fB\-\-local\-memory\fR.
 .TP
