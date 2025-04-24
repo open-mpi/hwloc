@@ -30,6 +30,9 @@ Version 2.12.1
   default in hwloc-calc --local-memory for finding local NUMA nodes
   that do not exactly match input locations.
   Thanks to Antoine Morvan for the report.
+* Fix a possible crash in the x86 backend when Qemu is configured to
+  expose multicore/thread CPUs that are actually single-core/thread.
+  Thanks to Georg Pfuetzenreuter.
 
 
 Version 2.12.0
