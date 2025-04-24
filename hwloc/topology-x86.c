@@ -653,7 +653,13 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
   infos->apicid = ebx >> 24;
   if (edx & (1 << 28)) {
-    legacy_max_log_proc = 1 << hwloc_flsl(((ebx >> 16) & 0xff) - 1);
+    unsigned ebx_16_23 = (ebx >> 16) & 0xff;
+    if (ebx_16_23) {
+      legacy_max_log_proc = 1 << hwloc_flsl(ebx_16_23 - 1);
+    } else {
+      hwloc_debug("HTT bit set in CPUID 0x01.edx, but legacy_max_proc = 0 in ebx, assuming legacy_max_log_proc = 1\n");
+      legacy_max_log_proc = 1;
+    }
   } else {
     hwloc_debug("HTT bit not set in CPUID 0x01.edx, assuming legacy_max_log_proc = 1\n");
     legacy_max_log_proc = 1;
