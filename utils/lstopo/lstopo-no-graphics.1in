@@ -768,12 +768,18 @@ sections may also be configured through \fB\-\-children\-order\fR.
 .\"    Colors Section
 .\" **************************
 .SH COLORS
-Individual CPUs and NUMA nodes are colored in the graphical output
-formats to indicate different characteristics:
+Boxes in the graphical output formats are colorized according to the
+hwloc object type, e.g. CPU packages are green or NUMA nodes are pink.
+This may be configured with \fB\-\-palette\fR, see also CUSTOM COLORS below.
+.
+On top of these default colors,
+individual CPUs and NUMA nodes may be colored
+to indicate different characteristics:
 .TP
 Green
 The topology is reported as seen by a specific process (see \fB\-\-pid\fR),
 and the given CPU or NUMA node is in this process CPU or Memory binding mask.
+This color may be changed with \fB\-\-binding\-color\fR.
 .TP
 White
 The CPU or NUMA node is in the allowed set (see below).
@@ -782,6 +788,7 @@ the object is also not in this process binding mask.
 .TP
 Red
 The CPU or NUMA node is not in the allowed set (see below).
+This color may be changed with \fB\-\-disallowed-color\fR.
 .
 .PP
 The "allowed set" is the set of CPUs or NUMA nodes to which the current process is
