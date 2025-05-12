@@ -82,6 +82,24 @@ Version 3.0.0
     possible with the new V2 XML export flag.
 
 
+Version 2.12.1
+--------------
+* Add hwloc-calc's --default-nodes option to hwloc-bind and hwloc-info.
+* Improve the --best-memattr "default" fallback, try to use "default"
+  memory nodes, and add verbose messages and warnings if some
+  performance info are incomplete or missing.
+  Thanks to Antoine Morvan for the report.
+* Fix CPU and memory binding on different locations,
+  thanks to Antoine Morvan for the report.
+* Add HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY and enable it by
+  default in hwloc-calc --local-memory for finding local NUMA nodes
+  that do not exactly match input locations.
+  Thanks to Antoine Morvan for the report.
+* Fix a possible crash in the x86 backend when Qemu is configured to
+  expose multicore/thread CPUs that are actually single-core/thread.
+  Thanks to Georg Pfuetzenreuter.
+
+
 Version 2.12.0
 --------------
 * Add hwloc_topology_get_default_nodeset() for the set of default
