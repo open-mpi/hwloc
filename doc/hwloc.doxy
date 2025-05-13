@@ -1172,6 +1172,7 @@ following environment variables.
   Hence, by default, hwloc uniformizes the max frequencies of cores
   that have the same base frequency (higher values are downgraded by up
   to 10%).
+  When available, the CPU capacity value is also adjusted accordingly.
 
   If this environment variable is set to <tt>adjust=X</tt>,
   the 10% threshold is replaced with X.
