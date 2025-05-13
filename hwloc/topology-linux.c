@@ -4715,7 +4715,8 @@ hwloc_linux_cpukinds_destroy(struct hwloc_linux_cpukinds *cpukinds)
 }
 
 /* for each set of PUs with the same base frequency,
- * adjust max frequencies by up to adjust_max percents
+ * adjust max frequencies by up to adjust_max percents,
+ * and uniformize to the min capacity
  */
 static void
 hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
@@ -4729,6 +4730,8 @@ hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
     unsigned long cur_base_freq = by_pu[first].base_freq;
     unsigned long min_maxfreq = by_pu[first].max_freq;
     unsigned long max_maxfreq = by_pu[first].max_freq;
+    unsigned long min_capacity = by_pu[first].capacity;
+    unsigned long max_capacity = by_pu[first].capacity;
     by_pu[first].done = 1;
     done++;
     next = 0;
@@ -4740,6 +4743,10 @@ hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
           max_maxfreq = by_pu[i].max_freq;
         else if (by_pu[i].max_freq < min_maxfreq)
           min_maxfreq = by_pu[i].max_freq;
+        if (by_pu[i].capacity > max_capacity)
+          max_capacity = by_pu[i].capacity;
+        else if (by_pu[i].capacity < min_capacity)
+          min_capacity = by_pu[i].capacity;
         by_pu[i].done = 1;
         done++;
       } else {
@@ -4751,6 +4758,8 @@ hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
     if (min_maxfreq == max_maxfreq) {
       hwloc_debug("linux/cpufreq: max frequencies always %lu when base=%lu\n",
                   min_maxfreq, cur_base_freq);
+      hwloc_debug("linux/cpufreq: %lu <= capacity <= %lu\n",
+                  min_capacity, max_capacity);
     } else {
       float ratio = ((float)(max_maxfreq-min_maxfreq)/(float)min_maxfreq);
       hwloc_debug("linux/cpufreq: max frequencies in [%lu-%lu] when base=%lu\n",
@@ -4758,10 +4767,12 @@ hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
       if (ratio*100 < (float)adjust_max) {
         hwloc_debug("linux/cpufreq: max frequencies overrated up to %u%% < %u%%, adjust all to %lu\n",
                     (unsigned)(ratio*100), adjust_max, min_maxfreq);
-        /* update max_freq of all PUs with this base_freq */
+        /* update max_freq and capacity of all PUs with this base_freq */
         for(i=first; i<nr_pus; i++)
-          if (by_pu[i].base_freq == cur_base_freq)
+          if (by_pu[i].base_freq == cur_base_freq) {
             by_pu[i].max_freq = min_maxfreq;
+            by_pu[i].capacity = min_capacity;
+          }
       }
     }
   }
