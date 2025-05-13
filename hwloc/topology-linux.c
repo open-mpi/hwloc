@@ -4673,16 +4673,27 @@ hwloc_linux_cpukinds_register(struct hwloc_linux_cpukinds *cpukinds,
                               int forced_efficiency)
 {
   unsigned i;
+  int use_index_for_efficiency = 0;
 
   /* sort by value, lower frequency and lower capacity likely means lower performance */
   qsort(cpukinds->sets, cpukinds->nr_sets, sizeof(*cpukinds->sets), hwloc_linux_cpukinds_compar);
 
+  /* values likely fit in integers (cpu_capacity is 1024 max as of linux 6.15).
+   * otherwise we'll replace them with their index.
+   */
+  for(i=0; i<cpukinds->nr_sets; i++) {
+    if (cpukinds->sets[i].value > INT_MAX) {
+      use_index_for_efficiency = 1;
+      break;
+    }
+  }
+
   for(i=0; i<cpukinds->nr_sets; i++) {
     char value[32];
-    snprintf(value, sizeof(value), "%lu", cpukinds->sets[i].value);
-    /* value (at least cpu_capacity) may be > INT_MAX, too large for a forced_efficiency, hence use i instead */
+    unsigned long efficiency = cpukinds->sets[i].value;
+    snprintf(value, sizeof(value), "%lu", efficiency);
     hwloc_linux_cpukinds_register_one(topology, cpukinds->sets[i].cpuset,
-                                      forced_efficiency ? (int) i : HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
+                                      forced_efficiency ? (use_index_for_efficiency ? (int) i : (int) efficiency) : HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
                                       (char *) name, value);
     /* the cpuset is given to the callee */
     cpukinds->sets[i].cpuset = NULL;
