@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.12.2
+--------------
+* Fix hwloc-gather-topology failure because of MemoryModules when
+  running as root. Thanks to Andrew Phelps for the report.
+
+
 Version 2.12.1
 --------------
 * Add hwloc-calc's --default-nodes option to hwloc-bind and hwloc-info.
