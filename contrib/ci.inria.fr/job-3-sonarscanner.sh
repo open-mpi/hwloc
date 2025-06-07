@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright © 2012-2022 Inria.  All rights reserved.
+# Copyright © 2012-2025 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -144,7 +144,7 @@ sed -e '/#define HWLOC_HAVE_ATTRIBUTE/d' -i include/private/autogen/config.h
 # hence the contents ~/.sonarqube-hwloc-token doesn't appear in the public logs.
 cat > sonar-project.properties << EOF
 sonar.host.url=https://sonarqube.inria.fr/sonarqube
-sonar.login=$(cat ~/.sonarqube-hwloc-token)
+sonar.token=$(cat ~/.sonarqube-hwloc-token)
 sonar.links.homepage=https://www.open-mpi.org/projects/hwloc/
 sonar.links.ci=https://ci.inria.fr/hwloc/
 sonar.links.scm=https://github.com/open-mpi/hwloc
@@ -153,7 +153,7 @@ sonar.projectKey=tadaam:hwloc:github:$hwloc_branch
 sonar.projectDescription=Hardware locality (hwloc)
 # SED doesn't want us to define projectName
 sonar.projectVersion=$hwloc_branch
-sonar.scm.disabled=false
+sonar.scm.disabled=true
 # sonar.scm.provider=git requires sonar-scanner to run inside a git clone
 sonar.sourceEncoding=UTF-8
 sonar.sources=hwloc, tests, utils
