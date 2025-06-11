@@ -214,8 +214,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_NUMANODE)
       obj->attr->numanode.local_memory = lvalue;
-    else if (!obj->parent)
-      topology->machine_memory.local_memory = lvalue;
     else if (hwloc__xml_verbose())
       fprintf(stderr, "%s: ignoring local_memory attribute for non-NUMAnode non-root object\n",
 	      state->global->msgprefix);
@@ -761,8 +759,6 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     } else if (!strcmp(tag, "page_type")) {
       if (obj->type == HWLOC_OBJ_NUMANODE) {
 	ret = hwloc__xml_import_pagetype(&obj->attr->numanode, &childstate);
-      } else if (!parent) {
-	ret = hwloc__xml_import_pagetype(&topology->machine_memory, &childstate);
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
