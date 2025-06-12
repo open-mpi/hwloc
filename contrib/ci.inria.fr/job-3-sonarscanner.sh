@@ -158,19 +158,19 @@ sonar.scm.disabled=true
 sonar.sourceEncoding=UTF-8
 sonar.sources=hwloc, tests, utils
 sonar.exclusions=tests/hwloc/ports/**,tests/hwloc/xml/*.xml
-sonar.c.clangsa.reportPath=analyzer_reports/*/*.plist
-sonar.c.errorRecoveryEnabled=true
-sonar.c.compiler.parser=GCC
-sonar.c.compiler.charset=UTF-8
-sonar.c.compiler.regex=^(.*):(\\\d+):\\\d+: warning: (.*)\\\[(.*)\\\]$
-sonar.c.compiler.reportPath=hwloc-build.log
-sonar.c.coverage.reportPath=hwloc-coverage.xml
-sonar.c.cppcheck.reportPath=${CPPCHECK_XMLS}
-sonar.c.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
-sonar.c.rats.reportPath=${RATS_XMLS}
-sonar.c.valgrind.reportPath=${VALGRIND_XMLS}
+sonar.cxx.gcc.encoding=UTF-8
+sonar.cxx.clangsa.reportPath=analyzer_reports/*/*.plist
+sonar.cxx.errorRecoveryEnabled=true
+sonar.cxx.compiler.parser=GCC
+sonar.cxx.compiler.regex=^(.*):(\\\d+):\\\d+: warning: (.*)\\\[(.*)\\\]$
+sonar.cxx.compiler.reportPath=hwloc-build.log
+sonar.cxx.coverage.reportPath=hwloc-coverage.xml
+sonar.cxx.cppcheck.reportPath=${CPPCHECK_XMLS}
+sonar.cxx.includeDirectories=$(echo | gcc -E -Wp,-v - 2>&1 | grep "^ " | tr '\n' ',')include,hwloc,utils/lstopo,utils/hwloc
+sonar.cxx.rats.reportPath=${RATS_XMLS}
+sonar.cxx.valgrind.reportPath=${VALGRIND_XMLS}
 # make sure only C matches our .c files
-sonar.lang.patterns.c++=**/*.cpp,**/*.hpp
+sonar.cxx.file.suffixes=.h,.c
 EOF
 
 # Log the sonar-scanner version in case of problem
