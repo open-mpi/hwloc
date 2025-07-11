@@ -21,6 +21,8 @@ Version 2.12.2
 --------------
 * Fix hwloc-gather-topology failure because of MemoryModules when
   running as root. Thanks to Andrew Phelps for the report.
+* Fix HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY for empty input
+  cpuset, thanks to Hadrien Grasland.
 
 
 Version 2.12.1
