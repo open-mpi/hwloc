@@ -873,6 +873,7 @@ extern "C" {
 #define hwloc_internal_distances_add_by_index HWLOC_NAME(internal_distances_add_by_index)
 #define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(hwloc_internal_distances_invalidate_cached_objs)
 
+#define hwloc_internal_memattr_set_value HWLOC_NAME(internal_memattr_set_value)
 #define hwloc_internal_memattr_s HWLOC_NAME(internal_memattr_s)
 #define hwloc_internal_memattr_target_s HWLOC_NAME(internal_memattr_target_s)
 #define hwloc_internal_memattr_initiator_s HWLOC_NAME(internal_memattr_initiator_s)
