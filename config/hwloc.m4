@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright © 2009-2025 Inria.  All rights reserved.
-dnl Copyright © 2009-2012, 2015-2017, 2020, 2023 Université Bordeaux
+dnl Copyright © 2009-2012, 2015-2017, 2020, 2023, 2025 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -435,6 +435,7 @@ EOF])
     AC_CHECK_HEADERS([dirent.h])
     AC_CHECK_HEADERS([strings.h])
     AC_CHECK_HEADERS([ctype.h])
+    AC_CHECK_HEADERS([sys/wait.h])
 
     AC_CHECK_FUNCS([strcasecmp], [
       _HWLOC_CHECK_DECL([strcasecmp], [

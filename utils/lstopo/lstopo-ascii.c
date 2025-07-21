@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2021 Inria.  All rights reserved.
- * Copyright © 2009-2012, 2020 Université Bordeaux
+ * Copyright © 2009-2012, 2020, 2025 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -29,6 +29,10 @@
 #endif
 #include <term.h>
 #endif /* HWLOC_HAVE_LIBTERMCAP */
+
+#if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
+#include <sys/wait.h>
+#endif
 
 #include "lstopo.h"
 
@@ -437,6 +441,62 @@ static struct draw_methods ascii_draw_methods = {
   ascii_textsize,
 };
 
+#if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
+static int start_pager(pid_t *child, int *pager_output) {
+  const char *pager;
+  int fd[2];
+  pid_t pid;
+
+  pager = getenv("LSTOPO_PAGER");
+  if (!pager)
+    pager = "less";
+
+  if (!*pager || !strcmp(pager, "cat"))
+    return 0;
+
+  if (pipe(fd) < 0)
+    return 0;
+
+  pid = fork();
+  if (pid < 0) {
+    close(fd[0]);
+    close(fd[1]);
+    return 0;
+  }
+
+  if (pid > 0) {
+    /* father */
+    close(fd[0]);
+    close(STDIN_FILENO);
+
+    *child = pid;
+
+    *pager_output = fd[1];
+    if (isatty(STDERR_FILENO))
+      dup2(fd[1], STDERR_FILENO);
+
+    return 1;
+  } else {
+    /* child */
+    char options[] = "LESS=SFRX";
+    putenv(options);
+
+    dup2(fd[0], STDIN_FILENO);
+    close(fd[0]);
+    close(fd[1]);
+
+    execlp(pager, pager, NULL);
+
+    /* less not available, just output */
+    execlp("cat", "cat", NULL);
+
+    /* Oops */
+    fprintf(stderr, "Failed to execute both pager %s and cat\n", pager);
+    exit(1);
+  }
+}
+#endif
+
 int
 output_ascii(struct lstopo_output *loutput, const char *filename)
 {
@@ -449,6 +509,11 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   int term = 0;
   char *tmp;
 #endif
+  int use_pager = 0;
+#if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
+  pid_t pager_pid = -1;
+  int pager_output = -1;
+#endif
   int width, height;
 
   output = open_output(filename, loutput->overwrite);
@@ -456,6 +521,12 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return -1;
   }
+
+#if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
+  use_pager = (!filename || !strcmp(filename, "-")) && isatty(STDOUT_FILENO);
+  if (use_pager)
+    use_pager = start_pager(&pager_pid, &pager_output);
+#endif
 
   loutput->gridsize = 10;
   loutput->fontsize = 10;
@@ -466,7 +537,7 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
   /* If we are outputing to a tty, use colors */
-  if (output == stdout && isatty(STDOUT_FILENO)) {
+  if (use_pager || (output == stdout && isatty(STDOUT_FILENO))) {
     term = !setupterm(NULL, STDOUT_FILENO, NULL);
 
     if (term) {
@@ -531,6 +602,21 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
   disp.utf8 = !strcmp(nl_langinfo(CODESET), "UTF-8");
 #endif /* HAVE_NL_LANGINFO */
 
+#if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
+  if (use_pager) {
+#ifdef HWLOC_HAVE_LIBTERMCAP
+    /* Flush ncurses */
+    refresh();
+#endif
+    fflush(stdout);
+
+    /* Now that we have set up colors on the tty (which the pager doesn't
+     * understand), we can send the text to the pager. */
+    dup2(pager_output, STDOUT_FILENO);
+    close(pager_output);
+  }
+#endif
+
   /* ready */
   output_draw(loutput);
 
@@ -571,5 +657,18 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
     fclose(output);
 
   destroy_colors(loutput);
+
+#if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
+  if (use_pager) {
+    /* Tell pager that we are finished */
+    fflush(stdout);
+    fflush(stderr);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+    /* And wait for it */
+    waitpid(pager_pid, NULL, 0);
+  }
+#endif
+
   return 0;
 }
