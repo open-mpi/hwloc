@@ -580,6 +580,10 @@ Output an ASCII art representation of the map
 (formerly called \fBtxt\fR).
 If outputting to stdout and if colors are supported on the terminal,
 the output will be colorized.
+
+The output is sent to a pager (\fIless\fR by default).
+\fBLSTOPO_PAGER\fR may be set to a different pager program in the environment,
+or set to \fIcat\fR or empty to disable the pager.
 .
 .TP
 \fBtikz\fR or \fBtex\fR

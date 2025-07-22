@@ -21,6 +21,7 @@ Version 2.13
 ------------
 * Adjust sysfs capacity on Intel CPUs on Linux 6.16+ together with
   max frequencies when they differ because of Turbo Boost Max 3.0.
+* Send the lstopo ASCII output to a pager (less by default).
 
 
 Version 2.12.1
