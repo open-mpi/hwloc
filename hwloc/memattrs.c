@@ -379,6 +379,7 @@ to_internal_location(struct hwloc_internal_location_s *iloc,
       errno = EINVAL;
       return -1;
     }
+    iloc->location.object.obj = location->location.object;
     iloc->location.object.gp_index = location->location.object->gp_index;
     iloc->location.object.type = location->location.object->type;
     return 0;
