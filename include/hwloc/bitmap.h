@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -206,7 +206,7 @@ HWLOC_DECLSPEC int hwloc_bitmap_list_sscanf(hwloc_bitmap_t bitmap, const char * 
  *
  * The taskset program manipulates bitmap strings that contain a single
  * (possible very long) hexadecimal number starting with 0x.
- * A bitmap containing bits 1, 33, 34, and all from 64 to 95 is printed as </tt>"0xffffffff0000000600000002"</tt>.
+ * A bitmap containing bits 1, 33, 34, and all from 64 to 95 is printed as <tt>"0xffffffff0000000600000002"</tt>.
  *
  * Up to \p buflen characters may be written in buffer \p buf.
  *
