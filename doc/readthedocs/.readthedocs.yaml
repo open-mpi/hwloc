@@ -2,8 +2,14 @@ version: 2
 
 build:
   os: ubuntu-lts-latest
+  apt_packages:
+    - fig2dev
   tools:
     python: latest
+  jobs:
+    post_build:
+      - cd doc && fig2dev -m 1.5 -L png images/diagram.fig images/diagram.png && cd -
+      - cd doc/readthedocs/ &&./readthedocs.io.sh && doxygen readthedocs.io.cfg && cd -
 
 sphinx:
   configuration: doc/readthedocs/conf.py
