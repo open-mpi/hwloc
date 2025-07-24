@@ -1,6 +1,6 @@
 import subprocess, os
 
-html_static_path = ['_build/html']
+html_static_path = ['../images']
 html_extra_path = ['./build/html']
 
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
