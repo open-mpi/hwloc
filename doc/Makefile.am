@@ -38,9 +38,6 @@ EXTRA_DIST = \
         doxygen.cfg \
         images/diagram.fig \
         www.open-mpi.org.cfg \
-        www.open-mpi.org-css.inc \
-        www.open-mpi.org-footer.inc \
-        www.open-mpi.org-header.inc \
         $(PREBUILT_IMAGES) \
         $(BUILT_IMAGES)
 
