@@ -66,13 +66,13 @@ echo "Installing hwloc-v${VERSION}-letter.pdf ..."
 cp -f doc/doxygen-doc/hwloc-letter.pdf "$dst/hwloc-v${VERSION}-letter.pdf"
 
 echo "Installing v${VERSION}/ HTML directory ..."
-rsync -avz doc/www.open-mpi.org*inc doc/www.open-mpi.org/html/ "$dst/v${VERSION}/"
+rsync -avz doc/www.open-mpi.org/html/ "$dst/v${VERSION}/"
 
 echo
 cd "$dst/v${VERSION}/"
 echo "Looking for URLs to be updated in links in main pages:"
 echo "- Link to examples:"
-grep -H ' id="cli_examples">' *.php || echo "Not found!"
+grep -H ' id="cli_examples">' *.html || echo "Not found!"
 echo "- Link to API upgrade in NEWS and tutorials:"
-grep -H ' class="title">Upgrading to the hwloc .* API<' *.php || echo "Not found!"
+grep -H ' class="title">Upgrading to the hwloc .* API<' *.html || echo "Not found!"
 cd ../..
