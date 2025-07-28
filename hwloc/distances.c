@@ -185,6 +185,12 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
 /* This function may be called with topology->tma set, it cannot free() or realloc() */
 int hwloc_internal_distances_dup(struct hwloc_topology *new, struct hwloc_topology *old)
 {
+  new->grouping = old->grouping;
+  new->grouping_verbose = old->grouping_verbose;
+  new->grouping_nbaccuracies = old->grouping_nbaccuracies;
+  memcpy(new->grouping_accuracies, old->grouping_accuracies, sizeof(old->grouping_accuracies));
+  new->grouping_next_subkind = old->grouping_next_subkind;
+
   struct hwloc_internal_distances_s *olddist;
   int err;
   new->next_dist_id = old->next_dist_id;
