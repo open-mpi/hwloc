@@ -25,6 +25,8 @@ Version 2.12.2
   cpuset, thanks to Hadrien Grasland.
 * Fix hwloc_distances_get_by_name() for distances with no kinds.
   Thanks to Hadrien Grasland.
+* Initialize distances grouping configuration for duplicated topology.
+  Thanks to Hadrien Grasland.
 
 
 Version 2.12.1
