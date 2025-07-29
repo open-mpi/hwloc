@@ -27,6 +27,7 @@ Version 2.12.2
   Thanks to Hadrien Grasland.
 * Initialize distances grouping configuration for duplicated topology.
   Thanks to Hadrien Grasland.
+* Improve Windows CMake build to support ARM64, thanks to Chiwen Hui.
 
 
 Version 2.12.1
