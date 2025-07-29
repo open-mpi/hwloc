@@ -1037,7 +1037,7 @@ hwloc_distances_get_by_name(hwloc_topology_t topology, const char *name,
     return -1;
   }
 
-  return hwloc__distances_get(topology, name, HWLOC_OBJ_TYPE_NONE, nrp, distancesp, HWLOC_DISTANCES_KIND_ALL, flags);
+  return hwloc__distances_get(topology, name, HWLOC_OBJ_TYPE_NONE, nrp, distancesp, 0, flags);
 }
 
 int
