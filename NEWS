@@ -23,6 +23,8 @@ Version 2.12.2
   running as root. Thanks to Andrew Phelps for the report.
 * Fix HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY for empty input
   cpuset, thanks to Hadrien Grasland.
+* Fix hwloc_distances_get_by_name() for distances with no kinds.
+  Thanks to Hadrien Grasland.
 
 
 Version 2.12.1
