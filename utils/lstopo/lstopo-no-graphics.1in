@@ -3,6 +3,7 @@
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
+.\" Copyright © 2025 Université of Reims Champagne-Ardenne.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH LSTOPO "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -234,12 +235,12 @@ Never factorize identical objects in the graphical output.
 If an object type is given, only factorizing of these objects is disabled.
 This only applies to normal CPU-side objects, it is independent from PCI collapsing.
 .TP
-\fB\-\-factorize\fR \fB\-\-factorize\fR=[<type>,]<N>[,<L>[,<F>]
+\fB\-\-factorize\fR \fB\-\-factorize\fR=[<type>,]<N>[,<F>[,<L>]]
 Factorize identical children in the graphical output (enabled by default).
 
 If <N> is specified (4 by default), factorizing only occurs when there are strictly
 more than N identical children.
-If <L> and <F> are specified, they set the numbers of first and last children to keep
+If <F> and <L> are specified, they set the numbers of first and last children to keep
 after factorizing.
 
 If an object type is given, only factorizing of these objects is configured.
