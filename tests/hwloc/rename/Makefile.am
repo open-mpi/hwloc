@@ -1,5 +1,5 @@
 if !HWLOC_HAVE_DARWIN
-all-local: needed useless
+all-local: needed useless names
 else HWLOC_HAVE_DARWIN
 # Do nothing on Darwin because their default compiler doesn't like our gcc/cpp lines
 all-local:
@@ -79,6 +79,15 @@ needed: cpp.out
 		| sed -e 's/FOOBAR_ ##   hwloc_ ## /FOOBAR_hwloc_/g' \
 		| sed -e 's/hwloc_uint64_t/uint64_t/g' \
 		| egrep -i '(^| |\*)hwloc_' ; then false ; else true ; fi
+	@echo "# done"
+
+names: cpp.out
+	@echo "# Checking if renaming to proper names"
+	@if grep '^#define' $(HWLOC_top_srcdir)/include/hwloc/rename.h \
+		| egrep -vw '(HWLOC_RENAME_H|HWLOC_MUNGE_NAME|HWLOC_MUNGE_NAME2)' \
+		| egrep -v '#define hwloc_(.*) HWLOC_NAME\(\1\)' \
+		| egrep -v '#define HWLOC_(.*) HWLOC_NAME_CAPS\(\1\)' \
+	 | grep '' ; then false ; else true ; fi
 	@echo "# done"
 
 clean-local:
