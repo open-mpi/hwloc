@@ -133,7 +133,7 @@ extern "C" {
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
 #define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
 #define hwloc_topology_set_xmlbuffer HWLOC_NAME(topology_set_xmlbuffer)
-#define hwloc_topology_components_flag_e HWLOC_NAME(hwloc_topology_components_flag_e)
+#define hwloc_topology_components_flag_e HWLOC_NAME(topology_components_flag_e)
 #define HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST HWLOC_NAME_CAPS(TOPOLOGY_COMPONENTS_FLAG_BLACKLIST)
 #define hwloc_topology_set_components HWLOC_NAME(topology_set_components)
 
@@ -351,7 +351,7 @@ extern "C" {
 #define hwloc_get_ancestor_obj_by_type HWLOC_NAME(get_ancestor_obj_by_type)
 #define hwloc_get_next_obj_by_depth HWLOC_NAME(get_next_obj_by_depth)
 #define hwloc_get_next_obj_by_type HWLOC_NAME(get_next_obj_by_type)
-#define hwloc_bitmap_singlify_per_core HWLOC_NAME(bitmap_singlify_by_core)
+#define hwloc_bitmap_singlify_per_core HWLOC_NAME(bitmap_singlify_per_core)
 #define hwloc_get_pu_obj_by_os_index HWLOC_NAME(get_pu_obj_by_os_index)
 #define hwloc_get_numanode_obj_by_os_index HWLOC_NAME(get_numanode_obj_by_os_index)
 #define hwloc_get_next_child HWLOC_NAME(get_next_child)
@@ -836,7 +836,7 @@ extern "C" {
 #define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
 #define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
 #define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
-#define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(hwloc_find_insert_io_parent_by_complete_cpuset)
+#define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(find_insert_io_parent_by_complete_cpuset)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__replace_infos HWLOC_NAME(_replace_infos)
@@ -881,8 +881,9 @@ extern "C" {
 #define hwloc_internal_distances_destroy HWLOC_NAME(internal_distances_destroy)
 #define hwloc_internal_distances_add HWLOC_NAME(internal_distances_add)
 #define hwloc_internal_distances_add_by_index HWLOC_NAME(internal_distances_add_by_index)
-#define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(hwloc_internal_distances_invalidate_cached_objs)
+#define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(internal_distances_invalidate_cached_objs)
 
+#define hwloc_internal_memattr_set_value HWLOC_NAME(internal_memattr_set_value)
 #define hwloc_internal_memattr_s HWLOC_NAME(internal_memattr_s)
 #define hwloc_internal_memattr_target_s HWLOC_NAME(internal_memattr_target_s)
 #define hwloc_internal_memattr_initiator_s HWLOC_NAME(internal_memattr_initiator_s)
