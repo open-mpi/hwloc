@@ -118,7 +118,7 @@ extern "C" {
 
 #define hwloc_topology_flags_e HWLOC_NAME(topology_flags_e)
 
-#define HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WITH_DISALLOWED)
+#define HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED HWLOC_NAME_CAPS(TOPOLOGY_FLAG_INCLUDE_DISALLOWED)
 #define HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IS_THISSYSTEM)
 #define HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES)
 #define HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IMPORT_SUPPORT)
@@ -486,7 +486,7 @@ extern "C" {
 #define hwloc_distances_get_name HWLOC_NAME(distances_get_name)
 #define hwloc_distances_release HWLOC_NAME(distances_release)
 #define hwloc_distances_obj_index HWLOC_NAME(distances_obj_index)
-#define hwloc_distances_obj_pair_values HWLOC_NAME(distances_pair_values)
+#define hwloc_distances_obj_pair_values HWLOC_NAME(distances_obj_pair_values)
 
 #define hwloc_distances_transform_e HWLOC_NAME(distances_transform_e)
 #define HWLOC_DISTANCES_TRANSFORM_REMOVE_NULL HWLOC_NAME_CAPS(DISTANCES_TRANSFORM_REMOVE_NULL)
@@ -566,7 +566,7 @@ extern "C" {
 #define hwloc_linux_set_tid_cpubind HWLOC_NAME(linux_set_tid_cpubind)
 #define hwloc_linux_get_tid_cpubind HWLOC_NAME(linux_get_tid_cpubind)
 #define hwloc_linux_get_tid_last_cpu_location HWLOC_NAME(linux_get_tid_last_cpu_location)
-#define hwloc_linux_read_path_as_cpumask HWLOC_NAME(linux_read_file_cpumask)
+#define hwloc_linux_read_path_as_cpumask HWLOC_NAME(linux_read_path_as_cpumask)
 
 /* windows.h */
 
@@ -583,7 +583,7 @@ extern "C" {
 
 #define hwloc_cl_device_pci_bus_info_khr HWLOC_NAME(cl_device_pci_bus_info_khr)
 #define hwloc_cl_device_topology_amd HWLOC_NAME(cl_device_topology_amd)
-#define hwloc_opencl_get_device_pci_busid HWLOC_NAME(opencl_get_device_pci_ids)
+#define hwloc_opencl_get_device_pci_busid HWLOC_NAME(opencl_get_device_pci_busid)
 #define hwloc_opencl_get_device_cpuset HWLOC_NAME(opencl_get_device_cpuset)
 #define hwloc_opencl_get_device_osdev HWLOC_NAME(opencl_get_device_osdev)
 #define hwloc_opencl_get_device_osdev_by_index HWLOC_NAME(opencl_get_device_osdev_by_index)
@@ -663,7 +663,7 @@ extern "C" {
 #define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
-#define hwloc_obj_add_children_sets HWLOC_NAME(add_children_sets)
+#define hwloc_obj_add_children_sets HWLOC_NAME(obj_add_children_sets)
 #define hwloc_topology_reconnect HWLOC_NAME(topology_reconnect)
 
 #define hwloc_filter_check_pcidev_subtype_important HWLOC_NAME(filter_check_pcidev_subtype_important)
@@ -678,8 +678,8 @@ extern "C" {
 #define hwloc_pcidisc_tree_insert_by_busid HWLOC_NAME(pcidisc_tree_insert_by_busid)
 #define hwloc_pcidisc_tree_attach HWLOC_NAME(pcidisc_tree_attach)
 
-#define hwloc_pci_find_by_busid HWLOC_NAME(pcidisc_find_by_busid)
-#define hwloc_pci_find_parent_by_busid HWLOC_NAME(pcidisc_find_busid_parent)
+#define hwloc_pci_find_by_busid HWLOC_NAME(pci_find_by_busid)
+#define hwloc_pci_find_parent_by_busid HWLOC_NAME(pci_find_parent_by_busid)
 
 #define hwloc_backend_distances_add_handle_t HWLOC_NAME(backend_distances_add_handle_t)
 #define hwloc_backend_distances_add_create HWLOC_NAME(backend_distances_add_create)
@@ -758,7 +758,7 @@ extern "C" {
 /* private/components.h */
 
 #define hwloc_disc_component_force_enable HWLOC_NAME(disc_component_force_enable)
-#define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_instantiate_others)
+#define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_enable_others)
 
 #define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
 #define hwloc_backends_find_callbacks HWLOC_NAME(backends_find_callbacks)
@@ -812,7 +812,7 @@ extern "C" {
 #define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
 #define hwloc_pci_locality_s HWLOC_NAME(pci_locality_s)
 
-#define hwloc_topology_forced_component_s HWLOC_NAME(topology_forced_component)
+#define hwloc_topology_forced_component_s HWLOC_NAME(topology_forced_component_s)
 
 #define hwloc_alloc_root_sets HWLOC_NAME(alloc_root_sets)
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
@@ -829,7 +829,7 @@ extern "C" {
 
 #define hwloc__reconnect HWLOC_NAME(_reconnect)
 
-#define hwloc__attach_memory_object HWLOC_NAME(insert_memory_object)
+#define hwloc__attach_memory_object HWLOC_NAME(_attach_memory_object)
 
 #define hwloc_get_obj_by_type_and_gp_index HWLOC_NAME(get_obj_by_type_and_gp_index)
 
