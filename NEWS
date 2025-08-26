@@ -24,6 +24,19 @@ Version 2.13
 * Send the lstopo ASCII output to a pager (less by default).
 
 
+Version 2.12.2
+--------------
+* Fix hwloc-gather-topology failure because of MemoryModules when
+  running as root. Thanks to Andrew Phelps for the report.
+* Fix HWLOC_LOCAL_NUMANODE_FLAG_INTERSECT_LOCALITY for empty input
+  cpuset, thanks to Hadrien Grasland.
+* Fix hwloc_distances_get_by_name() for distances with no kinds.
+  Thanks to Hadrien Grasland.
+* Initialize distances grouping configuration for duplicated topology.
+  Thanks to Hadrien Grasland.
+* Improve Windows CMake build to support ARM64, thanks to Chiwen Hui.
+
+
 Version 2.12.1
 --------------
 * Add hwloc-calc's --default-nodes option to hwloc-bind and hwloc-info.
