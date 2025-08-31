@@ -5,10 +5,10 @@ android {
     defaultConfig {
         applicationId "com.hwloc.lstopo"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
         ndkVersion "26.1.10909125"
         // Increase versionCode whenever you publish a new Android release
-        versionCode 80274
+        versionCode 80279
         // Official hwloc version - snapshot number - android apk version
         // Set snapshot number to 1 when the hwloc version is increased.
         // Increase the snapshot number when the hwloc code changed but not its version
