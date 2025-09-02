@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2013-2024 Inria.  All rights reserved.
  * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -20,7 +21,7 @@ struct hwloc_backend;
 /* needed for hwloc_plugin_check_namespace() */
 #ifdef HWLOC_HAVE_LTDL
 #include <ltdl.h>
-#else
+#elif !defined(HWLOC_WIN_SYS)
 #include <dlfcn.h>
 #endif
 #endif
@@ -330,6 +331,8 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
   void *sym;
 #ifdef HWLOC_HAVE_LTDL
   lt_dlhandle handle = lt_dlopen(NULL);
+#elif defined(HWLOC_WIN_SYS)
+  HMODULE handle = GetModuleHandleA(NULL);
 #else
   void *handle = dlopen(NULL, RTLD_NOW|RTLD_LOCAL);
 #endif
@@ -339,6 +342,9 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
 #ifdef HWLOC_HAVE_LTDL
   sym = lt_dlsym(handle, symbol);
   lt_dlclose(handle);
+#elif defined(HWLOC_WIN_SYS)
+  sym = GetModuleHandleA("hwloc.dll");
+  FreeLibrary(handle);
 #else
   sym = dlsym(handle, symbol);
   dlclose(handle);

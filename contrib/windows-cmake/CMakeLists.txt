@@ -1,6 +1,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2021-2024 Inria.  All rights reserved.
+# Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -12,6 +13,7 @@ project(hwloc
 enable_testing()
 
 option(HWLOC_ENABLE_TESTING "Enable testing" ON)
+option(HWLOC_ENABLE_PLUGINS "Enable plugin support" OFF)
 option(HWLOC_SKIP_LSTOPO "don't build/install lstopo")
 option(HWLOC_SKIP_TOOLS "don't build/install other hwloc tools")
 option(HWLOC_SKIP_INCLUDES "don't install headers")
@@ -20,7 +22,10 @@ option(HWLOC_WITH_OPENCL "enable OpenCL support")
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
     option(HWLOC_WITH_CUDA "enable CUDA support")
 endif()
-option(HWLOC_BUILD_SHARED_LIBS "build shared libraries" ${BUILD_SHARED_LIBS})
+
+if(DEFINED HWLOC_BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "The option HWLOC_BUILD_SHARED_LIBS has been removed. Please use BUILD_SHARED_LIBS instead.")
+endif()
 
 set(TOPDIR ${PROJECT_SOURCE_DIR}/../..)
 
@@ -82,19 +87,19 @@ HWLOC_HAVE_MSVC_CPUIDEX
 #   set(HAVE_DECL_STRTOULL 1)
 
 # --- optional external libraries
-set(HWLOC_HAVE_LIBXML2)
+set(HWLOC_HAVE_LIBXML2 0)
 if(HWLOC_WITH_LIBXML2)
     find_package(LibXml2 REQUIRED)
     set(HWLOC_HAVE_LIBXML2 1)
 endif()
 
-set(HWLOC_HAVE_OPENCL)
+set(HWLOC_HAVE_OPENCL 0)
 if(HWLOC_WITH_OPENCL)
     find_package(OpenCL REQUIRED)
     set(HWLOC_HAVE_OPENCL 1)
 endif()
 
-set(HAVE_CUDA)
+set(HAVE_CUDA 0)
 set(HAVE_CUDA_H)
 set(HAVE_CUDA_RUNTIME_API_H)
 set(HWLOC_HAVE_CUDART)
@@ -104,6 +109,33 @@ if(HWLOC_WITH_CUDA)
     set(HAVE_CUDA_H 1)
     set(HAVE_CUDA_RUNTIME_API_H 1)
     set(HWLOC_HAVE_CUDART 1)
+endif()
+
+set(HWLOC_HAVE_PLUGINS 0)
+set(HWLOC_ENABLED_PLUGINS_LIST)
+if(HWLOC_ENABLE_PLUGINS)
+    # this has to happen before the first add_library call
+    if(NOT DEFINED BUILD_SHARED_LIBS)
+        message(STATUS "HWLOC plugin support requires BUILD_SHARED_LIBS to be enabled, but it was not set. Setting BUILD_SHARED_LIBS to ON")
+        set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
+    elseif(NOT BUILD_SHARED_LIBS)
+        message(FATAL_ERROR "HWLOC plugin support requires BUILD_SHARED_LIBS to be enabled, but BUILD_SHARED_LIBS is set to ${BUILD_SHARED_LIBS}.")
+    endif()
+
+    set(HWLOC_HAVE_PLUGINS 1)
+    set(HWLOC_PLUGINS_PATH ${CMAKE_INSTALL_PREFIX}/lib/hwloc)
+
+    if(HWLOC_HAVE_CUDART)
+        list(APPEND HWLOC_ENABLED_PLUGINS_LIST "cuda")
+    endif()
+
+    if(HWLOC_HAVE_OPENCL)
+        list(APPEND HWLOC_ENABLED_PLUGINS_LIST "opencl")
+    endif()
+
+    if(HWLOC_HAVE_LIBXML2)
+        list(APPEND HWLOC_ENABLED_PLUGINS_LIST "xml_libxml")
+    endif()
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/private_config.h.in include/private/autogen/config.h)
@@ -134,18 +166,18 @@ add_library(hwloc
     ${TOPDIR}/hwloc/topology-xml-nolibxml.c
     ${TOPDIR}/hwloc/topology-windows.c
     $<$<BOOL:${HWLOC_HAVE_X86_CPUID}>:${TOPDIR}/hwloc/topology-x86.c>
-    $<$<BOOL:${HWLOC_HAVE_LIBXML2}>:${TOPDIR}/hwloc/topology-xml-libxml.c>
-    $<$<BOOL:${HWLOC_HAVE_OPENCL}>:${TOPDIR}/hwloc/topology-opencl.c>
-    $<$<BOOL:${HAVE_CUDA}>:${TOPDIR}/hwloc/topology-cuda.c>
+    $<$<AND:$<BOOL:${HWLOC_HAVE_LIBXML2}>,$<NOT:$<BOOL:${HWLOC_HAVE_PLUGINS}>>>:${TOPDIR}/hwloc/topology-xml-libxml.c>
+    $<$<AND:$<BOOL:${HWLOC_HAVE_OPENCL}>,$<NOT:$<BOOL:${HWLOC_HAVE_PLUGINS}>>>:${TOPDIR}/hwloc/topology-opencl.c>
+    $<$<AND:$<BOOL:${HAVE_CUDA}>,$<NOT:$<BOOL:${HWLOC_HAVE_PLUGINS}>>>:${TOPDIR}/hwloc/topology-cuda.c>
 )
 
 target_link_libraries(hwloc PRIVATE
-    $<$<BOOL:${HWLOC_HAVE_LIBXML2}>:LibXml2::LibXml2>
-    $<$<BOOL:${HWLOC_HAVE_OPENCL}>:OpenCL::OpenCL>
-    "$<$<BOOL:${HAVE_CUDA}>:CUDA::cudart;CUDA::cuda_driver>"
+    $<$<AND:$<BOOL:${HWLOC_HAVE_LIBXML2}>,$<NOT:$<BOOL:${HWLOC_HAVE_PLUGINS}>>>:LibXml2::LibXml2>
+    $<$<AND:$<BOOL:${HWLOC_HAVE_OPENCL}>,$<NOT:$<BOOL:${HWLOC_HAVE_PLUGINS}>>>:OpenCL::OpenCL>
+    "$<$<AND:$<BOOL:${HAVE_CUDA}>,$<NOT:$<BOOL:${HWLOC_HAVE_PLUGINS}>>>:CUDA::cudart;CUDA::cuda_driver>"
 )
 
-if(HWLOC_BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS)
     target_compile_definitions(hwloc PRIVATE $<$<BOOL:${MSVC}>:_USRDLL>)
 endif()
 
@@ -153,6 +185,38 @@ target_include_directories(hwloc PUBLIC
     "$<BUILD_INTERFACE:${TOPDIR}/include;${CMAKE_CURRENT_BINARY_DIR}/include>"
     $<INSTALL_INTERFACE:include>
 )
+
+# plugin support
+foreach(plugin IN LISTS HWLOC_ENABLED_PLUGINS_LIST)
+    # custom settings per plugin
+    if(plugin STREQUAL "cuda")
+        add_library(hwloc_${plugin} MODULE ${TOPDIR}/hwloc/topology-${plugin}.c)
+        target_link_libraries(hwloc_${plugin} PRIVATE hwloc CUDA::cudart CUDA::cuda_driver)
+    elseif(plugin STREQUAL "opencl")
+        add_library(hwloc_${plugin} MODULE ${TOPDIR}/hwloc/topology-${plugin}.c)
+        target_link_libraries(hwloc_${plugin} PRIVATE hwloc OpenCL::OpenCL)
+    elseif(plugin STREQUAL "xml_libxml")
+        add_library(hwloc_${plugin} MODULE ${TOPDIR}/hwloc/topology-xml-libxml.c)
+        target_link_libraries(hwloc_${plugin} PRIVATE hwloc LibXml2::LibXml2)
+    endif()
+
+    # common settings for all plugins
+    target_compile_definitions(hwloc_${plugin} PRIVATE "HWLOC_INSIDE_PLUGIN")
+
+    target_compile_definitions(hwloc_${plugin} PRIVATE $<$<BOOL:${MSVC}>:_USRDLL>)
+
+    target_include_directories(hwloc_${plugin} PUBLIC
+        "$<BUILD_INTERFACE:${TOPDIR}/include;${CMAKE_CURRENT_BINARY_DIR}/include>"
+        $<INSTALL_INTERFACE:include>
+    )
+endforeach()
+
+if(HWLOC_ENABLE_PLUGINS)
+    message(STATUS "Enabled plugins:")
+    foreach(plugin IN LISTS HWLOC_ENABLED_PLUGINS_LIST)
+        message(STATUS "  - ${plugin}")
+    endforeach()
+endif()
 
 # Tools under utils/hwloc
 
@@ -232,6 +296,15 @@ endforeach(target)
 # Install
 
 install(TARGETS hwloc)
+
+# install plugins
+foreach(plugin IN LISTS HWLOC_ENABLED_PLUGINS_LIST)
+    install(TARGETS hwloc_${plugin}
+        LIBRARY DESTINATION lib/hwloc
+        ARCHIVE DESTINATION lib/hwloc
+        RUNTIME DESTINATION bin/hwloc
+    )
+endforeach()
 
 if(NOT HWLOC_SKIP_TOOLS)
     install(TARGETS ${TOOLS})
