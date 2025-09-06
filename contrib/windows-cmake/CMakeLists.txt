@@ -108,7 +108,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/static-components.h.in include/static
 add_compile_definitions($<$<CONFIG:DEBUG>:HWLOC_DEBUG=1>)
 
 # FIXME dll soname
-add_library(hwloc
+if(HWLOC_BUILD_SHARED_LIBS)
+    add_library(hwloc SHARED)
+else()
+    add_library(hwloc)
+endif()
+
+target_sources(
+    hwloc
+    PRIVATE
     ${TOPDIR}/hwloc/topology.c
     ${TOPDIR}/hwloc/traversal.c
     ${TOPDIR}/hwloc/distances.c
