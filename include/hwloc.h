@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1258,7 +1258,7 @@ enum hwloc_modify_infos_op_e {
   /** \brief Add a new info attribute with the given name and value
    * only if that pair doesn't exist yet.
    * \return \c 1 if the pair was successfully added.
-   * \return \c 0 if the pair already existed.
+   * \return \c 0 if the pair was ignored because it already existed.
    * \hideinitializer
    */
   HWLOC_MODIFY_INFOS_OP_ADD_UNIQUE = 1UL<<1,

@@ -464,6 +464,7 @@ static int hwloc__realloc_infos(struct hwloc_infos_s *infos, unsigned nr)
   return 0;
 }
 
+/* return 1 on success, -1 on error */
 int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value)
 {
   unsigned count;
@@ -496,6 +497,7 @@ int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *v
   return -1;
 }
 
+/* return 1 if added, 0 if ignored because already present, -1 on error */
 static int hwloc__add_info_unique(struct hwloc_infos_s *infos, const char *name, const char *value)
 {
   struct hwloc_info_s *array = infos->array;
@@ -513,6 +515,7 @@ static int hwloc__add_info_unique(struct hwloc_infos_s *infos, const char *name,
   return hwloc__add_info(infos, name, value);
 }
 
+/* return N+1 if N entries were replaced by a single one, 1 if added without replacing, -1 on error */
 int hwloc__replace_infos(struct hwloc_infos_s *infos,
                          const char *name, const char *value)
 {
@@ -557,6 +560,7 @@ int hwloc__replace_infos(struct hwloc_infos_s *infos,
   }
 }
 
+/* return the number of removed */
 int hwloc__remove_infos(struct hwloc_infos_s *infos,
                         const char *name, const char *value)
 {
