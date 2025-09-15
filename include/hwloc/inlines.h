@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -128,7 +128,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 static __hwloc_inline int
 hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
-  return hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, name, value);
+  return hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_ADD, name, value) >= 0 ? 0 : -1;
 }
 
 static __hwloc_inline void *

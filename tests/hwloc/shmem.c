@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011-2024 Inria.  All rights reserved.
+ * Copyright © 2011-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
   err = hwloc_topology_load(orig);
   assert(!err);
   err = hwloc_obj_add_info(hwloc_get_root_obj(orig), "ShmemSyntheticWithDistances", "1");
-  assert(err == 1);
+  assert(err == 0);
 
   printf("adding distance matrix\n");
   for(i=0; i<3; i++) {
