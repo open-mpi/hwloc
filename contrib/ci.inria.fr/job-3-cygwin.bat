@@ -1,4 +1,5 @@
 REM
+REM  SPDX-License-Identifier: BSD-3-Clause
 REM  Copyright © 2012-2018 Inria.  All rights reserved.
 REM  See COPYING in top-level directory.
 REM

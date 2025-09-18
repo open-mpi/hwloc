@@ -1,8 +1,10 @@
-/* This example program looks for caches shared between this process
- * and another one based on their current binding.
- *
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2014-2018 Inria.  All rights reserved.
  * See COPYING in top-level directory.
+ *
+ * This example program looks for caches shared between this process
+ * and another one based on their current binding.
  */
 
 #include "hwloc.h"

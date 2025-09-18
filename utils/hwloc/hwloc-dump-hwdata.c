@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2015 Intel, Inc.  All rights reserved.
  * Copyright © 2015-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.

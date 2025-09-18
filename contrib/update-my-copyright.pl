@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
 #
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2010-2014 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2018 Inria.  All rights reserved.
-# $COPYRIGHT$
+# See COPYING in top-level directory.
 #
 
 # Short version:
@@ -70,7 +71,6 @@ my $my_formal_name = "Inria.  All rights reserved.";
 
 my @tokens;
 push(@tokens, "See COPYING in top-level directory");
-push(@tokens, "\\\$COPYRIGHT\\\$");
 
 # Override the defaults if some values are set in the environment
 $my_search_name = $ENV{HWLOC_COPYRIGHT_SEARCH_NAME}

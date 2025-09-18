@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# SPDX-License-Identifier: BSD-3-Clause
+# See COPYING in top-level directory.
+
 # Exit on error, useful if autoconf is missing, the script will stop instead of
 # trying to continue.
 set -e

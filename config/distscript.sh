@@ -1,5 +1,6 @@
 #!/bin/sh -f
 #
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 #                         University Research and Technology
 #                         Corporation.  All rights reserved.
@@ -12,11 +13,7 @@
 #                         All rights reserved.
 # Copyright © 2010-2014   Inria.  All rights reserved.
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
-# $COPYRIGHT$
-#
-# Additional copyrights may follow
-#
-# $HEADER$
+# See COPYING in top-level directory.
 #
 
 builddir="`pwd`"

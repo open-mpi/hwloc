@@ -1,8 +1,8 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2010-2012, 2014 Université Bordeaux
  * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2014 Inria.  All rights reserved.
- *
  * See COPYING in top-level directory.
  */
 
