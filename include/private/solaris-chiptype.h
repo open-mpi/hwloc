@@ -1,12 +1,8 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009-2010 Oracle and/or its affiliates.  All rights reserved.
- *
  * Copyright © 2017 Inria.  All rights reserved.
- * $COPYRIGHT$
- *
- * Additional copyrights may follow
- *
- * $HEADER$
+ * See COPYING in top-level directory.
  */
 
 

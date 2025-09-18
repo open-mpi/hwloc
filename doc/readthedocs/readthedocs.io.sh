@@ -1,7 +1,8 @@
 #!/bin/bash
 #
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2018-2025 Inria.  All rights reserved.
-# $COPYRIGHT$
+# See COPYING in top-level directory.
 #
 
 version=$(./../../config/hwloc_get_version.sh ./../../VERSION --version)

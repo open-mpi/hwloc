@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 #
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2021 Inria.  All rights reserved.
-# $COPYRIGHT$
-#
+# See COPYING in top-level directory.
 #
 # For any option found in usage (either .c (C file) or .in (Shell script))
 # check that they appear in the manpage (dash escaped) and completions.

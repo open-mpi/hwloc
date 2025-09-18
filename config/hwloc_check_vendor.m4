@@ -1,5 +1,6 @@
 dnl -*- shell-script -*-
 dnl
+dnl SPDX-License-Identifier: BSD-3-Clause
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -13,11 +14,7 @@ dnl                         All rights reserved.
 dnl Copyright © 2011      Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2015-2021 Inria.  All rights reserved.
 dnl Copyright © 2020      IBM Corporation.  All rights reserved.
-dnl $COPYRIGHT$
-dnl
-dnl Additional copyrights may follow
-dnl
-dnl $HEADER$
+dnl See COPYING in top-level directory.
 dnl
 
 dnl ------------------------------------------------------------------

@@ -1,13 +1,9 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009-2010 Oracle and/or its affiliates.  All rights reserved.
  * Copyright © 2013 Université Bordeaux.  All rights reserved.
  * Copyright © 2016-2020 Inria.  All rights reserved.
- *
- * $COPYRIGHT$
- *
- * Additional copyrights may follow
- *
- * $HEADER$
+ * See COPYING in top-level directory.
  */
 
 #include "private/autogen/config.h"

@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2010-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */

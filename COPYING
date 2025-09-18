@@ -1,3 +1,5 @@
+SPDX-License-Identifier: BSD-3-Clause
+
 Copyright © 2004-2006 The Trustees of Indiana University and Indiana University Research and Technology Corporation.  All rights reserved.
 Copyright © 2004-2005 The University of Tennessee and The University of Tennessee Research Foundation.  All rights reserved.
 Copyright © 2004-2005 High Performance Computing Center Stuttgart, University of Stuttgart.  All rights reserved.
@@ -14,7 +16,6 @@ Copyright © 2012      Blue Brain Project, EPFL. All rights reserved.
 Copyright © 2013-2014 University of Wisconsin-La Crosse. All rights reserved.
 Copyright © 2015      Research Organization for Information Science and Technology (RIST). All rights reserved.
 Copyright © 2015-2016 Intel, Inc.  All rights reserved.
-See COPYING in top-level directory.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -37,3 +38,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+hwloc/base64.c is distributed under the ISC license.
+
+contrib/android/AndroidApp/lstopo/src/main/java/com/hwloc/lstopo/ZoomView/
+is distributed under the MIT license.

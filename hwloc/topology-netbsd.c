@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2012 Aleksej Saushev, The NetBSD Foundation
  * Copyright © 2009-2019 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2020 Université Bordeaux

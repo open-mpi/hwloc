@@ -1,11 +1,13 @@
-/* This example program shows how to retrieve Knights Landing
- * memory and cluster modes.
- * See "Custom string infos" in the documentation for details
- * about these attributes.
- *
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2015-2016, 2015 Intel
  * Copyright © 2016 Inria.  All rights reserved.
  * See COPYING in top-level directory.
+ *
+ * This example program shows how to retrieve Knights Landing
+ * memory and cluster modes.
+ * See "Custom string infos" in the documentation for details
+ * about these attributes.
  */
 
 #include <stdio.h>

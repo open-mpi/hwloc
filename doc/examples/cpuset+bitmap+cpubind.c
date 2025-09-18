@@ -1,10 +1,12 @@
-/* This example program plays with:
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright © 2014-2018 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ *
+ * This example program plays with:
  * - retrieving and changing CPU binding of current process and thread
  * - retrieving the location where the current thread executes
  * - combining/modifying cpusets using the bitmap API
- *
- * Copyright © 2014-2018 Inria.  All rights reserved.
- * See COPYING in top-level directory.
  */
 
 #include "hwloc.h"
