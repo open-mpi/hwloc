@@ -1,12 +1,14 @@
-/* Example hwloc API program.
- *
- * See other examples under doc/examples/ in the source tree
- * for more details.
- *
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009-2016 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
+ *
+ * Example hwloc API program.
+ *
+ * See other examples under doc/examples/ in the source tree
+ * for more details.
  *
  * hwloc-hello.c
  */

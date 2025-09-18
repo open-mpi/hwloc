@@ -1,13 +1,10 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009, 2011, 2012 CNRS.  All rights reserved.
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
- * $COPYRIGHT$
- *
- * Additional copyrights may follow
- *
- * $HEADER$
+ * See COPYING in top-level directory.
  */
 
 #ifndef HWLOC_CONFIGURE_H

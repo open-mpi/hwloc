@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2016 Inria.  All rights reserved.
 # Copyright © 2016 Université Bordeaux
 # See COPYING in top-level directory.

@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
  * Copyright © 2020-2021 Inria.  All rights reserved.
  * See COPYING in top-level directory.

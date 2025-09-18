@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ * See COPYING in top-level directory.
+ */
+
 #include "hwloc.h"
 
 #include <stdio.h>

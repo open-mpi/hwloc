@@ -1,5 +1,6 @@
 /* include/hwloc/autogen/config.h.  Generated from config.h.in by configure.  */
 /* -*- c -*-
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux

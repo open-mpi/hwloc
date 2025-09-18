@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2009-2024 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012, 2020 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.

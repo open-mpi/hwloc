@@ -1,7 +1,8 @@
 #!/bin/bash
 #
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2021 Inria.  All rights reserved.
-# $COPYRIGHT$
+# See COPYING in top-level directory.
 #
 
 #

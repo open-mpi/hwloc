@@ -1,5 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
+dnl SPDX-License-Identifier: BSD-3-Clause
 dnl Copyright © 2010-2025 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
@@ -10,7 +11,6 @@ dnl                         All rights reserved.
 dnl Copyright © 2004-2008 High Performance Computing Center Stuttgart,
 dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
-dnl
 dnl See COPYING in top-level directory.
 
 #-----------------------------------------------------------------------

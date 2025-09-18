@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2012 Blue Brain Project, BBP/EPFL. All rights reserved.
  * Copyright © 2012-2024 Inria.  All rights reserved.
  * See COPYING in top-level directory.

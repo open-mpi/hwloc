@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2013-2024 Inria.  All rights reserved.
  * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.

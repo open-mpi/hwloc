@@ -1,11 +1,13 @@
-/* This example program plays with:
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright © 2022 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ *
+ * This example program plays with:
  * - finding local NUMA nodes
  * - finding the best NUMA nodes for bandwidth/latency
  * - displaying the bandwidth/latency values of NUMA nodes
  * - allocating on the best NUMA node for bandwidth
- *
- * Copyright © 2022 Inria.  All rights reserved.
- * See COPYING in top-level directory.
  */
 
 #include "hwloc.h"

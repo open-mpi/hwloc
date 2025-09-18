@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
  * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux

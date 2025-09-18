@@ -1,5 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
+dnl SPDX-License-Identifier: BSD-3-Clause
 dnl Copyright © 2009-2025 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020, 2023, 2025 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana

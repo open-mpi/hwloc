@@ -1,10 +1,12 @@
-/* This example program plays with:
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright © 2014-2018 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ *
+ * This example program plays with:
  * - finding and counting NUMA nodes
  * - manipulating nodesets
  * - memory binding and binding policies
- *
- * Copyright © 2014-2018 Inria.  All rights reserved.
- * See COPYING in top-level directory.
  */
 
 #include "hwloc.h"

@@ -1,12 +1,14 @@
-/* This example program plays with:
- * - finding GPU OS devices
- * - getting CUDA and OpenCL attributes
- * - displaying the locality of the GPU
- *
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009-2024 Inria.  All rights reserved.
  * Copyright © 2009-2011,2017 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
+ *
+ * This example program plays with:
+ * - finding GPU OS devices
+ * - getting CUDA and OpenCL attributes
+ * - displaying the locality of the GPU
  */
 
 #include "hwloc.h"
