@@ -65,8 +65,8 @@ my $QUIET = 0;
 my $HELP = 0;
 
 # Defaults
-my $my_search_name = "Cisco";
-my $my_formal_name = "Cisco Systems, Inc.  All rights reserved.";
+my $my_search_name = "Inria";
+my $my_formal_name = "Inria.  All rights reserved.";
 
 my @tokens;
 push(@tokens, "See COPYING in top-level directory");
