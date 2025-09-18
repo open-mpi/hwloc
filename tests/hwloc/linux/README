@@ -1,35 +1,39 @@
 -*- text -*-
 
 This directory contains tarballs of Linux sysfs hierarchies collected on
-various systems.  Each tarball `xyz.tar.bz2' comes with the corresponding
-`xyz.output', which gives the expected output of "lstopo -v -" for that
-system.
+various systems.  Each `xyz.test` describes a single test with its source
+topology, expected output and lstopo options.
 
 Together with the `HWLOC_FSROOT' environment variable, these are
 used by `test-topology.sh' to check for any regression introduced in
 hwloc detection logic.
 
-A new topology may be added by:
-* running "hwloc-gather-topology" on the target system and saving the
-  tarball and output files here.
-* if lstopo is not available on the target system, running "lstopo -v -"
-  on the extracted tarball to generate the corresponding `output' file
-  locally.
-* adding the tarball and output files to Makefile.am so that they are
-  properly handled in "make check" and "make dist".
+The `xyz.test' file should contain:
+- source: xyz.tar.bz2
+  Tarball filename, must be in same directory as xyz.test).
+- target: xyz.console or xyz.xml
+  Expected output filename (must be in same directory as xyz.test).
+- options: lstopo options
+  Default is `-v -'. Optional.
+- exclude: exclude file
+  To be passed to tar --exclude-from=<file>. Optional.
+- env: environment variable line to be sourced.
+  Optional. Multiple env lines are possible.
 
-When adding a XML-based output, make sure that the filename of the
-tarball ends with .xml.tar.bz2 (so that test-topology may skip it
-if XML support is disabled).
-
-If a `xyz.options' file is found, it will override the `lstopo' options
-(`-v -' by default) for generating the output `xyz.output'.
-
-If the output and tarball names do not match, it is possible to specify
-the actual tarball name in a `xyz.source' file.
-If some files should be excluded when extracting the tarball, they may
-be listed in a `xyz.exclude' file. For instance, to exclude `/sys/*/foo'
-from the saved topology, you should add `*/sys/foo' to `xyz.exclude'.
-These features are especially useful when the same tarball should be
+`exclude' and `env' are especially useful when the same tarball should be
 used for different tests with different configurations and thus different
 expected outputs, without having to save multiple copies of the tarball.
+
+XML output filenames should end with .xml instead of .console
+so that the lstopo output automatically switches to XML.
+
+A new topology may be added by:
+* Running "hwloc-gather-topology" on the target system and saving the
+  tarball and output files here.
+* If lstopo is not available/working on the target system, running "lstopo -v -"
+  or "lstopo -.xml" on the extracted tarball to generate the corresponding
+  output file locally.
+* Creating a test file describing the source, output, options, etc
+  as explained above.
+* Adding the test, tarball and output files to Makefile.am so that they
+  are properly handled in "make check" and "make dist".
