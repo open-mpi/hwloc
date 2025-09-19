@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Copyright © 2018-2025 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+
 exit_usage() {
   echo "$0 <ompi-www-dir>"
   echo "  copy built documentation from current hwloc directory"

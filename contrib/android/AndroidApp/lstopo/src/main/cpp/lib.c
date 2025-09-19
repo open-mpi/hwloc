@@ -1,3 +1,6 @@
+// Copyright © 2020-2023 Inria.  All rights reserved.
+// See COPYING in top-level directory.
+
 //
 // Created by Hoyet on 11/04/2019.
 //

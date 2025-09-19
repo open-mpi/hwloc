@@ -1,3 +1,8 @@
+#
+# Copyright © 2011-2025 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
 if !HWLOC_HAVE_DARWIN
 all-local: needed useless
 else HWLOC_HAVE_DARWIN

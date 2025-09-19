@@ -1,3 +1,6 @@
+// Copyright © 2020-2025 Inria.  All rights reserved.
+// See COPYING in top-level directory.
+
 package com.hwloc.lstopo;
 
 import android.app.Activity;

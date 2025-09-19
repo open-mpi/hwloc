@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright © 2018-2024 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+
 if test "x$1" = x -o "x$1" = "x-h" -o "x$1" = "x--help"; then
   echo "$0 <job> [<build>]"
   echo "  open all build logs from a job on ci.inria.fr jenkins."

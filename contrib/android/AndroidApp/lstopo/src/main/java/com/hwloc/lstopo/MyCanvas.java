@@ -1,3 +1,6 @@
+// Copyright © 2020 Inria.  All rights reserved.
+// See COPYING in top-level directory.
+
 package com.hwloc.lstopo;
 
 import android.content.Context;
