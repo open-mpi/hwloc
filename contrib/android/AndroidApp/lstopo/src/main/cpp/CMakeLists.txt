@@ -1,3 +1,6 @@
+# Copyright © 2020-2021 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+
 # For more information about using CMake with Android Studio, read the
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 

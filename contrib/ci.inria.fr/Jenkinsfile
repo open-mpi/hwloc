@@ -1,5 +1,8 @@
 #!groovy
 
+// Copyright © 2018-2024 Inria.  All rights reserved.
+// See COPYING in top-level directory.
+
 // The GIT checkout must use the remote branch name as the checkout local
 // branch name so that tarball names contain the branch name.
 // In "Additional Behaviours", enable "Checkout to specific local branch"

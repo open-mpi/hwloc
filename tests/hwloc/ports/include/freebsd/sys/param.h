@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2020 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ */
+
 #ifndef _SYS_PARAM_H_
 #define _SYS_PARAM_H_
 
