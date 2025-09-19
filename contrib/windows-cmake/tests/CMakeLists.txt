@@ -1,3 +1,8 @@
+#
+# Copyright © 2021-2024 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
 foreach(t api_version backends bind
   bitmap bitmap_compare_inclusion bitmap_first_last_weight bitmap_singlify bitmap_string
   distances get_area_memlocation get_cache_covering_cpuset get_closest_objs get_largest_objs_inside_cpuset

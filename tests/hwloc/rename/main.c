@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2011-2025 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ */
+
 /* don't let assert() stringify some hwloc names that would not
  * renamed afterwards, and wouldn't be easy to filter out */
 #define NDEBUG 1

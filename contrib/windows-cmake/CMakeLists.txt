@@ -1,3 +1,8 @@
+#
+# Copyright © 2021-2024 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
 cmake_minimum_required(VERSION 3.15)
 project(hwloc
     LANGUAGES C
