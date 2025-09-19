@@ -49,7 +49,7 @@ AC_USE_SYSTEM_EXTENSIONS
 
 AH_TOP([/* -*- c -*-
  *
- * Copyright © 2009, 2011, 2012 CNRS, inria., Université Bordeaux  All rights reserved.
+ * Copyright © 2009, 2011, 2012 CNRS, Inria, Université Bordeaux.  All rights reserved.
  * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2022 IBM Corporation.  All rights reserved.
  * $COPYRIGHT$
