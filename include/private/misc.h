@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -586,6 +586,7 @@ hwloc__pci_link_speed(unsigned generation, unsigned lanes)
    * Gen6 switched to PAM with with 242/256 FLIT (242B payload protected by 8B CRC + 6B FEC).
    * PCIe Gen6 = 64 GT/s signal-rate per lane x 242/256 =  8   GB/s data-rate per lane
    * PCIe Gen7 = 128GT/s signal-rate per lane x 242/256 = 16   GB/s data-rate per lane
+   * PCIe Gen8 = 256GT/s signal-rate per lane x 242/256 = 32   GB/s date-rate per lane
    */
 
   /* lanespeed in Gbit/s */
@@ -594,7 +595,7 @@ hwloc__pci_link_speed(unsigned generation, unsigned lanes)
   else if (generation <= 5)
     lanespeed = 8.0f * (1<<(generation-3)) * 128/130;
   else
-    lanespeed = 8.0f * (1<<(generation-3)) * 242/256; /* assume Gen8 will be 256 GT/s and so on */
+    lanespeed = 8.0f * (1<<(generation-3)) * 242/256; /* assume Gen9 will be 512 GT/s and so on */
 
   /* linkspeed in GB/s */
   return lanespeed * lanes / 8;
