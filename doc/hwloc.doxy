@@ -506,7 +506,8 @@ The hwloc core may also benefit from the following development packages:
     The relevant development package is usually <tt>libudev-devel</tt>
     or <tt>libudev-dev</tt>.
 </li>
-<li>libtool's ltdl library for dynamic plugin loading if the native dlopen cannot be used.
+<li>libtool's ltdl library for dynamic plugin loading on Unix systems
+  if the native dlopen cannot be used.
   The relevant development package is usually <tt>libtool-ltdl-devel</tt>
   or <tt>libltdl-dev</tt>.
 </li>
@@ -3319,7 +3320,8 @@ Components may optionally be built as <b>plugins</b> so that the hwloc core
 library does not directly depend on their dependencies (for instance
 the <tt>libpciaccess</tt> library).
 Plugin support may be enabled with the <tt>\--enable-plugins</tt>
-configure option.
+configure option, or with the <tt>HWLOC_ENABLE_PLUGINS</tt> CMake options
+on Windows.
 All components buildable as plugins will then be built as plugins.
 The configure option may be given a comma-separated list of component
 names to specify the exact list of components to build as plugins.
