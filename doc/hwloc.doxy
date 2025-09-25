@@ -2173,7 +2173,7 @@ and SectorSize (in bytes).
 <dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
 <dt>CUDAGlobalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
 <dd>
- The number of shared multiprocessors, the number of cores per
+ The number of shared multiprocessors, the number of (FP32) cores per
  multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
  Sizes are in KiB (1024 bytes).
