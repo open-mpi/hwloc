@@ -2184,7 +2184,7 @@ These info attributes are attached to OS device objects specified in parentheses
 <dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
 <dt>CUDAGlobalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
 <dd>
- The number of shared multiprocessors, the number of cores per
+ The number of shared multiprocessors, the number of (FP32) cores per
  multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
  Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
