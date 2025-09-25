@@ -47,6 +47,7 @@ static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
       }
       break;
     case 7:
+        return 64;
     case 8:
       switch (minor) {
         case 0: return 64;
