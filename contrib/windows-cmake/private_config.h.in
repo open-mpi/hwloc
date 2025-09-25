@@ -4,6 +4,7 @@
  * Copyright © 2009-2022 Inria.  All rights reserved.
  * Copyright © 2009, 2011, 2012, 2015 Université Bordeaux.  All rights reserved.
  * Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -492,9 +493,11 @@
 /* Define to 1 if you have the `OpenCL' library. */
 #cmakedefine HWLOC_HAVE_OPENCL @HWLOC_HAVE_OPENCL@
 
-/* Define to 1 if the hwloc library should support dynamically-loaded plugins
-   */
-/* #undef HWLOC_HAVE_PLUGINS */
+/* Define to 1 if the hwloc library should support dynamically-loaded plugins */
+#cmakedefine HWLOC_HAVE_PLUGINS @HWLOC_HAVE_PLUGINS@
+
+/* The hwloc plugins path */
+#cmakedefine HWLOC_PLUGINS_PATH "@HWLOC_PLUGINS_PATH@"
 
 /* `Define to 1 if you have pthread_getthrds_np' */
 /* #undef HWLOC_HAVE_PTHREAD_GETTHRDS_NP */

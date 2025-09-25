@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009-2023 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
+ * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -77,27 +78,64 @@ typedef lt_dlhandle hwloc_dlhandle;
 #define hwloc_dlforeachfile lt_dlforeachfile
 
 #else /* !HWLOC_HAVE_LTDL */
+
+#ifdef HWLOC_WIN_SYS
+/* Use Windows API for plugin loading */
+typedef HMODULE hwloc_dlhandle;
+static __hwloc_inline int hwloc_dlinit(void) { return 0; }
+static __hwloc_inline int hwloc_dlexit(void) { return 0; }
+#define hwloc_dlclose FreeLibrary
+#define hwloc_dlerror win_dlerror
+#define hwloc_dlsym GetProcAddress
+
+static char error_buffer[65535];
+char const * win_dlerror(void)
+{
+  size_t len = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
+                              GetLastError(), MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+                              error_buffer, (DWORD) sizeof( error_buffer ), NULL );
+  /* skip the newline at the end, since we always add one in the log ouput */
+  if (error_buffer[len-1] = '\n')
+    error_buffer[len-1] = '\0';
+  return error_buffer;
+}
+#else
 /* no-ltdl plugin load relies on less portable libdl */
 #include <dlfcn.h>
+#include <dirent.h>
+#include <unistd.h>
 typedef void * hwloc_dlhandle;
 static __hwloc_inline int hwloc_dlinit(void) { return 0; }
 static __hwloc_inline int hwloc_dlexit(void) { return 0; }
 #define hwloc_dlclose dlclose
 #define hwloc_dlerror dlerror
 #define hwloc_dlsym dlsym
+#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <dirent.h>
-#include <unistd.h>
 
 static hwloc_dlhandle hwloc_dlopenext(const char *_filename)
 {
   hwloc_dlhandle handle;
   char *filename = NULL;
+#ifdef HWLOC_WIN_SYS
+  size_t len = strlen(_filename) + strlen(".dll") + 1;
+  filename = (char*) malloc(len);
+  if (filename == NULL)
+      return NULL;
+
+  int ret = snprintf(filename, len, "%s.dll", _filename);
+  if (ret < 0 || (size_t)ret >= len) {
+      free(filename);
+      return NULL;
+  }
+  handle = LoadLibraryExA(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+#else
   if (asprintf(&filename, "%s.so", _filename) < 0)
     return NULL;
   handle = dlopen(filename, RTLD_NOW|RTLD_LOCAL);
+#endif
   free(filename);
   return handle;
 }
@@ -115,18 +153,78 @@ hwloc_dlforeachfile(const char *_paths,
 
   path = paths;
   while (*path) {
-    char *colon;
-    DIR *dir;
-    struct dirent *dirent;
+    char *pathsep;
 
-    colon = strchr(path, ':');
-    if (colon)
-      *colon = '\0';
+#ifdef HWLOC_WIN_SYS
+    pathsep = strchr(path, ';');
+#else
+    pathsep = strchr(path, ':');
+#endif
+    if (pathsep)
+      *pathsep = '\0';
 
     if (hwloc_plugins_verbose)
-      fprintf(stderr, "hwloc:  Looking under %s\n", path);
+      fprintf(stderr, "hwloc: Looking under %s\n", path);
 
-    dir = opendir(path);
+#ifdef HWLOC_WIN_SYS
+    WIN32_FIND_DATA find_data;
+    HANDLE find_handle;
+    char search_path[MAX_PATH];
+
+    // Prepare search path with wildcard
+    snprintf(search_path, MAX_PATH, "%s\\*", path);
+
+    find_handle = FindFirstFile(search_path, &find_data);
+    if (find_handle == INVALID_HANDLE_VALUE)
+        goto next;
+
+    do {
+      char *abs_name, *suffix;
+      struct _stat stbuf;
+      int err;
+
+      // Skip . and .. directories
+      if (strcmp(find_data.cFileName, ".") == 0 || strcmp(find_data.cFileName, "..") == 0)
+          continue;
+
+      abs_name = (char *) malloc(strlen(path) + 1 + strlen(find_data.cFileName) + 1);
+      if (abs_name == NULL)
+          continue;
+
+      if (sprintf(abs_name, "%s\\%s", path, find_data.cFileName) < 0) {
+          free(abs_name);
+          continue;
+      }
+
+      // Check if regular file
+      if (_stat(abs_name, &stbuf) < 0 || !(stbuf.st_mode & _S_IFREG)) {
+          free(abs_name);
+          continue;
+      }
+
+      /* Only keep .dll files, and remove that suffix to get the component basename */
+      suffix = strrchr(abs_name, '.');
+      if (!suffix || strcmp(suffix, ".dll")) {
+        free(abs_name);
+        continue;
+      }
+      *suffix = '\0';
+
+      err = func(abs_name, data);
+      if (err) {
+        free(abs_name);
+        continue;
+      }
+
+      free(abs_name);
+
+    } while (FindNextFile(find_handle, &find_data));
+
+    FindClose(find_handle);
+    goto next;
+#else
+    struct dirent *dirent;
+    DIR * dir = opendir(path);
     if (!dir)
       goto next;
 
@@ -167,11 +265,12 @@ hwloc_dlforeachfile(const char *_paths,
     }
 
     closedir(dir);
+#endif
 
   next:
-    if (!colon)
+    if (!pathsep)
       break;
-    path = colon+1;
+    path = pathsep+1;
   }
 
   free(paths);
@@ -200,7 +299,11 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   if (hwloc_plugins_verbose)
     fprintf(stderr, "hwloc: Plugin dlforeach found `%s'\n", filename);
 
+#ifdef HWLOC_WIN_SYS
+  basename = strrchr(filename, '\\');
+#else
   basename = strrchr(filename, '/');
+#endif
   if (!basename)
     basename = filename;
   else
