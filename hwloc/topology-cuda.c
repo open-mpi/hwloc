@@ -61,7 +61,7 @@ static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
     case 12:
       return 128;
   }
-  hwloc_debug("unknown compute capability %d.%d, disabling core display.\n", major, minor);
+  hwloc_debug("Unknown CUDA GPU compute capability %d.%d, ignoring CUDACoresPerMP info.\n", major, minor);
   return 0;
 }
 
