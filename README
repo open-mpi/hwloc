@@ -263,15 +263,17 @@ hwloc-hello.c'') prints the topology of the machine and performs some thread
 and memory binding. More examples are available in the doc/examples/ directory
 of the source tree.
 
-/* Example hwloc API program.
-*
-* See other examples under doc/examples/ in the source tree
-* for more details.
-*
-* Copyright (c) 2009-2016 Inria. All rights reserved.
+/*
+* SPDX-License-Identifier: BSD-3-Clause
+* Copyright © 2009-2025 Inria.  All rights reserved.
 * Copyright (c) 2009-2011 Universit?eacute; Bordeaux
 * Copyright (c) 2009-2010 Cisco Systems, Inc. All rights reserved.
 * See COPYING in top-level directory.
+*
+* Example hwloc API program.
+*
+* See other examples under doc/examples/ in the source tree
+* for more details.
 *
 * hwloc-hello.c
 */
