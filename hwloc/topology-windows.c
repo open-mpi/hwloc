@@ -225,7 +225,7 @@ static void hwloc_win_get_function_ptrs(void)
 {
   HMODULE kernel32, ntdll;
 
-#if HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE
+#if (defined HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE) && HWLOC_HAVE_GCC_W_CAST_FUNCTION_TYPE
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 
