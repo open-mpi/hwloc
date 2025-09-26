@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  */
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_noos_component;
