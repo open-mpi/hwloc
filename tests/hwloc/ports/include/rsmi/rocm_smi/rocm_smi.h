@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2013-2024 Inria.  All rights reserved.
+ * Copyright © 2013-2025 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -13,6 +13,11 @@
 #ifndef HWLOC_CONFIGURE_H
 #error rocm_smi.h must be included after private/autogen/config.h
 #endif
+
+#ifdef HAVE_DECL_RSMI_DEV_PARTITION_ID_GET
+#undef HAVE_DECL_RSMI_DEV_PARTITION_ID_GET
+#endif
+#define HAVE_DECL_RSMI_DEV_PARTITION_ID_GET 1
 
 typedef int rsmi_status_t;
 #define RSMI_STATUS_SUCCESS 0
