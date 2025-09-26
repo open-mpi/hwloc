@@ -231,33 +231,40 @@ static void hwloc_win_get_function_ptrs(void)
 
     kernel32 = LoadLibrary(TEXT("kernel32.dll"));
     if (kernel32) {
+      /* XP and Server 2003 */
+      VirtualFreeExProc =
+	(PFN_VIRTUALFREEEX) GetProcAddress(kernel32, "VirtualFreeEx");
+      /* Vista and Server 2003 */
+      GetCurrentProcessorNumberProc =
+	(PFN_GETCURRENTPROCESSORNUMBER) GetProcAddress(kernel32, "GetCurrentProcessorNumber");
+      GetNumaAvailableMemoryNodeProc =
+	(PFN_GETNUMAAVAILABLEMEMORYNODE) GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
+      /* Vista and Server 2008 */
+      VirtualAllocExNumaProc =
+	(PFN_VIRTUALALLOCEXNUMA) GetProcAddress(kernel32, "VirtualAllocExNuma");
+      /* Windows7 and Server 2008 R2 */
       GetActiveProcessorGroupCountProc =
 	(PFN_GETACTIVEPROCESSORGROUPCOUNT) GetProcAddress(kernel32, "GetActiveProcessorGroupCount");
       GetActiveProcessorCountProc =
 	(PFN_GETACTIVEPROCESSORCOUNT) GetProcAddress(kernel32, "GetActiveProcessorCount");
-      GetCurrentProcessorNumberProc =
-	(PFN_GETCURRENTPROCESSORNUMBER) GetProcAddress(kernel32, "GetCurrentProcessorNumber");
       GetCurrentProcessorNumberExProc =
 	(PFN_GETCURRENTPROCESSORNUMBEREX) GetProcAddress(kernel32, "GetCurrentProcessorNumberEx");
       SetThreadGroupAffinityProc =
 	(PFN_SETTHREADGROUPAFFINITY) GetProcAddress(kernel32, "SetThreadGroupAffinity");
       GetThreadGroupAffinityProc =
 	(PFN_GETTHREADGROUPAFFINITY) GetProcAddress(kernel32, "GetThreadGroupAffinity");
-      GetNumaAvailableMemoryNodeProc =
-	(PFN_GETNUMAAVAILABLEMEMORYNODE) GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
       GetNumaAvailableMemoryNodeExProc =
 	(PFN_GETNUMAAVAILABLEMEMORYNODEEX) GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
       GetLogicalProcessorInformationExProc =
 	(PFN_GETLOGICALPROCESSORINFORMATIONEX)GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
+      /* Windows7 and Server 2008 R2,
+       * and PSAPI_VERSION not set to 1 in Psapi.h */
       QueryWorkingSetExProc =
 	(PFN_QUERYWORKINGSETEX) GetProcAddress(kernel32, "K32QueryWorkingSetEx");
-      VirtualAllocExNumaProc =
-	(PFN_VIRTUALALLOCEXNUMA) GetProcAddress(kernel32, "VirtualAllocExNuma");
-      VirtualFreeExProc =
-	(PFN_VIRTUALFREEEX) GetProcAddress(kernel32, "VirtualFreeEx");
     }
 
     if (!QueryWorkingSetExProc) {
+      /* Vista and Server 2003 with SP1 and Server 2008 */
       HMODULE psapi = LoadLibrary(TEXT("psapi.dll"));
       if (psapi)
         QueryWorkingSetExProc = (PFN_QUERYWORKINGSETEX) GetProcAddress(psapi, "QueryWorkingSetEx");
