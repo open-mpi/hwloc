@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2009-2024 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012, 2020 Université Bordeaux
 # Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -180,8 +180,7 @@ nodist_libhwloc_port_rsmi_la_SOURCES = topology-rsmi.c
 libhwloc_port_rsmi_la_SOURCES = \
         include/rsmi/rocm_smi/rocm_smi.h
 libhwloc_port_rsmi_la_CPPFLAGS = $(common_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/rsmi \
-	-DHAVE_DECL_RSMI_DEV_PARTITION_ID_GET=1
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/rsmi
 
 nodist_libhwloc_port_levelzero_la_SOURCES = topology-levelzero.c
 libhwloc_port_levelzero_la_SOURCES = \
