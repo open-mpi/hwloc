@@ -1,6 +1,6 @@
 REM
 REM  SPDX-License-Identifier: BSD-3-Clause
-REM  Copyright © 2012-2023 Inria.  All rights reserved.
+REM  Copyright © 2012-2025 Inria.  All rights reserved.
 REM  See COPYING in top-level directory.
 REM
 
@@ -28,7 +28,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd %SHORTNAME%\contrib\windows-cmake
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-cmake %HWLOC_WINCMAKE_OPTS% --install-prefix=%cd%/install -DCMAKE_BUILD_TYPE=Release -B build
+cmake %HWLOC_WINCMAKE_OPTS% --install-prefix=%cd%/install -DCMAKE_BUILD_TYPE=Release -DHWLOC_ENABLE_PLUGINS:BOOL=ON -B build
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cmake --build build --parallel
