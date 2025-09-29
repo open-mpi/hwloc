@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2022 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
  * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
@@ -29,6 +29,10 @@ static int hwloc_components_verbose = 0;
 #ifdef HWLOC_HAVE_PLUGINS
 static int hwloc_plugins_verbose = 0;
 static const char * hwloc_plugins_blacklist = NULL;
+#if defined(HWLOC_WIN_SYS) && defined(__CYGWIN__)
+#define _stat stat
+#define _S_IFREG S_IFREG
+#endif
 #endif
 
 /* hwloc_components_mutex serializes:
