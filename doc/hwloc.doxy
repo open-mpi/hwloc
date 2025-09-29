@@ -903,7 +903,7 @@ indexes or as hwloc's logical object indexes.
 It eases cooperation with external tools such as taskset or numactl
 by exporting hwloc specifications into list of processor or NUMA node
 physical indexes.
-See also \ref faq_indexes.
+See also \ref faq_convert_indexes.
 
 
 \section cli_hwloc_info hwloc-info
@@ -3762,6 +3762,17 @@ The main reason for still using physical/OS indexes is when interacting with
 non-hwloc tools such as numactl or taskset, or when reading hardware information
 from raw sources such as /proc/cpuinfo.
 
+Keep in mind is that physical indexes are internally used to fill
+CPU and node sets (::hwloc_cpuset_t and ::hwloc_nodeset_t</tt>)
+because they are passed to operating systems for binding.
+Hence it is not recommended to display the contents of such sets
+(e.g. with <tt>hwloc_bitmap_list_snprintf()</tt>) without a clear indication
+that they are physical indexes.
+See also \ref faq_convert_indexes
+
+
+\subsection faq_convert_indexes How do I convert between logical and OS/physical indexes?
+
 lstopo options <tt>-l</tt> and <tt>-p</tt> may be used to switch between
 logical indexes (prefixed with <tt>L#</tt>) and physical/OS indexes (<tt>P#</tt>).
 Converting one into the other may also be achieved with hwloc-calc which may
@@ -3778,6 +3789,25 @@ $ hwloc-calc -I pu --physical-input --logical-output pu:3
 $ hwloc-calc -I numa --logical-input --physical-output numa:2-3 numa:7
 0,2,5
 \endverbatim
+
+From the C API, converting requires to go through objects to retrieve the other index.
+One may retrieve an object from a logical index with
+hwloc_get_obj_by_type() or hwloc_get_obj_by_depth().
+Getting a PU object or NUMA node from a physical index may be performed
+hwloc_get_pu_obj_by_os_index() or hwloc_get_numanode_obj_by_os_index().
+
+Given that cpusets and nodesets contain physical index bits,
+one may also want to convert them to logical indexes.
+One solution consists in iterating over the input set
+(e.g. hwloc_bitmap_foreach_begin()) and convert each (physical) bit into
+a PU object and then get its logical index.
+
+A more general solution for converting a cpuset into the logical indexes of
+larger objects (e.g. Cores or Packages instead of PUs) is to iterate over the
+level and keep the objects whose cpuset intersects the input cpuset.
+See hwloc_get_next_obj_covering_cpuset_by_type() for instance.
+
+See also \ref faq_indexes
 
 
 \subsection faq_structural hwloc is only a structural model, it ignores performance models, memory bandwidth, etc.?
