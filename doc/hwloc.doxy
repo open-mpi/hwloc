@@ -3762,7 +3762,7 @@ which are portable, contiguous and logically ordered
 In general, one should only use logical indexes and just let hwloc do the
 internal conversion when really needed (when talking to the OS and hardware).
 
-hwloc developers recommends that users do not use physical/OS indexes
+hwloc developers recommend that users do not use physical/OS indexes
 unless they really know what they are doing.
 The main reason for still using physical/OS indexes is when interacting with
 non-hwloc tools such as numactl or taskset, or when reading hardware information
