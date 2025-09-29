@@ -158,6 +158,7 @@ HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
  *
  * Each bit may be converted into a PU object using
  * hwloc_get_pu_obj_by_os_index().
+ * \sa faq_indexes
  */
 typedef hwloc_bitmap_t hwloc_cpuset_t;
 /** \brief A non-modifiable ::hwloc_cpuset_t. */
@@ -170,6 +171,7 @@ typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
  * ::hwloc_bitmap_t (see hwloc/bitmap.h).
  * Each bit may be converted into a NUMA node object using
  * hwloc_get_numanode_obj_by_os_index().
+ * \sa faq_indexes
  *
  * When binding memory on a system without any NUMA node,
  * the single main memory bank is considered as NUMA node #0.
