@@ -13,6 +13,13 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.12.3
+--------------
+* Fix CUDACoresPerMP on NVIDIA GPUs with compute capability 7.x.
+* Add FAQ "How do I convert between logical and OS/physical indexes?"
+  and further clarify that cpusets and nodesets contain physical indexes.
+
+
 Version 2.12.2
 --------------
 * Fix hwloc-gather-topology failure because of MemoryModules when
