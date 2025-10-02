@@ -10,10 +10,7 @@
     <info name="DMISysVendor" value="Silicon Graphics International Corp."/>
     <object type="Package" os_index="0" cpuset="0x000000ff,,,,,,0x000000ff" complete_cpuset="0x000000ff,,,,,,0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3" id="obj3">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="0" cpuset="0x000000ff,,,,,,0x000000ff" complete_cpuset="0x000000ff,,,,,,0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2" local_memory="33255329792">
-        <page_type size="4096" count="8118977"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="0" cpuset="0x000000ff,,,,,,0x000000ff" complete_cpuset="0x000000ff,,,,,,0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2" local_memory="33255329792"/>
       <object type="L3Cache" cpuset="0x000000ff,,,,,,0x000000ff" complete_cpuset="0x000000ff,,,,,,0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001,,,,,,0x00000001" complete_cpuset="0x00000001,,,,,,0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001,,,,,,0x00000001" complete_cpuset="0x00000001,,,,,,0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" id="obj6" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -159,10 +156,7 @@
     </object>
     <object type="Package" os_index="1" cpuset="0x0000ff00,,,,,,0x0000ff00" complete_cpuset="0x0000ff00,,,,,,0x0000ff00" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="70" id="obj70">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="1" cpuset="0x0000ff00,,,,,,0x0000ff00" complete_cpuset="0x0000ff00,,,,,,0x0000ff00" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="69" id="obj69" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="1" cpuset="0x0000ff00,,,,,,0x0000ff00" complete_cpuset="0x0000ff00,,,,,,0x0000ff00" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="69" id="obj69" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x0000ff00,,,,,,0x0000ff00" complete_cpuset="0x0000ff00,,,,,,0x0000ff00" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="71" id="obj71" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000100,,,,,,0x00000100" complete_cpuset="0x00000100,,,,,,0x00000100" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="72" id="obj72" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000100,,,,,,0x00000100" complete_cpuset="0x00000100,,,,,,0x00000100" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="73" id="obj73" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -260,10 +254,7 @@
     </object>
     <object type="Package" os_index="2" cpuset="0x00ff0000,,,,,,0x00ff0000" complete_cpuset="0x00ff0000,,,,,,0x00ff0000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="126" id="obj126">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="2" cpuset="0x00ff0000,,,,,,0x00ff0000" complete_cpuset="0x00ff0000,,,,,,0x00ff0000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="125" id="obj125" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="2" cpuset="0x00ff0000,,,,,,0x00ff0000" complete_cpuset="0x00ff0000,,,,,,0x00ff0000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="125" id="obj125" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x00ff0000,,,,,,0x00ff0000" complete_cpuset="0x00ff0000,,,,,,0x00ff0000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="127" id="obj127" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00010000,,,,,,0x00010000" complete_cpuset="0x00010000,,,,,,0x00010000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="128" id="obj128" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00010000,,,,,,0x00010000" complete_cpuset="0x00010000,,,,,,0x00010000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="129" id="obj129" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -349,10 +340,7 @@
     </object>
     <object type="Package" os_index="3" cpuset="0xff000000,,,,,,0xff000000" complete_cpuset="0xff000000,,,,,,0xff000000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="177" id="obj177">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="3" cpuset="0xff000000,,,,,,0xff000000" complete_cpuset="0xff000000,,,,,,0xff000000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="176" id="obj176" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="3" cpuset="0xff000000,,,,,,0xff000000" complete_cpuset="0xff000000,,,,,,0xff000000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="176" id="obj176" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0xff000000,,,,,,0xff000000" complete_cpuset="0xff000000,,,,,,0xff000000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="178" id="obj178" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x01000000,,,,,,0x01000000" complete_cpuset="0x01000000,,,,,,0x01000000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="179" id="obj179" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x01000000,,,,,,0x01000000" complete_cpuset="0x01000000,,,,,,0x01000000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="180" id="obj180" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -438,10 +426,7 @@
     </object>
     <object type="Package" os_index="4" cpuset="0x000000ff,,,,,,0x000000ff,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="228" id="obj228">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="4" cpuset="0x000000ff,,,,,,0x000000ff,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="227" id="obj227" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="4" cpuset="0x000000ff,,,,,,0x000000ff,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="227" id="obj227" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x000000ff,,,,,,0x000000ff,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="229" id="obj229" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001,,,,,,0x00000001,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="230" id="obj230" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001,,,,,,0x00000001,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,0x0" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="231" id="obj231" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -573,10 +558,7 @@
     </object>
     <object type="Package" os_index="5" cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="292" id="obj292">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="5" cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="291" id="obj291" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="5" cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="291" id="obj291" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="293" id="obj293" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000100,,,,,,0x00000100,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="294" id="obj294" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000100,,,,,,0x00000100,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,0x0" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="295" id="obj295" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -662,10 +644,7 @@
     </object>
     <object type="Package" os_index="6" cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="343" id="obj343">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="6" cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="342" id="obj342" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="6" cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="342" id="obj342" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="344" id="obj344" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00010000,,,,,,0x00010000,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="345" id="obj345" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00010000,,,,,,0x00010000,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,0x0" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="346" id="obj346" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -772,10 +751,7 @@
     </object>
     <object type="Package" os_index="7" cpuset="0xff000000,,,,,,0xff000000,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="399" id="obj399">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="7" cpuset="0xff000000,,,,,,0xff000000,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="398" id="obj398" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="7" cpuset="0xff000000,,,,,,0xff000000,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="398" id="obj398" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0xff000000,,,,,,0xff000000,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="400" id="obj400" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x01000000,,,,,,0x01000000,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="401" id="obj401" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x01000000,,,,,,0x01000000,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,0x0" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="402" id="obj402" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -861,10 +837,7 @@
     </object>
     <object type="Package" os_index="8" cpuset="0x000000ff,,,,,,0x000000ff,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" gp_index="450" id="obj450">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="8" cpuset="0x000000ff,,,,,,0x000000ff,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" gp_index="449" id="obj449" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="8" cpuset="0x000000ff,,,,,,0x000000ff,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" gp_index="449" id="obj449" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x000000ff,,,,,,0x000000ff,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" gp_index="451" id="obj451" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001,,,,,,0x00000001,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" gp_index="452" id="obj452" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001,,,,,,0x00000001,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,0x0" nodeset="0x00000100" complete_nodeset="0x00000100" gp_index="453" id="obj453" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -960,10 +933,7 @@
     </object>
     <object type="Package" os_index="9" cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" nodeset="0x00000200" complete_nodeset="0x00000200" gp_index="504" id="obj504">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="9" cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" nodeset="0x00000200" complete_nodeset="0x00000200" gp_index="503" id="obj503" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="9" cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" nodeset="0x00000200" complete_nodeset="0x00000200" gp_index="503" id="obj503" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,0x0" nodeset="0x00000200" complete_nodeset="0x00000200" gp_index="505" id="obj505" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000100,,,,,,0x00000100,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,0x0" nodeset="0x00000200" complete_nodeset="0x00000200" gp_index="506" id="obj506" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000100,,,,,,0x00000100,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,0x0" nodeset="0x00000200" complete_nodeset="0x00000200" gp_index="507" id="obj507" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1049,10 +1019,7 @@
     </object>
     <object type="Package" os_index="10" cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" gp_index="555" id="obj555">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="10" cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" gp_index="554" id="obj554" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="10" cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" gp_index="554" id="obj554" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" gp_index="556" id="obj556" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00010000,,,,,,0x00010000,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" gp_index="557" id="obj557" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00010000,,,,,,0x00010000,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,0x0" nodeset="0x00000400" complete_nodeset="0x00000400" gp_index="558" id="obj558" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1138,10 +1105,7 @@
     </object>
     <object type="Package" os_index="11" cpuset="0xff000000,,,,,,0xff000000,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,0x0" nodeset="0x00000800" complete_nodeset="0x00000800" gp_index="606" id="obj606">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="11" cpuset="0xff000000,,,,,,0xff000000,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,0x0" nodeset="0x00000800" complete_nodeset="0x00000800" gp_index="605" id="obj605" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="11" cpuset="0xff000000,,,,,,0xff000000,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,0x0" nodeset="0x00000800" complete_nodeset="0x00000800" gp_index="605" id="obj605" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0xff000000,,,,,,0xff000000,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,0x0" nodeset="0x00000800" complete_nodeset="0x00000800" gp_index="607" id="obj607" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x01000000,,,,,,0x01000000,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,0x0" nodeset="0x00000800" complete_nodeset="0x00000800" gp_index="608" id="obj608" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x01000000,,,,,,0x01000000,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,0x0" nodeset="0x00000800" complete_nodeset="0x00000800" gp_index="609" id="obj609" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1227,10 +1191,7 @@
     </object>
     <object type="Package" os_index="12" cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" gp_index="657" id="obj657">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="12" cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" gp_index="656" id="obj656" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="12" cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" gp_index="656" id="obj656" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" gp_index="658" id="obj658" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001,,,,,,0x00000001,,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" gp_index="659" id="obj659" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001,,,,,,0x00000001,,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,,0x0" nodeset="0x00001000" complete_nodeset="0x00001000" gp_index="660" id="obj660" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1316,10 +1277,7 @@
     </object>
     <object type="Package" os_index="13" cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" nodeset="0x00002000" complete_nodeset="0x00002000" gp_index="708" id="obj708">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="13" cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" nodeset="0x00002000" complete_nodeset="0x00002000" gp_index="707" id="obj707" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="13" cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" nodeset="0x00002000" complete_nodeset="0x00002000" gp_index="707" id="obj707" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,0x0" nodeset="0x00002000" complete_nodeset="0x00002000" gp_index="709" id="obj709" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000100,,,,,,0x00000100,,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,,0x0" nodeset="0x00002000" complete_nodeset="0x00002000" gp_index="710" id="obj710" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000100,,,,,,0x00000100,,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,,0x0" nodeset="0x00002000" complete_nodeset="0x00002000" gp_index="711" id="obj711" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1405,10 +1363,7 @@
     </object>
     <object type="Package" os_index="14" cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" gp_index="759" id="obj759">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="14" cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" gp_index="758" id="obj758" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="14" cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" gp_index="758" id="obj758" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" gp_index="760" id="obj760" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00010000,,,,,,0x00010000,,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" gp_index="761" id="obj761" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00010000,,,,,,0x00010000,,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,,0x0" nodeset="0x00004000" complete_nodeset="0x00004000" gp_index="762" id="obj762" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1494,10 +1449,7 @@
     </object>
     <object type="Package" os_index="15" cpuset="0xff000000,,,,,,0xff000000,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,0x0" nodeset="0x00008000" complete_nodeset="0x00008000" gp_index="810" id="obj810">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="15" cpuset="0xff000000,,,,,,0xff000000,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,0x0" nodeset="0x00008000" complete_nodeset="0x00008000" gp_index="809" id="obj809" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="15" cpuset="0xff000000,,,,,,0xff000000,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,0x0" nodeset="0x00008000" complete_nodeset="0x00008000" gp_index="809" id="obj809" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0xff000000,,,,,,0xff000000,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,0x0" nodeset="0x00008000" complete_nodeset="0x00008000" gp_index="811" id="obj811" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x01000000,,,,,,0x01000000,,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,,0x0" nodeset="0x00008000" complete_nodeset="0x00008000" gp_index="812" id="obj812" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x01000000,,,,,,0x01000000,,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,,0x0" nodeset="0x00008000" complete_nodeset="0x00008000" gp_index="813" id="obj813" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1583,10 +1535,7 @@
     </object>
     <object type="Package" os_index="16" cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" gp_index="861" id="obj861">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="16" cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" gp_index="860" id="obj860" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="16" cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" gp_index="860" id="obj860" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" gp_index="862" id="obj862" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001,,,,,,0x00000001,,,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" gp_index="863" id="obj863" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001,,,,,,0x00000001,,,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,,,0x0" nodeset="0x00010000" complete_nodeset="0x00010000" gp_index="864" id="obj864" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1672,10 +1621,7 @@
     </object>
     <object type="Package" os_index="17" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" nodeset="0x00020000" complete_nodeset="0x00020000" gp_index="912" id="obj912">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="17" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" nodeset="0x00020000" complete_nodeset="0x00020000" gp_index="911" id="obj911" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="17" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" nodeset="0x00020000" complete_nodeset="0x00020000" gp_index="911" id="obj911" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,0x0" nodeset="0x00020000" complete_nodeset="0x00020000" gp_index="913" id="obj913" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000100,,,,,,0x00000100,,,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,,,0x0" nodeset="0x00020000" complete_nodeset="0x00020000" gp_index="914" id="obj914" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000100,,,,,,0x00000100,,,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,,,0x0" nodeset="0x00020000" complete_nodeset="0x00020000" gp_index="915" id="obj915" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1761,10 +1707,7 @@
     </object>
     <object type="Package" os_index="18" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" gp_index="963" id="obj963">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="18" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" gp_index="962" id="obj962" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="18" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" gp_index="962" id="obj962" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" gp_index="964" id="obj964" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00010000,,,,,,0x00010000,,,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" gp_index="965" id="obj965" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00010000,,,,,,0x00010000,,,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,,,0x0" nodeset="0x00040000" complete_nodeset="0x00040000" gp_index="966" id="obj966" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1850,10 +1793,7 @@
     </object>
     <object type="Package" os_index="19" cpuset="0xff000000,,,,,,0xff000000,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,0x0" nodeset="0x00080000" complete_nodeset="0x00080000" gp_index="1014" id="obj1014">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="19" cpuset="0xff000000,,,,,,0xff000000,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,0x0" nodeset="0x00080000" complete_nodeset="0x00080000" gp_index="1013" id="obj1013" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="19" cpuset="0xff000000,,,,,,0xff000000,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,0x0" nodeset="0x00080000" complete_nodeset="0x00080000" gp_index="1013" id="obj1013" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0xff000000,,,,,,0xff000000,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,0x0" nodeset="0x00080000" complete_nodeset="0x00080000" gp_index="1015" id="obj1015" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x01000000,,,,,,0x01000000,,,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,,,0x0" nodeset="0x00080000" complete_nodeset="0x00080000" gp_index="1016" id="obj1016" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x01000000,,,,,,0x01000000,,,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,,,0x0" nodeset="0x00080000" complete_nodeset="0x00080000" gp_index="1017" id="obj1017" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -1939,10 +1879,7 @@
     </object>
     <object type="Package" os_index="20" cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" gp_index="1065" id="obj1065">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="20" cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" gp_index="1064" id="obj1064" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="20" cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" gp_index="1064" id="obj1064" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" complete_cpuset="0x000000ff,,,,,,0x000000ff,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" gp_index="1066" id="obj1066" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001,,,,,,0x00000001,,,,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" gp_index="1067" id="obj1067" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001,,,,,,0x00000001,,,,,0x0" complete_cpuset="0x00000001,,,,,,0x00000001,,,,,0x0" nodeset="0x00100000" complete_nodeset="0x00100000" gp_index="1068" id="obj1068" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -2028,10 +1965,7 @@
     </object>
     <object type="Package" os_index="21" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" nodeset="0x00200000" complete_nodeset="0x00200000" gp_index="1116" id="obj1116">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="21" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" nodeset="0x00200000" complete_nodeset="0x00200000" gp_index="1115" id="obj1115" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="21" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" nodeset="0x00200000" complete_nodeset="0x00200000" gp_index="1115" id="obj1115" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" complete_cpuset="0x0000ff00,,,,,,0x0000ff00,,,,,0x0" nodeset="0x00200000" complete_nodeset="0x00200000" gp_index="1117" id="obj1117" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00000100,,,,,,0x00000100,,,,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,,,,0x0" nodeset="0x00200000" complete_nodeset="0x00200000" gp_index="1118" id="obj1118" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000100,,,,,,0x00000100,,,,,0x0" complete_cpuset="0x00000100,,,,,,0x00000100,,,,,0x0" nodeset="0x00200000" complete_nodeset="0x00200000" gp_index="1119" id="obj1119" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -2117,10 +2051,7 @@
     </object>
     <object type="Package" os_index="22" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" gp_index="1167" id="obj1167">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="22" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" gp_index="1166" id="obj1166" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="22" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" gp_index="1166" id="obj1166" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" complete_cpuset="0x00ff0000,,,,,,0x00ff0000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" gp_index="1168" id="obj1168" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x00010000,,,,,,0x00010000,,,,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" gp_index="1169" id="obj1169" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00010000,,,,,,0x00010000,,,,,0x0" complete_cpuset="0x00010000,,,,,,0x00010000,,,,,0x0" nodeset="0x00400000" complete_nodeset="0x00400000" gp_index="1170" id="obj1170" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
@@ -2206,10 +2137,7 @@
     </object>
     <object type="Package" os_index="23" cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" nodeset="0x00800000" complete_nodeset="0x00800000" gp_index="1218" id="obj1218">
       <info name="CPUModel" value="Intel(R) Xeon(R) CPU E5-4640 0 @ 2.40GHz"/>
-      <object type="NUMANode" os_index="23" cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" nodeset="0x00800000" complete_nodeset="0x00800000" gp_index="1217" id="obj1217" local_memory="33269219328">
-        <page_type size="4096" count="8122368"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="23" cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" nodeset="0x00800000" complete_nodeset="0x00800000" gp_index="1217" id="obj1217" local_memory="33269219328"/>
       <object type="L3Cache" cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" complete_cpuset="0xff000000,,,,,,0xff000000,,,,,0x0" nodeset="0x00800000" complete_nodeset="0x00800000" gp_index="1219" id="obj1219" cache_size="20971520" depth="3" cache_linesize="64" cache_associativity="20" cache_type="0">
         <object type="L2Cache" cpuset="0x01000000,,,,,,0x01000000,,,,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,,,,0x0" nodeset="0x00800000" complete_nodeset="0x00800000" gp_index="1220" id="obj1220" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x01000000,,,,,,0x01000000,,,,,0x0" complete_cpuset="0x01000000,,,,,,0x01000000,,,,,0x0" nodeset="0x00800000" complete_nodeset="0x00800000" gp_index="1221" id="obj1221" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">

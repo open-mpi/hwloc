@@ -292,7 +292,6 @@ man3_objects_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_numanode_attr_s.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_numanode_attr_s_hwloc_memory_page_type_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_bridge_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \

@@ -23,10 +23,7 @@
     <info name="HostName" value="devel09"/>
     <info name="Architecture" value="x86_64"/>
     <object type="Package" os_index="1" cpuset="0x00000005" complete_cpuset="0x00000005" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4">
-      <object type="NUMANode" os_index="0" cpuset="0x00000005" complete_cpuset="0x00000005" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" local_memory="12884901888">
-        <page_type size="4096" count="3145728"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="0" cpuset="0x00000005" complete_cpuset="0x00000005" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" local_memory="12884901888"/>
       <object type="L3Cache" cpuset="0x00000005" complete_cpuset="0x00000005" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" cache_size="8388608" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
         <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="0">
@@ -93,10 +90,7 @@
       </object>
     </object>
     <object type="Package" os_index="0" cpuset="0x0000000a" complete_cpuset="0x0000000a" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="32">
-      <object type="NUMANode" os_index="1" cpuset="0x0000000a" complete_cpuset="0x0000000a" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="30" local_memory="12874317824">
-        <page_type size="4096" count="3143144"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="1" cpuset="0x0000000a" complete_cpuset="0x0000000a" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="30" local_memory="12874317824"/>
       <object type="L3Cache" cpuset="0x0000000a" complete_cpuset="0x0000000a" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="33" cache_size="8388608" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
         <object type="L2Cache" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="34" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8" cache_type="0">
           <object type="L1Cache" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="35" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="0">

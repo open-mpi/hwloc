@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -871,11 +871,6 @@ hwloc_synthetic_set_attr(struct hwloc_synthetic_attr_s *sattr,
     break;
   case HWLOC_OBJ_NUMANODE:
     obj->attr->numanode.local_memory = sattr->memorysize;
-    obj->attr->numanode.page_types_len = 1;
-    obj->attr->numanode.page_types = malloc(sizeof(*obj->attr->numanode.page_types));
-    memset(obj->attr->numanode.page_types, 0, sizeof(*obj->attr->numanode.page_types));
-    obj->attr->numanode.page_types[0].size = 4096;
-    obj->attr->numanode.page_types[0].count = sattr->memorysize / 4096;
     break;
   case HWLOC_OBJ_MEMCACHE:
     obj->attr->cache.depth = 1;

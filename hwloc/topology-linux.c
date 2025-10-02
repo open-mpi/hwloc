@@ -2654,91 +2654,12 @@ hwloc_parse_meminfo_info(struct hwloc_linux_backend_data_s *data,
 #define SYSFS_NUMA_NODE_PATH_LEN 128
 
 static void
-hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
-			   const char *dirpath,
-			   struct hwloc_numanode_attr_s *memory,
-			   unsigned allocated_page_types,
-			   uint64_t *remaining_local_memory)
-{
-  DIR *dir;
-  struct dirent *dirent;
-  unsigned long index_ = 1; /* slot 0 is for normal pages */
-  char line[64];
-  char path[SYSFS_NUMA_NODE_PATH_LEN];
-
-  dir = hwloc_opendir(dirpath, data->root_fd);
-  if (dir) {
-    while ((dirent = readdir(dir)) != NULL) {
-      int err;
-      if (strncmp(dirent->d_name, "hugepages-", 10))
-        continue;
-      if (index_ >= allocated_page_types) {
-	/* we must increase the page_types array */
-	struct hwloc_memory_page_type_s *tmp = realloc(memory->page_types, allocated_page_types * 2 * sizeof(*tmp));
-	if (!tmp)
-	  break;
-	memory->page_types = tmp;
-	allocated_page_types *= 2;
-      }
-      memory->page_types[index_].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
-      err = snprintf(path, sizeof(path), "%s/%s/nr_hugepages", dirpath, dirent->d_name);
-      if ((size_t) err < sizeof(path)
-	  && hwloc_read_path_by_length(path, line, sizeof(line), data->root_fd) > 0) {
-	/* these are the actual total amount of huge pages */
-	memory->page_types[index_].count = strtoull(line, NULL, 0);
-	*remaining_local_memory -= memory->page_types[index_].count * memory->page_types[index_].size;
-	index_++;
-      }
-    }
-    closedir(dir);
-    memory->page_types_len = index_;
-  }
-}
-
-static void
 hwloc_get_machine_meminfo(struct hwloc_linux_backend_data_s *data,
 			  struct hwloc_numanode_attr_s *memory)
 {
-  struct stat st;
-  int has_sysfs_hugepages = 0;
-  int types = 1; /* only normal pages by default */
-  uint64_t remaining_local_memory;
-  int err;
-
-  err = hwloc_stat("/sys/kernel/mm/hugepages", &st, data->root_fd);
-  if (!err) {
-    types = 1 /* normal non-huge size */ + st.st_nlink - 2 /* ignore . and .. */;
-    if (types < 3)
-      /* some buggy filesystems (e.g. btrfs when reading from fsroot)
-       * return wrong st_nlink for directories (always 1 for btrfs).
-       * use 3 as a sane default (default page + 2 huge sizes).
-       * hwloc_parse_hugepages_info() will extend it if needed.
-       */
-      types = 3;
-    has_sysfs_hugepages = 1;
-  }
-
-  memory->page_types = calloc(types, sizeof(*memory->page_types));
-  if (!memory->page_types) {
-    memory->page_types_len = 0;
-    return;
-  }
-  memory->page_types_len = 1; /* we'll increase it when successfully getting hugepage info */
-
   /* get the total memory */
   hwloc_parse_meminfo_info(data, "/proc/meminfo",
 			   &memory->local_memory);
-  remaining_local_memory = memory->local_memory;
-
-  if (has_sysfs_hugepages) {
-    /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
-    hwloc_parse_hugepages_info(data, "/sys/kernel/mm/hugepages", memory, types, &remaining_local_memory);
-    /* memory->page_types_len may have changed */
-  }
-
-  /* use remaining memory as normal pages */
-  memory->page_types[0].size = data->pagesize;
-  memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
 }
 
 static void
@@ -2746,50 +2667,12 @@ hwloc_get_sysfs_node_meminfo(struct hwloc_linux_backend_data_s *data,
 			     int node,
 			     struct hwloc_numanode_attr_s *memory)
 {
-  char path[SYSFS_NUMA_NODE_PATH_LEN];
   char meminfopath[SYSFS_NUMA_NODE_PATH_LEN];
-  struct stat st;
-  int has_sysfs_hugepages = 0;
-  int types = 1; /* only normal pages by default */
-  uint64_t remaining_local_memory;
-  int err;
-
-  sprintf(path, "/sys/devices/system/node/node%d/hugepages", node);
-  err = hwloc_stat(path, &st, data->root_fd);
-  if (!err) {
-    types = 1 /* normal non-huge size */ + st.st_nlink - 2 /* ignore . and .. */;
-    if (types < 3)
-      /* some buggy filesystems (e.g. btrfs when reading from fsroot)
-       * return wrong st_nlink for directories (always 1 for btrfs).
-       * use 3 as a sane default (default page + 2 huge sizes).
-       * hwloc_parse_hugepages_info() will extend it if needed.
-       */
-      types = 3;
-    has_sysfs_hugepages = 1;
-  }
-
-  memory->page_types = calloc(types, sizeof(*memory->page_types));
-  if (!memory->page_types) {
-    memory->page_types_len = 0;
-    return;
-  }
-  memory->page_types_len = 1; /* we'll increase it when successfully getting hugepage info */
 
   /* get the total memory */
   sprintf(meminfopath, "/sys/devices/system/node/node%d/meminfo", node);
   hwloc_parse_meminfo_info(data, meminfopath,
 			   &memory->local_memory);
-  remaining_local_memory = memory->local_memory;
-
-  if (has_sysfs_hugepages) {
-    /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
-    hwloc_parse_hugepages_info(data, path, memory, types, &remaining_local_memory);
-    /* memory->page_types_len may have changed */
-  }
-
-  /* use remaining memory as normal pages */
-  memory->page_types[0].size = data->pagesize;
-  memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
 }
 
 static int

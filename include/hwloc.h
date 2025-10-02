@@ -695,16 +695,6 @@ union hwloc_obj_attr_u {
   /** \brief NUMA node-specific Object Attributes */
   struct hwloc_numanode_attr_s {
     hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
-    unsigned page_types_len; /**< \brief Size of array \p page_types */
-    /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
-     *
-     * The array is sorted by increasing \p size fields.
-     * It contains \p page_types_len slots.
-     */
-    struct hwloc_memory_page_type_s {
-      hwloc_uint64_t size;	/**< \brief Size of pages */
-      hwloc_uint64_t count;	/**< \brief Number of pages of this size */
-    } * page_types;
   } numanode;
 
   /** \brief Cache-specific Object Attributes */

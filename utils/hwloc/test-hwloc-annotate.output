@@ -18,8 +18,6 @@
     <info name="DMISysVendor" value="Dell Inc."/>
     <info name="Foo" value="Bar"/>
     <object type="NUMANode" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2" local_memory="4014030848">
-      <page_type size="4096" count="979988"/>
-      <page_type size="2097152" count="0"/>
       <info name="Foo" value="Bar"/>
       <userdata length="0"/>
       <userdata length="1">a</userdata>

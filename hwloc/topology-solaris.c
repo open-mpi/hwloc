@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -447,13 +447,6 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
 
     hwloc_debug("NUMA node %ld has %lldkB\n", nids[i], mem_size/1024);
     obj->attr->numanode.local_memory = mem_size;
-    obj->attr->numanode.page_types_len = 2;
-    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
-    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
-    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
 
     n = lgrp_cpus(cookie, nids[i], pids, npids, LGRP_CONTENT_HIERARCHY);
     if (n < 0) {

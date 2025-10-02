@@ -4,11 +4,7 @@
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" gp_index="1" id="obj1">
     <info name="infowithvalue" value="value"/>
     <info name="infowithoutvalue" value=""/>
-    <object type="NUMANode" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2">
-      <page_type size="4096" count="8589934592"/>
-      <page_type size="8192" count="0"/>
-      <page_type size="17179869184" count="1"/>
-    </object>
+    <object type="NUMANode" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2"/>
     <object type="Package" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3" id="obj3">
       <object type="L3Cache" cpuset="0x00001111" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4" cache_size="4194304" depth="3" cache_linesize="0" cache_associativity="0" cache_type="0">
         <object type="L2Cache" cpuset="0x00000101" complete_cpuset="0x00000101" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5" cache_size="1048576" depth="2" cache_linesize="0" cache_associativity="0" cache_type="0">

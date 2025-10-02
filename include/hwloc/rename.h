@@ -103,7 +103,6 @@ extern "C" {
 
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
 #define hwloc_numanode_attr_s HWLOC_NAME(numanode_attr_s)
-#define hwloc_memory_page_type_s HWLOC_NAME(memory_page_type_s)
 #define hwloc_cache_attr_s HWLOC_NAME(cache_attr_s)
 #define hwloc_group_attr_s HWLOC_NAME(group_attr_s)
 #define hwloc_pcidev_attr_s HWLOC_NAME(pcidev_attr_s)
