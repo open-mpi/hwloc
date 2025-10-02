@@ -48,6 +48,8 @@
  * See hwloc/inlines.h for the actual inline code of some functions below.
  * See hwloc/export.h for exporting topologies to XML or to synthetic descriptions.
  * See hwloc/distances.h for querying and modifying distances between objects.
+ * See hwloc/memattrs.h for querying and modifying memory attributes such as Bandwidth.
+ * See hwloc/cpukinds.h for querying and modifying kinds of CPU cores.
  * See hwloc/diff.h for manipulating differences between similar topologies.
  */
 
