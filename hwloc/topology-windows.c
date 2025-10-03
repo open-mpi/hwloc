@@ -180,6 +180,9 @@ typedef struct _PROCESSOR_NUMBER {
 } PROCESSOR_NUMBER, *PPROCESSOR_NUMBER;
 #endif
 
+/* global variable so that we don't re-query it for constant fields */
+static SYSTEM_INFO SystemInfo;
+
 /* Function pointers */
 
 typedef WORD (WINAPI *PFN_GETACTIVEPROCESSORGROUPCOUNT)(void);
@@ -841,14 +844,12 @@ hwloc_win_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void 
 static int
 hwloc_win_get_area_memlocation(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr, size_t len, hwloc_nodeset_t nodeset, int flags __hwloc_attribute_unused)
 {
-  SYSTEM_INFO SystemInfo;
   DWORD page_size;
   uintptr_t start;
   unsigned nb;
   PSAPI_WORKING_SET_EX_INFORMATION *pv;
   unsigned i;
 
-  GetSystemInfo(&SystemInfo);
   page_size = SystemInfo.dwPageSize;
 
   start = (((uintptr_t) addr) / page_size) * page_size;
@@ -975,7 +976,6 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   struct hwloc_topology *topology = backend->topology;
   hwloc_bitmap_t groups_pu_set = NULL;
-  SYSTEM_INFO SystemInfo;
   DWORD length;
   int gotnuma = 0;
   int gotnumamemory = 0;
@@ -1019,6 +1019,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
+  /* initialize once per topology */
   GetSystemInfo(&SystemInfo);
 
   if (GetLogicalProcessorInformationExProc) {
@@ -1417,13 +1418,12 @@ const struct hwloc_component hwloc_windows_component = {
 int
 hwloc_fallback_nbprocessors(unsigned flags __hwloc_attribute_unused) {
   int n;
-  SYSTEM_INFO sysinfo;
 
   /* TODO handle flags & HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE */
 
   /* by default, ignore groups (return only the number in the current group) */
-  GetSystemInfo(&sysinfo);
-  n = sysinfo.dwNumberOfProcessors; /* FIXME could be non-contigous, rather return a mask from dwActiveProcessorMask? */
+  GetSystemInfo(&SystemInfo); /* needed because we may be called when the Windows backend isn't used */
+  n = SystemInfo.dwNumberOfProcessors; /* FIXME could be non-contigous, rather return a mask from dwActiveProcessorMask? */
 
   if (nr_processor_groups > 1) {
     /* assume n-1 groups are complete, since that's how we store things in cpusets */
