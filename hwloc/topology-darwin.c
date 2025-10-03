@@ -899,6 +899,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   hwloc__add_info(&topology->infos, "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);
+  hwloc_fallback_add_pagesize_info(topology); /* FIXME: it doesn't find any info about hugepages */
   return 0;
 }
 

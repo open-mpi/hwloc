@@ -56,6 +56,7 @@ Version 3.0.0
     favor of passing levels, topology and support as targets.
 * Removed features
   + Netloc.
+  + page_type NUMA node attributes, replaced with PageSizes topology info.
   + Importing and exporting from/to hwloc 1.x XML.
   + BlueGene/Q support.
   + Functions that were deprecated since 2.0:

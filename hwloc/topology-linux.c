@@ -2632,6 +2632,58 @@ hwloc_admin_disable_set_from_cgroup(int root_fd,
   hwloc_debug_bitmap("cpuset includes %s\n", admin_enabled_set);
 }
 
+static void hwloc_linux_add_pagesize_info(struct hwloc_topology *topology,
+                                          struct hwloc_linux_backend_data_s *data)
+{
+  DIR *dir;
+  dir = hwloc_opendir("/sys/kernel/mm/hugepages", data->root_fd);
+  if (dir) {
+    unsigned nr_sizes, i;
+    hwloc_pagesize_arrayelt_t *sizes;
+    struct dirent *dirent;
+    struct stat sb;
+
+    /* take the number of links as a good estimate for the number of sizes */
+    if (hwloc_stat("/sys/kernel/mm/hugepages", &sb, data->root_fd) == 0)
+      nr_sizes = sb.st_nlink - 2 + 1; /* . and .. ignored, normal size added */
+    else
+      nr_sizes = 3; /* 1 normal + 3 huge sizes should be enough is most cases */
+
+    sizes = malloc(nr_sizes * sizeof(*sizes));
+    if (!sizes) {
+      closedir(dir);
+      return;
+    }
+
+    sizes[0] = data->pagesize;
+    i = 1;
+    while ((dirent = readdir(dir)) != NULL) {
+      if (strncmp(dirent->d_name, "hugepages-", 10))
+        continue;
+      if (i == nr_sizes) {
+        hwloc_pagesize_arrayelt_t *tmp = realloc(sizes, nr_sizes * 2 * sizeof(*sizes));
+        if (!tmp)
+          break;
+        sizes = tmp;
+        nr_sizes *= 2;
+      }
+      sizes[i++] = 1024ULL * strtoull(dirent->d_name+10, NULL, 0);
+    }
+    nr_sizes = i;
+    /* the hugepages directory might be out-of-order in sysfs dumps */
+
+    hwloc__add_pagesize_info_from_array(topology, sizes, nr_sizes);
+
+    free(sizes);
+    closedir(dir);
+  }
+
+  /* don't fallback to hwloc_fallback_add_pagesize_info() on error
+   * because it doesn't read from sysfs dumps,
+   * and data->pagesize + sysfs are enough anyway.
+   */
+}
+
 static void
 hwloc_parse_meminfo_info(struct hwloc_linux_backend_data_s *data,
 			 const char *path,
@@ -7787,6 +7839,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc__add_info(&topology->infos, "Backend", "Linux");
     /* data->utsname was filled with real uname or \0, we can safely pass it */
     hwloc_add_uname_info(topology, &data->utsname);
+    hwloc_linux_add_pagesize_info(topology, data);
     data->need_global_infos = 0;
   }
   return 0;

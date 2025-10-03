@@ -144,6 +144,7 @@ typedef struct _SYSTEM_INFO {
 } SYSTEM_INFO, *LPSYSTEM_INFO;
 
 void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
+SIZE_T WINAPI GetLargePageMinimum(void);
 
 HANDLE WINAPI OpenProcess(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwProcessId);
 #define PROCESS_SET_INFORMATION 0x0200
@@ -292,11 +293,5 @@ int WINAPI GetSystemMetrics(int nIndex);
 ATOM WINAPI RegisterClass(const WNDCLASS *lpWndClass);
 
 #define TEXT(str) (str)
-
-/* hide Linux' host disabling _SC_LARGE_PAGESIZE */
-#undef HAVE_DECL__SC_LARGE_PAGESIZE
-#define HAVE_DECL__SC_LARGE_PAGESIZE 1
-#undef _SC_LARGE_PAGESIZE
-#define _SC_LARGE_PAGESIZE 33
 
 #endif /* HWLOC_PORT_WINDOWS_WINDOWS_H */

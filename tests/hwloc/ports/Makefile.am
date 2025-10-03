@@ -72,6 +72,7 @@ libhwloc_port_freebsd_la_SOURCES = \
         include/freebsd/pthread.h \
         include/freebsd/pthread_np.h \
         include/freebsd/sys/cpuset.h \
+        include/freebsd/sys/mman.h \
         include/freebsd/sys/sysctl.h \
         include/freebsd/sys/thr.h \
         include/freebsd/sys/user.h \

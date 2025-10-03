@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012, 2020 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -14,6 +14,7 @@
 #include <inttypes.h>
 #include <sys/param.h>
 #include <sys/user.h>
+#include <sys/mman.h>
 #include <pthread.h>
 #include <sys/cdefs.h>
 #include <stddef.h>
@@ -523,6 +524,37 @@ hwloc_look_freebsd_domains(struct hwloc_topology *topology){
 }
 #endif
 
+static void
+hwloc_freebsd_add_pagesize_info(struct hwloc_topology *topology)
+{
+  int nr;
+  hwloc_pagesize_arrayelt_t *sizes;
+
+  /* available since 7.3, but we could also use sysctl(hw.pagesizes) which returns an array of size_t possibly with ending zeroes */
+  nr = getpagesizes(NULL, 0);
+  if (nr < 0)
+    goto fallback;
+  sizes = malloc(nr *sizeof(*sizes));
+  if (!sizes)
+    goto fallback;
+  if (getpagesizes(sizes, nr) < 0) {
+    free(sizes);
+    goto fallback;
+  }
+
+  /* sizes are unsigned long, ordered */
+  if (hwloc__add_pagesize_info_from_array(topology, sizes, nr) < 0) {
+    free(sizes);
+    goto fallback;
+  }
+
+  free(sizes);
+  return;
+
+ fallback:
+  hwloc_fallback_add_pagesize_info(topology);
+}
+
 static int
 hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -558,6 +590,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (data->need_global_infos) {
     hwloc__add_info(&topology->infos, "Backend", "FreeBSD");
     hwloc_add_uname_info(topology, NULL);
+    hwloc_freebsd_add_pagesize_info(topology);
     data->need_global_infos = 0;
   }
   return 0;

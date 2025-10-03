@@ -972,6 +972,35 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 }
 #endif /* LIBKSTAT */
 
+static void
+hwloc_solaris_get_pagesize_info(struct hwloc_topology *topology)
+{
+  int nr;
+  hwloc_pagesize_arrayelt_t *sizes;
+
+  nr = getpagesizes(NULL, 0);
+  if (nr < 0)
+    goto fallback;
+  sizes = malloc(nr *sizeof(*sizes));
+  if (!sizes)
+    goto fallback;
+  if (getpagesizes(sizes, nr) < 0) {
+    free(sizes);
+    goto fallback;
+  }
+
+  if (hwloc__add_pagesize_info_from_array(topology, sizes, nr) < 0) {
+    free(sizes);
+    goto fallback;
+  }
+
+  free(sizes);
+  return;
+
+ fallback:
+  hwloc_fallback_add_pagesize_info(topology);
+}
+
 static int
 hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -1011,6 +1040,8 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   hwloc__add_info(&topology->infos, "Backend", "Solaris");
   hwloc_add_uname_info(topology, NULL);
+  hwloc_solaris_get_pagesize_info(topology);
+
   return 0;
 }
 

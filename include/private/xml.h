@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -47,6 +47,10 @@ struct hwloc_xml_backend_data_s {
   void *data; /* libxml2 doc, or nolibxml buffer */
   unsigned version_major, version_minor;
   unsigned char need_cuda_backend_info, need_nvml_backend_info, need_rsmi_backend_info, need_levelzero_backend_info, need_opencl_backend_info, need_gl_backend_info;
+  /* array of pagetype sizes import from v2 */
+  void *v2_pagesizes; /* actually a hwloc_pagesize_arrayelt_t* but we don't want/need to insert private/private.h which is not available in plugins */
+  unsigned v2_pagesize_nr;
+  unsigned v2_pagesize_nr_alloc;
 };
 
 /**************

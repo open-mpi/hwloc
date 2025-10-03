@@ -812,6 +812,7 @@ hwloc_look_aix(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
   hwloc__add_info(&topology->infos, "Backend", "AIX");
   hwloc_add_uname_info(topology, NULL);
+  hwloc_fallback_add_pagesize_info(topology);
   return 0;
 }
 

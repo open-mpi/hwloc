@@ -531,4 +531,5 @@
     <info name="FrequencyMaxMHz" value="2701"/>
   </cpukind>
   <info name="Backend" value="Linux"/>
+  <info name="PageSizes" value="4096,2097152"/>
 </topology>

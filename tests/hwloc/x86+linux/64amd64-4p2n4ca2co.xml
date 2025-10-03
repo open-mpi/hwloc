@@ -673,4 +673,5 @@
   <info name="OSVersion" value="#1 SMP Debian 4.1.6-1 (2015-08-23)"/>
   <info name="HostName" value="jolly"/>
   <info name="Architecture" value="x86_64"/>
+  <info name="PageSizes" value="4096,2097152"/>
 </topology>

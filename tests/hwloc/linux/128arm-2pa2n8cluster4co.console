@@ -699,5 +699,5 @@ Relative latency matrix (name NUMALatency kind 5) between 4 NUMANodes (depth -3)
      3    33    32    16    10
 CPU kind #0 efficiency 0 cpuset 0xffffffff,0xffffffff,0xffffffff,0xffffffff
   LinuxCapacity = 1024
-Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.15.0-rc1-00005-g4c1b4a4d90b6-dirty OSVersion="#313 SMP PREEMPT Sun Nov 7 14:18:05 EST 2021" HostName=ubuntu Architecture=aarch64
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.15.0-rc1-00005-g4c1b4a4d90b6-dirty OSVersion="#313 SMP PREEMPT Sun Nov 7 14:18:05 EST 2021" HostName=ubuntu Architecture=aarch64 PageSizes=4096,65536,2097152,33554432,1073741824
 Topology not from this system

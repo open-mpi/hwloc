@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -44,6 +44,7 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
     topology->machine_memory.local_memory = memsize;;
 
   hwloc_add_uname_info(topology, NULL);
+  hwloc_fallback_add_pagesize_info(topology);
   return 0;
 }
 

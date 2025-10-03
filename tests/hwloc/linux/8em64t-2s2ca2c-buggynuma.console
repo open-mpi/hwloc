@@ -46,5 +46,5 @@ depth 0:           1 Machine (type #0)
      depth 5:      8 Core (type #3)
       depth 6:     8 PU (type #4)
 Special depth -3:  1 NUMANode (type #14)
-Topology infos: LinuxCgroup=/ Backend=Linux
+Topology infos: LinuxCgroup=/ Backend=Linux PageSizes=4096,2097152
 Topology not from this system

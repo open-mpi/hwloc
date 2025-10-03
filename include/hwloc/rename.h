@@ -863,6 +863,10 @@ extern "C" {
 #define hwloc_look_hardwired_fujitsu_fx100 HWLOC_NAME(look_hardwired_fujitsu_fx100)
 
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
+#define hwloc_fallback_add_pagesize_info HWLOC_NAME(fallback_add_pagesize_info)
+#define hwloc_pagesize_arrayelt_t HWLOC_NAME(pagesize_arrayelt_t)
+#define hwloc__add_pagesize_info_from_array HWLOC_NAME(_add_pagesize_info_from_array)
+
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
 #define hwloc_free_object_and_children HWLOC_NAME(free_object_and_children)
 #define hwloc_free_object_siblings_and_children HWLOC_NAME(free_object_siblings_and_children)

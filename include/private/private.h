@@ -384,6 +384,20 @@ extern int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology);
  */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology, void *cached_uname);
 
+/* Insert PageSizes topology info from legacy sysconf&co */
+extern void hwloc_fallback_add_pagesize_info(struct hwloc_topology *topology);
+
+#if (defined HWLOC_LINUX_SYS)
+/* Linux may need more than a long when loading a 64bit sysfs dump (eg with 16GB pages) on a 32bit machine */
+typedef uint64_t hwloc_pagesize_arrayelt_t;
+#else
+/* at least Solaris and FreeBSD want a size_t */
+typedef size_t hwloc_pagesize_arrayelt_t;
+#endif
+
+/* Insert PageSizes topology info from the array of sizes */
+extern int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology, hwloc_pagesize_arrayelt_t *sizes, unsigned nr);
+
 /* Free obj and its attributes assuming it's not linked to a parent and doesn't have any child */
 extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
 
