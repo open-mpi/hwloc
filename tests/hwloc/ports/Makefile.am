@@ -114,6 +114,7 @@ nodist_libhwloc_port_solaris_la_SOURCES = topology-solaris.c topology-solaris-ch
 libhwloc_port_solaris_la_SOURCES = \
         include/solaris/kstat.h \
         include/solaris/picl.h \
+        include/solaris/sys/mman.h \
         include/solaris/sys/lgrp_user.h \
         include/solaris/sys/processor.h \
         include/solaris/sys/procset.h \
