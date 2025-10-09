@@ -513,7 +513,7 @@ NUMANode:11
 NUMANode:4
 
 
-# MCDRAM subtype NUMA filter
+# HBM subtype NUMA filter
 NUMANode:3
 NUMANode:5
 

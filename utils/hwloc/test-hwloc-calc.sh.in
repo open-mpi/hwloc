@@ -124,23 +124,23 @@ set -e
   echo "# Number of objects at depth 3 in a NUMA Node"
   $calc --if synthetic --input "node:4 core:4 pu:4" node:2 -N 3
   echo
-  echo "# Number of MCDRAM subtype NUMA Nodes"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -N 'numa[mcdram]' all
+  echo "# Number of HBM subtype NUMA Nodes"
+  $calc --if xml --input $xmldir/64intel64-heteromem.xml -N 'numa[hbm]' all
   echo
-  echo "# List of MCDRAM subtype NUMA Nodes near 2 L3"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -I 'numa[mcdram]' l3:1-2
+  echo "# List of HBM subtype NUMA Nodes near 2 L3"
+  $calc --if xml --input $xmldir/64intel64-heteromem.xml -I 'numa[hbm]' l3:1-2
   echo
-  echo "# Hierarchical list of MCDRAM subtype NUMA nodes within Package (DDR node is ignored)"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -H 'pack.numa[mcdram]' 'numa[mcdram]:0' 'numa[ddr]:1' 'numa[mcdram]:3'
+  echo "# Hierarchical list of HBM subtype NUMA nodes within Package (DRAM node is ignored)"
+  $calc --if xml --input $xmldir/64intel64-heteromem.xml -H 'pack.numa[hbm]' 'numa[hbm]:0' 'numa[ddr]:1' 'numa[hbm]:3'
   echo
   echo "# List of default NUMA Nodes in a Package"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml --default-nodes -I NUMANode -p Package:0
+  $calc --if xml --input $xmldir/64intel64-heteromem.xml --default-nodes -I NUMANode -p Package:0
   echo
   echo "# Number of Memory Tiers"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -N memorytier all
+  $calc --if xml --input $xmldir/64intel64-heteromem.xml -N memorytier all
   echo
   echo "# Memory Tier of a single node"
-  $calc --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -I memorytier node:4
+  $calc --if xml --input $xmldir/64intel64-heteromem.xml -I memorytier node:4
   echo
   echo "# Check that we don't mix a single input NUMA node with other local nodes"
   $calc --if synthetic -i "pack:2 [numa] group:2 [numa] [numa] pu:2" -I node node:2

@@ -1,3 +1,0 @@
-# Like KNL in SNC4 Flat, but with less cores
-source:  64intel64-fakeKNL-SNC4-hybrid.xml
-target:  64intel64-fakeKNL-SNC4-hybrid.xml
