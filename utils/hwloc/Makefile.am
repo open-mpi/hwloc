@@ -57,8 +57,7 @@ endif HWLOC_HAVE_X86
 endif HWLOC_HAVE_LINUX
 
 hwloc_dump_hwdata_SOURCES = \
-	hwloc-dump-hwdata.c \
-	hwloc-dump-hwdata-knl.c
+	hwloc-dump-hwdata.c
 hwloc_dump_hwdata_CPPFLAGS = $(AM_CPPFLAGS) -DRUNSTATEDIR="\"$(HWLOC_runstatedir)\""
 
 hwloc_calc_SOURCES = \

@@ -21,8 +21,6 @@
 
 #define DEFAULT_DUMP_DIR RUNSTATEDIR "/hwloc"
 
-extern int hwloc_dump_hwdata_knl_smbios(const char *input_fsroot, const char *filename);
-
 static void usage(const char *name, FILE *where)
 {
     fprintf (where, "Usage: %s [ options ] ...\n", name);
@@ -87,11 +85,7 @@ int main(int argc, char *argv[])
     if (!input_fsroot)
       input_fsroot = "/";
 
-    err = asprintf(&filename, "%s/knl_memoryside_cache", dirname);
-    assert(err >= 0);
-    err = hwloc_dump_hwdata_knl_smbios(input_fsroot, filename);
-    free(filename);
-    printf("\n");
+    /* add dumps here */
 
     return err ? EXIT_FAILURE : EXIT_SUCCESS;
 }

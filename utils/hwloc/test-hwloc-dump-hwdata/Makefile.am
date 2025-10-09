@@ -6,8 +6,7 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-dumps = \
-	knl-snc4h50.tar.bz2
+dumps = 
 
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(dumps)
