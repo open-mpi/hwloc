@@ -4466,12 +4466,15 @@ The MCDRAM NUMA nodes may be identified thanks to the <tt>subtype</tt> field
 which is set to <tt>MCDRAM</tt>.
 
 Command-line tools such as <tt>hwloc-bind</tt> may bind memory on the MCDRAM by
-using the <i>hbm</i> keyword. For instance, to bind on the first MCDRAM NUMA node:
+using the <i>hbm</i> keyword or by selecting MCDRAM nodes explicitly.
+For instance, to bind on the first MCDRAM NUMA node on Xeon Phi:
 
 \verbatim
 $ hwloc-bind --membind --hbm numa:0 -- myprogram
-$ hwloc-bind --membind numa:0 -- myprogram
+$ hwloc-bind --membind numa[mcdram]:0 -- myprogram
 \endverbatim
+
+See also \ref heteromem_use_cli
 
 
 \subsection faq_knl_dump Why do I need hwloc-dump-hwdata for memory on Intel Xeon Phi processor?
