@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009, 2024 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -105,13 +105,6 @@ hwloc_calc_check_object_filtered(hwloc_obj_t obj, struct hwloc_calc_level *level
     if (level->memory_tier >= 0) {
       const char *tier = hwloc_obj_get_info_by_name(obj, "MemoryTier");
       if (!tier || atoi(tier) != level->memory_tier)
-        return 1;
-    }
-
-    if (level->only_hbm >= 0) {
-      /* filter on hbm */
-      int obj_is_hbm = obj->subtype && !strcmp(obj->subtype, "MCDRAM");
-      if (level->only_hbm != obj_is_hbm)
         return 1;
     }
 
@@ -301,7 +294,7 @@ hwloc_calc_parse_level(struct hwloc_calc_location_context_s *lcontext,
     return 0;
   }
 
-  if (!strcasecmp(typestring, "HBM") || !strcasecmp(typestring, "MCDRAM")) {
+  if (!strcasecmp(typestring, "HBM")) {
     level->only_hbm = 1;
     level->type = HWLOC_OBJ_NUMANODE;
     level->depth = HWLOC_TYPE_DEPTH_NUMANODE;

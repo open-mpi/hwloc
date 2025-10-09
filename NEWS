@@ -58,6 +58,7 @@ Version 3.0.0
   + Netloc.
   + page_type NUMA node attributes, replaced with PageSizes topology info.
   + Importing and exporting from/to hwloc 1.x XML.
+  + Intel Knights Landing Xeon Phi specific NUMA support in the Linux backend.
   + BlueGene/Q support.
   + Functions that were deprecated since 2.0:
     - memory-binding functions with the "_nodeset" suffix,
