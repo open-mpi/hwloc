@@ -4432,44 +4432,45 @@ that are installed by CUDA, i.e. the CUDA, NVML and NVIDIA OpenCL backends,
 since the given directory does not exist.
 
 
-\subsection faq_knl_numa How do I find the local MCDRAM NUMA node on Intel Xeon Phi processor?
+\subsection faq_hybrid_numa How do I find the local HBM NUMA node on heterogeneous memory systems?
 
 Intel Xeon Phi processors introduced a new memory architecture by
 possibly having two distinct local memories:
-some normal memory (DDR) and some high-bandwidth on-package memory (MCDRAM).
+some normal memory (DRAM)
+and some high-bandwidth on-package memory (HBM, actually called MCDRAM on Xeon Phi).
 Processors can be configured in various clustering modes to have up to 4 <em>Clusters</em>.
 Moreover, each <em>Cluster</em> (quarter, half or whole processor) of the processor may have its own local
 parts of the DDR and of the MCDRAM.
 This memory and clustering configuration may be probed by looking at MemoryMode
 and ClusterMode attributes, see \ref attributes_info_platform and doc/examples/get-knl-modes.c
 in the source directory.
+These processors are now obsolete but other models such as the Intel Xeon Max support similar features.
 
-Starting with version 2.0, hwloc properly exposes this memory
-configuration.
-DDR and MCDRAM are attached as two memory children of the same parent,
-DDR first, and MCDRAM second if any.
-Depending on the processor configuration, that parent may be a Package,
-a Cache, or a Group object of type <tt>Cluster</tt>.
+Since with version 2.0, hwloc properly exposes this memory configuration.
+DRAM and HBM are attached as two memory children of the same parent,
+DRAM first, and HBM second if any.
+Depending on the hardware configuration, that parent may be a Package,
+a Cache, or a Group object (of type <tt>Cluster</tt> on Xeon Phi).
 
-Hence cores may have one or two local NUMA nodes, listed by the core nodeset.
+Hence cores may have two local NUMA nodes, listed by the core nodeset.
 An application may allocate local memory from a core by using that nodeset.
-The operating system will actually allocate from the DDR when
-possible, or fallback to the MCDRAM.
+The operating system will actually allocate from the DRAM when
+possible, or fallback to the HBM.
 
 To allocate specifically on one of these memories,
 one should walk up the parent pointers until finding an object with
 some memory children.
-Looking at these memory children will give the DDR first,
-then the MCDRAM if any.
+Looking at these memory children will give the DRAM first,
+then the HBM/MCDRAM if any.
 Their nodeset may then be used for allocating or binding memory buffers.
 
 One may also traverse the list of NUMA nodes until finding some whose
 cpuset matches the target core or PUs.
-The MCDRAM NUMA nodes may be identified thanks to the <tt>subtype</tt> field
-which is set to <tt>MCDRAM</tt>.
+The high-bandwidth NUMA nodes may be identified thanks to the <tt>subtype</tt> field
+which is set to <tt>HBM</tt> (or <tt>MCDRAM</tt> on XeonPhi).
 
-Command-line tools such as <tt>hwloc-bind</tt> may bind memory on the MCDRAM by
-using the <i>hbm</i> keyword. For instance, to bind on the first MCDRAM NUMA node:
+Command-line tools such as <tt>hwloc-bind</tt> may bind memory on the HBM/MCDRAM by
+using the <i>hbm</i> keyword. For instance, to bind on the first HBM NUMA node:
 
 \verbatim
 $ hwloc-bind --membind --hbm numa:0 -- myprogram

@@ -22,6 +22,9 @@ Version 2.13
   on Windows using the HWLOC_ENABLE_PLUGINS CMake option,
   thanks to Julian Hornich.
   + HWLOC_BUILD_SHARED_LIBS is removed in favor of BUILD_SHARED_LIBS.
+* The FAQ "How do I find the local MCDRAM NUMA node on Intel Xeon Phi
+  processor?" is replaced with "How do I find the local HBM NUMA node
+  on heterogeneous memory systems?"
 * Drop support for Windows before 7 or Server 2008 R2.
 
 
