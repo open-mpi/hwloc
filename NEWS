@@ -78,6 +78,7 @@ Version 3.0.0
     suffixed by "KiB".
   + XML format switches to 3.0 by default. Exporting to 2.x is
     possible with the new V2 XML export flag.
+  + The tool hwloc-dump-hwdata is removed.
 
 
 Version 2.12.2

@@ -48,7 +48,6 @@ struct hwloc_linux_backend_data_s {
 #ifdef HWLOC_HAVE_LIBUDEV
   struct udev *udev; /* Global udev context */
 #endif
-  const char *dumped_hwdata_dirname;
   enum {
     HWLOC_LINUX_ARCH_X86, /* x86 32 or 64bits, including k1om (KNC) */
     HWLOC_LINUX_ARCH_IA64,
@@ -7126,10 +7125,6 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
     data->udev = udev_new();
   }
 #endif
-
-  data->dumped_hwdata_dirname = getenv("HWLOC_DUMPED_HWDATA_DIR");
-  if (!data->dumped_hwdata_dirname)
-    data->dumped_hwdata_dirname = RUNSTATEDIR "/hwloc/";
 
   data->use_numa_distances = 1;
   data->use_numa_distances_for_cpuless = 1;

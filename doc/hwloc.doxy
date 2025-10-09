@@ -956,20 +956,6 @@ files by using hwloc-diff to save the differences between
 topologies instead of entire topologies.
 
 
-\section cli_hwloc_dump_hwdata hwloc-dump-hwdata
-
-hwloc-dump-hwdata is a Linux and x86-specific tool that dumps
-(during boot, privileged) some topology and locality information
-from raw hardware files (SMBIOS and ACPI tables) to human-readable
-and world-accessible files that the hwloc library will later reuse.
-
-Currently only used on Intel Xeon Phi processor platforms.
-See \ref faq_knl_dump.
-
-See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
-about the location of dumped files.
-
-
 \section cli_hwloc_gather hwloc-gather-topology and hwloc-gather-cpuid
 
 hwloc-gather-topology is a Linux-specific tool that saves the
@@ -1296,16 +1282,6 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded CPUID dump is really the underlying system.
-  </dd>
-
-<dt>HWLOC_DUMPED_HWDATA_DIR=/path/to/dumped/files/</dt>
-  <dd>loads files dumped by <tt>hwloc-dump-hwdata</tt> (on Linux)
-  from the given directory.
-  The default dump/load directory is configured during build based
-  on \--runstatedir, \--localstatedir, and \--prefix options.
-  It usually points to <tt>/var/run/hwloc/</tt> in Linux distribution
-  packages, but it may also point to <tt>$prefix/var/run/hwloc/</tt>
-  when manually installing and only specifying \--prefix.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
@@ -4277,14 +4253,6 @@ This XML-based model also has the advantage of speeding up the
 discovery because reading a XML topology is usually much faster
 than querying the operating system again.
 
-The utility <tt>hwloc-dump-hwdata</tt> is also involved in gathering
-privileged information at boot time and making it available to
-non-privileged users (note that this may require a specific SELinux
-MLS policy module). However, it only applies to Intel Xeon Phi processors
-for now (see \ref faq_knl_dump).
-See also <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
-about the location of dumped files.
-
 
 \subsection faq_os_error What should I do when hwloc reports "operating system" warnings?
 
@@ -4452,37 +4420,6 @@ $ hwloc-bind --membind numa[hbm]:0 -- myprogram
 \endverbatim
 
 See also \ref heteromem_use_cli
-
-
-\subsection faq_knl_dump Why do I need hwloc-dump-hwdata for memory on Intel Xeon Phi processor?
-
-Intel Xeon Phi processors may use the on-package memory (MCDRAM)
-as either memory or a memory-side cache
-(reported as a L3 cache by hwloc by default,
-see <tt>HWLOC_KNL_MSCACHE_L3</tt> in \ref envvar).
-There are also several clustering modes that significantly affect the memory organization
-(see \ref faq_knl_numa for more information about these modes).
-Details about these are currently only available to privileged users.
-Without them, hwloc relies on a heuristic for guessing the modes.
-
-The hwloc-dump-hwdata utility may be used to dump this privileged binary information
-into human-readable and world-accessible files that the hwloc library will later load.
-The utility should usually run as root once during boot, in order to update dumped
-information (stored under /var/run/hwloc by default) in case the MCDRAM or clustering configuration
-changed between reboots.
-
-When SELinux MLS policy is enabled, a specific hwloc policy module may be required
-so that all users get access to the dumped files (in /var/run/hwloc by default).
-One may use hwloc policy files from the SELinux Reference Policy at
-https://github.com/TresysTechnology/refpolicy-contrib
-(see also the documentation at https://github.com/TresysTechnology/refpolicy/wiki/GettingStarted).
-
-hwloc-dump-hwdata requires <tt>dmi-sysfs</tt> kernel module loaded.
-
-The utility is currently unneeded on platforms without Intel Xeon Phi processors.
-
-See <tt>HWLOC_DUMPED_HWDATA_DIR</tt> in \ref envvar for details
-about the location of dumped files.
 
 
 \subsection faq_windows How do I build hwloc for Windows?
