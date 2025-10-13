@@ -124,15 +124,15 @@ set -e
   $info --if synthetic --input "pack:4 [numa(memory=1000000)] l3:2 [numa(memory=1000)] core:4 pu:2" --local-memory-flags larger --best-memattr capacity -s pu:63
   echo
   echo "# default NUMA node of a PU"
-  $info --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -s --default-nodes pu:44
+  $info --if xml --input $xmldir/64intel64-heteromem.xml -s --default-nodes pu:44
   echo
 
   echo
-  echo "# MCDRAM subtype NUMA filter"
-  $info --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -s 'numa[mcdram]:1-2'
+  echo "# HBM subtype NUMA filter"
+  $info --if xml --input $xmldir/64intel64-heteromem.xml -s 'numa[hbm]:1-2'
   echo
   echo "# Memory Tier 1 filter"
-  $info --if xml --input $xmldir/64intel64-fakeKNL-SNC4-hybrid.xml -s 'numa[tier=1]:3'
+  $info --if xml --input $xmldir/64intel64-heteromem.xml -s 'numa[tier=1]:3'
   echo
   echo "# NVML subtype OSdev type filter"
   $info --if xml --input $xmldir/power8gpudistances.xml -s 'os[nvml]:all'

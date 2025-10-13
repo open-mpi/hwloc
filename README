@@ -265,7 +265,7 @@ of the source tree.
 
 /*
 * SPDX-License-Identifier: BSD-3-Clause
-* Copyright © 2009-2025 Inria.  All rights reserved.
+* Copyright (c) 2009-2016 Inria. All rights reserved.
 * Copyright (c) 2009-2011 Universit?eacute; Bordeaux
 * Copyright (c) 2009-2010 Cisco Systems, Inc. All rights reserved.
 * See COPYING in top-level directory.

@@ -21,7 +21,7 @@ EXTRA_DIST = \
 SUBDIRS = include hwloc
 
 if HWLOC_BUILD_STANDALONE
-SUBDIRS += utils tests contrib/systemd contrib/completion contrib/misc contrib/hwloc-ps.www
+SUBDIRS += utils tests contrib/completion contrib/misc contrib/hwloc-ps.www
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
 # There's no INSTALL_SUBDIRS, so always enter doc/ and check HWLOC_BUILD/INSTALL_DOXYGEN there
 SUBDIRS += doc
@@ -60,7 +60,6 @@ dist-hook:
 		$(distdir)/contrib/completion \
 		$(distdir)/contrib/hwloc-ps.www \
 		$(distdir)/contrib/misc \
-		$(distdir)/contrib/systemd \
 		$(distdir)/contrib/windows
 endif !HWLOC_BUILD_STANDALONE
 

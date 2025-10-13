@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2009-2022 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009-2013, 2017 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -20,7 +20,7 @@ if HWLOC_HAVE_CXX
 TESTS += hwloc-hello-cpp
 endif HWLOC_HAVE_CXX
 
-check_PROGRAMS = $(TESTS) cpuset+bitmap+cpubind nodeset+membind+policy get-knl-modes gpu memory-attributes
+check_PROGRAMS = $(TESTS) cpuset+bitmap+cpubind nodeset+membind+policy gpu memory-attributes
 if !HWLOC_HAVE_WINDOWS
 check_PROGRAMS += sharedcaches
 endif

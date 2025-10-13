@@ -1531,7 +1531,6 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
    *
    * We could also use the existing subtype but it's not clear it'd be better.
    * For NVIDIA GPU, "GPUMemory" is set in the Linux backend, and used above to set tier type anyway.
-   * For KNL, the Linux backend sets subtypes and memattrs, sorting by memattrs already works fine.
    * Existing subtypes could have been imported from XML, usually mostly OK except maybe SPM (fallback for I don't know)?
    * An envvar (or HWLOC_MEMTIERS_REFRESH special value?) could be passed to ignore existing subtypes,
    * but "GPUMemory" wouldn't be available anymore, we'd have to use something else like "PCIBusId",

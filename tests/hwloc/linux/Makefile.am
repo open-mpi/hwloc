@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2009-2023 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -45,9 +45,6 @@ sysfs_tests = \
 	48amd64-4pa2n6c-sparse.test \
 	64amd64-4s2n4ca2co.test \
 	64fake-4n2s2ca2c2t.test \
-	64intel64-fakeKNL-A2A-cache.test \
-	64intel64-fakeKNL-SNC4-hybrid-msc.test \
-	64intel64-fakeKNL-SNC4-hybrid.test \
 	96em64t-4no4pa3ca2co.test \
 	128arm-2pa2n8cluster4co.test \
 	128ia64-17n4s2c.test \
@@ -94,8 +91,6 @@ sysfs_tarballs = \
 	48amd64-4pa2n6c-sparse.tar.bz2 \
 	64amd64-4s2n4ca2co.tar.bz2 \
 	64fake-4n2s2ca2c2t.tar.bz2 \
-	64intel64-fakeKNL-A2A-cache.tar.bz2 \
-	64intel64-fakeKNL-SNC4-hybrid.tar.bz2 \
 	96em64t-4no4pa3ca2co.tar.bz2 \
 	128arm-2pa2n8cluster4co.tar.bz2 \
 	128ia64-17n4s2c.tar.bz2 \
@@ -138,9 +133,6 @@ sysfs_console_outputs = \
 	48amd64-4pa2n6c-sparse.console \
 	64amd64-4s2n4ca2co.console \
 	64fake-4n2s2ca2c2t.console \
-	64intel64-fakeKNL-A2A-cache.console \
-	64intel64-fakeKNL-SNC4-hybrid-msc.console \
-	64intel64-fakeKNL-SNC4-hybrid.console \
 	96em64t-4no4pa3ca2co.console \
 	128arm-2pa2n8cluster4co.console \
 	128ia64-17n4s2c.console \

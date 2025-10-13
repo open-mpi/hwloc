@@ -28,7 +28,7 @@ xml_tests = \
         32em64t-2n8c2t-pci-wholeio.test \
         irregulargroups-disallowed.test \
         irregulargroups-disallowed.console.test \
-        64intel64-fakeKNL-SNC4-hybrid.test \
+        64intel64-heteromem.test \
         96em64t-4n4d3ca2co-pci.test \
         192em64t-12gr2n8c2t.test \
         192em64t-24n8c2t.test \
@@ -54,7 +54,7 @@ xml_xml_outputs = \
         32em64t-2n8c2t-pci-normalio.xml \
         32em64t-2n8c2t-pci-wholeio.xml \
         irregulargroups-disallowed.xml \
-        64intel64-fakeKNL-SNC4-hybrid.xml \
+        64intel64-heteromem.xml \
         96em64t-4n4d3ca2co-pci.xml \
         192em64t-12gr2n8c2t.xml \
         192em64t-24n8c2t.xml \
