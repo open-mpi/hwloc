@@ -8,9 +8,7 @@
     <object type="Group" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x0000000f" complete_nodeset="0x0000000f" gp_index="2" id="obj2" subtype="MyBigGroup" kind="1" subkind="0">
       <object type="Group" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000003" complete_nodeset="0x00000003" gp_index="3" id="obj3" subtype="MySmallGroup" kind="1" subkind="1">
         <object type="Group" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="58" id="obj58" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4" local_memory="1073741824"/>
           <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5">
             <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" id="obj6"/>
           </object>
@@ -20,7 +18,6 @@
         </object>
         <object type="Group" cpuset="0x0000000c" complete_cpuset="0x0000000c" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="59" id="obj59" kind="1001" subkind="0">
           <object type="NUMANode" os_index="1" cpuset="0x0000000c" complete_cpuset="0x0000000c" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="9" id="obj9" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
             <userdata name="EncodedShort3" length="3" encoding="base64">f+B/</userdata>
             <userdata name="EncodedLong0" length="128" encoding="base64">eK5kf+B/AAB4rmR/4H8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAtmR/4H8AAP////8AAAAA////fwAAAAA=</userdata>
           </object>
@@ -34,9 +31,7 @@
       </object>
       <object type="Group" os_index="1" cpuset="0x000000f0" complete_cpuset="0x000000f0" nodeset="0x0000000c" complete_nodeset="0x0000000c" gp_index="14" id="obj14" subtype="MySmallGroup" kind="1" subkind="1">
         <object type="Group" cpuset="0x00000030" complete_cpuset="0x00000030" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="60" id="obj60" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="2" cpuset="0x00000030" complete_cpuset="0x00000030" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="15" id="obj15" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="2" cpuset="0x00000030" complete_cpuset="0x00000030" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="15" id="obj15" local_memory="1073741824"/>
           <object type="Core" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="16" id="obj16">
             <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="17" id="obj17"/>
           </object>
@@ -45,9 +40,7 @@
           </object>
         </object>
         <object type="Group" cpuset="0x000000c0" complete_cpuset="0x000000c0" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="61" id="obj61" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="3" cpuset="0x000000c0" complete_cpuset="0x000000c0" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="20" id="obj20" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="3" cpuset="0x000000c0" complete_cpuset="0x000000c0" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="20" id="obj20" local_memory="1073741824"/>
           <object type="Core" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="21" id="obj21">
             <object type="PU" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="22" id="obj22"/>
           </object>
@@ -61,9 +54,7 @@
     <object type="Group" os_index="1" cpuset="0x0000ff00" complete_cpuset="0x0000ff00" nodeset="0x000000f0" complete_nodeset="0x000000f0" gp_index="26" id="obj26" subtype="MyBigGroup" kind="1" subkind="0">
       <object type="Group" os_index="2" cpuset="0x00000f00" complete_cpuset="0x00000f00" nodeset="0x00000030" complete_nodeset="0x00000030" gp_index="27" id="obj27" subtype="MySmallGroup" kind="1" subkind="1">
         <object type="Group" cpuset="0x00000300" complete_cpuset="0x00000300" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="62" id="obj62" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="4" cpuset="0x00000300" complete_cpuset="0x00000300" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="28" id="obj28" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="4" cpuset="0x00000300" complete_cpuset="0x00000300" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="28" id="obj28" local_memory="1073741824"/>
           <object type="Core" os_index="8" cpuset="0x00000100" complete_cpuset="0x00000100" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="29" id="obj29">
             <object type="PU" os_index="8" cpuset="0x00000100" complete_cpuset="0x00000100" nodeset="0x00000010" complete_nodeset="0x00000010" gp_index="30" id="obj30"/>
           </object>
@@ -72,9 +63,7 @@
           </object>
         </object>
         <object type="Group" cpuset="0x00000c00" complete_cpuset="0x00000c00" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="63" id="obj63" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="5" cpuset="0x00000c00" complete_cpuset="0x00000c00" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="33" id="obj33" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="5" cpuset="0x00000c00" complete_cpuset="0x00000c00" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="33" id="obj33" local_memory="1073741824"/>
           <object type="Core" os_index="10" cpuset="0x00000400" complete_cpuset="0x00000400" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="34" id="obj34">
             <object type="PU" os_index="10" cpuset="0x00000400" complete_cpuset="0x00000400" nodeset="0x00000020" complete_nodeset="0x00000020" gp_index="35" id="obj35"/>
           </object>
@@ -85,9 +74,7 @@
       </object>
       <object type="Group" os_index="3" cpuset="0x0000f000" complete_cpuset="0x0000f000" nodeset="0x000000c0" complete_nodeset="0x000000c0" gp_index="38" id="obj38" subtype="MySmallGroup" kind="1" subkind="1">
         <object type="Group" cpuset="0x00003000" complete_cpuset="0x00003000" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="64" id="obj64" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="39" id="obj39" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="39" id="obj39" local_memory="1073741824"/>
           <object type="Core" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="40" id="obj40">
             <object type="PU" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000040" complete_nodeset="0x00000040" gp_index="41" id="obj41"/>
           </object>
@@ -96,9 +83,7 @@
           </object>
         </object>
         <object type="Group" cpuset="0x0000c000" complete_cpuset="0x0000c000" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="65" id="obj65" kind="1001" subkind="0">
-          <object type="NUMANode" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="44" id="obj44" local_memory="1073741824">
-            <page_type size="4096" count="262144"/>
-          </object>
+          <object type="NUMANode" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="44" id="obj44" local_memory="1073741824"/>
           <object type="Core" os_index="14" cpuset="0x00004000" complete_cpuset="0x00004000" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="45" id="obj45">
             <object type="PU" os_index="14" cpuset="0x00004000" complete_cpuset="0x00004000" nodeset="0x00000080" complete_nodeset="0x00000080" gp_index="46" id="obj46"/>
           </object>

@@ -3,9 +3,7 @@
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x555500ff" complete_cpuset="0x555500ff" allowed_cpuset="0x555500ff" nodeset="0x0000000d" complete_nodeset="0x0000000d" allowed_nodeset="0x0000000d" gp_index="1" id="obj1">
     <object type="Package" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="26" id="obj26">
-      <object type="NUMANode" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="27" id="obj27" subtype="DRAM" local_memory="214748364800">
-        <page_type size="4096" count="26214400"/>
-      </object>
+      <object type="NUMANode" os_index="0" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="27" id="obj27" subtype="DRAM" local_memory="214748364800"/>
       <object type="Core" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4">
         <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2"/>
         <object type="PU" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="3" id="obj3"/>
@@ -24,12 +22,8 @@
       </object>
     </object>
     <object type="Package" os_index="1" cpuset="0x55550000" complete_cpuset="0x55550000" nodeset="0x0000000c" complete_nodeset="0x0000000c" gp_index="53" id="obj53">
-      <object type="NUMANode" os_index="2" cpuset="0x55550000" complete_cpuset="0x55550000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="54" id="obj54" subtype="DRAM" local_memory="107374182400">
-        <page_type size="4096" count="26214400"/>
-      </object>
-      <object type="NUMANode" os_index="3" cpuset="0x55550000" complete_cpuset="0x55550000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="55" id="obj55" subtype="HBM" local_memory="10737418240">
-        <page_type size="4096" count="2621440"/>
-      </object>
+      <object type="NUMANode" os_index="2" cpuset="0x55550000" complete_cpuset="0x55550000" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="54" id="obj54" subtype="DRAM" local_memory="107374182400"/>
+      <object type="NUMANode" os_index="3" cpuset="0x55550000" complete_cpuset="0x55550000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="55" id="obj55" subtype="HBM" local_memory="10737418240"/>
       <object type="Core" os_index="8" cpuset="0x00010000" complete_cpuset="0x00010000" nodeset="0x0000000c" complete_nodeset="0x0000000c" gp_index="31" id="obj31">
         <object type="PU" os_index="16" cpuset="0x00010000" complete_cpuset="0x00010000" nodeset="0x0000000c" complete_nodeset="0x0000000c" gp_index="29" id="obj29"/>
       </object>

@@ -2,9 +2,7 @@
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">
 <topology version="3.0">
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
-    <object type="NUMANode" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" local_memory="17174994944">
-      <page_type size="4096" count="4193114"/>
-    </object>
+    <object type="NUMANode" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" nodeset="0x00000001" complete_nodeset="0x00000001" local_memory="17174994944"/>
     <object type="Package" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001">
       <info name="CPUModel" value="Intel(R) Xeon(TM) CPU 2.60GHz"/>
       <object type="L3Cache" cpuset="0x00001111" complete_cpuset="0x00001111" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="4194304" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">

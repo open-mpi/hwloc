@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -660,14 +660,6 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->nodeset = hwloc_bitmap_alloc();
 	hwloc_bitmap_set(obj->nodeset, i);
 	obj->attr->numanode.local_memory = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
-	obj->attr->numanode.page_types_len = 2;
-	obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
-	memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
-	obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-	obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-	/* TODO: obj->attr->numanode.page_types[1].count = rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
       case HWLOC_OBJ_L2CACHE:
 	obj->attr->cache.size = _system_configuration.L2_cache_size;
@@ -820,6 +812,7 @@ hwloc_look_aix(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
   hwloc__add_info(&topology->infos, "Backend", "AIX");
   hwloc_add_uname_info(topology, NULL);
+  hwloc_fallback_add_pagesize_info(topology);
   return 0;
 }
 

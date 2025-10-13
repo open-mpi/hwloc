@@ -103,7 +103,6 @@ extern "C" {
 
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
 #define hwloc_numanode_attr_s HWLOC_NAME(numanode_attr_s)
-#define hwloc_memory_page_type_s HWLOC_NAME(memory_page_type_s)
 #define hwloc_cache_attr_s HWLOC_NAME(cache_attr_s)
 #define hwloc_group_attr_s HWLOC_NAME(group_attr_s)
 #define hwloc_pcidev_attr_s HWLOC_NAME(pcidev_attr_s)
@@ -864,6 +863,10 @@ extern "C" {
 #define hwloc_look_hardwired_fujitsu_fx100 HWLOC_NAME(look_hardwired_fujitsu_fx100)
 
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
+#define hwloc_fallback_add_pagesize_info HWLOC_NAME(fallback_add_pagesize_info)
+#define hwloc_pagesize_arrayelt_t HWLOC_NAME(pagesize_arrayelt_t)
+#define hwloc__add_pagesize_info_from_array HWLOC_NAME(_add_pagesize_info_from_array)
+
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
 #define hwloc_free_object_and_children HWLOC_NAME(free_object_and_children)
 #define hwloc_free_object_siblings_and_children HWLOC_NAME(free_object_siblings_and_children)

@@ -2012,6 +2012,13 @@ These info attributes are attached to the topology itself.
 <dd>The operating system name, release, version, the hostname and the
 architecture name, as reported by the Unix <tt>uname</tt> command.
 </dd>
+<dt>PageSizes</dt>
+<dd>The sizes of pages, huge pages and/or large pages supported
+by the machine, in bytes.
+Values are in ascending order, separated by commas.
+<br/>
+This supersedes the <tt>page_type</tt> NUMA node attributes from hwloc releases up to 2.x.
+</dd>
 <dt>LinuxCgroup</dt>
 <dd>The name the Linux control group where the calling process is
 placed.
@@ -4914,6 +4921,16 @@ else /* 3.x exporter with 3.x importer */
 \endverbatim
 
 Note that hwloc v3.x can neither import from nor export to hwloc 1.x.
+
+
+\section upgrade_to_api_3x_pagetypes Removal of page types
+
+The page type array in NUMA node was removed because it was either
+not filled with actual number of pages, or meaningless because
+those numbers could vary dynamically.
+
+It is replaced with the <tt>PageSizes</tt> topology info which
+just lists the supported page sizes.
 
 
 \section upgrade_to_api_3x_deprecations API Deprecations

@@ -19,5 +19,5 @@ Relative latency matrix (name NUMALatency kind 5) between 2 NUMANodes (depth -3)
      0    10    20
      1    20    10
 12 processors not represented in topology: 0x0000fff0
-Topology infos: LinuxCgroup=/prout Backend=Linux
+Topology infos: LinuxCgroup=/prout Backend=Linux PageSizes=4096,2097152
 Topology not from this system

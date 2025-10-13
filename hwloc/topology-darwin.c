@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -374,13 +374,6 @@ static void hwloc__darwin_build_numa_level(struct hwloc_topology *topology,
       obj->attr->numanode.local_memory = size;
       (*gotnumamemory)++;
     }
-    obj->attr->numanode.page_types_len = 2;
-    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
-    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
-    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
     hwloc__insert_object_by_cpuset(topology, NULL, obj ,"darwin:numanode");
   }
 }
@@ -906,6 +899,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   hwloc__add_info(&topology->infos, "Backend", "Darwin");
   hwloc_add_uname_info(topology, NULL);
+  hwloc_fallback_add_pagesize_info(topology); /* FIXME: it doesn't find any info about hugepages */
   return 0;
 }
 

@@ -1,6 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2013-2023 Inria.  All rights reserved.
+ * Copyright © 2013-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -182,7 +183,6 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 			if (err < 0)
 				return err;
 		}
-		/* ignore memory page_types */
 		break;
 	case HWLOC_OBJ_L1CACHE:
 	case HWLOC_OBJ_L2CACHE:

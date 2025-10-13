@@ -1,7 +1,7 @@
 <!--
   SPDX-License-Identifier: BSD-3-Clause
   Copyright © 2009      CNRS
-  Copyright © 2009-2023 Inria.  All rights reserved.
+  Copyright © 2009-2025 Inria.  All rights reserved.
   Copyright © 2009-2011 Université Bordeaux.
   See COPYING in top-level directory.
 
@@ -39,10 +39,6 @@
 <!ATTLIST object pci_type CDATA "" >
 <!ATTLIST object pci_link_speed CDATA "0." >
 <!ATTLIST object osdev_type CDATA "" >
-
-<!ELEMENT page_type EMPTY>
-<!ATTLIST page_type size CDATA #REQUIRED>
-<!ATTLIST page_type count CDATA #REQUIRED>
 
 <!ELEMENT info EMPTY>
 <!ATTLIST info name CDATA #REQUIRED>
@@ -90,3 +86,8 @@
 <!ELEMENT cpukind (info*)>
 <!ATTLIST cpukind cpuset CDATA "0">
 <!ATTLIST cpukind forced_efficiency CDATA "-1">
+
+<!-- ignored since 3.0 -->
+<!ELEMENT page_type EMPTY>
+<!ATTLIST page_type size CDATA #REQUIRED>
+<!ATTLIST page_type count CDATA #REQUIRED>

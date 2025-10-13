@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -447,13 +447,6 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
 
     hwloc_debug("NUMA node %ld has %lldkB\n", nids[i], mem_size/1024);
     obj->attr->numanode.local_memory = mem_size;
-    obj->attr->numanode.page_types_len = 2;
-    obj->attr->numanode.page_types = malloc(2*sizeof(*obj->attr->numanode.page_types));
-    memset(obj->attr->numanode.page_types, 0, 2*sizeof(*obj->attr->numanode.page_types));
-    obj->attr->numanode.page_types[0].size = hwloc_getpagesize();
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-    obj->attr->numanode.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
 
     n = lgrp_cpus(cookie, nids[i], pids, npids, LGRP_CONTENT_HIERARCHY);
     if (n < 0) {
@@ -979,6 +972,35 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 }
 #endif /* LIBKSTAT */
 
+static void
+hwloc_solaris_get_pagesize_info(struct hwloc_topology *topology)
+{
+  int nr;
+  hwloc_pagesize_arrayelt_t *sizes;
+
+  nr = getpagesizes(NULL, 0);
+  if (nr < 0)
+    goto fallback;
+  sizes = malloc(nr *sizeof(*sizes));
+  if (!sizes)
+    goto fallback;
+  if (getpagesizes(sizes, nr) < 0) {
+    free(sizes);
+    goto fallback;
+  }
+
+  if (hwloc__add_pagesize_info_from_array(topology, sizes, nr) < 0) {
+    free(sizes);
+    goto fallback;
+  }
+
+  free(sizes);
+  return;
+
+ fallback:
+  hwloc_fallback_add_pagesize_info(topology);
+}
+
 static int
 hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 {
@@ -1018,6 +1040,8 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   hwloc__add_info(&topology->infos, "Backend", "Solaris");
   hwloc_add_uname_info(topology, NULL);
+  hwloc_solaris_get_pagesize_info(topology);
+
   return 0;
 }
 

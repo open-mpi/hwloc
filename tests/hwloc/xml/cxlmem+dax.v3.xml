@@ -20,10 +20,7 @@
       <info name="CPUModelNumber" value="107"/>
       <info name="CPUModel" value="QEMU Virtual CPU version 2.5+"/>
       <info name="CPUStepping" value="1"/>
-      <object type="NUMANode" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="24" id="obj24" local_memory="3061719040">
-        <page_type size="4096" count="747490"/>
-        <page_type size="2097152" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="24" id="obj24" local_memory="3061719040"/>
       <object type="L3Cache" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="8" id="obj8" cache_size="16777216" depth="3" cache_linesize="64" cache_associativity="16" cache_type="0">
         <object type="L2Cache" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7" id="obj7" cache_size="4194304" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
           <object type="L1Cache" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">

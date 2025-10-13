@@ -32,5 +32,5 @@ Special depth -3:  1 NUMANode (type #14)
 Special depth -4:  2 Bridge (type #16)
 Special depth -5:  4 PCIDev (type #17)
 Special depth -6:  3 OSDev (type #18)
-Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=4.9.0-3-amd64 OSVersion="#1 SMP Debian 4.9.30-2+deb9u2 (2017-06-26)" HostName=hwloc-debian9amd64 Architecture=x86_64
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=4.9.0-3-amd64 OSVersion="#1 SMP Debian 4.9.30-2+deb9u2 (2017-06-26)" HostName=hwloc-debian9amd64 Architecture=x86_64 PageSizes=4096,2097152,1073741824
 Topology not from this system

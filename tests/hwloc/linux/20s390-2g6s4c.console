@@ -61,5 +61,5 @@ depth 0:           1 Machine (type #0)
     depth 4:       20 Core (type #3)
      depth 5:      20 PU (type #4)
 Special depth -3:  1 NUMANode (type #14)
-Topology infos: Backend=Linux OSName=Linux OSRelease=dummy OSVersion=dummy HostName=dummy Architecture=s390x
+Topology infos: Backend=Linux OSName=Linux OSRelease=dummy OSVersion=dummy HostName=dummy Architecture=s390x PageSizes=4096,1048576
 Topology not from this system

@@ -12,9 +12,7 @@
       </object>
     </object>
     <object type="Group" cpuset="0x00000070" complete_cpuset="0x000000f0" nodeset="0x00000002" complete_nodeset="0x00000002" kind="1001" subkind="0">
-      <object type="NUMANode" os_index="1" cpuset="0x00000070" complete_cpuset="0x000000f0" nodeset="0x00000002" complete_nodeset="0x00000002" local_memory="1073741824">
-        <page_type size="4096" count="262144"/>
-      </object>
+      <object type="NUMANode" os_index="1" cpuset="0x00000070" complete_cpuset="0x000000f0" nodeset="0x00000002" complete_nodeset="0x00000002" local_memory="1073741824"/>
       <object type="Core" os_index="2" cpuset="0x00000030" complete_cpuset="0x00000030" nodeset="0x00000002" complete_nodeset="0x00000002">
         <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000002" complete_nodeset="0x00000002"/>
         <object type="PU" os_index="5" cpuset="0x00000020" complete_cpuset="0x00000020" nodeset="0x00000002" complete_nodeset="0x00000002"/>
@@ -24,9 +22,7 @@
       </object>
     </object>
     <object type="Group" cpuset="0x00000400" complete_cpuset="0x00000f00" nodeset="0x00000004" complete_nodeset="0x00000004" kind="1001" subkind="0">
-      <object type="NUMANode" os_index="2" cpuset="0x00000400" complete_cpuset="0x00000f00" nodeset="0x00000004" complete_nodeset="0x00000004" local_memory="1073741824">
-        <page_type size="4096" count="262144"/>
-      </object>
+      <object type="NUMANode" os_index="2" cpuset="0x00000400" complete_cpuset="0x00000f00" nodeset="0x00000004" complete_nodeset="0x00000004" local_memory="1073741824"/>
       <object type="Core" os_index="5" cpuset="0x00000400" complete_cpuset="0x00000c00" nodeset="0x00000004" complete_nodeset="0x00000004">
         <object type="PU" os_index="10" cpuset="0x00000400" complete_cpuset="0x00000400" nodeset="0x00000004" complete_nodeset="0x00000004"/>
       </object>

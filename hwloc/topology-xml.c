@@ -516,12 +516,30 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
   return 0;
 }
 
-static int
-hwloc__xml_import_pagetype(struct hwloc_numanode_attr_s *memory,
-			   hwloc__xml_import_state_t state)
+static void
+hwloc__xml_v2import_pagesize(struct hwloc_xml_backend_data_s *data,
+                             unsigned long long size)
 {
-  uint64_t size = 0, count = 0;
+  unsigned i;
+  hwloc_pagesize_arrayelt_t* array = data->v2_pagesizes;
+  for(i=0; i<data->v2_pagesize_nr; i++)
+    if (size == array[i])
+      return;
+  if (data->v2_pagesize_nr == data->v2_pagesize_nr_alloc) {
+#define V2_PAGESIZE_REALLOC_NR 8
+    hwloc_pagesize_arrayelt_t *new = realloc(data->v2_pagesizes, (data->v2_pagesize_nr_alloc + V2_PAGESIZE_REALLOC_NR)*sizeof(*new));
+    if (!new)
+      return;
+    data->v2_pagesize_nr_alloc += V2_PAGESIZE_REALLOC_NR;
+    array = data->v2_pagesizes = new;
+  }
+  array[data->v2_pagesize_nr++] = size;
+}
 
+static int
+hwloc__xml_v2import_pagetype(struct hwloc_xml_backend_data_s *data,
+                             hwloc__xml_import_state_t state)
+{
   while (1) {
     char *attrname, *attrvalue;
     if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
@@ -532,26 +550,15 @@ hwloc__xml_import_pagetype(struct hwloc_numanode_attr_s *memory,
       if (ret < 0)
         return -1;
       /* ignored */
-    } else if (!strcmp(attrname, "size"))
-      size = strtoull(attrvalue, NULL, 10);
-    else if (!strcmp(attrname, "count"))
-      count = strtoull(attrvalue, NULL, 10);
-    else
+    } else if (!strcmp(attrname, "size")) {
+      hwloc__xml_v2import_pagesize(data, strtoull(attrvalue, NULL, 10));
+    } else if (!strcmp(attrname, "count")) {
+      /* ignored */
+    } else
       return -1;
   }
 
-  if (size) {
-    unsigned idx = memory->page_types_len;
-    struct hwloc_memory_page_type_s *tmp;
-    tmp = realloc(memory->page_types, (idx+1)*sizeof(*memory->page_types));
-    if (tmp) { /* if failed to allocate, ignore this page_type entry */
-      memory->page_types = tmp;
-      memory->page_types_len = idx+1;
-      memory->page_types[idx].size = size;
-      memory->page_types[idx].count = count;
-    }
-  }
-
+  /* ignored */
   return state->global->close_tag(state);
 }
 
@@ -757,9 +764,9 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       /* we'll handle children later */
       break;
 
-    } else if (!strcmp(tag, "page_type")) {
+    } else if (data->version_major <= 2 && !strcmp(tag, "page_type")) { /* backward compat with 2.x */
       if (obj->type == HWLOC_OBJ_NUMANODE) {
-	ret = hwloc__xml_import_pagetype(&obj->attr->numanode, &childstate);
+	ret = hwloc__xml_v2import_pagetype(data, &childstate);
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
@@ -1865,6 +1872,8 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   data->need_levelzero_backend_info = 0;
   data->need_opencl_backend_info = 0;
   data->need_gl_backend_info = 0;
+  data->v2_pagesizes = NULL;
+  data->v2_pagesize_nr = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -2017,6 +2026,13 @@ done:
   }
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
+  if (data->v2_pagesizes) {
+    assert(data->version_major <= 2);
+    hwloc__add_pagesize_info_from_array(topology, (hwloc_pagesize_arrayelt_t*) data->v2_pagesizes, data->v2_pagesize_nr);
+    free(data->v2_pagesizes);
+    data->v2_pagesizes = NULL;
+  }
+
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
     topology->support.discovery->pu = 1;
     topology->support.discovery->disallowed_pu = 1;
@@ -2038,6 +2054,9 @@ done:
     fprintf(stderr, "%s: XML component discovery failed.\n",
 	    data->msgprefix);
  err:
+  free(data->v2_pagesizes);
+  data->v2_pagesizes = NULL;
+
   hwloc_free_object_siblings_and_children(root->first_child);
   root->first_child = NULL;
   hwloc_free_object_siblings_and_children(root->memory_first_child);
@@ -2271,14 +2290,33 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
       sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.local_memory);
       state->new_prop(state, "local_memory", tmp);
     }
-    for(i=0; i<obj->attr->numanode.page_types_len; i++) {
-      struct hwloc__xml_export_state_s childstate;
-      state->new_child(state, &childstate, "page_type");
-      sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.page_types[i].size);
-      childstate.new_prop(&childstate, "size", tmp);
-      sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.page_types[i].count);
-      childstate.new_prop(&childstate, "count", tmp);
-      childstate.end_object(&childstate, "page_type");
+    if (v2export) {
+      const char *pagesizes = hwloc_get_info_by_name(&topology->infos, "PageSizes");
+      if (pagesizes) {
+        const char *current = pagesizes;
+        while (*current) {
+          struct hwloc__xml_export_state_s childstate;
+          char value[22]; /* enough for 21 digits + ending 0 */
+          const char *next;
+          size_t len;
+          next = strchr(current, ',');
+          if (next)
+            len = next - current;
+          else
+            len = strlen(current);
+          if (len >= sizeof(value))
+            len = sizeof(value)-1;
+          memcpy(value, current, len);
+          value[len] = '\0';
+          state->new_child(state, &childstate, "page_type");
+          childstate.new_prop(&childstate, "size", value);
+          childstate.new_prop(&childstate, "count", "0"); /* don't bother */
+          childstate.end_object(&childstate, "page_type");
+          if (!next)
+            break;
+          current = next+1;
+        }
+      }
     }
     break;
   case HWLOC_OBJ_L1CACHE:

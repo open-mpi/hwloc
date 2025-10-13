@@ -12,11 +12,7 @@
       <info name="CPUModelNumber" value="85"/>
       <info name="CPUModel" value="Intel(R) Xeon(R) Platinum 8174 CPU @ 3.10GHz"/>
       <info name="CPUStepping" value="4"/>
-      <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="294" id="obj294" local_memory="810234351616">
-        <page_type size="4096" count="197811121"/>
-        <page_type size="2097152" count="0"/>
-        <page_type size="1073741824" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="294" id="obj294" local_memory="810234351616"/>
       <object type="L3Cache" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="8" id="obj8" cache_size="34603008" depth="3" cache_linesize="64" cache_associativity="11" cache_type="0">
         <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7" id="obj7" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
@@ -189,11 +185,7 @@
       <info name="CPUModelNumber" value="85"/>
       <info name="CPUModel" value="Intel(R) Xeon(R) Platinum 8174 CPU @ 3.10GHz"/>
       <info name="CPUStepping" value="4"/>
-      <object type="NUMANode" os_index="1" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="295" id="obj295" local_memory="811737923584">
-        <page_type size="4096" count="198178204"/>
-        <page_type size="2097152" count="0"/>
-        <page_type size="1073741824" count="0"/>
-      </object>
+      <object type="NUMANode" os_index="1" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="295" id="obj295" local_memory="811737923584"/>
       <object type="L3Cache" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="130" id="obj130" cache_size="34603008" depth="3" cache_linesize="64" cache_associativity="11" cache_type="0">
         <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="129" id="obj129" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">

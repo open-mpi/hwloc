@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -110,6 +110,74 @@ void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unus
   if (*utsname->machine)
     hwloc__add_info(&topology->infos, "Architecture", utsname->machine);
 #endif /* HAVE_UNAME */
+}
+
+void hwloc_fallback_add_pagesize_info(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+#ifdef hwloc_getpagesize
+  int err;
+  char buffer[42];
+  long pagesize;
+  long largepagesize = -1; /* not found */
+
+  if (hwloc_get_info_by_name(&topology->infos, "PageSizes"))
+    /* don't annotate twice */
+    return;
+
+  pagesize = hwloc_getpagesize();
+  largepagesize = -1; /* not found */
+# if HAVE_DECL__SC_LARGE_PAGESIZE
+  largepagesize = sysconf(_SC_LARGE_PAGESIZE);
+# endif
+  if (largepagesize == -1)
+    err = snprintf(buffer, sizeof(buffer), "%ld", pagesize);
+  else
+    err = snprintf(buffer, sizeof(buffer), "%ld,%ld", pagesize, largepagesize);
+  if (err < 0)
+    return;
+  hwloc__add_info(&topology->infos, "PageSizes", buffer);
+#endif /* hwloc_getpagesize */
+}
+
+static int hwloc_pagesize_arrayelt_compar(const void *_a, const void *_b)
+{
+  hwloc_pagesize_arrayelt_t a = *(hwloc_pagesize_arrayelt_t *) _a;
+  hwloc_pagesize_arrayelt_t b = *(hwloc_pagesize_arrayelt_t *) _b;
+  return a < b ? -1 : (a > b ? 1 : 0);
+}
+
+int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology,
+                                        hwloc_pagesize_arrayelt_t *sizes,
+                                        unsigned nr)
+{
+  size_t buflen, i;
+  char *buffer, *current;
+  ssize_t err;
+
+  /* might be needed on Linux when loading from sysfs dump (reordered dirents) or XML (just in case),
+   * cheap anyway
+   */
+  qsort(sizes, nr, sizeof(*sizes), hwloc_pagesize_arrayelt_compar);
+
+  buflen = 22*nr; /* 21 digits + comma or ending 0 */
+  buffer = malloc(buflen);
+  if (!buffer)
+    return -1;
+
+  current = buffer;
+  for(i=0; i<nr; i++) {
+    err = snprintf(current, buflen, "%s%llu", current != buffer ? "," : "", (unsigned long long) sizes[i]);
+    if (err < 0)
+      break;
+    current += err;
+    buflen -= err;
+  }
+
+  if (current != buffer)
+    hwloc__add_info(&topology->infos, "PageSizes", buffer);
+
+  free(buffer);
+  return 0;
 }
 
 char *

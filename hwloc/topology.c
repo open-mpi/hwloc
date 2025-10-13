@@ -680,13 +680,6 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
 static void
 hwloc__free_object_contents(hwloc_obj_t obj)
 {
-  switch (obj->type) {
-  case HWLOC_OBJ_NUMANODE:
-    free(obj->attr->numanode.page_types);
-    break;
-  default:
-    break;
-  }
   hwloc__free_infos(&obj->infos);
   free(obj->attr);
   free(obj->children);
@@ -946,7 +939,6 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   struct hwloc_tma *tma = newtopology->tma;
   hwloc_obj_t *level;
   unsigned level_width;
-  size_t len;
   unsigned i;
   hwloc_obj_t child, prev;
   int err = 0;
@@ -981,12 +973,6 @@ hwloc__duplicate_object(struct hwloc_topology *newtopology,
   newobj->total_memory = src->total_memory;
 
   memcpy(newobj->attr, src->attr, sizeof(*newobj->attr));
-
-  if (src->type == HWLOC_OBJ_NUMANODE && src->attr->numanode.page_types_len) {
-    len = src->attr->numanode.page_types_len * sizeof(struct hwloc_memory_page_type_s);
-    newobj->attr->numanode.page_types = hwloc_tma_malloc(tma, len);
-    memcpy(newobj->attr->numanode.page_types, src->attr->numanode.page_types, len);
-  }
 
   newobj->cpuset = hwloc_bitmap_tma_dup(tma, src->cpuset);
   newobj->complete_cpuset = hwloc_bitmap_tma_dup(tma, src->complete_cpuset);
@@ -1160,8 +1146,6 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   new->userdata_not_decoded = old->userdata_not_decoded;
 
   assert(!old->machine_memory.local_memory);
-  assert(!old->machine_memory.page_types_len);
-  assert(!old->machine_memory.page_types);
 
   for(i = HWLOC_OBJ_TYPE_MIN; i < HWLOC_OBJ_TYPE_MAX; i++)
     new->type_depth[i] = old->type_depth[i];
@@ -1461,11 +1445,6 @@ merge_insert_equal(hwloc_obj_t new, hwloc_obj_t old)
     if (new->attr->numanode.local_memory && !old->attr->numanode.local_memory) {
       /* no memory in old, use new memory */
       old->attr->numanode.local_memory = new->attr->numanode.local_memory;
-      free(old->attr->numanode.page_types);
-      old->attr->numanode.page_types_len = new->attr->numanode.page_types_len;
-      old->attr->numanode.page_types = new->attr->numanode.page_types;
-      new->attr->numanode.page_types = NULL;
-      new->attr->numanode.page_types_len = 0;
     }
     /* old->attr->numanode.total_memory will be updated by propagate_total_memory() */
     break;
@@ -2307,25 +2286,11 @@ hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, 
   return parent;
 }
 
-static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
-{
-  const struct hwloc_memory_page_type_s *a = _a;
-  const struct hwloc_memory_page_type_s *b = _b;
-  /* consider 0 as larger so that 0-size page_type go to the end */
-  if (!b->size)
-    return -1;
-  /* don't cast a-b in int since those are ullongs */
-  if (b->size == a->size)
-    return 0;
-  return a->size < b->size ? -1 : 1;
-}
-
 /* Propagate memory counts */
 static void
 propagate_total_memory(hwloc_obj_t obj)
 {
   hwloc_obj_t child;
-  unsigned i;
 
   /* reset total before counting local and children memory */
   obj->total_memory = 0;
@@ -2343,18 +2308,6 @@ propagate_total_memory(hwloc_obj_t obj)
 
   if (obj->type == HWLOC_OBJ_NUMANODE) {
     obj->total_memory += obj->attr->numanode.local_memory;
-
-    if (obj->attr->numanode.page_types_len) {
-      /* By the way, sort the page_type array.
-       * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
-       */
-      qsort(obj->attr->numanode.page_types, obj->attr->numanode.page_types_len, sizeof(*obj->attr->numanode.page_types), hwloc_memory_page_type_compare);
-      /* Ignore 0-size page_types, they are at the end */
-      for(i=obj->attr->numanode.page_types_len; i>=1; i--)
-	if (obj->attr->numanode.page_types[i-1].size)
-	  break;
-      obj->attr->numanode.page_types_len = i;
-    }
   }
 }
 
@@ -3600,7 +3553,6 @@ hwloc_discover(struct hwloc_topology *topology,
     /* if we're sure we found all NUMA nodes without their sizes (x86 backend?),
      * we could split topology->total_memory in all of them.
      */
-    free(topology->machine_memory.page_types);
     memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
   }
 
@@ -3748,8 +3700,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
   /* Machine-wide memory */
   topology->machine_memory.local_memory = 0;
-  topology->machine_memory.page_types_len = 0;
-  topology->machine_memory.page_types = NULL;
 
   /* Allowed stuff */
   topology->allowed_cpuset = NULL;
@@ -4104,7 +4054,6 @@ hwloc_topology_clear (struct hwloc_topology *topology)
     free(topology->levels[l]);
   for(l=0; l<HWLOC_NR_SLEVELS; l++)
     free(topology->slevels[l].objs);
-  free(topology->machine_memory.page_types);
 }
 
 void
