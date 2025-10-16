@@ -2188,7 +2188,7 @@ See \ref heteromem.
 <dt>CXLDevice (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
 If multiple devices are interleaved, their bus IDs are separated by commas,
-and the number of devices in reported in CXLDeviceInterleaveWays.
+and the number of devices is reported in CXLDeviceInterleaveWays.
 </dd>
 <dt>CXLDeviceInterleaveWays (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>If multiple CXL devices are interleaved, this attribute shows the
