@@ -2261,6 +2261,46 @@ done:
     goto err;
   }
 
+  /* update v3.0 NUMA page types */
+  if (data->version_major > 2 && data->first_numanode) {
+    const char *nrs = hwloc_obj_get_info_by_name(topology->levels[0][0], "PageSizeNr");
+    const char *sizes = hwloc_obj_get_info_by_name(topology->levels[0][0], "PageSizes");
+    if (nrs && sizes) {
+      unsigned nr = atoi(nrs);
+      if (nr) {
+        struct hwloc_memory_page_type_s * page_types = calloc(nr, sizeof(*page_types));
+        if (page_types) {
+          unsigned i;
+          const char *current;
+          char *end;
+          current = sizes;
+          for(i=0; i<nr; i++) {
+            page_types[i].size = strtoull(current, &end, 0);
+            if (!*end) {
+              i++;
+              break;
+            }
+            current = end+1; /* skip the comma */
+          }
+          nr = i; /* in case we broke out. things will be cleaned in propagate_total_memory() anyway */
+          hwloc_obj_t node = data->first_numanode;
+          do {
+            if (!node->attr->numanode.page_types_len) {
+              node->attr->numanode.page_types = malloc(nr * sizeof(*page_types));
+              if (node->attr->numanode.page_types) {
+                memcpy(node->attr->numanode.page_types, page_types, nr * sizeof(*page_types));
+                node->attr->numanode.page_types_len = nr;
+                node->attr->numanode.page_types[0].count = node->attr->numanode.local_memory / node->attr->numanode.page_types[0].size; /* assume all memory is in normal/small pages */
+              }
+            }
+            node = node->next_cousin;
+          } while (node);
+          free(page_types);
+        }
+      }
+    }
+  }
+
   /* update pre-v2.0 memory group gp_index */
   if (data->version_major < 2 && data->first_numanode) {
     hwloc_obj_t node = data->first_numanode;
