@@ -87,5 +87,5 @@ CPU kind #0 efficiency 0 cpuset 0x000ff000
 CPU kind #1 efficiency 1 cpuset 0x00000fff
   FrequencyMaxMHz = 5000
   FrequencyBaseMHz = 1900
-Topology infos: Backend=Linux OSName=Linux OSRelease=6.1.0-13-amd64 OSVersion="#1 SMP PREEMPT_DYNAMIC Debian 6.1.55-1 (2023-09-29)" HostName=vesubie Architecture=x86_64 PageSizes=4096,2097152,1073741824
+Topology infos: Backend=Linux OSName=Linux OSRelease=6.1.0-13-amd64 OSVersion="#1 SMP PREEMPT_DYNAMIC Debian 6.1.55-1 (2023-09-29)" HostName=vesubie Architecture=x86_64 PageSizeNr=3 PageSizes=4096,2097152,1073741824
 Topology not from this system

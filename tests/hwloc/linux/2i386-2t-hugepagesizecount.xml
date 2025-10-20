@@ -30,5 +30,6 @@
     </object>
   </object>
   <info name="Backend" value="Linux"/>
+  <info name="PageSizeNr" value="3"/>
   <info name="PageSizes" value="4096,2097152,17179869184"/>
 </topology>

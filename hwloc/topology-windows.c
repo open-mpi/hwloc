@@ -969,13 +969,17 @@ static void
 hwloc_windows_add_pagesize_info(hwloc_topology_t topology)
 {
   char buffer[21+1+21+1]; /* 21 digits + comma + 21 digits + ending 0 */
+  const char *nrs;
   size_t pagesize = SystemInfo.dwPageSize;
   size_t largepagesize = GetLargePageMinimum(); /* no way to find all sizes? */
   if (largepagesize) {
+    nrs = "2";
     snprintf(buffer, sizeof(buffer), "%lu,%lu", (unsigned long) pagesize, (unsigned long) largepagesize);
   } else {
+    nrs = "1";
     snprintf(buffer, sizeof(buffer), "%lu", (unsigned long) pagesize);
   }
+  hwloc__add_info(&topology->infos, "PageSizeNr", nrs);
   hwloc__add_info(&topology->infos, "PageSizes", buffer);
 }
 

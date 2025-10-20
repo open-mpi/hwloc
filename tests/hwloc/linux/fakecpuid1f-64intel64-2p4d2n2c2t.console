@@ -336,5 +336,5 @@ Relative latency matrix (name NUMALatency kind 5) between 16 NUMANodes (depth -3
     13    20    20    20    20    20    20    20    20    20    20    20    20    20    10    20    20
     14    20    20    20    20    20    20    20    20    20    20    20    20    20    20    10    20
     15    20    20    20    20    20    20    20    20    20    20    20    20    20    20    20    10
-Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.0.0-rc7 OSVersion="#1 SMP Tue Feb 26 08:48:46 CET 2019" HostName=debian Architecture=x86_64 PageSizes=4096,2097152
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.0.0-rc7 OSVersion="#1 SMP Tue Feb 26 08:48:46 CET 2019" HostName=debian Architecture=x86_64 PageSizeNr=2 PageSizes=4096,2097152
 Topology not from this system

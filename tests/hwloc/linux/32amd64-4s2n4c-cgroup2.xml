@@ -98,5 +98,6 @@
   </cpukind>
   <info name="LinuxCgroup" value="/uid_2008/job_15389/step_0"/>
   <info name="Backend" value="Linux"/>
+  <info name="PageSizeNr" value="2"/>
   <info name="PageSizes" value="4096,2097152"/>
 </topology>

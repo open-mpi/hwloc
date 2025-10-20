@@ -1957,10 +1957,11 @@ These info attributes are attached to the topology itself.
 <dd>The operating system name, release, version, the hostname and the
 architecture name, as reported by the Unix <tt>uname</tt> command.
 </dd>
-<dt>PageSizes</dt>
+<dt>PageSizes=4096,2097152</dt>
+<dt>PagesizeNr=2</dt>
 <dd>The sizes of pages, huge pages and/or large pages supported
-by the machine, in bytes.
-Values are in ascending order, separated by commas.
+by the machine, in bytes (values are in ascending order, separated by commas).
+And the number of sizes.
 <br/>
 This supersedes the <tt>page_type</tt> NUMA node attributes from hwloc releases up to 2.x.
 </dd>
@@ -4829,8 +4830,8 @@ The page type array in NUMA node was removed because it was either
 not filled with actual number of pages, or meaningless because
 those numbers could vary dynamically.
 
-It is replaced with the <tt>PageSizes</tt> topology info which
-just lists the supported page sizes.
+It is replaced with the <tt>PageSizes</tt> and <tt>PageSizeNr</tt> topology info which
+just list the supported page sizes.
 
 
 \section upgrade_to_api_3x_deprecations API Deprecations

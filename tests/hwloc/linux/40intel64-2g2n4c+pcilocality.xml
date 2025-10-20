@@ -499,5 +499,6 @@
   </distances2>
   <info name="LinuxCgroup" value="/torque/513099.master.cm.cluster"/>
   <info name="Backend" value="Linux"/>
+  <info name="PageSizeNr" value="2"/>
   <info name="PageSizes" value="4096,2097152"/>
 </topology>

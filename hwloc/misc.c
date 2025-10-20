@@ -117,6 +117,7 @@ void hwloc_fallback_add_pagesize_info(struct hwloc_topology *topology __hwloc_at
 #ifdef hwloc_getpagesize
   int err;
   char buffer[42];
+  const char *nrs;
   long pagesize;
   long largepagesize = -1; /* not found */
 
@@ -129,12 +130,16 @@ void hwloc_fallback_add_pagesize_info(struct hwloc_topology *topology __hwloc_at
 # if HAVE_DECL__SC_LARGE_PAGESIZE
   largepagesize = sysconf(_SC_LARGE_PAGESIZE);
 # endif
-  if (largepagesize == -1)
+  if (largepagesize == -1) {
+    nrs = "1";
     err = snprintf(buffer, sizeof(buffer), "%ld", pagesize);
-  else
+  } else {
+    nrs = "2";
     err = snprintf(buffer, sizeof(buffer), "%ld,%ld", pagesize, largepagesize);
+  }
   if (err < 0)
     return;
+  hwloc__add_info(&topology->infos, "PageSizeNr", nrs);
   hwloc__add_info(&topology->infos, "PageSizes", buffer);
 #endif /* hwloc_getpagesize */
 }
@@ -151,6 +156,7 @@ int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology,
                                         unsigned nr)
 {
   size_t buflen, i;
+  char nrs[11];
   char *buffer, *current;
   ssize_t err;
 
@@ -173,8 +179,11 @@ int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology,
     buflen -= err;
   }
 
-  if (current != buffer)
+  if (current != buffer) {
+    snprintf(nrs, sizeof(nrs), "%u", nr);
+    hwloc__add_info(&topology->infos, "PageSizeNr", nrs);
     hwloc__add_info(&topology->infos, "PageSizes", buffer);
+  }
 
   free(buffer);
   return 0;

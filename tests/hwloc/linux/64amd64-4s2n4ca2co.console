@@ -294,5 +294,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      5    22    22    16    16    16    10    22    16
      6    16    22    16    22    16    22    10    16
      7    22    16    16    22    22    16    16    10
-Topology infos: Backend=Linux Architecture=x86_64 PageSizes=4096,2097152
+Topology infos: Backend=Linux Architecture=x86_64 PageSizeNr=2 PageSizes=4096,2097152
 Topology not from this system

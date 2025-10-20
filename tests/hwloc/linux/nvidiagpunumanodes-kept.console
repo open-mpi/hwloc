@@ -106,5 +106,5 @@ Relative latency matrix (name NUMALatency kind 5) between 8 NUMANodes (depth -3)
      1    80    80    80    80    80    10    80    80
      2    80    80    80    80    80    80    10    80
      3    80    80    80    80    80    80    80    10
-Topology infos: LinuxCgroup=/jjh Backend=Linux OSName=Linux OSRelease=4.14.0-49.el7a.bz1553205.page_fault_hang.ppc64le OSVersion="#1 SMP Fri Mar 30 12:06:11 CDT 2018" HostName=c685f8n02 Architecture=ppc64le PageSizes=65536,2097152,1073741824 MemoryTiersNr=2
+Topology infos: LinuxCgroup=/jjh Backend=Linux OSName=Linux OSRelease=4.14.0-49.el7a.bz1553205.page_fault_hang.ppc64le OSVersion="#1 SMP Fri Mar 30 12:06:11 CDT 2018" HostName=c685f8n02 Architecture=ppc64le PageSizeNr=3 PageSizes=65536,2097152,1073741824 MemoryTiersNr=2
 Topology not from this system

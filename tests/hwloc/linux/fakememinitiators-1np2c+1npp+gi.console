@@ -83,5 +83,5 @@ Memory attribute #7 name `WriteLatency' flags 6
   NUMANode L#3 = 26 from cpuset 0x0000000c (Group0 L#2)
   NUMANode L#4 = 26 from cpuset 0x000000c0 (Group0 L#3)
   NUMANode L#5 = 77 from cpuset 0x000000cc (Package L#1)
-Topology infos: LinuxCgroup=/ Backend=Linux PageSizes=4096,2097152,1073741824 MemoryTiersNr=2
+Topology infos: LinuxCgroup=/ Backend=Linux PageSizeNr=3 PageSizes=4096,2097152,1073741824 MemoryTiersNr=2
 Topology not from this system

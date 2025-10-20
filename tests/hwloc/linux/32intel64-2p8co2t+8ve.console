@@ -158,5 +158,5 @@ Relative latency matrix (name NUMALatency kind 5) between 2 NUMANodes (depth -3)
  index     0     1
      0    10    21
      1    21    10
-Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=3.10.0-1160.15.2.el7.x86_64 OSVersion="#1 SMP Wed Feb 3 15:06:38 UTC 2021" HostName=ve Architecture=x86_64 PageSizes=4096,2097152,1073741824
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=3.10.0-1160.15.2.el7.x86_64 OSVersion="#1 SMP Wed Feb 3 15:06:38 UTC 2021" HostName=ve Architecture=x86_64 PageSizeNr=3 PageSizes=4096,2097152,1073741824
 Topology not from this system
