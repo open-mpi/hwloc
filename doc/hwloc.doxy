@@ -1963,12 +1963,9 @@ These info attributes are attached to the root object (Machine).
 
 <dl>
 <dt>PlatformName, PlatformModel, PlatformVendor, PlatformBoardID, PlatformRevision,</dt>
-<dt> SystemVersionRegister, ProcessorVersionRegister (Machine)</dt>
-<dd>Some POWER/PowerPC-specific attributes describing the platform
-and processor.
+<dt> SystemVersionRegister (Machine)</dt>
+<dd>Some POWER/PowerPC-specific attributes describing the platform.
 Currently only available on Linux.
-Usually added to Package objects, but can be in Machine instead if
-hwloc failed to discover any package.
 </dd>
 <dt>DMIBoardVendor, DMIBoardName, etc.</dt>
 <dd>DMI hardware information such as the motherboard and chassis
@@ -2065,9 +2062,10 @@ and for ia64 processors on Linux (except CPUStepping).
 <dd>
 The family of the CPU, currently only available on Linux on LoongArch platforms.
 </dd>
-<dt>CPURevision</dt>
+<dt>CPURevision, ProcessorVersionRegister</dt>
 <dd>
-A POWER/PowerPC-specific general processor revision number,
+POWER/PowerPC-specific general processor revision number,
+and processor version register (PVR),
 currently only available on Linux.
 </dd>
 <dt>CPUType</dt>
