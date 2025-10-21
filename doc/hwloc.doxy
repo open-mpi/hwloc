@@ -2179,7 +2179,7 @@ the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
 </dd>
-<dt>BXIUUID (OpenFabrics BXI OS devices)</dt>
+<dt>BXIUUID (Network BXI OS devices)</dt>
 <dd>The UUID of an Atos/Bull BXI HCA.
 </dd>
 </dl>
