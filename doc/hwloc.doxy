@@ -2040,25 +2040,11 @@ A Solaris-specific general processor type name, such as "i86pc".
 
 \subsection attributes_info_osdev OS Device Information
 
+\subsubsection attributes_info_osdev_gpu_coproc GPU and Coprocessor OS Device Information
+
 These info attributes are attached to OS device objects specified in parentheses.
 
 <dl>
-<dt>Vendor, Model, Revision, Size, SectorSize (Storage OS devices)</dt>
-<dd>The vendor and model names, revision,
- size (in kibibytes = 1024 bytes, and the value string is suffixed with "KiB")
- and SectorSize (in bytes).
-</dd>
-<dt>LinuxDeviceID (Storage OS devices)</dt>
-<dd>The major/minor device number such as 8:0 of Linux device.
-</dd>
-<dt>SerialNumber (Storage and CXL Memory OS devices)</dt>
-<dd>The serial number of the device.
-</dd>
-<dt>CXLRAMSize, CXLPMEMSize (CXL Memory OS devices)</dt>
-<dd>The size of the volatile (RAM) or persistent (PMEM) memory
- in a CXL Type-3 device.
- Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
-</dd>
 <dt>GPUVendor, GPUModel (GPU and/or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
@@ -2157,6 +2143,30 @@ These info attributes are attached to OS device objects specified in parentheses
 <dd>
  If this attribute exists, the VectorEngine device is configured in
  partitioned mode with multiple NUMA nodes.
+</dd>
+</dl>
+
+
+\subsubsection attributes_info_osdev_other Other OS Device Information
+
+These info attributes are attached to OS device objects specified in parentheses.
+
+<dl>
+<dt>Vendor, Model, Revision, Size, SectorSize (Storage OS devices)</dt>
+<dd>The vendor and model names, revision,
+ size (in kibibytes = 1024 bytes, and the value string is suffixed with "KiB")
+ and SectorSize (in bytes).
+</dd>
+<dt>LinuxDeviceID (Storage OS devices)</dt>
+<dd>The major/minor device number such as 8:0 of Linux device.
+</dd>
+<dt>SerialNumber (Storage and CXL Memory OS devices)</dt>
+<dd>The serial number of the device.
+</dd>
+<dt>CXLRAMSize, CXLPMEMSize (CXL Memory OS devices)</dt>
+<dd>The size of the volatile (RAM) or persistent (PMEM) memory
+ in a CXL Type-3 device.
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
 </dd>
 <dt>Address, Port (Network interface OS devices)</dt>
 <dd>The MAC address and the port number of a software network
