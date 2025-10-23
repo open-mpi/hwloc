@@ -1916,8 +1916,12 @@ hwloc_obj_add_info(), hwloc_modify_infos() or the \ref cli_hwloc_annotate progra
 Some topology-global info attributes (not specific to some objects)
 are also accessible using hwloc_topology_get_infos().
 
-Here is a non-exhaustive list of attributes that may be automatically
-added by hwloc.
+<br>
+
+Here is a list of attributes that may be automatically added by hwloc.
+A description is given for each pair name (or group of related pairs),
+and examples of values are also provided.
+
 Note that these attributes heavily depend on the ability of the
 operating system to report them.
 Many of them will therefore be missing on some OS.
@@ -1928,24 +1932,28 @@ Many of them will therefore be missing on some OS.
 These info attributes are attached to the topology itself.
 
 <dl>
-<dt>OSName, OSRelease, OSVersion, HostName, Architecture</dt>
+<dt>OSName=Linux</dt>
+<dt>OSRelease=5.14.0-427.76.1.el9_4.x86_64</dt>
+<dt>OSVersion=#1 SMP PREEMPT_DYNAMIC Fri Jun 27 09:53:45 EDT 2025</dt>
+<dt>HostName=adastra6</dt>
+<dt>Architecture=x86_64</dt>
 <dd>The operating system name, release, version, the hostname and the
 architecture name, as reported by the Unix <tt>uname</tt> command.
 </dd>
 <dt>PageSizes=4096,2097152</dt>
-<dt>PagesizeNr=2</dt>
+<dt>PageSizeNr=2</dt>
 <dd>The sizes of pages, huge pages and/or large pages supported
 by the machine, in bytes (values are in ascending order, separated by commas).
 And the number of sizes.
 <br/>
 This supersedes the <tt>page_type</tt> NUMA node attributes from hwloc releases up to 2.x.
 </dd>
-<dt>LinuxCgroup</dt>
+<dt>LinuxCgroup=/slurm/uid_10102/job_4229632/step_extern</dt>
 <dd>The name the Linux control group where the calling process is
 placed.
 </dd>
-<dt>WindowsBuildEnvironment</dt>
-<dd>Either MinGW or Cygwin when one of these environments was used during build.
+<dt>WindowsBuildEnvironment=Cygwin</dt>
+<dd>Either <tt>MinGW</tt> or <tt>Cygwin</tt> when one of these environments was used during build.
 </dd>
 </dl>
 
@@ -1955,27 +1963,27 @@ placed.
 These info attributes are attached to the topology itself.
 
 <dl>
-<dt>MemoryTiersNr</dt>
+<dt>MemoryTiersNr=2</dt>
 <dd>The number of different memory tiers in the topology, if any.
 See \ref heteromem.
 </dd>
-<dt>Backend</dt>
+<dt>Backend=Linux</dt>
 <dd>The name of a hwloc backend/component that added objects in the topology.
 If several components were combined, multiple Backend pairs may exist,
 with different values, for instance <tt>x86</tt>, <tt>Linux</tt> and
 <tt>CUDA</tt>.
 </dd>
-<dt>SyntheticDescription</dt>
+<dt>SyntheticDescription=Pack:1 [NUMA(memory=16GiB)] L2:6(size=1MiB) L1d:1(size=48kiB) Core:1 PU:2</dt>
 <dd>The description string that was given to hwloc to build this
-synthetic topology.
+synthetic topology. See \ref synthetic
 </dd>
-<dt>hwlocVersion</dt>
+<dt>hwlocVersion=2.13.0</dt>
 <dd>The version number of the hwloc library that was used to generate
 the topology. If the topology was loaded from XML, this is not the hwloc
 version that loaded it, but rather the first hwloc instance that exported
 the topology to XML earlier.
 </dd>
-<dt>ProcessName</dt>
+<dt>ProcessName=myprogram</dt>
 <dd>The name of the process that contains the hwloc library that was used
 to generate the topology. If the topology was from XML, this is not the
 hwloc process that loaded it, but rather the first process that exported
