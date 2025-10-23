@@ -2051,26 +2051,44 @@ These info attributes are attached to Package objects,
 or to the root object (Machine) if package locality information is missing.
 
 <dl>
-<dt>CPUModel</dt>
-<dd>The processor model name.</dd>
-<dt>CPUVendor, CPUModelNumber, CPUFamilyNumber, CPUStepping</dt>
-<dd>The processor vendor name, model number, family number, and stepping number.
-Currently available for x86 and Xeon Phi processors on most systems,
-and for ia64 processors on Linux (except CPUStepping).
+<dt>CPUModel=AMD EPYC 7A53 64-Core Processor</dt>
+<dd>The processor model name, available on most platforms and operating systems.
 </dd>
-<dt>CPUFamily</dt>
+<dt>CPUVendor=AuthenticAMD</dt>
+<dd>The processor vendor name, usually available when running on x86 hardware and/or Linux platforms.
+</dd>
+<dt>CPUModelNumber=48</dt>
+<dt>CPUFamilyNumber=25</dt>
+<dt>CPUStepping=1</dt>
+<dd>x86-specific processor model, family, and stepping numbers.
+</dd>
+<dt>CPUImplementer=0x48</dt>
+<dt>CPUArchitecture=8</dt>
+<dt>CPUVariant=0x1</dt>
+<dt>CPUPart=0xd01</dt>
+<dd>
+ARM-specific CPU information about the implementer, the sub-architecture,
+the variant and the part number,
+currently only available on Linux on some platforms.
+</dd>
+<dt>CPUFamily=Loongson-64bit</dt>
 <dd>
 The family of the CPU, currently only available on Linux on LoongArch platforms.
 </dd>
-<dt>CPURevision, ProcessorVersionRegister</dt>
+<dt>CPURevision=2</dt>
 <dd>
-POWER/PowerPC-specific general processor revision number,
-and processor version register (PVR),
-currently only available on Linux.
+Processor revision number,
+currently only available on Linux on ARM and on some POWER/PowerPC platforms.
 </dd>
-<dt>CPUType</dt>
+<dt>ProcessorVersionRegister=0x123</dt>
 <dd>
-A Solaris-specific general processor type name, such as "i86pc".
+POWER/PowerPC-specific processor version register (PVR),
+currently only available on Linux on some platforms.
+</dd>
+<dt>CPUType=sparcv9</dt>
+<dd>
+A Solaris-specific general processor type name, such as <tt>i86pc</tt> or <tt>sparcv9</tt>,
+as reported by PICL.
 </dd>
 </dl>
 
