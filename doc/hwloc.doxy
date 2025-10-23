@@ -2036,10 +2036,10 @@ currently only available on Linux on some platforms.
 <dd>
 The family of the CPU, currently only available on Linux on LoongArch platforms.
 </dd>
-<dt>CPURevision=2</dt>
+<dt>CPURevision=0x11</dt>
 <dd>
 Processor revision number,
-currently only available on Linux on ARM and on some POWER/PowerPC platforms.
+currently only available on Linux on ARM, LoongArch and on some POWER/PowerPC platforms.
 </dd>
 <dt>ProcessorVersionRegister=0x123</dt>
 <dd>

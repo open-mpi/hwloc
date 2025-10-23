@@ -4761,6 +4761,9 @@ hwloc_linux_parse_cpuinfo_loongarch(const char *prefix, const char *value,
   } else if (!strcmp("CPU Family", prefix)) {
     if (value[0])
       hwloc__add_info(infos, "CPUFamily", value);
+  } else if (!strcmp("CPU Revision", prefix)) {
+    if (value[0])
+      hwloc__add_info(infos, "CPURevision", value);
   }
   return 0;
 }
