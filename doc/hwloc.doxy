@@ -1957,41 +1957,6 @@ operating system to report them.
 Many of them will therefore be missing on some OS.
 
 
-\subsection attributes_info_platform Hardware Platform Information
-
-These info attributes are attached to the root object (Machine).
-
-<dl>
-<dt>PlatformName, PlatformModel, PlatformVendor, PlatformBoardID, PlatformRevision,</dt>
-<dt> SystemVersionRegister (Machine)</dt>
-<dd>Some POWER/PowerPC-specific attributes describing the platform.
-Currently only available on Linux.
-</dd>
-<dt>DMIBoardVendor, DMIBoardName, etc.</dt>
-<dd>DMI hardware information such as the motherboard and chassis
-models and vendors, the BIOS revision, etc.,
-as reported by Linux under <tt>/sys/class/dmi/id/</tt>.
-</dd>
-<dt>SoC0ID, SoC0Family, SoC1Revision, etc.</dt>
-<dd>The ID, family and revision of the first system-on-chip
-(<tt>SoC0</tt>), second (<tt>SoC1</tt>), etc.
-</dd>
-<dt>MemoryMode, ClusterMode</dt>
-<dd>
-Intel Xeon Phi processor configuration modes.
-Available if hwloc-dump-hwdata was used (see \ref faq_knl_dump)
-or if hwloc managed to guess them from the NUMA configuration.
-
-The memory mode may be <em>Cache</em>, <em>Flat</em>,
-<em>Hybrid50</em> (half the MCDRAM is used as a cache)
-or <em>Hybrid25</em> (25% of MCDRAM as cache).
-The cluster mode may be <em>Quadrant</em>, <em>Hemisphere</em>, <em>All2All</em>,
-<em>SNC2</em> or <em>SNC4</em>.
-See doc/examples/get-knl-modes.c in the source directory for an example of retrieving these attributes.
-</dd>
-</dl>
-
-
 \subsection attributes_info_os Operating System Information
 
 These info attributes are attached to the root object (Machine).
@@ -2041,6 +2006,57 @@ the topology to XML earlier.
 to generate the topology. If the topology was from XML, this is not the
 hwloc process that loaded it, but rather the first process that exported
 the topology to XML earlier.
+</dd>
+</dl>
+
+
+\subsection attributes_info_platform Hardware Platform Information
+
+These info attributes are attached to the root object (Machine).
+
+<dl>
+<dt>DMIBIOSVersion=V70 Ver. 01.08.00</dt>
+<dt>DMIBoardVendor=HP</dt>
+<dt>DMIChassisType=10</dt>
+<dt>DMIProductName=HP EliteBook 840 14 inch G10 Notebook PC</dt>
+<dd>These keys (and several others) describe, the name, serial number,
+version, etc. of the hardware product, chassis, motherboard and BIOS,
+as reported by DMI when supported on Linux (under <tt>/sys/class/dmi/id/</tt>).
+</dd>
+<dt>HardwareName=Marvell Armada-370</dt>
+<dt>HardwareRevision=0001</dt>
+<dt>HardwareSerial=000abc123</dt>
+<dd>The name, revision and serial number of the platform,
+currently available only on some Linux/ARM platforms.
+</dd>
+<dt>PlatformName=PowerNV</dt>
+<dt>PlatformModel=C1P9S01 REV 1.01</dt>
+<dt>PlatformVendor=Eyetech Ltd.</dt>
+<dt>PlatformBoardID=0x22c</dt>
+<dt>PlatformRevision=3</dt>
+<dt>SystemVersionRegister=0x3456</dt>
+<dd>All these keys describe POWER/PowerPC platforms.
+Currently only available on Linux.
+</dd>
+<dt>SoC0ID=25</dt>
+<dt>SoC2Family=Tegra</dt>
+<dt>SoC1Revision=0x00000102</dt>
+<dd>These keys provide the ID, family and revision of the first system-on-chip
+(<tt>SoC0</tt>), second (<tt>SoC1</tt>), etc.
+Currently only available on Linux on some platforms.
+</dd>
+<dt>MemoryMode, ClusterMode</dt>
+<dd>
+Intel Xeon Phi processor configuration modes.
+Available if hwloc-dump-hwdata was used (see \ref faq_knl_dump)
+or if hwloc managed to guess them from the NUMA configuration.
+
+The memory mode may be <em>Cache</em>, <em>Flat</em>,
+<em>Hybrid50</em> (half the MCDRAM is used as a cache)
+or <em>Hybrid25</em> (25% of MCDRAM as cache).
+The cluster mode may be <em>Quadrant</em>, <em>Hemisphere</em>, <em>All2All</em>,
+<em>SNC2</em> or <em>SNC4</em>.
+See doc/examples/get-knl-modes.c in the source directory for an example of retrieving these attributes.
 </dd>
 </dl>
 
