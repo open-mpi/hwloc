@@ -2300,59 +2300,67 @@ and GID #1 of port #3.
 These info attributes are attached to objects specified in parentheses.
 
 <dl>
-<dt>MemoryTier (NUMA Nodes)</dt>
+<dt>MemoryTier=1 (NUMA Nodes)</dt>
 <dd>The rank of the memory tier of this node.
 Ranks start from 0 for highest bandwidth nodes.
 The attribute is only set if multiple tiers are found.
 See \ref heteromem.
 </dd>
-<dt>CXLDevice (NUMA Nodes or DAX Memory OS devices)</dt>
+<dt>CXLDevice=0003:02:01.0 (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
 If multiple devices are interleaved, their bus IDs are separated by commas,
 and the number of devices is reported in CXLDeviceInterleaveWays.
 </dd>
-<dt>CXLDeviceInterleaveWays (NUMA Nodes or DAX Memory OS devices)</dt>
+<dt>CXLDeviceInterleaveWays=2 (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>If multiple CXL devices are interleaved, this attribute shows the
 number of devices (and the number of bus IDs in the CXLDevice attributes).
 </dd>
-<dt>DAXDevice (NUMA Nodes)</dt>
+<dt>DAXDevice=dax1.0 (NUMA Nodes)</dt>
 <dd>The name of the Linux DAX device that was used to expose a non-volatile
 memory region as a volatile NUMA node.
 </dd>
-<dt>DAXType (NUMA Nodes or DAX OS devices)</dt>
+<dt>DAXType=SPM (NUMA Nodes or DAX OS devices)</dt>
 <dd>The type of memory exposed in a Linux DAX device or in the corresponding NUMA node,
 either "NVM" (non-volatile memory) or "SPM" (specific-purpose memory).
 </dd>
-<dt>DAXParent (NUMA Nodes or DAX OS devices)</dt>
+<dt>DAXParent=ACPI0017:00/root0/decoder0.1/region1/dax_region1 (NUMA Nodes or DAX OS devices)</dt>
 <dd>
 A string describing the Linux sysfs hierarchy that exposes the DAX device,
 for instance containing "hmem1" for specific-purpose memory or "ndbus0" for NVDIMMs.
 </dd>
-<dt>
-<dt>PCIBusID (GPUMemory NUMA Nodes)</dt>
+<dt>PCIBusID=0006:00:00.0 (GPUMemory NUMA Nodes)</dt>
 <dd>The PCI bus ID of the GPU whose memory is exposed in this NUMA node.
 </dd>
-<dt>Inclusive (Caches)</dt>
+<dt>Inclusive=1 (Caches)</dt>
 <dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
 Currently only available on x86 processors.
 </dd>
-<dt>SolarisProcessorGroup (Group)</dt>
+<dt>SolarisProcessorGroup=CPU_PM_Active_Power_Domain (Group)</dt>
 <dd>
 The Solaris kstat processor group name that was used to build this Group object.
 </dd>
-<dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
+<dt>PCIVendor=Bull HN Information Systems</dt>
+<dt>PCIDevice=BXI Host Channel Adapter v1.3 (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>
-<dt>PCISlot (PCI devices or Bridges)</dt>
+<dt>PCISlot=2 (PCI devices or Bridges)</dt>
 <dd>The name/number of the physical slot where the device is plugged.
  If the physical device contains PCI bridges above the actual PCI device,
  the attribute may be attached to the highest bridge
  (i.e. the first object that actually appears below the physical slot).
 </dd>
-<dt>Vendor, AssetTag, PartNumber, DeviceLocation, BankLocation, FormFactor, Type, Size, Rank (MemoryModule Misc objects)</dt>
+<dt>Vendor=Hynix</dt>
+<dt>FormFactor=DIMM</dt>
+<dt>Type=DDR5</dt>
+<dt>Size=16777216</dt>
+<dt>DeviceLocation=B6</dt>
+<dt>BankLocation=Controller0ChannelADimm0</dt>
+<dt>Rank=1</dt>
+<dt>AssetTag=011736A0</dt>
+<dt>PartNumber=HMCG78AGBRA191N (MemoryModule Misc objects)</dt>
 <dd>
-Information about memory modules (DIMMs) extracted from SMBIOS.
-Size is in KiB.
+ Information about memory modules (DIMMs) extracted from SMBIOS.
+ Size is in KiB.
 </dd>
 <dt>SerialNumber=AMCAN00091340A83M (Block and CXL Block Memory OS devices, MemoryModule Misc objects)</dt>
 <dd>The serial number of the device.
@@ -2369,7 +2377,7 @@ see other subsections above.
 Here is a non-exhaustive list of user-provided info attributes
 that have a special meaning:
 <dl>
-<dt>lstopoStyle</dt>
+<dt>lstopoStyle=Background=#0000ff;Text=#ffffff</dt>
 <dd>Enforces the style of an object (background and text colors)
  in the graphical output of lstopo.
  See CUSTOM COLORS in the lstopo(1) manpage for details.
