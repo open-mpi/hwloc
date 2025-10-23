@@ -2230,9 +2230,6 @@ and SectorSize (in bytes).
 <dt>LinuxDeviceID (Block OS devices)</dt>
 <dd>The major/minor device number such as 8:0 of Linux device.
 </dd>
-<dt>SerialNumber (Block and CXL Memory OS devices)</dt>
-<dd>The serial number of the device.
-</dd>
 <dt>CXLRAMSize, CXLPMEMSize (CXL Memory Block OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
  in a CXL Type-3 device.
@@ -2313,6 +2310,13 @@ The Solaris kstat processor group name that was used to build this Group object.
 <dd>
 Information about memory modules (DIMMs) extracted from SMBIOS.
 Size is in KiB.
+</dd>
+<dt>SerialNumber=AMCAN00091340A83M (Block and CXL Block Memory OS devices, MemoryModule Misc objects)</dt>
+<dd>The serial number of the device.
+<br/>
+Note that some OS devices such as Co-Processors may have specific info names
+such as <tt>LevelZeroSerialNumber</tt> when formatted by dedicated APIs,
+see other subsections above.
 </dd>
 </dl>
 
