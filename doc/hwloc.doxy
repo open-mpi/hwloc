@@ -2192,9 +2192,6 @@ These info attributes are attached to OS device objects specified in parentheses
 <dt>LinuxDeviceID (Storage OS devices)</dt>
 <dd>The major/minor device number such as 8:0 of Linux device.
 </dd>
-<dt>SerialNumber (Storage and CXL Memory OS devices)</dt>
-<dd>The serial number of the device.
-</dd>
 <dt>CXLRAMSize, CXLPMEMSize (CXL Memory OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
  in a CXL Type-3 device.
@@ -2275,6 +2272,13 @@ The Solaris kstat processor group name that was used to build this Group object.
 <dd>
  Information about memory modules (DIMMs) extracted from SMBIOS.
  Size is in kibibytes (1024 bytes), and the value string is suffixed with "KiB".
+</dd>
+<dt>SerialNumber=AMCAN00091340A83M (Storage and CXL Memory OS devices, MemoryModule Misc objects)</dt>
+<dd>The serial number of the device.
+<br/>
+Note that some OS devices such as Co-Processors may have specific info names
+such as <tt>LevelZeroSerialNumber</tt> when formatted by dedicated APIs,
+see other subsections above.
 </dd>
 </dl>
 
