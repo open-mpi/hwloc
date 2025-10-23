@@ -2256,30 +2256,40 @@ These info attributes are attached to OS device objects specified in parentheses
 These info attributes are attached to OS device objects specified in parentheses.
 
 <dl>
-<dt>Vendor, Model, Revision, Size, SectorSize (Block OS devices)</dt>
+<dt>Vendor=SK hynix</dt>
+<dt>Model=PC801 HFS001TEJ9X101N</dt>
+<dt>Revision=HPS1</dt>
+<dt>Size=1000204632</dt>
+<dt>SectorSize=512 (Block OS devices)</dt>
 <dd>The vendor and model names, revision, size (in KiB = 1024 bytes)
 and SectorSize (in bytes).
 </dd>
-<dt>LinuxDeviceID (Block OS devices)</dt>
+<dt>LinuxDeviceID=259:0 (Block OS devices)</dt>
 <dd>The major/minor device number such as 8:0 of Linux device.
 </dd>
-<dt>CXLRAMSize, CXLPMEMSize (CXL Memory Block OS devices)</dt>
+<dt>CXLRAMSize=16777216</dt>
+<dt>CXLPMEMSize=1073741824 (CXL Memory Block OS devices)</dt>
 <dd>The size of the volatile (RAM) or persistent (PMEM) memory
  in a CXL Type-3 device.
  Sizes are in KiB (1024 bytes).
 </dd>
-<dt>Address, Port (Network interface OS devices)</dt>
+<dt>Address=40:5b:7f:97:a0:b8</dt>
+<dt>Port=1 (Network interface OS devices)</dt>
 <dd>The MAC address and the port number of a software network
 interface, such as <tt>eth4</tt> on Linux.
 </dd>
-<dt>NodeGUID, SysImageGUID, Port1State, Port2LID, Port2LMC, Port3GID1
-(OpenFabrics OS devices)</dt>
+<dt>NodeGUID=9c63:c003:00fb:7458</dt>
+<dt>SysImageGUID=9c63:c003:00fb:7458</dt>
+<dt>Port1State=4</dt>
+<dt>Port2LID=0x2</dt>
+<dt>Port2LMC=0</dt>
+<dt>Port3GID1=fe80:0000:0000:0009:9c63:c003:00fb:7458 (OpenFabrics OS devices)</dt>
 <dd>The node GUID and GUID mask,
 the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
 </dd>
-<dt>BXIUUID (OpenFabrics BXI OS devices)</dt>
+<dt>BXIUUID=0x720109782dfd (OpenFabrics BXI OS devices)</dt>
 <dd>The UUID of an Atos/Bull BXI HCA.
 </dd>
 </dl>
