@@ -1986,7 +1986,7 @@ placed.
 
 \subsection attributes_info_hwloc hwloc Information
 
-Unless specified, these info attributes are attached to the root object (Machine).
+These info attributes are attached to the root object (Machine).
 
 <dl>
 <dt>MemoryTiersNr=2</dt>
