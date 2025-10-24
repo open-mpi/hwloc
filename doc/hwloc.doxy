@@ -2019,7 +2019,7 @@ These info attributes are attached to the root object (Machine).
 <dt>DMIBoardVendor=HP</dt>
 <dt>DMIChassisType=10</dt>
 <dt>DMIProductName=HP EliteBook 840 14 inch G10 Notebook PC</dt>
-<dd>These keys (and several others) describe, the name, serial number,
+<dd>These keys (and several others) provide the name, serial number,
 version, etc. of the hardware product, chassis, motherboard and BIOS,
 as reported by DMI when supported on Linux (under <tt>/sys/class/dmi/id/</tt>).
 </dd>
@@ -2036,7 +2036,7 @@ currently available only on some Linux/ARM platforms.
 <dt>PlatformRevision=3</dt>
 <dt>SystemVersionRegister=0x3456</dt>
 <dd>All these keys describe POWER/PowerPC platforms.
-Currently only available on Linux.
+Currently only available on some Linux platforms.
 </dd>
 <dt>SoC0ID=25</dt>
 <dt>SoC2Family=Tegra</dt>
