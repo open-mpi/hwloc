@@ -2085,101 +2085,126 @@ as reported by PICL.
 These info attributes are attached to OS device objects specified in parentheses.
 
 <dl>
-<dt>GPUVendor, GPUModel (GPU and/or Co-Processor OS devices)</dt>
+<dt>GPUVendor=NVIDIA Corporation
+<dd>GPUModel=Tesla V100-SXM3-32GB-H (GPU and/or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
-<dt>OpenCLDeviceType, OpenCLPlatformIndex,</dt>
-<dt>OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL OS devices)</dt>
+<dt>OpenCLDeviceType=GPU</dt>
+<dt>OpenCLPlatformIndex=0</dt>
+<dt>OpenCLPlatformName=AMD Accelerated Parallel Processing</dt>
+<dt>OpenCLPlatformDeviceIndex=1 (OpenCL OS devices)</dt>
 <dd>The type of OpenCL device,
  the OpenCL platform index and name,
  and the index of the device within the platform.
 </dd>
-<dt>OpenCLComputeUnits, OpenCLGlobalMemorySize (OpenCL OS devices)</dt>
+<dt>OpenCLComputeUnits=110</dt>
+<dt>OpenCLGlobalMemorySize=67092480KiB (OpenCL OS devices)</dt>
 <dd>The number of compute units and global memory size of an OpenCL device.
- Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with <tt>KiB</tt>.
 </dd>
-<dt>LevelZeroVendor, LevelZeroModel, LevelZeroBrand,</dt>
-<dt>LevelZeroSerialNumber, LevelZeroBoardNumber (LevelZero OS devices)</dt>
+<dt>LevelZeroVendor=Intel(R) Corporation</dt>
+<dt>LevelZeroModel=Intel(R) Data Center GPU Max 1550</dt>
+<dt>LevelZeroBrand=Intel(R) Corporation</dt>
+<dt>LevelZeroSerialNumber=0x180e7227b70f4a0d</dt>
+<dt>LevelZeroBoardNumber=0 (LevelZero OS devices)</dt>
 <dd>
  The name of the vendor, device model, brand of a Level Zero device,
  and its serial and board numbers.
 </dd>
-<dt>LevelZeroDriverIndex, LevelZeroDriverDeviceIndex (LevelZero OS devices)</dt>
+<dt>LevelZeroDriverIndex=0</dt>
+<dt>LevelZeroDriverDeviceIndex=0 (LevelZero OS devices)</dt>
 <dd>The index of the Level Zero driver within the list of drivers,
  and the index of the device within the list of devices managed by this driver.
 </dd>
-<dt>LevelZeroUUID (LevelZero OS devices or subdevices)</dt>
+<dt>LevelZeroUUID=27a77ad2b8419be80000000000000000 (LevelZero OS devices or subdevices)</dt>
 <dd>The UUID of the device or subdevice.
 </dd>
-<dt>LevelZeroSubdevices (LevelZero OS devices)</dt>
+<dt>LevelZeroSubdevices=2 (LevelZero OS devices)</dt>
 <dd>The number of subdevices below this OS device.
 </dd>
-<dt>LevelZeroSubdeviceID (LevelZero OS subdevices)</dt>
+<dt>LevelZeroSubdeviceID=1 (LevelZero OS subdevices)</dt>
 <dd>The index of this subdevice within its parent.
 </dd>
-<dt>LevelZeroDeviceType (LevelZero OS devices or subdevices)</dt>
+<dt>LevelZeroDeviceType=GPU (LevelZero OS devices or subdevices)</dt>
 <dd>A string describing the type of device, for instance "GPU", "CPU", "FPGA", etc.
 </dd>
-<dt>LevelZeroNumSlices, LevelZeroNumSubslicesPerSlice,</dt>
-<dt>LevelZeroNumEUsPerSubslice, LevelZeroNumThreadsPerEU (LevelZero OS devices or subdevices)</dt>
+<dt>LevelZeroNumSlices=2</dt>
+<dt>LevelZeroNumSubslicesPerSlice=56</dt>
+<dt>LevelZeroNumEUsPerSubslice=8</dt>
+<dt>LevelZeroNumThreadsPerEU=8 (LevelZero OS devices or subdevices)</dt>
 <dd>The number of slices in the device, of subslices per slice,
  of execution units (EU) per subslice, and of threads per EU.
 </dd>
-<dt>LevelZeroHBMSize, LevelZeroDDRSize, LevelZeroMemorySize (LevelZero OS devices or subdevices)</dt>
+<dt>LevelZeroHBMSize=134217728KiB</dt>
+<dt>LevelZeroDDRSize=16777216KiB</dt>
+<dt>LevelZeroMemorySize=16777216KiB (LevelZero OS devices or subdevices)</dt>
 <dd>The amount of HBM or DDR memory of a LevelZero device or subdevice.
- Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with <tt>KiB</tt>.
  If the type of memory could not be determined, the generic name LevelZeroMemorySize is used.
  For devices that contain subdevices, the amount reported in the root device
  includes the memories of all its subdevices.
 </dd>
-<dt>LevelZeroCQGroups, LevelZeroCQGroup2 (LevelZero OS devices or subdevices)</dt>
+<dt>LevelZeroCQGroup=3s</dt>
+<dt>LevelZeroCQGroup2=7*0x2 (LevelZero OS devices or subdevices)</dt>
 <dd>The number of completion queue groups, and the description of the third group
 (as <tt>N*0xX</tt> where <tt>N</tt> is the number of queues in the group,
  and <tt>0xX</tt> is the hexadecimal bitmask of <tt>ze_command_queue_group_property_flag_t</tt>
  listing properties of those queues).
 </dd>
-<dt>AMDUUID, AMDSerial (RSMI GPU OS devices)</dt>
+<dt>AMDUUID=e36ac86da8af0f71</dt>
+<dt>AMDSerial=692224001590 (RSMI GPU OS devices)</dt>
 <dd>The UUID and serial number of AMD GPUs.
 </dd>
-<dt>RSMIVRAMSize, RSMIVisibleVRAMSize, RSMIGTTSize (RSMI GPU OS devices)</dt>
+<dt>RSMIVRAMSize=67092480KiB</dt>
+<dt>RSMIVisibleVRAMSize=67092480KiB</dt>
+<dt>RSMIGTTSize=262899364KiB (RSMI GPU OS devices)</dt>
 <dd>
  The amount of GPU memory (VRAM),
  of GPU memory that is visible from the host (Visible VRAM),
  and of system memory that is usable by the GPU (Graphics Translation Table).
- Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with <tt>KiB</tt>.
 </dd>
-<dt>XGMIHiveID (RSMI GPU OS devices)</dt>
+<dt>XGMIHiveID=bac53b896800dc20 (RSMI GPU OS devices)</dt>
 <dd>The ID of the group of GPUs (Hive) interconnected by XGMI links
 </dd>
-<dt>XGMIPeers (RSMI GPU OS devices)</dt>
+<dt>XGMIPeers="rsmi0 rsmi1" (RSMI GPU OS devices)</dt>
 <dd>The list of RSMI OS devices that are directly connected
   to the current device through XGMI links.
   They are given as a space-separated list of object names,
   for instance <em>rsmi2 rsmi3</em>.
 </dd>
-<dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
+<dt>NVIDIAUUID=GPU-06162e6e-80e9-16e9-357e-ac30a929731c</dt>
+<dt>NVIDIASerial=0322716102756 (NVML GPU OS devices)</dt>
 <dd>The UUID and serial number of NVIDIA GPUs.
 </dd>
-<dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
-<dt>CUDAGlobalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
+<dt>CUDAMultiProcessors=56</dt>
+<dt>CUDACoresPerMP=64</dt>
+<dt>CUDAGlobalMemorySize=16671616KiB</dt>
+<dt>CUDAL2CacheSize=4096KiB</dt>
+<dt>CUDASharedMemorySizePerMP=48KiB (CUDA OS devices)</dt>
 <dd>
  The number of shared multiprocessors, the number of (FP32) cores per
  multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
- Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with <tt>KiB</tt>.
 </dd>
-<dt>VectorEngineModel, VectorEngineSerialNumber (VectorEngine OS devices)</dt>
+<dt>VectorEngineModel=1</dt>
+<dt>VectorEngineSerialNumber=32424a3233303034390000000000000 (VectorEngine OS devices)</dt>
 <dd>
  The model and serial number of a VectorEngine device.
 </dd>
-<dt>VectorEngineCores, VectorEngineMemorySize, VectorEngineLLCSize,</dt>
-<dt>VectorEngineL2Size, VectorEngineL1dSize, VectorEngineL1iSize (VectorEngine OS devices)</dt>
+<dt>VectorEngineCores=8</dt>
+<dt>VectorEngineMemorySize=50331648KiB</dt>
+<dt>VectorEngineLLCSize=16384KiB</dt>
+<dt>VectorEngineL2Size=256KiB</dt>
+<dt>VectorEngineL1dSize=32KiB</dt>
+<dt>VectorEngineL1iSize=32KiB (VectorEngine OS devices)</dt>
 <dd>
  The number of cores, memory size, and the sizes of the (global)
  last level cache and of L2, L1d and L1i caches of a VectorEngine device.
- Sizes are in kibibytes (1024 bytes), and value strings are suffixed with "KiB".
+ Sizes are in kibibytes (1024 bytes), and value strings are suffixed with <tt>KiB</tt>.
 </dd>
-<dt>VectorEngineNUMAPartitioned (VectorEngine OS devices)</dt>
+<dt>VectorEngineNUMAPartitioned=1 (VectorEngine OS devices)</dt>
 <dd>
  If this attribute exists, the VectorEngine device is configured in
  partitioned mode with multiple NUMA nodes.
