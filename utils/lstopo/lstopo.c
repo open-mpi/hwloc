@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2015, 2017 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -1013,8 +1013,9 @@ main (int argc, char *argv[])
   lstopo_palette_init(&loutput);
 
   /* show all error messages */
-  if (!getenv("HWLOC_HIDE_ERRORS"))
-    putenv((char *) "HWLOC_HIDE_ERRORS=0");
+  env = getenv("HWLOC_SHOW_ERRORS");
+  if (!env)
+    putenv((char *) "HWLOC_SHOW_ERRORS=all");
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
     putenv((char *) "HWLOC_XML_VERBOSE=1");

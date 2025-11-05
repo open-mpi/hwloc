@@ -1048,26 +1048,27 @@ following environment variables.
   which gathers all resources but marks the unavailable ones as disallowed.
   </dt>
 
-<dt>HWLOC_HIDE_ERRORS=1</dt>
+
+<dt>HWLOC_SHOW_ERRORS=critical</dt>
   <dd>enables or disables verbose reporting of errors.
-  The hwloc library may issue warnings to the standard error stream
+  The hwloc library may issue warnings and errors to the standard error stream
   when it detects a problem during topology discovery, for instance
   if the operating system (or user) gives contradictory topology
   information.
 
-  By default (1), hwloc only shows critical errors such as invalid
+  By default (<tt>critical</tt>), hwloc only shows critical errors such as invalid
   hardware topology information or invalid configuration.
-  If set to 0 (default in lstopo), more errors are displayed,
+  If set to <tt>all</tt> (default in lstopo), all errors are displayed,
   for instance a failure to initialize CUDA or NVML.
-  If set to 2, no hwloc error messages are shown.
+  If set to empty or <tt>none</tt>, no hwloc error messages are shown.
 
-  Note that additional verbose messages may be enabled with
-  other variables such as HWLOC_GROUPING_VERBOSE.
+  The variable may contain a comma-separated list of keywords,
+  possibly prefixed with a dash to negate them.
+  For instance <tt>all,-bind</tt> enables all error messages
+  except the non-critical ones emitted by the binding code.
+
+  This supersedes the former HWLOC_HIDE_ERRORS variable.
   </dd>
-<!-- since 2.12.1, not stable yet, hence not documented but internally used in hwloc-bind
- HWLOC_SHOW_ERRORS=bind
-  show binding errors as if HWLOC_HIDE_ERRORS=0 for them
--->
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
   <dd>enables or disables the use of NUMA distances.
@@ -4386,7 +4387,7 @@ The resulting topology will miss some L3 caches.
 
 If your application does not care about cache sharing, or if you do not plan to
 request cache-aware binding in your process launcher, you may likely ignore
-this error (and hide it by setting HWLOC_HIDE_ERRORS=2 in your environment).
+this error (and hide it by setting HWLOC_SHOW_ERRORS=none in your environment).
 
 Some platforms report similar warnings about conflicting Packages and NUMANodes.
 
@@ -4988,6 +4989,12 @@ removed since their non-strict variants are sufficient.
 </li>
 
 </ul>
+
+
+\section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+
+The HWLOC_HIDE_ERRORS environment variable is now obsolete
+(but still supported), superseded by HWLOC_SHOW_ERRORS, see \envvar.
 
 
 

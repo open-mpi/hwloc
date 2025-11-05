@@ -6,5 +6,5 @@
 # NUMA distance matrix works fine.
 source:  40intel64-4n10c+pci-conflicts.tar.bz2
 target:  40intel64-4n10c+pci-conflicts.console
-env:     HWLOC_HIDE_ERRORS=1
-env:     export HWLOC_HIDE_ERRORS
+env:     HWLOC_SHOW_ERRORS=none
+env:     export HWLOC_SHOW_ERRORS

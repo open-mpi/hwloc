@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2013-2024 Inria.  All rights reserved.
+ * Copyright © 2013-2025 Inria.  All rights reserved.
  * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
@@ -382,27 +382,31 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
  * @{
  */
 
-/** \brief Check whether error messages are hidden.
+/** \brief Get the mask of error messages to display
  *
- * Callers should print critical error messages
- * (e.g. invalid hw topo info, invalid config)
- * only if this function returns strictly less than 2.
+ * The mask is a OR'ed set of HWLOC_SHOWMSG_* as defined below.
  *
- * Callers should print non-critical error messages
- * (e.g. failure to initialize CUDA)
- * if this function returns 0.
- *
- * This function return 1 by default (show critical only),
- * 0 in lstopo (show all),
- * or anything set in HWLOC_HIDE_ERRORS in the environment.
- *
- * Use macros HWLOC_SHOW_CRITICAL_ERRORS() and HWLOC_SHOW_ALL_ERRORS()
- * for clarity.
+ * By default, only critical errors are shown.
+ * May be configured with the HWLOC_SHOW_ERRORS envvar
+ * (or the obsolete HWLOC_HIDE_ERRORS).
+ * lstopo enables all error messages (HWLOC_SHOW_ERRORS=all).
+ * hwloc-bind enables binding error messages (HWLOC_SHOW_ERRORS=bind).
  */
-HWLOC_DECLSPEC int hwloc_hide_errors(void);
+HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 
-#define HWLOC_SHOW_CRITICAL_ERRORS() (hwloc_hide_errors() < 2)
-#define HWLOC_SHOW_ALL_ERRORS() (hwloc_hide_errors() == 0)
+#define HWLOC_SHOW_ERRORS(_flag) (hwloc_show_errors_mask() & (_flag))
+
+#define HWLOC_SHOWMSG_CRITICAL  (1UL<<0)
+/* non-critical messages:
+ * failure to initialize CUDA, etc. */
+#define HWLOC_SHOWMSG_BIND      (1UL<<1) /* binding */
+/* all messages */
+#define HWLOC_SHOWMSG_ALL       (~0UL)
+
+/* backward compatibility until all callers are converted to passing a mask */
+#define HWLOC_SHOW_CRITICAL_ERRORS() HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL)
+#define HWLOC_SHOW_ALL_ERRORS() HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_ALL)
+
 
 /** \brief Add an object to the topology.
  *
