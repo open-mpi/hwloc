@@ -14,8 +14,6 @@
 #include "private/misc.h"
 #include "private/debug.h"
 
-#include <math.h>
-
 int
 hwloc__xml_verbose(void)
 {
