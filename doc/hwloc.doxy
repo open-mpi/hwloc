@@ -4438,7 +4438,7 @@ The resulting topology will miss some L3 caches.
 
 If your application does not care about cache sharing, or if you do not plan to
 request cache-aware binding in your process launcher, you may likely ignore
-this error (and hide it by setting HWLOC_HIDE_ERRORS=1 in your environment).
+this error (and hide it by setting HWLOC_HIDE_ERRORS=2 in your environment).
 
 Some platforms report similar warnings about conflicting Packages and NUMANodes.
 
