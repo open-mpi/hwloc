@@ -587,7 +587,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	  /* possible future types */
 	  type = HWLOC_OBJ_GROUP;
 	} else {
-	  /* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels */
+	  /* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels.
+           * if so NO_EXTENDED export may export "Cache" but it wouldn't be importable in old 2.x releases */
 	  if (verbose)
 	    fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
 	  errno = EINVAL;
@@ -1244,7 +1245,7 @@ hwloc__export_synthetic_indexes(hwloc_obj_t *level, unsigned total,
 
 static int
 hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
-                                 unsigned long flags,
+                                 unsigned long flags __hwloc_attribute_unused,
 				 hwloc_obj_t obj,
 				 char *buffer, size_t buflen)
 {
@@ -1265,7 +1266,7 @@ hwloc__export_synthetic_obj_attr(struct hwloc_topology * topology,
 	     prefix, (unsigned long long) obj->attr->numanode.local_memory);
     prefix = separator;
   }
-  if (obj->type == HWLOC_OBJ_NUMANODE && !(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1)) {
+  if (obj->type == HWLOC_OBJ_NUMANODE) {
     hwloc_obj_t memorysidecache = obj->parent;
     hwloc_uint64_t size = 0;
     while (memorysidecache && memorysidecache->type == HWLOC_OBJ_MEMCACHE) {
@@ -1338,21 +1339,9 @@ hwloc__export_synthetic_obj(struct hwloc_topology * topology, unsigned long flag
   /* <type>:<arity>, except for root */
   if (arity != (unsigned)-1)
     snprintf(aritys, sizeof(aritys), ":%u", arity);
-  if (hwloc__obj_type_is_cache(obj->type)
-      && (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)) {
-    /* v1 uses generic "Cache" for non-extended type name */
-    res = hwloc_snprintf(tmp, tmplen, "Cache%s", aritys);
-
-  } else if (obj->type == HWLOC_OBJ_PACKAGE
-	     && (flags & (HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
-			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
-    /* if exporting to v1 or without extended-types, use all-v1-compatible Socket name */
-    res = hwloc_snprintf(tmp, tmplen, "Socket%s", aritys);
-
-  } else if (obj->type == HWLOC_OBJ_DIE
-	     && (flags & (HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
-			  |HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1))) {
-    /* if exporting to v1 or without extended-types, use all-v1-compatible Group name */
+  if (obj->type == HWLOC_OBJ_DIE
+	     && (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES)) {
+    /* if exporting without extended-types, use Die since it wasn't supported until 2.1 */
     res = hwloc_snprintf(tmp, tmplen, "Group%s", aritys);
 
   } else if (obj->type == HWLOC_OBJ_GROUP /* don't export group depth */
@@ -1390,28 +1379,6 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
   mchild = parent->memory_first_child;
   if (!mchild)
     return 0;
-
-  if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1) {
-    /* v1: export a single NUMA child */
-    if (parent->memory_arity > 1) {
-      /* not supported */
-      if (verbose)
-	fprintf(stderr, "Cannot export to synthetic v1 if multiple memory children are attached to the same location.\n");
-      errno = EINVAL;
-      return -1;
-    }
-
-    if (needprefix)
-      hwloc__export_synthetic_add_char(&ret, &tmp, &tmplen, ' ');
-
-    /* ignore memcaches and export the NUMA node */
-    while (mchild->type != HWLOC_OBJ_NUMANODE)
-      mchild = mchild->memory_first_child;
-    res = hwloc__export_synthetic_obj(topology, flags, mchild, 1, tmp, tmplen);
-    if (hwloc__export_synthetic_update_status(&ret, &tmp, &tmplen, res) < 0)
-      return -1;
-    return ret;
-  }
 
   while (mchild) {
     /* The core doesn't support shared memcache for now (because ACPI and Linux don't).
@@ -1529,7 +1496,6 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 
   if (flags & ~(HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES
 		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS
-		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1
 		|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)) {
     errno = EINVAL;
     return -1;
@@ -1561,31 +1527,6 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
       fprintf(stderr, "Cannot export to synthetic unless memory is attached symmetrically.\n");
     errno = EINVAL;
     return -1;
-  }
-
-  if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1) {
-    /* v1 requires all NUMA at the same level */
-    hwloc_obj_t node, parent;
-    signed pdepth;
-
-    node = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0);
-    assert(node);
-    parent = node->parent;
-    while (!hwloc__obj_type_is_normal(parent->type))
-      parent = parent->parent;
-    pdepth = parent->depth;
-
-    while ((node = node->next_cousin) != NULL) {
-      parent = node->parent;
-      while (!hwloc__obj_type_is_normal(parent->type))
-        parent = parent->parent;
-      if (parent->depth != pdepth) {
-	if (verbose)
-	  fprintf(stderr, "Cannot export to synthetic v1 if memory is attached to parents at different depths.\n");
-	errno = EINVAL;
-	return -1;
-      }
-    }
   }
 
   /* we're good, start exporting */

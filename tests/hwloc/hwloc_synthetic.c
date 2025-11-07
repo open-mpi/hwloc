@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -65,9 +65,9 @@ int main(void)
 
   assert(hwloc_get_memory_parents_depth(topology) == 2);
 
-  err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1);
-  assert(err == 47);
-  err = strcmp("Socket:2 Group:3 NUMANode:1 Cache:4 Core:5 PU:6", buffer);
+  err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS);
+  assert(err == 50);
+  err = strcmp("Package:2 Group:3 [NUMANode] L2Cache:4 Core:5 PU:6", buffer);
   assert(!err);
 
   hwloc_topology_destroy(topology);
@@ -166,10 +166,6 @@ int main(void)
   assert(err == 132);
   err = strcmp("Package:2 [NUMANode(memory=1073741824)] [NUMANode(memory=1048576)] Core:2 [NUMANode(memory=1073741824 indexes=8,7,5,6,4,3,1,2)] PU:4", buffer);
   assert(!err);
-
-  err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1);
-  assert(err == -1);
-  assert(errno == EINVAL);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY);
   assert(err == 21);

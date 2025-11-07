@@ -146,8 +146,8 @@ Machine (4096MiB total)
     NUMANode L#2 (P#2 1024MiB)
   Group0 L#3
     NUMANode L#3 (P#1 1024MiB)
-** Export synthetic flag extended,attrs,v1...
-Group:4 NUMANode:1 PU:4
+** Export synthetic flag extended,attrs...
+Group:4 [NUMANode] PU:4
 ** Export XML flag v2...
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topology SYSTEM "hwloc2.dtd">

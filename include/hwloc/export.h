@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -216,9 +216,11 @@ HWLOC_DECLSPEC void hwloc_topology_set_userdata_import_callback(hwloc_topology_t
  * Flags to be given as a OR'ed set to hwloc_topology_export_synthetic().
  */
 enum hwloc_topology_export_synthetic_flags_e {
- /** \brief Export extended types such as L2dcache as basic types such as Cache.
+ /** \brief Export basic object types.
   *
-  * This is required if loading the synthetic description with hwloc < 1.9.
+  * Avoid recent/extended object types such as Die.
+  * Rather export basic types such as Group that are supported
+  * by all hwloc versions.
   * \hideinitializer
   */
  HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES = (1UL<<0),
@@ -226,30 +228,19 @@ enum hwloc_topology_export_synthetic_flags_e {
  /** \brief Do not export level attributes.
   *
   * Ignore level attributes such as memory/cache sizes or PU indexes.
-  * This is required if loading the synthetic description with hwloc < 1.10.
   * \hideinitializer
   */
  HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS = (1UL<<1),
-
- /** \brief Export the memory hierarchy as expected in hwloc 1.x.
-  *
-  * Instead of attaching memory children to levels, export single NUMA node child
-  * as normal intermediate levels, when possible.
-  * This is required if loading the synthetic description with hwloc 1.x.
-  * However this may fail if some objects have multiple local NUMA nodes.
-  * \hideinitializer
-  */
- HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_V1 = (1UL<<2),
 
  /** \brief Do not export memory information.
   *
   * Only export the actual hierarchy of normal CPU-side objects and ignore
   * where memory is attached.
   * This is useful for when the hierarchy of CPUs is what really matters,
-  * but it behaves as if there was a single machine-wide NUMA node.
+  * but the exported topology will get a single machine-wide NUMA node.
   * \hideinitializer
   */
- HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY = (1UL<<3)
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY = (1UL<<2)
 };
 
 /** \brief Export the topology as a synthetic string.

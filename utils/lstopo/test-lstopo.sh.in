@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2009 CNRS
-# Copyright © 2009-2024 Inria.  All rights reserved.
+# Copyright © 2009-2025 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux
 # Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
 # See COPYING in top-level directory.
@@ -121,8 +121,8 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   $ls -i "node:4 pu:4" --restrict 0x3 --restrict-flags t\$,memless
   echo "** Restrict flag none..."
   $ls -i "node:4 pu:4" --restrict 0x3 --restrict-flags none
-  echo "** Export synthetic flag extended,attrs,v1..."
-  $ls -i "node:4 pu:4" -.synthetic --export-synthetic-flags extended,attrs,v1
+  echo "** Export synthetic flag extended,attrs..."
+  $ls -i "node:4 pu:4" -.synthetic --export-synthetic-flags extended,attrs
   echo "** Export XML flag v2..."
   $ls -i "node:4 pu:4" -.v2xml
   echo "** Topology flag disallowed..."
