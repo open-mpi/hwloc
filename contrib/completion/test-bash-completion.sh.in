@@ -2,7 +2,7 @@
 
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2024 Inria.  All rights reserved.
+# Copyright © 2024-2025 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -118,7 +118,7 @@ COMP_CWORD=${#COMP_WORDS[*]}-1
 echo "Completing ${COMP_WORDS[*]}<tab>"
 _hwloc_patch
 echo "Got ${COMPREPLY[*]}"
-test "${COMPREPLY[*]}" = "--reverse --version --help"
+test "${COMPREPLY[*]}" = "--reverse --dry-run --version --help"
 echo "OK"
 
 COMP_WORDS=( "hwloc-compress-dir" "--v" )
