@@ -1002,7 +1002,6 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
-<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
   <dd>enables verbose messages in the XML or synthetic topology backends.
   hwloc XML backends (see \ref xml) can emit some error messages to
   the error output stream.
@@ -1067,7 +1066,11 @@ following environment variables.
   For instance <tt>all,-bind</tt> enables all error messages
   except the non-critical ones emitted by the binding code.
 
-  This supersedes the former HWLOC_HIDE_ERRORS variable.
+  Valid keywords: <tt>all</tt>, <tt>critical</tt>, <tt>bind</tt>,
+  <tt>synthetic</tt>, <tt>none</tt>.
+
+  This supersedes the former HWLOC_HIDE_ERRORS
+  and HWLOC_SYNTHETIC_VERBOSE variables.
   </dd>
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
@@ -2890,6 +2893,9 @@ will export this topology to XML as usual.
 topology and reimport it on another machine. It is a lot less
 precise than XML but may still be enough when only the hierarchy
 of resources matters.
+
+\note Verbose error messages from importing/exporting synthetic topology
+may be enabled by passing <tt>synthetic</tt> in HWLOC_SHOW_ERRORS, see \ref envvar.
 
 
 \section synthetic_string Synthetic description string
@@ -4993,7 +4999,8 @@ removed since their non-strict variants are sufficient.
 
 \section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
 
-The HWLOC_HIDE_ERRORS environment variable is now obsolete
+The HWLOC_HIDE_ERRORS and HWLOC_SYNTHETIC_VERBOSE
+environment variables are now obsolete
 (but still supported), superseded by HWLOC_SHOW_ERRORS, see \envvar.
 
 

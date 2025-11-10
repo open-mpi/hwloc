@@ -72,7 +72,7 @@ Version 3.0.0
     superseded with a single HWLOC_PCI_LOCALITY since 2.0.
 * Misc
   + The HWLOC_SHOW_ERRORS environment variable replaces HWLOC_HIDE_ERRORS
-    with more configuration options,
+    and HWLOC_SYNTHETIC_VERBOSE, with more configuration options,
     see Environment Variables in the documentation for details.
   + hwloc_topology_allow() is now possible on shmem-adopted topology.
     This allows to share a topology between processes in different

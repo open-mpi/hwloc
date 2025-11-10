@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2023 Université de Reims Champagne-Ardenne.  All rights reserved.
@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
     putenv((char *) "HWLOC_XML_VERBOSE=1");
-  if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
-    putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
+  if (!getenv("HWLOC_SHOW_ERRORS"))
+    putenv((char *) "HWLOC_SHOW_ERRORS=synthetic");
 
   hwloc_topology_init(&topology);
 

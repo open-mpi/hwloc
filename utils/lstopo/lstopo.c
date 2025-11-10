@@ -1019,8 +1019,6 @@ main (int argc, char *argv[])
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
     putenv((char *) "HWLOC_XML_VERBOSE=1");
-  if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
-    putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
 
   /* Use localized time prints, and utf-8 characters in the ascii output */
 #ifdef HAVE_SETLOCALE

@@ -412,8 +412,8 @@ int main(int argc, char *argv[])
   /* enable verbose backends */
   if (!getenv("HWLOC_XML_VERBOSE"))
     putenv((char *) "HWLOC_XML_VERBOSE=1");
-  if (!getenv("HWLOC_SYNTHETIC_VERBOSE"))
-    putenv((char *) "HWLOC_SYNTHETIC_VERBOSE=1");
+  if (!getenv("HWLOC_SHOW_ERRORS"))
+    putenv((char *) "HWLOC_SHOW_ERRORS=synthetic");
 
   cpuset = hwloc_bitmap_alloc();
   nodeset = hwloc_bitmap_alloc();

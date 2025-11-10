@@ -99,6 +99,8 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(CRITICAL);
         else if (!hwloc_strncasecmp(tmp, "bind", 4))
           HWLOC_SHOWMSG_TOGGLE(BIND);
+        else if (!hwloc_strncasecmp(tmp, "synthetic", 9))
+          HWLOC_SHOWMSG_TOGGLE(SYNTHETIC);
         else if (!hwloc_strncasecmp(tmp, "none", 4))
           mask = 0;
         tmp = next;
@@ -106,6 +108,7 @@ unsigned long hwloc_show_errors_mask(void)
 
      } else {
        /* backward compat with 2.x */
+       const char *misc_envvar;
        envvar = getenv("HWLOC_HIDE_ERRORS");
        if (envvar) {
          int val = atoi(envvar);
@@ -114,6 +117,9 @@ unsigned long hwloc_show_errors_mask(void)
          else if (val >= 2)
            mask = 0;
        }
+       misc_envvar = getenv("HWLOC_SYNTHETIC_VERBOSE");
+       if (misc_envvar && atoi(misc_envvar))
+         mask |= HWLOC_SHOWMSG_SYNTHETIC;
      }
 #ifdef HWLOC_DEBUG
     if (!envvar) {
