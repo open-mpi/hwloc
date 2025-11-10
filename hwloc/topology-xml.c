@@ -1872,6 +1872,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   data->need_gl_backend_info = 0;
   data->v2_pagesizes = NULL;
   data->v2_pagesize_nr = 0;
+  data->v2_pagesize_nr_alloc = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
