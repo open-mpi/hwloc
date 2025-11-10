@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
 .\" SPDX-License-Identifier: BSD-3-Clause
-.\" Copyright © 2013-2018 Inria.  All rights reserved.
+.\" Copyright © 2013-2025 Inria.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-PATCH "1" "%HWLOC_DATE%" "%PACKAGE_VERSION%" "%PACKAGE_NAME%"
 .SH NAME
@@ -16,7 +16,7 @@ hwloc-patch \- Apply a topology difference to an existing XML topology
 [\fIoptions\fR]
 \fI[<topology.xml> | refname]\fR
 \fI[<diff.xml> | -]\fR
-\fI<output.xml>\fR
+\fI[<output.xml> | -]\fR
 .PP
 .B hwloc-patch
 [\fIoptions\fR]
@@ -53,7 +53,9 @@ or hwloc-compress-dir.
 .
 .PP
 If <output.xml> is given, the new, modified topology is stored in that
-new file. Otherwise, <topology.xml> is modified in place.
+new file.
+If \fB\-\fR is given as an output, the modified topology is sent to stdout.
+If no output is given, <topology.xml> is modified in place.
 .
 .PP
 If \fBrefname\fR is given instead of <topology.xml>, the input topology filename
