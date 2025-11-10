@@ -14,20 +14,6 @@
 #include "private/misc.h"
 #include "private/debug.h"
 
-int
-hwloc__xml_verbose(void)
-{
-  static int checked = 0;
-  static int verbose = 0;
-  if (!checked) {
-    const char *env = getenv("HWLOC_XML_VERBOSE");
-    if (env)
-      verbose = atoi(env);
-    checked = 1;
-  }
-  return verbose;
-}
-
 static int
 hwloc_nolibxml_import(void)
 {
@@ -108,6 +94,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 			      hwloc__xml_import_state_t state,
 			      int *ignore)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
+
   if (!strcmp(name, "type")) {
     /* already handled */
     return;
@@ -117,19 +105,19 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "gp_index")) {
     obj->gp_index = strtoull(value, NULL, 10);
-    if (!obj->gp_index && hwloc__xml_verbose())
+    if (!obj->gp_index && show_errors)
       fprintf(stderr, "%s: unexpected zero gp_index, topology may be invalid\n", state->global->msgprefix);
     if (obj->gp_index >= topology->next_gp_index)
       topology->next_gp_index = obj->gp_index + 1;
   } else if (!strcmp(name, "id")) { /* starting with 3.x */
     if (!strncmp(value, "obj", 3)) {
       obj->gp_index = strtoull(value+3, NULL, 10);
-      if (!obj->gp_index && hwloc__xml_verbose())
+      if (!obj->gp_index && show_errors)
         fprintf(stderr, "%s: unexpected zero id, topology may be invalid\n", state->global->msgprefix);
       if (obj->gp_index >= topology->next_gp_index)
         topology->next_gp_index = obj->gp_index + 1;
     } else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: unexpected id `%s' not-starting with `obj', ignoring\n", state->global->msgprefix, value);
     }
   } else if (!strcmp(name, "cpuset")) {
@@ -170,7 +158,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
       obj->attr->cache.size = lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring cache_size attribute for non-cache object type\n",
 	      state->global->msgprefix);
   }
@@ -179,7 +167,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
       obj->attr->cache.linesize = lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring cache_linesize attribute for non-cache object type\n",
 	      state->global->msgprefix);
   }
@@ -188,7 +176,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     int lvalue = atoi(value);
     if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
       obj->attr->cache.associativity = lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring cache_associativity attribute for non-cache object type\n",
 	      state->global->msgprefix);
   }
@@ -201,10 +189,10 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	  || lvalue == HWLOC_OBJ_CACHE_INSTRUCTION)
 	obj->attr->cache.type = (hwloc_obj_cache_type_t) lvalue;
       else
-        if (hwloc__xml_verbose())
+        if (show_errors)
           fprintf(stderr, "%s: ignoring invalid cache_type attribute %lu\n",
                   state->global->msgprefix, lvalue);
-    } else if (hwloc__xml_verbose())
+    } else if (show_errors)
       fprintf(stderr, "%s: ignoring cache_type attribute for non-cache object type\n",
 	      state->global->msgprefix);
   }
@@ -213,7 +201,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_NUMANODE)
       obj->attr->numanode.local_memory = lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring local_memory attribute for non-NUMAnode non-root object\n",
 	      state->global->msgprefix);
   }
@@ -224,7 +212,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	obj->attr->cache.depth = lvalue;
      } else if (obj->type == HWLOC_OBJ_GROUP || obj->type == HWLOC_OBJ_BRIDGE) {
        /* will be overwritten by the core */
-     } else if (hwloc__xml_verbose())
+     } else if (show_errors)
        fprintf(stderr, "%s: ignoring depth attribute for object type without depth\n",
 	       state->global->msgprefix);
   }
@@ -233,7 +221,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_GROUP)
       obj->attr->group.kind = lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring kind attribute for non-group object type\n",
 	      state->global->msgprefix);
   }
@@ -242,7 +230,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_GROUP)
       obj->attr->group.subkind = lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring subkind attribute for non-group object type\n",
 	      state->global->msgprefix);
   }
@@ -251,7 +239,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_GROUP)
       obj->attr->group.dont_merge = (unsigned char) lvalue;
-    else if (hwloc__xml_verbose())
+    else if (show_errors)
       fprintf(stderr, "%s: ignoring dont_merge attribute for non-group object type\n",
 	      state->global->msgprefix);
   }
@@ -263,7 +251,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       unsigned domain, bus, dev, func;
       if (sscanf(value, "%x:%02x:%02x.%01x",
 		 &domain, &bus, &dev, &func) != 4) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: ignoring invalid pci_busid format string %s\n",
 		  state->global->msgprefix, value);
 	*ignore = 1;
@@ -276,7 +264,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring pci_busid attribute for non-PCI object\n",
 		state->global->msgprefix);
       break;
@@ -292,7 +280,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 		 &classid, &vendor, &device, &subvendor, &subdevice, &revision, &prog_if) != 7
           && sscanf(value, "%x [%04x:%04x] [%04x:%04x] %02x", /* hwloc < 3.x didn't export the prog-if */
                     &classid, &vendor, &device, &subvendor, &subdevice, &revision) != 6) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: ignoring invalid pci_type format string %s\n",
 		  state->global->msgprefix, value);
       } else {
@@ -307,7 +295,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring pci_type attribute for non-PCI object\n",
 		state->global->msgprefix);
       break;
@@ -322,7 +310,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring pci_link_speed attribute for non-PCI object\n",
 		state->global->msgprefix);
       break;
@@ -334,7 +322,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     case HWLOC_OBJ_BRIDGE: {
       unsigned upstream_type, downstream_type;
       if (sscanf(value, "%u-%u", &upstream_type, &downstream_type) != 2) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: ignoring invalid bridge_type format string %s\n",
 		  state->global->msgprefix, value);
       } else {
@@ -345,7 +333,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring bridge_type attribute for non-bridge object\n",
 		state->global->msgprefix);
       break;
@@ -358,7 +346,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       unsigned domain, secbus, subbus;
       if (sscanf(value, "%x:[%02x-%02x]",
 		 &domain, &secbus, &subbus) != 3) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: ignoring invalid bridge_pci format string %s\n",
 		  state->global->msgprefix, value);
 	*ignore = 1;
@@ -371,7 +359,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring bridge_pci attribute for non-bridge object\n",
 		state->global->msgprefix);
       break;
@@ -383,7 +371,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     case HWLOC_OBJ_OS_DEVICE: {
       unsigned long osdev_type;
       if (sscanf(value, "%lu", &osdev_type) != 1) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: ignoring invalid osdev_type format string %s\n",
 		  state->global->msgprefix, value);
       } else {
@@ -392,7 +380,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring osdev_type attribute for non-osdev object\n",
 		state->global->msgprefix);
       break;
@@ -406,7 +394,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
       break;
     }
     default:
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring numanode_type attribute for non-NUMA object\n",
 		state->global->msgprefix);
       break;
@@ -414,7 +402,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
   }
 
   else {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: ignoring unknown object attribute %s\n",
 	      state->global->msgprefix, name);
   }
@@ -689,6 +677,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 			 hwloc_obj_t parent, hwloc_obj_t obj, int *gotignored,
 			 hwloc__xml_import_state_t state)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   int ignored = 0;
   int childrengotignored = 0;
   char *tag;
@@ -723,13 +712,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	  /* ignore possible future type */
 	  obj->type = _HWLOC_OBJ_FUTURE;
 	  ignored = 1;
-	  if (hwloc__xml_verbose())
+	  if (show_errors)
 	    fprintf(stderr, "%s: %s object not-supported, will be ignored\n",
 		    state->global->msgprefix, attrvalue);
 	}
 #endif
         else {
-	  if (hwloc__xml_verbose())
+	  if (show_errors)
 	    fprintf(stderr, "%s: unrecognized object type string %s\n",
 		    state->global->msgprefix, attrvalue);
 	  goto error_with_object;
@@ -738,7 +727,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     } else {
       /* type needed first */
       if (obj->type == HWLOC_OBJ_TYPE_NONE) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: object attribute %s found before type\n",
 		  state->global->msgprefix,  attrname);
 	goto error_with_object;
@@ -766,7 +755,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
       if (obj->type == HWLOC_OBJ_NUMANODE) {
 	ret = hwloc__xml_v2import_pagetype(data, &childstate);
       } else {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: invalid non-NUMAnode object child %s\n",
 		  state->global->msgprefix, tag);
 	ret = -1;
@@ -777,7 +766,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     } else if (!strcmp(tag, "userdata")) {
       ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: invalid special object child %s\n",
 		state->global->msgprefix, tag);
       ret = -1;
@@ -790,7 +779,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
 
   if (parent && obj->type == HWLOC_OBJ_MACHINE) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: Machine object cannot be a child object\n",
               state->global->msgprefix);
     goto error_with_object;
@@ -798,7 +787,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   if (parent) {
     if (parent->type == HWLOC_OBJ_PU && hwloc_obj_type_is_normal(obj->type)) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: PU object cannot be the parent of normal object %s\n",
                 state->global->msgprefix, hwloc_obj_type_string(obj->type));
       goto error_with_object;
@@ -807,21 +796,21 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     /* check parent/child types for 2.x */
     if (hwloc__obj_type_is_normal(obj->type)) {
       if (!hwloc__obj_type_is_normal(parent->type)) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: normal object %s cannot be child of non-normal parent %s\n",
 		  state->global->msgprefix, hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc__obj_type_is_memory(obj->type)) {
       if (hwloc__obj_type_is_io(parent->type) || HWLOC_OBJ_MISC == parent->type) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: Memory object %s cannot be child of non-normal-or-memory parent %s\n",
 		  state->global->msgprefix, hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
       }
     } else if (hwloc__obj_type_is_io(obj->type)) {
       if (hwloc__obj_type_is_memory(parent->type) || HWLOC_OBJ_MISC == parent->type) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: I/O object %s cannot be child of non-normal-or-I/O parent %s\n",
 		  state->global->msgprefix, hwloc_obj_type_string(obj->type), hwloc_obj_type_string(parent->type));
 	goto error_with_object;
@@ -859,7 +848,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   /* check that cache attributes are coherent with the actual type */
   if (hwloc__obj_type_is_cache(obj->type)
       && obj->type != hwloc_cache_type_by_depth_type(obj->attr->cache.depth, obj->attr->cache.type)) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: invalid cache type %s with attribute depth %u and type %d\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->attr->cache.depth, (int) obj->attr->cache.type);
     goto error_with_object;
@@ -867,13 +856,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   /* check special types vs cpuset+nodeset */
   if ((!obj->cpuset || !obj->nodeset) && !hwloc__obj_type_is_special(obj->type)) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: invalid normal or memory object %s P#%u without cpuset and nodeset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
   if ((obj->cpuset || obj->nodeset) && hwloc__obj_type_is_special(obj->type)) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: invalid special object %s with cpuset or nodeset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type));
     goto error_with_object;
@@ -883,7 +872,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (obj->type == HWLOC_OBJ_PU) {
     /* obj->cpuset!=NULL was checked above */
     if (hwloc_bitmap_weight(obj->cpuset) != 1 || !hwloc_bitmap_isset(obj->cpuset, obj->os_index)) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: PU object P#%u with invalid cpuset\n",
 		state->global->msgprefix, obj->os_index);
       goto error_with_object;
@@ -894,7 +883,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   if (obj->type == HWLOC_OBJ_NUMANODE) {
     /* obj->nodeset!=NULL was checked above */
     if (hwloc_bitmap_weight(obj->nodeset) != 1 || !hwloc_bitmap_isset(obj->nodeset, obj->os_index)) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: NUMA node object P#%u with invalid nodeset\n",
 		state->global->msgprefix, obj->os_index);
       goto error_with_object;
@@ -903,13 +892,13 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
   /* check parent vs child sets */
   if (obj->cpuset && parent && !parent->cpuset) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: invalid object %s P#%u with cpuset while parent has none\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
   if (obj->nodeset && parent && !parent->nodeset) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: invalid object %s P#%u with nodeset while parent has none\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
@@ -1000,7 +989,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 				     &childrengotignored,
 				     &childstate);
     } else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: invalid special object child %s while looking for objects\n",
 		state->global->msgprefix, tag);
       ret = -1;
@@ -1077,6 +1066,7 @@ static int
 hwloc__xml_import_support(hwloc_topology_t topology,
                           hwloc__xml_import_state_t state)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   char *name = NULL;
   int value = 1; /* value is optional */
   while (1) {
@@ -1088,7 +1078,7 @@ hwloc__xml_import_support(hwloc_topology_t topology,
     else if (!strcmp(attrname, "value"))
       value = atoi(attrvalue);
     else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring unknown support attribute %s\n",
 		state->global->msgprefix, attrname);
     }
@@ -1154,6 +1144,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
                             hwloc__xml_import_state_t state,
                             int heterotypes)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   hwloc_obj_type_t unique_type = HWLOC_OBJ_TYPE_NONE;
   hwloc_obj_type_t *different_types = NULL;
   unsigned nbobjs = 0;
@@ -1178,7 +1169,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
       nbobjs = strtoul(attrvalue, NULL, 10);
     else if (!strcmp(attrname, "type")) {
       if (hwloc_type_sscanf(attrvalue, &unique_type, NULL, 0) < 0) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: unrecognized %s type %s\n",
 		  state->global->msgprefix, _TAG_NAME, attrvalue);
 	goto out;
@@ -1198,7 +1189,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
       name = attrvalue;
     }
     else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring unknown %s attribute %s\n",
 		state->global->msgprefix, _TAG_NAME, attrname);
     }
@@ -1206,7 +1197,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
   /* abort if missing attribute */
   if (!nbobjs || (!heterotypes && unique_type == HWLOC_OBJ_TYPE_NONE) || !indexing || !kind) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: %s missing some attributes\n",
 	      state->global->msgprefix, _TAG_NAME);
     goto out;
@@ -1217,7 +1208,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
   if (heterotypes)
     different_types = malloc(nbobjs*sizeof(*different_types));
   if (!indexes || !u64values || (heterotypes && !different_types)) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: failed to allocate %s arrays for %u objects\n",
 	      state->global->msgprefix, _TAG_NAME, nbobjs);
     goto out_with_arrays;
@@ -1250,7 +1241,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
     else if (!strcmp(tag, "u64values"))
       is_u64values = 1;
     if (!is_index && !is_u64values) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: %s with unrecognized child %s\n",
 		state->global->msgprefix, _TAG_NAME, tag);
       goto out_with_arrays;
@@ -1258,7 +1249,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
     if (state->global->next_attr(&childstate, &attrname, &attrvalue) < 0
 	|| strcmp(attrname, "length")) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: %s child must have length attribute\n",
 		state->global->msgprefix, _TAG_NAME);
       goto out_with_arrays;
@@ -1267,7 +1258,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
     ret = state->global->get_content(&childstate, &buffer, length);
     if (ret < 0) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: %s child needs content of length %d\n",
 		state->global->msgprefix, _TAG_NAME, length);
       goto out_with_arrays;
@@ -1277,7 +1268,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
       /* get indexes */
       const char *tmp, *tmp2;
       if (nr_indexes >= nbobjs) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: %s with more than %u indexes\n",
 		  state->global->msgprefix, _TAG_NAME, nbobjs);
 	goto out_with_arrays;
@@ -1292,14 +1283,14 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
             /* reached the end of this indexes attribute */
             break;
 	  if (hwloc_type_sscanf(tmp, &t, NULL, 0) < 0) {
-	    if (hwloc__xml_verbose())
+	    if (show_errors)
 	      fprintf(stderr, "%s: %s with unrecognized heterogeneous type %s\n",
 		      state->global->msgprefix, _TAG_NAME, tmp);
 	    goto out_with_arrays;
 	  }
 	  tmp2 = strchr(tmp, ':');
 	  if (!tmp2) {
-	    if (hwloc__xml_verbose())
+	    if (show_errors)
 	      fprintf(stderr, "%s: %s with missing colon after heterogeneous type %s\n",
 		      state->global->msgprefix, _TAG_NAME, tmp);
 	    goto out_with_arrays;
@@ -1322,7 +1313,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
       /* get uint64_t values */
       const char *tmp;
       if (nr_u64values >= nbobjs*nbobjs) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: %s with more than %u u64values\n",
 		  state->global->msgprefix, _TAG_NAME, nbobjs*nbobjs);
 	goto out_with_arrays;
@@ -1346,7 +1337,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
     ret = state->global->close_tag(&childstate);
     if (ret < 0) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: %s with more than %u indexes\n",
 		state->global->msgprefix, _TAG_NAME, nbobjs);
       goto out_with_arrays;
@@ -1356,13 +1347,13 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
   }
 
   if (nr_indexes != nbobjs) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: %s with less than %u indexes\n",
 	      state->global->msgprefix, _TAG_NAME, nbobjs);
     goto out_with_arrays;
   }
   if (nr_u64values != nbobjs*nbobjs) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: %s with less than %u u64values\n",
 	      state->global->msgprefix, _TAG_NAME, nbobjs*nbobjs);
     goto out_with_arrays;
@@ -1370,21 +1361,21 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
   if (nbobjs < 2) {
     /* distances with a single object are useless, even if the XML isn't invalid */
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: ignoring %s with only %u objects\n",
 	      state->global->msgprefix, _TAG_NAME, nbobjs);
     goto out_ignore;
   }
   if (unique_type == HWLOC_OBJ_PU || unique_type == HWLOC_OBJ_NUMANODE) {
     if (!os_indexing) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring PU or NUMA %s without os_indexing\n",
 		state->global->msgprefix, _TAG_NAME);
       goto out_ignore;
     }
   } else {
     if (!gp_indexing) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring !PU or !NUMA %s without gp_indexing\n",
 		state->global->msgprefix, _TAG_NAME);
       goto out_ignore;
@@ -1428,6 +1419,7 @@ hwloc__xml_import_memattr_value(hwloc_topology_t topology,
                                 unsigned long flags,
                                 hwloc__xml_import_state_t state)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   char *target_obj_gp_index_s = NULL;
   char *target_obj_type_s = NULL;
   hwloc_uint64_t target_obj_gp_index;
@@ -1455,7 +1447,7 @@ hwloc__xml_import_memattr_value(hwloc_topology_t topology,
     else if (!strcmp(attrname, "initiator_obj_type"))
       initiator_obj_type_s = attrvalue;
     else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: ignoring unknown memattr_value attribute %s\n",
                 state->global->msgprefix, attrname);
       return -1;
@@ -1463,20 +1455,20 @@ hwloc__xml_import_memattr_value(hwloc_topology_t topology,
   }
 
   if (!target_obj_type_s) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: ignoring memattr_value without target_obj_type.\n",
               state->global->msgprefix);
     return -1;
   }
   if (hwloc_type_sscanf(target_obj_type_s, &target_obj_type, NULL, 0) < 0) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: failed to identify memattr_value target object type %s\n",
               state->global->msgprefix, target_obj_type_s);
     return -1;
   }
 
   if (!value_s || !target_obj_gp_index_s) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: ignoring memattr_value without value and target_obj_gp_index\n",
               state->global->msgprefix);
     return -1;
@@ -1488,7 +1480,7 @@ hwloc__xml_import_memattr_value(hwloc_topology_t topology,
     /* add a value with initiator */
     struct hwloc_internal_location_s loc;
     if (!initiator_cpuset_s && (!initiator_obj_gp_index_s || !initiator_obj_type_s)) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: ignoring memattr_value without initiator attributes\n",
                 state->global->msgprefix);
       return -1;
@@ -1499,7 +1491,7 @@ hwloc__xml_import_memattr_value(hwloc_topology_t topology,
       loc.type = HWLOC_LOCATION_TYPE_CPUSET;
       loc.location.cpuset = hwloc_bitmap_alloc();
       if (!loc.location.cpuset) {
-        if (hwloc__xml_verbose())
+        if (show_errors)
           fprintf(stderr, "%s: failed to allocated memattr_value initiator cpuset\n",
                   state->global->msgprefix);
         return -1;
@@ -1509,7 +1501,7 @@ hwloc__xml_import_memattr_value(hwloc_topology_t topology,
       loc.type = HWLOC_LOCATION_TYPE_OBJECT;
       loc.location.object.gp_index = strtoull(initiator_obj_gp_index_s, NULL, 10);
       if (hwloc_type_sscanf(initiator_obj_type_s, &loc.location.object.type, NULL, 0) < 0) {
-        if (hwloc__xml_verbose())
+        if (show_errors)
           fprintf(stderr, "%s: failed to identify memattr_value initiator object type %s\n",
                   state->global->msgprefix, initiator_obj_type_s);
         return -1;
@@ -1533,6 +1525,7 @@ static int
 hwloc__xml_import_memattr(hwloc_topology_t topology,
                           hwloc__xml_import_state_t state)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   char *name = NULL;
   unsigned long flags = (unsigned long) -1;
   hwloc_memattr_id_t id = (hwloc_memattr_id_t) -1;
@@ -1547,7 +1540,7 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
     else if (!strcmp(attrname, "flags"))
       flags = strtoul(attrvalue, NULL, 10);
     else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: ignoring unknown memattr attribute %s\n",
                 state->global->msgprefix, attrname);
       return -1;
@@ -1589,7 +1582,7 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
       ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
       /* ignored */
     } else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: memattr with unrecognized child %s\n",
                 state->global->msgprefix, tag);
       ret = -1;
@@ -1611,6 +1604,7 @@ static int
 hwloc__xml_import_cpukind(hwloc_topology_t topology,
                           hwloc__xml_import_state_t state)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   hwloc_bitmap_t cpuset = NULL;
   int forced_efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
   struct hwloc_infos_s infos;
@@ -1631,7 +1625,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
     } else if (!strcmp(attrname, "forced_efficiency")) {
       forced_efficiency = atoi(attrvalue);
     } else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: ignoring unknown cpukind attribute %s\n",
                 state->global->msgprefix, attrname);
       hwloc_bitmap_free(cpuset);
@@ -1654,7 +1648,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
       if (!ret && infoname && infovalue)
         hwloc__add_info(&infos, infoname, infovalue);
     } else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
         fprintf(stderr, "%s: cpukind with unrecognized child %s\n",
                 state->global->msgprefix, tag);
       ret = -1;
@@ -1667,7 +1661,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
   }
 
   if (!cpuset) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: ignoring cpukind without cpuset\n",
               state->global->msgprefix);
     goto error;
@@ -1694,6 +1688,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 			   hwloc_topology_diff_t *firstdiffp,
 			   hwloc_topology_diff_t *lastdiffp)
 {
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   char *type_s = NULL;
   char *obj_depth_s = NULL;
   char *obj_index_s = NULL;
@@ -1724,7 +1719,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
     else if (!strcmp(attrname, "obj_attr_newvalue"))
       obj_attr_newvalue_s = attrvalue;
     else {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: ignoring unknown diff attribute %s\n",
 		state->global->msgprefix, attrname);
       return -1;
@@ -1742,7 +1737,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 
       /* obj_attr mandatory generic attributes */
       if (!obj_depth_s || !obj_index_s || !obj_attr_type_s) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: missing mandatory obj attr generic attributes\n",
 		  state->global->msgprefix);
 	break;
@@ -1750,7 +1745,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 
       /* obj_attr mandatory attributes common to all subtypes */
       if (!obj_attr_oldvalue_s || !obj_attr_newvalue_s) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: missing mandatory obj attr value attributes\n",
 		  state->global->msgprefix);
 	break;
@@ -1759,7 +1754,7 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
       /* mandatory attributes for obj_attr_info subtype */
       obj_attr_type = atoi(obj_attr_type_s);
       if (obj_attr_type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO && !obj_attr_name_s) {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: missing mandatory obj attr info name attribute\n",
 		  state->global->msgprefix);
 	break;
@@ -1847,6 +1842,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
    * This backend enforces !topology->is_thissystem by default.
    */
 
+  int show_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML);
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_xml_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   struct hwloc__xml_import_state_s state, childstate;
@@ -1879,14 +1875,14 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     goto failed;
 
   if (data->version_major > 3) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: cannot import XML version %u.%u > 2\n",
 	      data->msgprefix, data->version_major, data->version_minor);
     goto err;
   }
 
   if (data->version_major < 2) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: importing XML version %u.%u < 2 isn't supported anymore\n",
 	      data->msgprefix, data->version_major, data->version_minor);
     goto err;
@@ -1942,7 +1938,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
         if (infoname && infovalue)
           hwloc__add_info(&topology->infos, infoname, infovalue);
       } else {
-	if (hwloc__xml_verbose())
+	if (show_errors)
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
 		  data->msgprefix, tag);
 	goto done;
@@ -1955,7 +1951,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 
 done:
   if (!root->cpuset) {
-    if (hwloc__xml_verbose())
+    if (show_errors)
       fprintf(stderr, "%s: invalid root object without cpuset\n",
 	      data->msgprefix);
     goto err;
@@ -1974,13 +1970,13 @@ done:
 
     /* v2 must have non-empty nodesets since at least one NUMA node is required */
     if (!root->nodeset) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: invalid root object without nodeset\n",
 		data->msgprefix);
       goto err;
     }
     if (hwloc_bitmap_iszero(root->nodeset)) {
-      if (hwloc__xml_verbose())
+      if (show_errors)
 	fprintf(stderr, "%s: invalid root object with empty nodeset\n",
 		data->msgprefix);
       goto err;
@@ -2049,7 +2045,7 @@ done:
  failed:
   if (data->look_done)
     data->look_done(data, -1);
-  if (hwloc__xml_verbose())
+  if (show_errors)
     fprintf(stderr, "%s: XML component discovery failed.\n",
 	    data->msgprefix);
  err:

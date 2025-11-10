@@ -401,6 +401,7 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
  * failure to initialize CUDA, etc. */
 #define HWLOC_SHOWMSG_BIND      (1UL<<1) /* binding */
 #define HWLOC_SHOWMSG_SYNTHETIC (1UL<<2) /* synthetic */
+#define HWLOC_SHOWMSG_XML       (1UL<<3) /* XML */
 /* all messages */
 #define HWLOC_SHOWMSG_ALL       (~0UL)
 

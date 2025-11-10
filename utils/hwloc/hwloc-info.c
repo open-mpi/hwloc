@@ -848,10 +848,8 @@ main (int argc, char *argv[])
   hwloc_utils_check_api_version(callname);
 
   /* enable verbose backends */
-  if (!getenv("HWLOC_XML_VERBOSE"))
-    putenv((char *) "HWLOC_XML_VERBOSE=1");
   if (!getenv("HWLOC_SHOW_ERRORS"))
-    putenv((char *) "HWLOC_SHOW_ERRORS=synthetic");
+    putenv((char *) "HWLOC_SHOW_ERRORS=xml,synthetic");
 
   err = hwloc_topology_init (&topology);
   if (err)

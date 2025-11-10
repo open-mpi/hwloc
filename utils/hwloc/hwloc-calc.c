@@ -410,10 +410,8 @@ int main(int argc, char *argv[])
   hwloc_utils_check_api_version(callname);
 
   /* enable verbose backends */
-  if (!getenv("HWLOC_XML_VERBOSE"))
-    putenv((char *) "HWLOC_XML_VERBOSE=1");
   if (!getenv("HWLOC_SHOW_ERRORS"))
-    putenv((char *) "HWLOC_SHOW_ERRORS=synthetic");
+    putenv((char *) "HWLOC_SHOW_ERRORS=xml,synthetic");
 
   cpuset = hwloc_bitmap_alloc();
   nodeset = hwloc_bitmap_alloc();

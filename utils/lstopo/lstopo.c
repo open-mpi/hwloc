@@ -1016,9 +1016,6 @@ main (int argc, char *argv[])
   env = getenv("HWLOC_SHOW_ERRORS");
   if (!env)
     putenv((char *) "HWLOC_SHOW_ERRORS=all");
-  /* enable verbose backends */
-  if (!getenv("HWLOC_XML_VERBOSE"))
-    putenv((char *) "HWLOC_XML_VERBOSE=1");
 
   /* Use localized time prints, and utf-8 characters in the ascii output */
 #ifdef HAVE_SETLOCALE

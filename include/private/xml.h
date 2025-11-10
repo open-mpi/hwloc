@@ -11,8 +11,6 @@
 
 #include <sys/types.h>
 
-HWLOC_DECLSPEC int hwloc__xml_verbose(void);
-
 /**************
  * XML import *
  **************/

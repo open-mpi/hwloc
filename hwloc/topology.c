@@ -99,6 +99,8 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(CRITICAL);
         else if (!hwloc_strncasecmp(tmp, "bind", 4))
           HWLOC_SHOWMSG_TOGGLE(BIND);
+        else if (!hwloc_strncasecmp(tmp, "xml", 3))
+          HWLOC_SHOWMSG_TOGGLE(XML);
         else if (!hwloc_strncasecmp(tmp, "synthetic", 9))
           HWLOC_SHOWMSG_TOGGLE(SYNTHETIC);
         else if (!hwloc_strncasecmp(tmp, "none", 4))
@@ -117,6 +119,9 @@ unsigned long hwloc_show_errors_mask(void)
          else if (val >= 2)
            mask = 0;
        }
+       misc_envvar = getenv("HWLOC_XML_VERBOSE");
+       if (misc_envvar && atoi(misc_envvar))
+         mask |= HWLOC_SHOWMSG_XML;
        misc_envvar = getenv("HWLOC_SYNTHETIC_VERBOSE");
        if (misc_envvar && atoi(misc_envvar))
          mask |= HWLOC_SHOWMSG_SYNTHETIC;

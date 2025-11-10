@@ -1001,17 +1001,6 @@ following environment variables.
   See also \ref synthetic.
   </dd>
 
-<dt>HWLOC_XML_VERBOSE=1</dt>
-  <dd>enables verbose messages in the XML or synthetic topology backends.
-  hwloc XML backends (see \ref xml) can emit some error messages to
-  the error output stream.
-  Enabling these verbose messages within hwloc can be useful for
-  understanding failures to parse input XML topologies.
-  Similarly, enabling verbose messages in the synthetic topology
-  backend can help understand why the description string is invalid.
-  See also \ref synthetic.
-  </dd>
-
 <dt>HWLOC_THISSYSTEM=1</dt>
   <dd>enforces the return value of hwloc_topology_is_thissystem(), as if
   ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
@@ -1067,11 +1056,12 @@ following environment variables.
   except the non-critical ones emitted by the binding code.
 
   Valid keywords: <tt>all</tt>, <tt>critical</tt>, <tt>bind</tt>,
-  <tt>synthetic</tt>, <tt>none</tt>.
+  <tt>xml</tt>, <tt>synthetic</tt>, <tt>none</tt>.
 
-  This supersedes the former HWLOC_HIDE_ERRORS
+  This supersedes the former HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE
   and HWLOC_SYNTHETIC_VERBOSE variables.
   </dd>
+
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
   <dd>enables or disables the use of NUMA distances.
@@ -2807,6 +2797,9 @@ that two very similar nodes still have different XML exports
 (e.g. some serial numbers or MAC addresses are different).
 If a less precise exporting/importing is required, one may want to
 look at \ref synthetic instead.
+
+\note Verbose error messages from importing/exporting XML topology
+may be enabled by passing <tt>xml</tt> in HWLOC_SHOW_ERRORS, see \ref envvar.
 
 
 \section xml_backends libxml2 and minimalistic XML backends
@@ -4999,7 +4992,7 @@ removed since their non-strict variants are sufficient.
 
 \section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
 
-The HWLOC_HIDE_ERRORS and HWLOC_SYNTHETIC_VERBOSE
+The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete
 (but still supported), superseded by HWLOC_SHOW_ERRORS, see \envvar.
 

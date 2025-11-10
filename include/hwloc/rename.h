@@ -737,8 +737,6 @@ extern "C" {
 
 /* private/xml.h */
 
-#define hwloc__xml_verbose HWLOC_NAME(_xml_verbose)
-
 #define hwloc__xml_import_state_s HWLOC_NAME(_xml_import_state_s)
 #define hwloc__xml_import_state_t HWLOC_NAME(_xml_import_state_t)
 #define hwloc__xml_import_diff HWLOC_NAME(_xml_import_diff)
