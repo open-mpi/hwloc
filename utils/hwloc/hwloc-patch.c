@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2013-2021 Inria.  All rights reserved.
+ * Copyright © 2013-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -14,6 +14,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "Usage: hwloc-patch [options] [<old.xml> | refname] [<diff.xml> | -] [<output.xml>]\n");
 	fprintf(where, "Options:\n");
 	fprintf(where, "  -R --reverse     Reverse the sense of the difference\n");
+	fprintf(where, "  --dry-run        Check if diff apply without applying it\n");
 	fprintf(where, "  --version        Report version and exit\n");
         fprintf(where, "  -h --help        Show this usage\n");
 }
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
 	unsigned long flags = HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED | HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT;
 	unsigned long patchflags = 0;
 	char *callname, *input, *inputdiff, *output = NULL, *refname = NULL;
+	int dryrun = 0;
 	int err;
 
         callname = strrchr(argv[0], '/');
@@ -91,6 +93,8 @@ int main(int argc, char *argv[])
 	while (argc && *argv[0] == '-') {
 		if (!strcmp (argv[0], "-R") || !strcmp (argv[0], "--reverse")) {
 			patchflags ^= HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE;
+		} else if (!strcmp (argv[0], "--dry-run")) {
+			dryrun = 1;
 		} else if (!strcmp (argv[0], "--version")) {
 			printf("%s %s\n", callname, HWLOC_VERSION);
 			exit(EXIT_SUCCESS);
@@ -165,11 +169,13 @@ int main(int argc, char *argv[])
 		goto out_with_topo;
 	}
 
-	err = hwloc_topology_export_xml(topo, output ? output : input, 0);
-	if (err < 0) {
-		fprintf(stderr, "Failed to export patched topology %s\n", output);
-		goto out_with_topo;
-	}
+        if (!dryrun) {
+		err = hwloc_topology_export_xml(topo, output ? output : input, 0);
+		if (err < 0) {
+			fprintf(stderr, "Failed to export patched topology %s\n", output);
+			goto out_with_topo;
+		}
+        }
 
 	hwloc_topology_destroy(topo);
 	hwloc_topology_diff_destroy(firstdiff);
