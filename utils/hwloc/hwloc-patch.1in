@@ -32,6 +32,9 @@ hwloc-patch \- Apply a topology difference to an existing XML topology
 \fB\-R \-\-reverse\fR
 Reverse the sense the difference file.
 .TP
+\fB\-\-dry\-run\fR
+Check if the patch applies, but do not actually write the result.
+.TP
 \fB\-\-version\fR
 Report version and exit.
 .TP
@@ -90,6 +93,10 @@ hwloc-patch's operation is best described through several examples.
 Apply a XML topology difference file to an existing topology:
 
     $ hwloc-patch fourmi023.xml diff.xml fourmi023-new.xml
+
+Check if a XML topology difference file could apply to an existing topology but do not apply it:
+
+    $ hwloc-patch --dry-run fourmi023.xml diff.xml
 
 Apply a XML topology difference file whose refname field contains the right input topology:
 

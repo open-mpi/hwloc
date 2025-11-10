@@ -430,6 +430,7 @@ complete -F _hwloc_diff hwloc-diff
 
 _hwloc_patch(){
     local OPTIONS=(-R --reverse
+		   --dry-run
 		   --version
 		   -h --help
 		  )

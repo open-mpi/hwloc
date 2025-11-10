@@ -26,6 +26,7 @@ Version 2.13
   processor?" is replaced with "How do I find the local HBM NUMA node
   on heterogeneous memory systems?"
 * Drop support for Windows before 7 or Server 2008 R2.
+* hwloc-patch now has a --dry-run option.
 
 
 Version 2.12.2
