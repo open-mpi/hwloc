@@ -41,6 +41,7 @@ struct hwloc_xml_backend_data_s {
   void (*close_child)(struct hwloc__xml_import_state_s * state);
   int (*get_content)(struct hwloc__xml_import_state_s * state, const char **beginp, size_t expected_length); /* return 0 on empty content (and sets beginp to empty string), 1 on actual content, -1 on error or unexpected content length */
   void (*close_content)(struct hwloc__xml_import_state_s * state);
+  int show_errors;
   char * msgprefix;
   void *data; /* libxml2 doc, or nolibxml buffer */
   unsigned version_major, version_minor;
