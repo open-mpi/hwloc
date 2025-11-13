@@ -103,6 +103,10 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(XML);
         else if (!hwloc_strncasecmp(tmp, "synthetic", 9))
           HWLOC_SHOWMSG_TOGGLE(SYNTHETIC);
+        else if (!hwloc_strncasecmp(tmp, "components", 10))
+          HWLOC_SHOWMSG_TOGGLE(COMPONENTS);
+        else if (!hwloc_strncasecmp(tmp, "plugins", 7))
+          HWLOC_SHOWMSG_TOGGLE(PLUGINS);
         else if (!hwloc_strncasecmp(tmp, "none", 4))
           mask = 0;
         tmp = next;

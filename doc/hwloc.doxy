@@ -1056,10 +1056,12 @@ following environment variables.
   except the non-critical ones emitted by the binding code.
 
   Valid keywords: <tt>all</tt>, <tt>critical</tt>, <tt>bind</tt>,
-  <tt>xml</tt>, <tt>synthetic</tt>, <tt>none</tt>.
+  <tt>xml</tt>, <tt>synthetic</tt>, <tt>components</tt>, <tt>plugins</tt>, <tt>none</tt>.
 
   This supersedes the former HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE
-  and HWLOC_SYNTHETIC_VERBOSE variables.
+  and HWLOC_SYNTHETIC_VERBOSE variables. It also includes some error messages
+  about components and plugins previously enabled through HWLOC_COMPONENTS_VERBOSE
+  and HWLOC_PLUGINS_VERBOSE.
   </dd>
 
 
@@ -1313,6 +1315,9 @@ following environment variables.
   This is the recommended way to list the available components
   with their priority
   (all of them are <em>registered</em> at startup).
+
+  Error messages about components are controled by the <tt>components</tt>
+  keyword in the HWLOC_SHOW_ERRORS variable.
   </dd>
 
 <dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
@@ -1325,6 +1330,9 @@ following environment variables.
   <dd>displays verbose information about plugins.
   List which directories are scanned, which files are loaded,
   and which components are successfully loaded.
+
+  Error messages about plugins are controled by the <tt>plugins</tt>
+  keyword in the HWLOC_SHOW_ERRORS variable.
   </dd>
 
 <dt>HWLOC_PLUGINS_BLACKLIST=filename1,filename2,...</dt>
@@ -3331,9 +3339,12 @@ Therefore, they may only be loaded
 (e.g. with <tt>hwloc_topology_set_xml()</tt>)
 if no other component is enabled.
 
+Passing <tt>components</tt> in the HWLOC_SHOW_ERRORS variable
+enables the reporting of error messages related to components.
 The environment variable <tt>HWLOC_COMPONENTS_VERBOSE</tt>
-may be set to get verbose messages about available components
+may also be set to get verbose messages about available components
 (including their priority) and enabling as backends.
+See \ref envvar.
 
 
 \section plugins_select Selecting which components to use
@@ -3400,6 +3411,12 @@ requests it, as explained in the previous sections.
 
 Also note that plugins should carefully be enabled and used when
 embedding hwloc in another project, see \ref embed for details.
+
+Passing <tt>plugins</tt> in the HWLOC_SHOW_ERRORS variable
+enables the reporting of error messages related to plugins.
+The environment variable <tt>HWLOC_PLUGINS_VERBOSE</tt>
+may also be set to get verbose messages about plugins.
+See \ref envvar.
 
 
 \section plugins_list Existing components and plugins
@@ -4996,6 +5013,9 @@ The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete
 (but still supported), superseded by HWLOC_SHOW_ERRORS, see \envvar.
 
+Error messages from plugins and components are now controlled by
+HWLOC_SHOW_ERRORS as well (while verbose debug messages remain in
+HWLOC_PLUGINS_VERBOSE and HWLOC_COMPONENTS_VERBOSE).
 
 
 */

@@ -26,8 +26,10 @@ static struct hwloc_disc_component * hwloc_disc_components = NULL;
 static unsigned hwloc_components_users = 0; /* first one initializes, last ones destroys */
 
 static int hwloc_components_verbose = 0;
+static int hwloc_show_component_errors = 0;
 #ifdef HWLOC_HAVE_PLUGINS
 static int hwloc_plugins_verbose = 0;
+static int hwloc_show_plugin_errors = 0;
 static const char * hwloc_plugins_blacklist = NULL;
 #if defined(HWLOC_WIN_SYS) && defined(__CYGWIN__)
 #define _stat stat
@@ -322,14 +324,14 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   /* dlopen and get the component structure */
   handle = hwloc_dlopenext(filename);
   if (!handle) {
-    if (hwloc_plugins_verbose)
+    if (hwloc_show_plugin_errors)
       fprintf(stderr, "hwloc: Failed to load plugin: %s\n", hwloc_dlerror());
     goto out;
   }
 
   componentsymbolname = malloc(strlen(basename)+10+1);
   if (!componentsymbolname) {
-    if (hwloc_plugins_verbose)
+    if (hwloc_show_plugin_errors)
       fprintf(stderr, "hwloc: Failed to allocation component `%s' symbol\n",
 	      basename);
     goto out_with_handle;
@@ -337,14 +339,14 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   sprintf(componentsymbolname, "%s_component", basename);
   component = hwloc_dlsym(handle, componentsymbolname);
   if (!component) {
-    if (hwloc_plugins_verbose)
+    if (hwloc_show_plugin_errors)
       fprintf(stderr, "hwloc: Failed to find component symbol `%s'\n",
 	      componentsymbolname);
     free(componentsymbolname);
     goto out_with_handle;
   }
   if (component->abi != HWLOC_COMPONENT_ABI) {
-    if (hwloc_plugins_verbose)
+    if (hwloc_show_plugin_errors)
       fprintf(stderr, "hwloc: Plugin symbol ABI %u instead of %d\n",
 	      component->abi, HWLOC_COMPONENT_ABI);
     free(componentsymbolname);
@@ -357,18 +359,18 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
 
   if (HWLOC_COMPONENT_TYPE_DISC == component->type) {
     if (strncmp(basename, "hwloc_", 6)) {
-      if (hwloc_plugins_verbose)
+      if (hwloc_show_plugin_errors)
 	fprintf(stderr, "hwloc: Plugin name `%s' doesn't match its type DISCOVERY\n", basename);
       goto out_with_handle;
     }
   } else if (HWLOC_COMPONENT_TYPE_XML == component->type) {
     if (strncmp(basename, "hwloc_xml_", 10)) {
-      if (hwloc_plugins_verbose)
+      if (hwloc_show_plugin_errors)
 	fprintf(stderr, "hwloc: Plugin name `%s' doesn't match its type XML\n", basename);
       goto out_with_handle;
     }
   } else {
-    if (hwloc_plugins_verbose)
+    if (hwloc_show_plugin_errors)
       fprintf(stderr, "hwloc: Plugin name `%s' has invalid type %u\n",
 	      basename, (unsigned) component->type);
     goto out_with_handle;
@@ -433,6 +435,7 @@ hwloc_plugins_init(void)
 
   verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
   hwloc_plugins_verbose = verboseenv ? atoi(verboseenv) : 0;
+  hwloc_show_plugin_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_PLUGINS) | hwloc_plugins_verbose;
 
   hwloc_plugins_blacklist = getenv("HWLOC_PLUGINS_BLACKLIST");
 
@@ -470,14 +473,14 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 
   /* check that the component name is valid */
   if (!strcmp(component->name, HWLOC_COMPONENT_STOP_NAME)) {
-    if (hwloc_components_verbose)
+    if (hwloc_show_component_errors)
       fprintf(stderr, "hwloc: Cannot register discovery component with reserved name `" HWLOC_COMPONENT_STOP_NAME "'\n");
     return -1;
   }
   if (strchr(component->name, HWLOC_COMPONENT_EXCLUDE_CHAR)
       || strchr(component->name, HWLOC_COMPONENT_PHASESEP_CHAR)
       || strcspn(component->name, HWLOC_COMPONENT_SEPS) != strlen(component->name)) {
-    if (hwloc_components_verbose)
+    if (hwloc_show_component_errors)
       fprintf(stderr, "hwloc: Cannot register discovery component with name `%s' containing reserved characters `%c" HWLOC_COMPONENT_SEPS "'\n",
 	      component->name, HWLOC_COMPONENT_EXCLUDE_CHAR);
     return -1;
@@ -493,7 +496,7 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 				   |HWLOC_DISC_PHASE_MISC
 				   |HWLOC_DISC_PHASE_ANNOTATE
 				   |HWLOC_DISC_PHASE_TWEAK))) {
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (hwloc_show_component_errors)
       fprintf(stderr, "hwloc: Cannot register discovery component `%s' with invalid phases 0x%x\n",
               component->name, component->phases);
     return -1;
@@ -558,6 +561,7 @@ hwloc_components_init(void)
 
   verboseenv = getenv("HWLOC_COMPONENTS_VERBOSE");
   hwloc_components_verbose = verboseenv ? atoi(verboseenv) : 0;
+  hwloc_show_component_errors = HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_COMPONENTS) | hwloc_components_verbose;
 
 #ifdef HWLOC_HAVE_PLUGINS
   hwloc_plugins_init();
@@ -583,7 +587,7 @@ hwloc_components_init(void)
   /* hwloc_static_components is created by configure in static-components.h */
   for(i=0; NULL != hwloc_static_components[i]; i++) {
     if (hwloc_static_components[i]->flags) {
-      if (HWLOC_SHOW_CRITICAL_ERRORS())
+      if (hwloc_show_component_errors)
         fprintf(stderr, "hwloc: Ignoring static component with invalid flags %lx\n",
                 hwloc_static_components[i]->flags);
       continue;
@@ -591,7 +595,7 @@ hwloc_components_init(void)
 
     /* initialize the component */
     if (hwloc_static_components[i]->init && hwloc_static_components[i]->init(0) < 0) {
-      if (hwloc_components_verbose)
+      if (hwloc_show_component_errors)
 	fprintf(stderr, "hwloc: Ignoring static component, failed to initialize\n");
       continue;
     }
@@ -612,7 +616,7 @@ hwloc_components_init(void)
 #ifdef HWLOC_HAVE_PLUGINS
   for(desc = hwloc_plugins; NULL != desc; desc = desc->next) {
     if (desc->component->flags) {
-      if (HWLOC_SHOW_CRITICAL_ERRORS())
+      if (hwloc_show_component_errors)
         fprintf(stderr, "hwloc: Ignoring plugin `%s' component with invalid flags %lx\n",
                 desc->name, desc->component->flags);
       continue;
@@ -620,7 +624,7 @@ hwloc_components_init(void)
 
     /* initialize the component */
     if (desc->component->init && desc->component->init(0) < 0) {
-      if (hwloc_components_verbose)
+      if (hwloc_show_component_errors)
 	fprintf(stderr, "hwloc: Ignoring plugin `%s', failed to initialize\n", desc->name);
       continue;
     }
@@ -848,7 +852,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   backend = comp->instantiate(topology, comp, topology->backend_excluded_phases | blacklisted_phases,
 			      NULL, NULL, NULL);
   if (!backend) {
-    if (hwloc_components_verbose || (envvar_forced && HWLOC_SHOW_CRITICAL_ERRORS()))
+    if (hwloc_show_component_errors)
       fprintf(stderr, "hwloc: Failed to instantiate discovery component `%s'\n", comp->name);
     return -1;
   }
@@ -945,7 +949,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  if (comp->phases & ~blacklisted_phases)
 	    hwloc_disc_component_try_enable(topology, comp, 1 /* envvar forced */, blacklisted_phases);
 	} else {
-          if (HWLOC_SHOW_CRITICAL_ERRORS())
+          if (hwloc_show_component_errors)
             fprintf(stderr, "hwloc: Cannot find discovery component `%s'\n", name);
 	}
 
@@ -1078,7 +1082,7 @@ hwloc_backend_enable(struct hwloc_backend *backend)
 
   /* check backend flags */
   if (backend->flags) {
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (hwloc_show_component_errors)
       fprintf(stderr, "hwloc: Cannot enable discovery component `%s' phases 0x%x with unknown flags %lx\n",
               backend->component->name, backend->component->phases, backend->flags);
     return -1;

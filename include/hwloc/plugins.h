@@ -396,14 +396,16 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 
 #define HWLOC_SHOW_ERRORS(_flag) (hwloc_show_errors_mask() & (_flag))
 
-#define HWLOC_SHOWMSG_CRITICAL  (1UL<<0)
+#define HWLOC_SHOWMSG_CRITICAL   (1UL<<0)
 /* non-critical messages:
  * failure to initialize CUDA, etc. */
-#define HWLOC_SHOWMSG_BIND      (1UL<<1) /* binding */
-#define HWLOC_SHOWMSG_SYNTHETIC (1UL<<2) /* synthetic */
-#define HWLOC_SHOWMSG_XML       (1UL<<3) /* XML */
+#define HWLOC_SHOWMSG_BIND       (1UL<<1) /* binding */
+#define HWLOC_SHOWMSG_SYNTHETIC  (1UL<<2) /* synthetic */
+#define HWLOC_SHOWMSG_XML        (1UL<<3) /* XML */
+#define HWLOC_SHOWMSG_COMPONENTS (1UL<<4) /* Components */
+#define HWLOC_SHOWMSG_PLUGINS    (1UL<<5) /* Plugins */
 /* all messages */
-#define HWLOC_SHOWMSG_ALL       (~0UL)
+#define HWLOC_SHOWMSG_ALL        (~0UL)
 
 /* backward compatibility until all callers are converted to passing a mask */
 #define HWLOC_SHOW_CRITICAL_ERRORS() HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL)
