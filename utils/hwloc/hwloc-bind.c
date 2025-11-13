@@ -193,11 +193,9 @@ int main(int argc, char *argv[])
   }
 
   /* show binding error messages, e.g. PREFERRED_MANY not supported by Linux kernel */
-  env = getenv("HWLOC_HIDE_ERRORS");
-  if (!env || atoi(env) != 2) {
-    if (!getenv("HWLOC_SHOW_ERRORS"))
-      putenv((char *) "HWLOC_SHOW_ERRORS=bind");
-  }
+  env = getenv("HWLOC_SHOW_ERRORS");
+  if (!env)
+    putenv((char *) "HWLOC_SHOW_ERRORS=bind");
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_all_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_ALL);

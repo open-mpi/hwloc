@@ -65,28 +65,84 @@ int hwloc_topology_abi_check(hwloc_topology_t topology)
   return topology->topology_abi != HWLOC_TOPOLOGY_ABI ? -1 : 0;
 }
 
-/* callers should rather use wrappers HWLOC_SHOW_ALL_ERRORS() and HWLOC_SHOW_CRITICAL_ERRORS() for clarity */
-int hwloc_hide_errors(void)
+/* callers should rather use HWLOC_SHOW_ERRORS() for clarity */
+unsigned long hwloc_show_errors_mask(void)
 {
-  static int hide = 1; /* only show critical errors by default. lstopo will show others */
+  static unsigned long mask = HWLOC_SHOWMSG_CRITICAL;
   static int checked = 0;
   if (!checked) {
-    const char *envvar = getenv("HWLOC_HIDE_ERRORS");
-    if (envvar) {
-      hide = atoi(envvar);
+    const char *envvar;
+    envvar = getenv("HWLOC_SHOW_ERRORS");
+     if (envvar) {
+      const char *tmp = envvar, * next;
+      mask = 0;
+      while (*tmp) {
+        size_t len;
+        int negate = 0;
+        if (*tmp == '!' || *tmp == '-' || *tmp == '~') {
+          negate = 1;
+          tmp++;
+        }
+        len = strcspn(tmp, " ,|+");
+        next = tmp+len+1;
+
+#define HWLOC_SHOWMSG_TOGGLE(NAME) do {     \
+        if (negate)                         \
+          mask &= ~HWLOC_SHOWMSG_##NAME;    \
+        else                                \
+          mask |= HWLOC_SHOWMSG_##NAME;     \
+        } while (0)
+
+        if (!hwloc_strncasecmp(tmp, "all", 2))
+          HWLOC_SHOWMSG_TOGGLE(ALL);
+        else if (!hwloc_strncasecmp(tmp, "critical", 4))
+          HWLOC_SHOWMSG_TOGGLE(CRITICAL);
+        else if (!hwloc_strncasecmp(tmp, "bind", 4))
+          HWLOC_SHOWMSG_TOGGLE(BIND);
+        else if (!hwloc_strncasecmp(tmp, "xml", 3))
+          HWLOC_SHOWMSG_TOGGLE(XML);
+        else if (!hwloc_strncasecmp(tmp, "synthetic", 9))
+          HWLOC_SHOWMSG_TOGGLE(SYNTHETIC);
+        else if (!hwloc_strncasecmp(tmp, "components", 10))
+          HWLOC_SHOWMSG_TOGGLE(COMPONENTS);
+        else if (!hwloc_strncasecmp(tmp, "plugins", 7))
+          HWLOC_SHOWMSG_TOGGLE(PLUGINS);
+        else if (!hwloc_strncasecmp(tmp, "none", 4))
+          mask = 0;
+        tmp = next;
+      }
+
+     } else {
+       /* backward compat with 2.x */
+       const char *misc_envvar;
+       envvar = getenv("HWLOC_HIDE_ERRORS");
+       if (envvar) {
+         int val = atoi(envvar);
+         if (!val)
+           mask = HWLOC_SHOWMSG_ALL;
+         else if (val >= 2)
+           mask = 0;
+       }
+       misc_envvar = getenv("HWLOC_XML_VERBOSE");
+       if (misc_envvar && atoi(misc_envvar))
+         mask |= HWLOC_SHOWMSG_XML;
+       misc_envvar = getenv("HWLOC_SYNTHETIC_VERBOSE");
+       if (misc_envvar && atoi(misc_envvar))
+         mask |= HWLOC_SHOWMSG_SYNTHETIC;
+     }
 #ifdef HWLOC_DEBUG
-    } else {
+    if (!envvar) {
       /* if debug is enabled and HWLOC_DEBUG_VERBOSE isn't forced to 0,
-       * show all errors jus like we show all debug messages.
+       * show all errors just like we show all debug messages.
        */
       envvar = getenv("HWLOC_DEBUG_VERBOSE");
-      if (!envvar || atoi(envvar))
-        hide = 0;
+      if (envvar && atoi(envvar))
+        mask = HWLOC_SHOWMSG_ALL;
+     }
 #endif
-    }
-    checked = 1;
+     checked = 1;
   }
-  return hide;
+  return mask;
 }
 
 

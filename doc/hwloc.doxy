@@ -1001,18 +1001,6 @@ following environment variables.
   See also \ref synthetic.
   </dd>
 
-<dt>HWLOC_XML_VERBOSE=1</dt>
-<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
-  <dd>enables verbose messages in the XML or synthetic topology backends.
-  hwloc XML backends (see \ref xml) can emit some error messages to
-  the error output stream.
-  Enabling these verbose messages within hwloc can be useful for
-  understanding failures to parse input XML topologies.
-  Similarly, enabling verbose messages in the synthetic topology
-  backend can help understand why the description string is invalid.
-  See also \ref synthetic.
-  </dd>
-
 <dt>HWLOC_THISSYSTEM=1</dt>
   <dd>enforces the return value of hwloc_topology_is_thissystem(), as if
   ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
@@ -1048,26 +1036,34 @@ following environment variables.
   which gathers all resources but marks the unavailable ones as disallowed.
   </dt>
 
-<dt>HWLOC_HIDE_ERRORS=1</dt>
+
+<dt>HWLOC_SHOW_ERRORS=critical</dt>
   <dd>enables or disables verbose reporting of errors.
-  The hwloc library may issue warnings to the standard error stream
+  The hwloc library may issue warnings and errors to the standard error stream
   when it detects a problem during topology discovery, for instance
   if the operating system (or user) gives contradictory topology
   information.
 
-  By default (1), hwloc only shows critical errors such as invalid
+  By default (<tt>critical</tt>), hwloc only shows critical errors such as invalid
   hardware topology information or invalid configuration.
-  If set to 0 (default in lstopo), more errors are displayed,
+  If set to <tt>all</tt> (default in lstopo), all errors are displayed,
   for instance a failure to initialize CUDA or NVML.
-  If set to 2, no hwloc error messages are shown.
+  If set to empty or <tt>none</tt>, no hwloc error messages are shown.
 
-  Note that additional verbose messages may be enabled with
-  other variables such as HWLOC_GROUPING_VERBOSE.
+  The variable may contain a comma-separated list of keywords,
+  possibly prefixed with a dash to negate them.
+  For instance <tt>all,-bind</tt> enables all error messages
+  except the non-critical ones emitted by the binding code.
+
+  Valid keywords: <tt>all</tt>, <tt>critical</tt>, <tt>bind</tt>,
+  <tt>xml</tt>, <tt>synthetic</tt>, <tt>components</tt>, <tt>plugins</tt>, <tt>none</tt>.
+
+  This supersedes the former HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE
+  and HWLOC_SYNTHETIC_VERBOSE variables. It also includes some error messages
+  about components and plugins previously enabled through HWLOC_COMPONENTS_VERBOSE
+  and HWLOC_PLUGINS_VERBOSE.
   </dd>
-<!-- since 2.12.1, not stable yet, hence not documented but internally used in hwloc-bind
- HWLOC_SHOW_ERRORS=bind
-  show binding errors as if HWLOC_HIDE_ERRORS=0 for them
--->
+
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
   <dd>enables or disables the use of NUMA distances.
@@ -1319,6 +1315,9 @@ following environment variables.
   This is the recommended way to list the available components
   with their priority
   (all of them are <em>registered</em> at startup).
+
+  Error messages about components are controled by the <tt>components</tt>
+  keyword in the HWLOC_SHOW_ERRORS variable.
   </dd>
 
 <dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
@@ -1331,6 +1330,9 @@ following environment variables.
   <dd>displays verbose information about plugins.
   List which directories are scanned, which files are loaded,
   and which components are successfully loaded.
+
+  Error messages about plugins are controled by the <tt>plugins</tt>
+  keyword in the HWLOC_SHOW_ERRORS variable.
   </dd>
 
 <dt>HWLOC_PLUGINS_BLACKLIST=filename1,filename2,...</dt>
@@ -2804,6 +2806,9 @@ that two very similar nodes still have different XML exports
 If a less precise exporting/importing is required, one may want to
 look at \ref synthetic instead.
 
+\note Verbose error messages from importing/exporting XML topology
+may be enabled by passing <tt>xml</tt> in HWLOC_SHOW_ERRORS, see \ref envvar.
+
 
 \section xml_backends libxml2 and minimalistic XML backends
 
@@ -2889,6 +2894,9 @@ will export this topology to XML as usual.
 topology and reimport it on another machine. It is a lot less
 precise than XML but may still be enough when only the hierarchy
 of resources matters.
+
+\note Verbose error messages from importing/exporting synthetic topology
+may be enabled by passing <tt>synthetic</tt> in HWLOC_SHOW_ERRORS, see \ref envvar.
 
 
 \section synthetic_string Synthetic description string
@@ -3331,9 +3339,12 @@ Therefore, they may only be loaded
 (e.g. with <tt>hwloc_topology_set_xml()</tt>)
 if no other component is enabled.
 
+Passing <tt>components</tt> in the HWLOC_SHOW_ERRORS variable
+enables the reporting of error messages related to components.
 The environment variable <tt>HWLOC_COMPONENTS_VERBOSE</tt>
-may be set to get verbose messages about available components
+may also be set to get verbose messages about available components
 (including their priority) and enabling as backends.
+See \ref envvar.
 
 
 \section plugins_select Selecting which components to use
@@ -3400,6 +3411,12 @@ requests it, as explained in the previous sections.
 
 Also note that plugins should carefully be enabled and used when
 embedding hwloc in another project, see \ref embed for details.
+
+Passing <tt>plugins</tt> in the HWLOC_SHOW_ERRORS variable
+enables the reporting of error messages related to plugins.
+The environment variable <tt>HWLOC_PLUGINS_VERBOSE</tt>
+may also be set to get verbose messages about plugins.
+See \ref envvar.
 
 
 \section plugins_list Existing components and plugins
@@ -4386,7 +4403,7 @@ The resulting topology will miss some L3 caches.
 
 If your application does not care about cache sharing, or if you do not plan to
 request cache-aware binding in your process launcher, you may likely ignore
-this error (and hide it by setting HWLOC_HIDE_ERRORS=2 in your environment).
+this error (and hide it by setting HWLOC_SHOW_ERRORS=none in your environment).
 
 Some platforms report similar warnings about conflicting Packages and NUMANodes.
 
@@ -4989,6 +5006,16 @@ removed since their non-strict variants are sufficient.
 
 </ul>
 
+
+\section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+
+The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
+environment variables are now obsolete
+(but still supported), superseded by HWLOC_SHOW_ERRORS, see \envvar.
+
+Error messages from plugins and components are now controlled by
+HWLOC_SHOW_ERRORS as well (while verbose debug messages remain in
+HWLOC_PLUGINS_VERBOSE and HWLOC_COMPONENTS_VERBOSE).
 
 
 */

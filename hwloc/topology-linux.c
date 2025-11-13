@@ -1851,17 +1851,7 @@ static __hwloc_inline void
 warn_preferred_many_fallback(hwloc_const_bitmap_t nodeset)
 {
   static int warned = 0;
-  static int checked_binding_error_env = 0;
-  static int warn_binding_errors = 0;
-  if (!checked_binding_error_env) {
-    char *env = getenv("HWLOC_SHOW_ERRORS");
-    if (env) {
-      if (strstr(env, "bind"))
-        warn_binding_errors = 1;
-    }
-    checked_binding_error_env = 1;
-  }
-  if (!warned && (warn_binding_errors || HWLOC_SHOW_ALL_ERRORS()) && hwloc_bitmap_weight(nodeset) > 1) {
+  if (!warned && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_BIND) && hwloc_bitmap_weight(nodeset) > 1) {
     fprintf(stderr, "[hwloc/membind] MPOL_PREFERRED_MANY not supported by the kernel.\n");
     fprintf(stderr, "If *all* given nodes must be used, use strict binding or the interleave policy.\n");
     fprintf(stderr, "Otherwise the old MPOL_PREFERRED will only use the first given node.\n");

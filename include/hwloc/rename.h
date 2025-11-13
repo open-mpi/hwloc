@@ -658,7 +658,7 @@ extern "C" {
 
 #define hwloc_plugin_check_namespace HWLOC_NAME(plugin_check_namespace)
 
-#define hwloc_hide_errors HWLOC_NAME(hide_errors)
+#define hwloc_show_errors_mask HWLOC_NAME(show_errors_mask)
 #define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
@@ -736,8 +736,6 @@ extern "C" {
 #define hwloc_x86_cpuid HWLOC_NAME(x86_cpuid)
 
 /* private/xml.h */
-
-#define hwloc__xml_verbose HWLOC_NAME(_xml_verbose)
 
 #define hwloc__xml_import_state_s HWLOC_NAME(_xml_import_state_s)
 #define hwloc__xml_import_state_t HWLOC_NAME(_xml_import_state_t)
