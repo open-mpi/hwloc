@@ -121,6 +121,8 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(GL);
         else if (!hwloc_strncasecmp(tmp, "os", 2))
           HWLOC_SHOWMSG_TOGGLE(OS);
+        else if (!hwloc_strncasecmp(tmp, "pci", 3))
+          HWLOC_SHOWMSG_TOGGLE(PCI);
         else if (!hwloc_strncasecmp(tmp, "none", 4))
           mask = 0;
         tmp = next;

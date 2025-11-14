@@ -3133,7 +3133,7 @@ annotate_cxl_dax(hwloc_obj_t obj, unsigned region, int root_fd)
     if (pcibdf) {
       if (interleave_ways) {
         if (interleave_ways >= 16) {
-          if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
+          if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS|HWLOC_SHOWMSG_PCI))
             fprintf(stderr, "hwloc/linux/cxl: Found more than 16 interleaved devices for region%u, ignoring the last ones.\n", region);
           break;
         }
