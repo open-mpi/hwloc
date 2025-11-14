@@ -107,6 +107,18 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(COMPONENTS);
         else if (!hwloc_strncasecmp(tmp, "plugins", 7))
           HWLOC_SHOWMSG_TOGGLE(PLUGINS);
+        else if (!hwloc_strncasecmp(tmp, "rsmi", 4))
+          HWLOC_SHOWMSG_TOGGLE(RSMI);
+        else if (!hwloc_strncasecmp(tmp, "cuda", 4))
+          HWLOC_SHOWMSG_TOGGLE(CUDA);
+        else if (!hwloc_strncasecmp(tmp, "nvml", 4))
+          HWLOC_SHOWMSG_TOGGLE(NVML);
+        else if (!hwloc_strncasecmp(tmp, "l0", 2))
+          HWLOC_SHOWMSG_TOGGLE(L0);
+        else if (!hwloc_strncasecmp(tmp, "opencl", 6))
+          HWLOC_SHOWMSG_TOGGLE(OPENCL);
+        else if (!hwloc_strncasecmp(tmp, "gl", 2))
+          HWLOC_SHOWMSG_TOGGLE(GL);
         else if (!hwloc_strncasecmp(tmp, "none", 4))
           mask = 0;
         tmp = next;

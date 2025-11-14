@@ -404,6 +404,12 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 #define HWLOC_SHOWMSG_XML        (1UL<<3) /* XML */
 #define HWLOC_SHOWMSG_COMPONENTS (1UL<<4) /* Components */
 #define HWLOC_SHOWMSG_PLUGINS    (1UL<<5) /* Plugins */
+#define HWLOC_SHOWMSG_RSMI       (1UL<<6) /* RSMI */
+#define HWLOC_SHOWMSG_CUDA       (1UL<<7) /* CUDA */
+#define HWLOC_SHOWMSG_NVML       (1UL<<8) /* NVML */
+#define HWLOC_SHOWMSG_L0         (1UL<<9) /* L0 */
+#define HWLOC_SHOWMSG_OPENCL     (1UL<<10) /* OpenCL */
+#define HWLOC_SHOWMSG_GL         (1UL<<11) /* GL */
 /* all messages */
 #define HWLOC_SHOWMSG_ALL        (~0UL)
 

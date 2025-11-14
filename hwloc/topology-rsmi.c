@@ -92,7 +92,7 @@ static int get_device_name(uint32_t dv_ind, char *device_name, unsigned int size
   rsmi_status_t rsmi_rc = rsmi_dev_name_get(dv_ind, device_name, size);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get name: %s\n", (unsigned)dv_ind, status_string);
@@ -113,7 +113,7 @@ static int get_device_pci_info(uint32_t dv_ind, uint64_t *bdfid)
   rsmi_status_t rsmi_rc = rsmi_dev_pci_id_get(dv_ind, bdfid);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get PCI Info: %s\n", (unsigned)dv_ind, status_string);
@@ -135,7 +135,7 @@ static int get_device_partition_id(uint32_t dv_ind __hwloc_attribute_unused, uin
   rsmi_status_t rsmi_rc = rsmi_dev_partition_id_get(dv_ind, partid);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get partition ID: %s\n", (unsigned)dv_ind, status_string);
@@ -220,7 +220,7 @@ static int get_device_xgmi_hive_id(uint32_t dv_ind, char *buffer)
   rsmi_status_t rsmi_rc = rsmi_dev_xgmi_hive_id_get(dv_ind, &hive_id);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get hive id: %s\n", (unsigned)dv_ind, status_string);
@@ -245,7 +245,7 @@ static int get_device_io_link_type(uint32_t dv_ind_src, uint32_t dv_ind_dst,
                                                   hops, type);
 
   if (rsmi_rc != RSMI_STATUS_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_rc = rsmi_status_string(rsmi_rc, &status_string);
       fprintf(stderr, "hwloc/rsmi: GPU(%u): Failed to get link type: %s\n", (unsigned)dv_ind_src, status_string);
@@ -283,7 +283,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   ret = rsmi_init(0);
   if (RSMI_STATUS_SUCCESS != ret) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_status_string(ret, &status_string);
       fprintf(stderr, "hwloc/rsmi: Failed to initialize with rsmi_init(): %s\n", status_string);
@@ -295,7 +295,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 
   ret = rsmi_num_monitor_devices(&nb);
   if (RSMI_STATUS_SUCCESS != ret || !nb) {
-    if (RSMI_STATUS_SUCCESS != ret && HWLOC_SHOW_ALL_ERRORS()) {
+    if (RSMI_STATUS_SUCCESS != ret && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
       const char *status_string;
       rsmi_status_string(ret, &status_string);
       fprintf(stderr, "hwloc/rsmi: Failed to get number of devices with rsmi_num_monitor_devices(): %s\n", status_string);

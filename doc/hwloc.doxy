@@ -1055,8 +1055,12 @@ following environment variables.
   For instance <tt>all,-bind</tt> enables all error messages
   except the non-critical ones emitted by the binding code.
 
-  Valid keywords: <tt>all</tt>, <tt>critical</tt>, <tt>bind</tt>,
-  <tt>xml</tt>, <tt>synthetic</tt>, <tt>components</tt>, <tt>plugins</tt>, <tt>none</tt>.
+  Valid keywords for the level of verbosity:
+  <tt>all</tt>, <tt>critical</tt>, <tt>none</tt>.
+
+  Valid keywords for selecting kinds of error messages:
+  <tt>bind</tt>, <tt>xml</tt>, <tt>synthetic</tt>, <tt>components</tt>, <tt>plugins</tt>,
+  <tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt>, <tt>gl</tt>.
 
   This supersedes the former HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE
   and HWLOC_SYNTHETIC_VERBOSE variables. It also includes some error messages

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2020-2024 Inria.  All rights reserved.
+ * Copyright © 2020-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -94,7 +94,7 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
     case ZE_DEVICE_TYPE_MCA: type = "MCA"; break;
     case ZE_DEVICE_TYPE_VPU: type = "VPU"; break;
     default:
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
         fprintf(stderr, "hwloc/levelzero: unexpected device type %u\n", (unsigned) prop->type);
       type = "Unknown";
     }
@@ -215,7 +215,7 @@ hwloc__levelzero_memory_get(zes_device_handle_t zesh,
 
           if (mprop.onSubdevice) {
             if (mprop.subdeviceId >= nr_osdevs || !nr_osdevs || !sub_osdevs) {
-              if (HWLOC_SHOW_ALL_ERRORS())
+              if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
                 fprintf(stderr, "hwloc/levelzero: memory module #%u on unexpected subdeviceId #%u\n", m, mprop.subdeviceId);
               osdev = NULL; /* we'll ignore it but we'll still agregate its subdevice memories into totalHBM/DDRkB */
             } else {
@@ -397,7 +397,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
   i = 0;
   res = zesDriverGet(&i, NULL);
   if (res != ZE_RESULT_SUCCESS || i != nbdrivers) {
-    if (HWLOC_SHOW_ALL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
       fprintf(stderr, "hwloc/levelzero: zesDriverGet returned %x and found %u ZES drivers vs %u ZE drivers\n", res, i, nbdrivers);
     return 0;
   }
@@ -465,7 +465,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
 
       res = zeDeviceGetProperties(zeh, &props);
       if (res != ZE_RESULT_SUCCESS) {
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
           fprintf(stderr, "hwloc/levelzero: zeDeviceGetProperties() failed %x, skipping driver %u device %u\n",
                   res, i, j);
         continue;
@@ -473,7 +473,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       memcpy(uuid.id, props.uuid.id, ZE_MAX_DEVICE_UUID_SIZE);
       res = zesDriverGetDeviceByUuidExp(zesdrh[i], uuid, &zesh, &onSubdevice, &subdeviceId);
       if (res != ZE_RESULT_SUCCESS) {
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
           fprintf(stderr, "hwloc/levelzero: zesDriverGetDeviceByUuidExp() failed %x, skipping driver %u device %u\n",
                   res, i, j);
         continue;
@@ -512,7 +512,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
 
             res = zeDeviceGetProperties(subzeh, &props);
             if (res != ZE_RESULT_SUCCESS) {
-              if (HWLOC_SHOW_ALL_ERRORS())
+              if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
                 fprintf(stderr, "hwloc/levelzero: subdevice zeDeviceGetProperties() failed %x, skipping driver %u device %u\n",
                         res, i, j);
               continue;
@@ -520,7 +520,7 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             memcpy(uuid.id, props.uuid.id, ZE_MAX_DEVICE_UUID_SIZE);
             res = zesDriverGetDeviceByUuidExp(zesdrh[i], uuid, &subzesh, &onSubdevice, &subdeviceId);
             if (res != ZE_RESULT_SUCCESS) {
-              if (HWLOC_SHOW_ALL_ERRORS())
+              if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
                 fprintf(stderr, "hwloc/levelzero: subdevice zesDriverGetDeviceByUuidExp() failed %x, skipping driver %u device %u\n",
                         res, i, j);
               continue;
@@ -769,7 +769,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
   res = zeInit(0);
   if (res != ZE_RESULT_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0)) {
       fprintf(stderr, "hwloc/levelzero: Failed to initialize in zeInit(): 0x%x\n", (unsigned)res);
     }
     return 0;
@@ -777,7 +777,7 @@ hwloc_levelzero_discover(struct hwloc_backend *backend, struct hwloc_disc_status
 
   res = zesInit(0);
   if (res != ZE_RESULT_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS()) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0)) {
       fprintf(stderr, "hwloc/levelzero: Failed to initialize in zesInit(): 0x%x\n", (unsigned)res);
     }
     return 0;
