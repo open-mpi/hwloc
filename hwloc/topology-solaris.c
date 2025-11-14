@@ -636,7 +636,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
-          if (HWLOC_SHOW_CRITICAL_ERRORS())
+          if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
             fprintf(stderr, "hwloc/solaris: kstat_read failed for CPU%u: %s\n", cpuid, strerror(errno));
 	  continue;
 	}
@@ -695,7 +695,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	if (!stat)
 	  {
 	    if (Lpkg_num) {
-              if (HWLOC_SHOW_CRITICAL_ERRORS())
+              if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
                 fprintf(stderr, "hwloc/solaris: could not read package id for CPU%u: %s\n", cpuid, strerror(errno));
             } else {
 	      hwloc_debug("could not read package id for CPU%u: %s\n", cpuid, strerror(errno));
@@ -719,7 +719,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    break;
 #endif
 	  default:
-            if (HWLOC_SHOW_CRITICAL_ERRORS())
+            if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
               fprintf(stderr, "hwloc/solaris: chip_id type %u unknown\n", (unsigned) stat->data_type);
 	    look_chips = 0;
 	    continue;
@@ -748,7 +748,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	if (!stat)
 	  {
 	    if (Lcore_num) {
-              if (HWLOC_SHOW_CRITICAL_ERRORS())
+              if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
                 fprintf(stderr, "hwloc/solaris: could not read core id for CPU%u: %s\n", cpuid, strerror(errno));
             } else {
 	      hwloc_debug("could not read core id for CPU%u: %s\n", cpuid, strerror(errno));
@@ -772,7 +772,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    break;
 #endif
 	  default:
-            if (HWLOC_SHOW_CRITICAL_ERRORS())
+            if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
               fprintf(stderr, "hwloc/solaris: core_id type %u unknown\n", (unsigned) stat->data_type);
 	    look_cores = 0;
 	    continue;
@@ -801,7 +801,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
     } else if (!strcmp("pg_hw_perf", ksp->ks_module)) {
       if (kstat_read(kc, ksp, NULL) == -1) {
-        if (HWLOC_SHOW_CRITICAL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
           fprintf(stderr, "hwloc/solaris: kstat_read failed for module %s name %s instance %d: %s\n", ksp->ks_module, ksp->ks_name, ksp->ks_instance, strerror(errno));
 	continue;
       }

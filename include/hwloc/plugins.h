@@ -410,6 +410,7 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 #define HWLOC_SHOWMSG_L0         (1UL<<9) /* L0 */
 #define HWLOC_SHOWMSG_OPENCL     (1UL<<10) /* OpenCL */
 #define HWLOC_SHOWMSG_GL         (1UL<<11) /* GL */
+#define HWLOC_SHOWMSG_OS         (1UL<<12) /* Operating system */
 /* all messages */
 #define HWLOC_SHOWMSG_ALL        (~0UL)
 

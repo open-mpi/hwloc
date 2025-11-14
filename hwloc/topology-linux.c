@@ -1851,7 +1851,7 @@ static __hwloc_inline void
 warn_preferred_many_fallback(hwloc_const_bitmap_t nodeset)
 {
   static int warned = 0;
-  if (!warned && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_BIND) && hwloc_bitmap_weight(nodeset) > 1) {
+  if (!warned && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_BIND|HWLOC_SHOWMSG_OS) && hwloc_bitmap_weight(nodeset) > 1) {
     fprintf(stderr, "[hwloc/membind] MPOL_PREFERRED_MANY not supported by the kernel.\n");
     fprintf(stderr, "If *all* given nodes must be used, use strict binding or the interleave policy.\n");
     fprintf(stderr, "Otherwise the old MPOL_PREFERRED will only use the first given node.\n");
@@ -3133,7 +3133,7 @@ annotate_cxl_dax(hwloc_obj_t obj, unsigned region, int root_fd)
     if (pcibdf) {
       if (interleave_ways) {
         if (interleave_ways >= 16) {
-          if (HWLOC_SHOW_CRITICAL_ERRORS())
+          if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
             fprintf(stderr, "hwloc/linux/cxl: Found more than 16 interleaved devices for region%u, ignoring the last ones.\n", region);
           break;
         }
@@ -3340,8 +3340,8 @@ list_sysfsnode(struct hwloc_topology *topology,
     char *sn, *tn;
     hwloc_bitmap_asprintf(&sn, nodeset);
     hwloc_bitmap_asprintf(&tn, topology->levels[0][0]->nodeset);
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
-      fprintf(stderr, "hwloc/linux: ignoring nodes because nodeset %s doesn't match existing nodeset %s.\n", tn, sn);
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
+      fprintf(stderr, "hwloc/linux: ignoring sysfs nodes because nodeset %s doesn't match existing nodeset %s.\n", tn, sn);
     free(sn);
     free(tn);
     hwloc_bitmap_free(nodeset);
@@ -3525,7 +3525,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 	failednodes++;
 	continue;
       }
-      if (allow_overlapping_node_cpusets < 2 && HWLOC_SHOW_CRITICAL_ERRORS())
+      if (allow_overlapping_node_cpusets < 2 && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/linux: node P#%u cpuset intersects with previous nodes, forcing its acceptance\n", osnode);
     }
     hwloc_bitmap_or(nodes_cpuset, nodes_cpuset, cpuset);
@@ -5257,7 +5257,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   hwloc_debug("Found sysfs cpu files under /sys/devices/system/cpu with %s topology filenames\n",
 	      old_siblings_filenames ? "old" : "new");
   if (err < 0) {
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
       fprintf(stderr, "hwloc/linux: failed to find sysfs cpu topology directory, aborting linux discovery.\n");
     return -1;
   }
@@ -6625,7 +6625,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
     }
     /* couldn't read a single full string from that buffer, we're screwed */
     if (!boff) {
-      if (HWLOC_SHOW_CRITICAL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/linux: hwloc couldn't read a DMI firmware entry #%u in %s\n",
                 i, path);
       break;
@@ -7104,7 +7104,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
       goto out_with_data;
     }
 #else
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
       fprintf(stderr, "hwloc/linux: Cannot change fsroot without openat() support.\n");
     errno = ENOSYS;
     goto out_with_data;
