@@ -86,7 +86,7 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
   array = calloc(total, sizeof(*array));
   if (!array) {
     if (show_errors)
-      fprintf(stderr, "Failed to allocate synthetic index array of size %lu\n", total);
+      fprintf(stderr, "hwloc/synthetic: Failed to allocate index array of size %lu\n", total);
     goto out;
   }
 
@@ -99,7 +99,7 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
       unsigned idx = strtoul(attr, (char **) &next, 10);
       if (next == attr) {
 	if (show_errors)
-	  fprintf(stderr, "Failed to read synthetic index #%lu at '%s'\n", (unsigned long) i, attr);
+	  fprintf(stderr, "hwloc/synthetic: Failed to read index #%lu at '%s'\n", (unsigned long) i, attr);
 	goto out_with_array;
       }
 
@@ -107,7 +107,7 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
       if (i != total-1) {
 	if (*next != ',') {
 	  if (show_errors)
-	    fprintf(stderr, "Missing comma after synthetic index #%lu at '%s'\n", (unsigned long) i, attr);
+	    fprintf(stderr, "hwloc/synthetic: Missing comma after index #%lu at '%s'\n", (unsigned long) i, attr);
 	  goto out_with_array;
 	}
 	attr = next+1;
@@ -151,13 +151,13 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	step = (unsigned) strtol(tmp, &tmp2, 0);
 	if (tmp2 == tmp || *tmp2 != '*') {
 	  if (show_errors)
-	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number before '*'\n", tmp);
+	    fprintf(stderr, "hwloc/synthetic: Failed to read index interleaving loop '%s' without number before '*'\n", tmp);
 	  free(loops);
 	  goto out_with_array;
 	}
 	if (!step) {
 	  if (show_errors)
-	    fprintf(stderr, "Invalid interleaving loop with step 0 at '%s'\n", tmp);
+	    fprintf(stderr, "hwloc/synthetic: Invalid interleaving loop with step 0 at '%s'\n", tmp);
 	  free(loops);
 	  goto out_with_array;
 	}
@@ -165,13 +165,13 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	nb = (unsigned) strtol(tmp2, &tmp3, 0);
 	if (tmp3 == tmp2 || (*tmp3 && *tmp3 != ':' && *tmp3 != ')' && *tmp3 != ' ')) {
 	  if (show_errors)
-	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number between '*' and ':'\n", tmp);
+	    fprintf(stderr, "hwloc/synthetic: Failed to read index interleaving loop '%s' without number between '*' and ':'\n", tmp);
 	  free(loops);
 	  goto out_with_array;
 	}
 	if (!nb) {
 	  if (show_errors)
-	    fprintf(stderr, "Invalid interleaving loop with number 0 at '%s'\n", tmp2);
+	    fprintf(stderr, "hwloc/synthetic: Invalid interleaving loop with number 0 at '%s'\n", tmp2);
 	  free(loops);
 	  goto out_with_array;
 	}
@@ -199,13 +199,13 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	err = hwloc_type_sscanf(tmp, &type, &attrs, sizeof(attrs));
 	if (err < 0) {
 	  if (show_errors)
-	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
+	    fprintf(stderr, "hwloc/synthetic: Failed to read index interleaving loop type '%s'\n", tmp);
 	  free(loops);
 	  goto out_with_array;
 	}
 	if (type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	  if (show_errors)
-	    fprintf(stderr, "Misc object type disallowed in synthetic index interleaving loop type '%s'\n", tmp);
+	    fprintf(stderr, "hwloc/synthetic: Misc object type disallowed in index interleaving loop type '%s'\n", tmp);
 	  free(loops);
 	  goto out_with_array;
 	}
@@ -225,7 +225,7 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	}
 	if (loops[cur_loop].level_depth == (unsigned)-1) {
 	  if (show_errors)
-	    fprintf(stderr, "Failed to find level for synthetic index interleaving loop type '%s'\n",
+	    fprintf(stderr, "hwloc/synthetic: Failed to find level for index interleaving loop type '%s'\n",
 		    tmp);
 	  free(loops);
 	  goto out_with_array;
@@ -245,7 +245,7 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	for(i=0; i<nr_loops; i++) {
 	  if (loops[i].level_depth == mydepth && i != cur_loop) {
 	    if (show_errors)
-	      fprintf(stderr, "Invalid duplicate interleaving loop type in synthetic index '%s'\n", attr);
+	      fprintf(stderr, "hwloc/synthetic: Invalid duplicate interleaving loop type in index '%s'\n", attr);
 	    free(loops);
 	    goto out_with_array;
 	  }
@@ -275,7 +275,7 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	nr_loops++;
       } else {
 	if (show_errors)
-	  fprintf(stderr, "Invalid index interleaving total width %lu instead of %lu\n", nbs, total);
+	  fprintf(stderr, "hwloc/synthetic: Invalid index interleaving total width %lu instead of %lu\n", nbs, total);
 	free(loops);
 	goto out_with_array;
       }
@@ -297,12 +297,12 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
     for(j=0; j<total; j++) {
       if (array[j] >= total) {
 	if (show_errors)
-	  fprintf(stderr, "Invalid index interleaving generates out-of-range index %u\n", array[j]);
+	  fprintf(stderr, "hwloc/synthetic: Invalid index interleaving generates out-of-range index %u\n", array[j]);
 	goto out_with_array;
       }
       if (!array[j] && j) {
 	if (show_errors)
-	  fprintf(stderr, "Invalid index interleaving generates duplicate index values\n");
+	  fprintf(stderr, "hwloc/synthetic: Invalid index interleaving generates duplicate index values\n");
 	goto out_with_array;
       }
     }
@@ -368,7 +368,7 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
   next_pos = (const char *) strchr(attrs, ')');
   if (!next_pos) {
     if (show_errors)
-      fprintf(stderr, "Missing attribute closing bracket in synthetic string doesn't have a number of objects at '%s'\n", attrs);
+      fprintf(stderr, "hwloc/synthetic: Missing attribute closing bracket in description at '%s'\n", attrs);
     errno = EINVAL;
     return -1;
   }
@@ -401,7 +401,7 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
       attrs++;
     else if (')' != *attrs) {
       if (show_errors)
-	fprintf(stderr, "Missing parameter separator at '%s'\n", attrs);
+	fprintf(stderr, "hwloc/synthetic: Missing parameter separator at '%s'\n", attrs);
       errno = EINVAL;
       return -1;
     }
@@ -411,7 +411,7 @@ hwloc_synthetic_parse_attrs(const char *attrs, const char **next_posp,
 
   if (index_string) {
     if (sind->string && show_errors)
-      fprintf(stderr, "Overwriting duplicate indexes attribute with last occurence\n");
+      fprintf(stderr, "hwloc/synthetic: Overwriting duplicate indexes attribute with last occurence\n");
     sind->string = index_string;
     sind->string_length = (unsigned long)index_string_length;
   }
@@ -525,13 +525,13 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
       if (hwloc_type_sscanf(pos, &type, &attrs, sizeof(attrs)) < 0) {
 	if (show_errors)
-	  fprintf(stderr, "Synthetic string with unknown attached object type at '%s'\n", pos);
+	  fprintf(stderr, "hwloc/synthetic: Description with unknown attached object type at '%s'\n", pos);
 	errno = EINVAL;
 	goto error;
       }
       if (type != HWLOC_OBJ_NUMANODE) {
 	if (show_errors)
-	  fprintf(stderr, "Synthetic string with disallowed attached object type at '%s'\n", pos);
+	  fprintf(stderr, "hwloc/synthetic: Description with disallowed attached object type at '%s'\n", pos);
 	errno = EINVAL;
 	goto error;
       }
@@ -553,7 +553,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       next_pos = strchr(pos, ']');
       if (!next_pos) {
 	if (show_errors)
-	  fprintf(stderr,"Synthetic string doesn't have a closing `]' after attached object type at '%s'\n", pos);
+	  fprintf(stderr,"hwloc/synthetic: Description doesn't have a closing `]' after attached object type at '%s'\n", pos);
 	errno = EINVAL;
 	goto error;
       }
@@ -586,14 +586,14 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	  /* FIXME: allow generic "Cache" string? would require to deal with possibly duplicate cache levels.
            * if so, NO_EXTENDED export may export "Cache" but it wouldn't be importable in old 2.x releases */
 	  if (show_errors)
-	    fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
+	    fprintf(stderr, "hwloc/synthetic: Description with unknown object type at '%s'\n", pos);
 	  errno = EINVAL;
 	  goto error;
 	}
       }
       if (type == HWLOC_OBJ_MACHINE || type == HWLOC_OBJ_MISC || type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE) {
 	if (show_errors)
-	  fprintf(stderr, "Synthetic string with disallowed object type at '%s'\n", pos);
+	  fprintf(stderr, "hwloc/synthetic: Description with disallowed object type at '%s'\n", pos);
 	errno = EINVAL;
 	goto error;
       }
@@ -601,7 +601,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       next_pos = strchr(pos, ':');
       if (!next_pos) {
 	if (show_errors)
-	  fprintf(stderr,"Synthetic string doesn't have a `:' after object type at '%s'\n", pos);
+	  fprintf(stderr,"hwloc/synthetic: Description doesn't have a `:' after object type at '%s'\n", pos);
 	errno = EINVAL;
 	goto error;
       }
@@ -624,13 +624,13 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     item = strtoul(pos, (char **)&next_pos, 0);
     if (next_pos == pos) {
       if (show_errors)
-	fprintf(stderr,"Synthetic string doesn't have a number of objects at '%s'\n", pos);
+	fprintf(stderr,"hwloc/synthetic: Description doesn't have a number of objects at '%s'\n", pos);
       errno = EINVAL;
       goto error;
     }
     if (!item) {
       if (show_errors)
-	fprintf(stderr,"Synthetic string with disallowed 0 number of objects at '%s'\n", pos);
+	fprintf(stderr,"hwloc/synthetic: Description with disallowed 0 number of objects at '%s'\n", pos);
       errno = EINVAL;
       goto error;
     }
@@ -649,13 +649,13 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     if (count + 1 >= HWLOC_SYNTHETIC_MAX_DEPTH) {
       if (show_errors)
-	fprintf(stderr,"Too many synthetic levels, max %d\n", HWLOC_SYNTHETIC_MAX_DEPTH);
+	fprintf(stderr,"hwloc/synthetic: Too many levels, max %d\n", HWLOC_SYNTHETIC_MAX_DEPTH);
       errno = EINVAL;
       goto error;
     }
     if (item > UINT_MAX) {
       if (show_errors)
-	fprintf(stderr,"Too big arity, max %u\n", UINT_MAX);
+	fprintf(stderr,"hwloc/synthetic: Too big arity, max %u\n", UINT_MAX);
       errno = EINVAL;
       goto error;
     }
@@ -666,7 +666,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
   if (data->level[count-1].attr.type != HWLOC_OBJ_TYPE_NONE && data->level[count-1].attr.type != HWLOC_OBJ_PU) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot use non-PU type for last level\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot use non-PU type for last level\n");
     errno = EINVAL;
     return -1;
   }
@@ -685,42 +685,42 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   /* sanity checks */
   if (!type_count[HWLOC_OBJ_PU]) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string missing ending number of PUs\n");
+      fprintf(stderr, "hwloc/synthetic: Description missing ending number of PUs\n");
     errno = EINVAL;
     return -1;
   } else if (type_count[HWLOC_OBJ_PU] > 1) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot have several PU levels\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot have several PU levels\n");
     errno = EINVAL;
     return -1;
   }
   if (type_count[HWLOC_OBJ_PACKAGE] > 1) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot have several package levels\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot have several package levels\n");
     errno = EINVAL;
     return -1;
   }
   if (type_count[HWLOC_OBJ_DIE] > 1) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot have several die levels\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot have several die levels\n");
     errno = EINVAL;
     return -1;
   }
   if (type_count[HWLOC_OBJ_NUMANODE] > 1) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot have several NUMA node levels\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot have several NUMA node levels\n");
     errno = EINVAL;
     return -1;
   }
   if (type_count[HWLOC_OBJ_NUMANODE] && data->numa_attached_nr) {
     if (show_errors)
-      fprintf(stderr,"Synthetic string cannot have NUMA nodes both as a level and attached\n");
+      fprintf(stderr,"hwloc/synthetic: Description cannot have NUMA nodes both as a level and attached\n");
     errno = EINVAL;
     return -1;
   }
   if (type_count[HWLOC_OBJ_CORE] > 1) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot have several core levels\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot have several core levels\n");
     errno = EINVAL;
     return -1;
   }
@@ -733,7 +733,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
   if (unset && unset != count-2) {
     if (show_errors)
-      fprintf(stderr, "Synthetic string cannot mix unspecified and specified types for levels\n");
+      fprintf(stderr, "hwloc/synthetic: Description cannot mix unspecified and specified types for levels\n");
     errno = EINVAL;
     return -1;
   }
@@ -819,7 +819,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   if (!type_count[HWLOC_OBJ_NUMANODE] && !data->numa_attached_nr) {
     /* insert a NUMA level below the automatic machine root */
     if (show_errors)
-      fprintf(stderr, "Inserting a NUMA level with a single object at depth 1\n");
+      fprintf(stderr, "hwloc/synthetic: Inserting a NUMA level with a single object at depth 1\n");
     /* move existing levels by one */
     memmove(&data->level[2], &data->level[1], count*sizeof(struct hwloc_synthetic_level_data_s));
     data->level[1].attr.type = HWLOC_OBJ_NUMANODE;
@@ -1393,7 +1393,7 @@ hwloc__export_synthetic_memory_children(struct hwloc_topology * topology, unsign
       if (show_errors && numanode->memory_arity > 1) {
         static int warned = 0;
         if (!warned)
-          fprintf(stderr, "Ignoring non-first memory children at non-first level of memory hierarchy.\n");
+          fprintf(stderr, "hwloc/synthetic: Ignoring non-first memory children at non-first level of memory hierarchy.\n");
         warned = 1;
       }
       numanode = numanode->memory_first_child;
@@ -1508,7 +1508,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
 
   if (!obj->symmetric_subtree) {
     if (show_errors)
-      fprintf(stderr, "Cannot export to synthetic unless topology is symmetric (root->symmetric_subtree must be set).\n");
+      fprintf(stderr, "hwloc/synthetic: Cannot export description unless topology is symmetric (root->symmetric_subtree must be set).\n");
     errno = EINVAL;
     return -1;
   }
@@ -1516,7 +1516,7 @@ hwloc_topology_export_synthetic(struct hwloc_topology * topology,
   if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_IGNORE_MEMORY)
       && hwloc_check_memory_symmetric(topology) < 0) {
     if (show_errors)
-      fprintf(stderr, "Cannot export to synthetic unless memory is attached symmetrically.\n");
+      fprintf(stderr, "hwloc/synthetic: Cannot export description unless memory is attached symmetrically.\n");
     errno = EINVAL;
     return -1;
   }
