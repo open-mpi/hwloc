@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2020-2024 Inria.  All rights reserved.
+ * Copyright © 2020-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -509,7 +509,7 @@ hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
       heuristics = HWLOC_CPUKINDS_RANKING_FORCED_EFFICIENCY;
     else if (!strcmp(env, "no_forced_efficiency"))
       heuristics = HWLOC_CPUKINDS_RANKING_NO_FORCED_EFFICIENCY;
-    else if (HWLOC_SHOW_CRITICAL_ERRORS())
+    else if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL))
       fprintf(stderr, "hwloc: Failed to recognize HWLOC_CPUKINDS_RANKING value %s\n", env);
   }
 

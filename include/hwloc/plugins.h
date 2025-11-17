@@ -416,10 +416,6 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 /* all messages */
 #define HWLOC_SHOWMSG_ALL        (~0UL)
 
-/* backward compatibility until all callers are converted to passing a mask */
-#define HWLOC_SHOW_CRITICAL_ERRORS() HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL)
-#define HWLOC_SHOW_ALL_ERRORS() HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_ALL)
-
 
 /** \brief Add an object to the topology.
  *
