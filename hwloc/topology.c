@@ -123,6 +123,8 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(OS);
         else if (!hwloc_strncasecmp(tmp, "pci", 3))
           HWLOC_SHOWMSG_TOGGLE(PCI);
+        else if (!hwloc_strncasecmp(tmp, "core", 4))
+          HWLOC_SHOWMSG_TOGGLE(CORE);
         else if (!hwloc_strncasecmp(tmp, "none", 4))
           mask = 0;
         tmp = next;
@@ -195,7 +197,7 @@ static void report_insert_error(hwloc_obj_t new, hwloc_obj_t old, const char *ms
 {
   static int reported = 0;
 
-  if (reason && !reported && HWLOC_SHOW_CRITICAL_ERRORS()) {
+  if (reason && !reported && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE)) {
     char newstr[512];
     char oldstr[512];
     report_insert_error_format_obj(newstr, sizeof(newstr), new);
@@ -3353,7 +3355,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
       tmpnbobjs = realloc(topology->level_nbobjects,
 			  2 * topology->nb_levels_allocated * sizeof(*topology->level_nbobjects));
       if (!tmplevels || !tmpnbobjs) {
-        if (HWLOC_SHOW_CRITICAL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE))
           fprintf(stderr, "hwloc: failed to realloc level arrays to %u\n", topology->nb_levels_allocated * 2);
 
 	/* if one realloc succeeded, make sure the caller will free the new buffer */
@@ -3697,17 +3699,17 @@ hwloc_discover(struct hwloc_topology *topology,
   hwloc_debug("%s", "\nRemoving empty objects\n");
   remove_empty(topology, &topology->levels[0][0]);
   if (!topology->levels[0][0]) {
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE))
       fprintf(stderr, "hwloc: Topology became empty, aborting!\n");
     return -1;
   }
   if (hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE))
       fprintf(stderr, "hwloc: Topology does not contain any PU, aborting!\n");
     return -1;
   }
   if (hwloc_bitmap_iszero(topology->levels[0][0]->nodeset)) {
-    if (HWLOC_SHOW_CRITICAL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE))
       fprintf(stderr, "hwloc: Topology does not contain any NUMA node, aborting!\n");
     return -1;
   }
