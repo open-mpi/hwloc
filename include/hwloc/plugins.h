@@ -413,6 +413,7 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 #define HWLOC_SHOWMSG_OS         (1UL<<12) /* Operating system */
 #define HWLOC_SHOWMSG_PCI        (1UL<<13) /* PCI */
 #define HWLOC_SHOWMSG_CORE       (1UL<<14) /* Issues in hwloc core */
+#define HWLOC_SHOWMSG_MISC       (1UL<<15) /* Misc messages that don't belong anywhere else */
 /* all messages */
 #define HWLOC_SHOWMSG_ALL        (~0UL)
 
