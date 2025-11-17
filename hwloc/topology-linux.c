@@ -7104,7 +7104,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
       goto out_with_data;
     }
 #else
-    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS|HWLOC_SHOWMSG_USER))
       fprintf(stderr, "hwloc/linux: Cannot change fsroot without openat() support.\n");
     errno = ENOSYS;
     goto out_with_data;

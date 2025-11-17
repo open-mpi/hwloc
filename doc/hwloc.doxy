@@ -1062,7 +1062,7 @@ following environment variables.
   <tt>bind</tt>, <tt>xml</tt>, <tt>synthetic</tt>, <tt>components</tt>, <tt>plugins</tt>,
   <tt>os</tt>, <tt>core</tt>, <tt>pci</tt>,
   <tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt>, <tt>gl</tt>,
-  <tt>misc</tt>.
+  <tt>misc</tt>, <tt>user</tt>.
 
   This supersedes the former HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE
   and HWLOC_SYNTHETIC_VERBOSE variables. It also includes some error messages
