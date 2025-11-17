@@ -387,18 +387,21 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
  * The mask is a OR'ed set of HWLOC_SHOWMSG_* as defined below.
  *
  * By default, only critical errors are shown.
- * May be configured with the HWLOC_SHOW_ERRORS envvar
- * (or the obsolete HWLOC_HIDE_ERRORS).
+ * May be configured with the HWLOC_SHOW_ERRORS environment variable
  * lstopo enables all error messages (HWLOC_SHOW_ERRORS=all).
  * hwloc-bind enables binding error messages (HWLOC_SHOW_ERRORS=bind).
+ * See \ref envvar
+ *
+ * Callers should rather use HWLOC_SHOW_ERRORS() to directly check
+ * if some kind of messages are enabled.
  */
 HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 
 #define HWLOC_SHOW_ERRORS(_flag) (hwloc_show_errors_mask() & (_flag))
 
 #define HWLOC_SHOWMSG_CRITICAL   (1UL<<0)
-/* non-critical messages:
- * failure to initialize CUDA, etc. */
+/* Kinds of messages: failure to initialize CUDA, etc.
+ * At least one of these should be passed to HWLOC_SHOW_ERRORS() */
 #define HWLOC_SHOWMSG_BIND       (1UL<<1) /* binding */
 #define HWLOC_SHOWMSG_SYNTHETIC  (1UL<<2) /* synthetic */
 #define HWLOC_SHOWMSG_XML        (1UL<<3) /* XML */

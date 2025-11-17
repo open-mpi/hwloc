@@ -1044,25 +1044,33 @@ following environment variables.
   if the operating system (or user) gives contradictory topology
   information.
 
-  By default (<tt>critical</tt>), hwloc only shows critical errors such as invalid
-  hardware topology information or invalid configuration.
-  If set to <tt>all</tt> (default in lstopo), all errors are displayed,
+  Each error message is tagged with one or several keywords that control
+  whether it should be displayed or not:
+  <ul>
+  <li><tt>critical</tt> for critical errors such as invalid hardware topology information or invalid configuration.</li>
+  <li><tt>components</tt> and <tt>plugins</tt> for internal component and backends, and when they are dynamically loaded as plugins.</li>
+  <li><tt>core</tt> for issues in the library core, usually caused by discovery backends but not caught there.</li>
+  <li><tt>os</tt> for operating system specific errors.</li>
+  <li><tt>pci</tt> for PCI (and CXL) discovery.</li>
+  <li><tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt> and <tt>gl</tt> for IO-specific discovery.</li>
+  <li><tt>xml</tt> and <tt>synthetic</tt> for XML and synthetic topologies.</li>
+  <li><tt>bind</tt> for CPU or memory binding.</li>
+  <li><tt>misc</tt> for other error messages.</li>
+  <li><tt>user</tt> for errors caused by user-given configuration (environment variables, XML input path, etc.).</li>
+  </ul>
+
+  By default (<tt>critical</tt>), hwloc only shows critical errors.
+  If the variable is set to <tt>all</tt> (default in lstopo), all errors are displayed,
   for instance a failure to initialize CUDA or NVML.
   If set to empty or <tt>none</tt>, no hwloc error messages are shown.
 
   The variable may contain a comma-separated list of keywords,
   possibly prefixed with a dash to negate them.
-  For instance <tt>all,-bind</tt> enables all error messages
-  except the non-critical ones emitted by the binding code.
-
-  Valid keywords for the level of verbosity:
-  <tt>all</tt>, <tt>critical</tt>, <tt>none</tt>.
-
-  Valid keywords for selecting kinds of error messages:
-  <tt>bind</tt>, <tt>xml</tt>, <tt>synthetic</tt>, <tt>components</tt>, <tt>plugins</tt>,
-  <tt>os</tt>, <tt>core</tt>, <tt>pci</tt>,
-  <tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt>, <tt>gl</tt>,
-  <tt>misc</tt>, <tt>user</tt>.
+  For instance <tt>all,-cuda</tt> enables all error messages
+  except the non-critical ones emitted by the CUDA discovery.
+  Long keywords such as <tt>components</tt> may be shortened
+  down to 4 characters as long as there is no possible confusion
+  (e.g. <tt>opencl</tt> cannot be shortened).
 
   This supersedes the former HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE
   and HWLOC_SYNTHETIC_VERBOSE variables. It also includes some error messages

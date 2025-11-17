@@ -101,11 +101,11 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(BIND);
         else if (!hwloc_strncasecmp(tmp, "xml", 3))
           HWLOC_SHOWMSG_TOGGLE(XML);
-        else if (!hwloc_strncasecmp(tmp, "synthetic", 9))
+        else if (!hwloc_strncasecmp(tmp, "synthetic", 4))
           HWLOC_SHOWMSG_TOGGLE(SYNTHETIC);
-        else if (!hwloc_strncasecmp(tmp, "components", 10))
+        else if (!hwloc_strncasecmp(tmp, "components", 4))
           HWLOC_SHOWMSG_TOGGLE(COMPONENTS);
-        else if (!hwloc_strncasecmp(tmp, "plugins", 7))
+        else if (!hwloc_strncasecmp(tmp, "plugins", 4))
           HWLOC_SHOWMSG_TOGGLE(PLUGINS);
         else if (!hwloc_strncasecmp(tmp, "rsmi", 4))
           HWLOC_SHOWMSG_TOGGLE(RSMI);
