@@ -279,6 +279,12 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
     if (!errno)
       /* libxml2 read the file fine, but it got an error during parsing */
       errno = EINVAL;
+    if (HWLOC_SHOW_CRITICAL_ERRORS()) {
+      if (xmlpath)
+        fprintf(stderr, "hwloc/libxml: Failed to read input diff file `%s': %s\n", xmlpath, strerror(errno));
+      else if (xmlbuffer)
+        fprintf(stderr, "hwloc/libxml: Failed to read input diff buffer: %s\n", strerror(errno));
+    }
     hwloc_libxml2_cleanup();
     goto out;
   }
@@ -375,6 +381,12 @@ hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
     if (!errno)
       /* libxml2 read the file fine, but it got an error during parsing */
       errno = EINVAL;
+    if (HWLOC_SHOW_CRITICAL_ERRORS()) {
+      if (xmlpath)
+        fprintf(stderr, "hwloc/libxml: Failed to read input file `%s': %s\n", xmlpath, strerror(errno));
+      else if (xmlbuffer)
+        fprintf(stderr, "hwloc/libxml: Failed to read input buffer: %s\n", strerror(errno));
+    }
     hwloc_libxml2_cleanup();
     return -1;
   }
