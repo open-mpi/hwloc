@@ -51,7 +51,7 @@ hwloc__darwin_cpukinds_add(struct hwloc_darwin_cpukinds *kinds,
                            char cluster_type, const char *compatible)
 {
   if (kinds->nr == MAX_KINDS) {
-    if (HWLOC_SHOW_ALL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
       fprintf(stderr, "hwloc/darwin: failed to add new cpukinds, already %u used\n", kinds->nr);
     return NULL;
   }
@@ -131,7 +131,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
 
   kret = IORegistryEntryGetChildIterator(cpus_root, dt_plane_name, &cpus_iter);
   if (kret != KERN_SUCCESS) {
-    if (HWLOC_SHOW_ALL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
       fprintf(stderr, "hwloc/darwin/cpukinds: failed to create iterator\n");
     IOObjectRelease(cpus_root);
     return -1;
@@ -164,7 +164,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
       continue;
     }
     if (CFGetTypeID(ref) != CFNumberGetTypeID()) {
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: unexpected `logical-cpu-id' CF type %s\n",
                 CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
       CFRelease(ref);
@@ -173,7 +173,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
     {
       long long lld_value;
       if (!CFNumberGetValue(ref, kCFNumberLongLongType, &lld_value)) {
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
           fprintf(stderr, "hwloc/darwin/cpukinds: failed to get logical-cpu-id\n");
         CFRelease(ref);
         continue;
@@ -211,19 +211,19 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
     /* get cluster-type */
     ref = IORegistryEntrySearchCFProperty(cpus_child, dt_plane_name, CFSTR("cluster-type"), kCFAllocatorDefault, kNilOptions);
     if (!ref) {
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: failed to find cluster-type\n");
       continue;
     }
     if (CFGetTypeID(ref) != CFDataGetTypeID()) {
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: unexpected `cluster-type' CF type %s\n",
                 CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
       CFRelease(ref);
       continue;
     }
     if (CFDataGetLength(ref) < 2) {
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: only got %ld bytes from cluster-type data\n",
                 CFDataGetLength(ref));
       CFRelease(ref);
@@ -236,7 +236,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
         hwloc_debug("got cluster-type %c\n", u8_values[0]);
         cluster_type = u8_values[0];
       } else {
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
           fprintf(stderr, "hwloc/darwin/cpukinds: got more than one character in cluster-type data %c%c...\n",
                   u8_values[0], u8_values[1]);
         CFRelease(ref);
@@ -248,12 +248,12 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
     /* get compatible */
     ref = IORegistryEntrySearchCFProperty(cpus_child, dt_plane_name, CFSTR("compatible"), kCFAllocatorDefault, kNilOptions);
     if (!ref) {
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: failed to find compatible\n");
       continue;
     }
     if (CFGetTypeID(ref) != CFDataGetTypeID()) {
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: unexpected `compatible' CF type %s\n",
                 CFStringGetCStringPtr(CFCopyTypeIDDescription(CFGetTypeID(ref)), kCFStringEncodingUTF8));
       CFRelease(ref);
@@ -271,7 +271,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
         if (!compatible[i] && compatible[i+1])
           compatible[i] = ';';
       if (!compatible[0]) {
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
           fprintf(stderr, "hwloc/darwin/cpukinds: compatible is empty\n");
         CFRelease(ref);
         continue;
@@ -303,7 +303,7 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
       kinds->kinds[i].perflevel = 0;
     } else {
       *matched_perflevels = 0;
-      if (HWLOC_SHOW_ALL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s, cannot match perflevels\n",
                 kinds->kinds[i].cluster_type, kinds->kinds[i].compatible);
     }
@@ -493,7 +493,7 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
       size_t s;
       snprintf(name, sizeof(name), "hw.perflevel%u.l2perflevels", level);
       if (!sysctlbyname(name, NULL, &s, NULL, 0))
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
           fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, (unsigned long) s);
     }
 
@@ -524,7 +524,7 @@ static void hwloc__darwin_look_perflevel_caches(struct hwloc_topology *topology,
       size_t s;
       snprintf(name, sizeof(name), "hw.perflevel%u.l3perflevels", level);
       if (!sysctlbyname(name, NULL, &s, NULL, 0))
-        if (HWLOC_SHOW_ALL_ERRORS())
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
           fprintf(stderr, "hwloc/darwin: key %s succeeded size %lu, please report to hwloc developers.\n", name, (unsigned long) s);
     }
 

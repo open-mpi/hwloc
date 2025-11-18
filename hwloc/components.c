@@ -852,7 +852,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   backend = comp->instantiate(topology, comp, topology->backend_excluded_phases | blacklisted_phases,
 			      NULL, NULL, NULL);
   if (!backend) {
-    if (hwloc_show_component_errors)
+    if (hwloc_show_component_errors || (envvar_forced && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER)))
       fprintf(stderr, "hwloc: Failed to instantiate discovery component `%s'\n", comp->name);
     return -1;
   }
@@ -949,7 +949,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  if (comp->phases & ~blacklisted_phases)
 	    hwloc_disc_component_try_enable(topology, comp, 1 /* envvar forced */, blacklisted_phases);
 	} else {
-          if (hwloc_show_component_errors)
+          if (hwloc_show_component_errors || HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
             fprintf(stderr, "hwloc: Cannot find discovery component `%s'\n", name);
 	}
 

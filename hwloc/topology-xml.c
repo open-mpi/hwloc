@@ -1035,7 +1035,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 	/* next should be before cur */
 	if (!childrengotignored) {
 	  static int reported = 0;
-	  if (!reported && HWLOC_SHOW_CRITICAL_ERRORS()) {
+	  if (!reported && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML|HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER)) {
 	    hwloc__xml_import_report_outoforder(topology, next, cur);
 	    reported = 1;
 	  }

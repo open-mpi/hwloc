@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2023 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2014-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015      Research Organization for Information Science
@@ -177,7 +177,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   ret = pci_system_init();
   if (ret) {
     HWLOC_PCIACCESS_UNLOCK();
-    if (HWLOC_SHOW_ALL_ERRORS())
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_PCI))
       fprintf(stderr, "hwloc/pci: Failed to initialize libpciaccess with pci_system_init(): %d (%s)\n",
               ret, strerror(errno));
     return -1;

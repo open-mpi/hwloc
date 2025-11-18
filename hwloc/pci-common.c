@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2025 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -154,7 +154,7 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
 	  }
 	  free(buffer);
 	} else {
-          if (HWLOC_SHOW_CRITICAL_ERRORS())
+          if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_PCI))
             fprintf(stderr, "hwloc/pci: Ignoring HWLOC_PCI_LOCALITY file `%s' too large (%lu bytes)\n",
                     env, (unsigned long) st.st_size);
 	}
@@ -341,7 +341,7 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
     }
     case HWLOC_PCI_BUSID_EQUAL: {
       static int reported = 0;
-      if (!reported && HWLOC_SHOW_CRITICAL_ERRORS()) {
+      if (!reported && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_PCI)) {
         fprintf(stderr, "*********************************************************\n");
         fprintf(stderr, "* hwloc %s received invalid PCI information.\n", HWLOC_VERSION);
         fprintf(stderr, "*\n");

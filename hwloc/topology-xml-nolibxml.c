@@ -413,16 +413,22 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
 
   if (xmlbuffer) {
     nbdata->buffer = malloc(xmlbuflen);
-    if (!nbdata->buffer)
+    if (!nbdata->buffer) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML|HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
+        fprintf(stderr, "hwloc/nolibxml: Failed to allocate input buffer copy.\n");
       goto out_with_nbdata;
+    }
     nbdata->buflen = xmlbuflen;
     memcpy(nbdata->buffer, xmlbuffer, xmlbuflen);
     nbdata->buffer[xmlbuflen-1] = '\0'; /* make sure it's there as requested in the API */
 
   } else {
     int err = hwloc_nolibxml_read_file(xmlpath, &nbdata->buffer, &nbdata->buflen);
-    if (err < 0)
+    if (err < 0) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML|HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
+        fprintf(stderr, "hwloc/nolibxml: Failed to read input file `%s': %s\n", xmlpath, strerror(errno));
       goto out_with_nbdata;
+    }
   }
 
   bdata->look_init = hwloc_nolibxml_look_init;
@@ -452,16 +458,22 @@ hwloc_nolibxml_import_diff(struct hwloc__xml_import_state_s *state,
 
   if (xmlbuffer) {
     buffer = malloc(xmlbuflen);
-    if (!buffer)
+    if (!buffer) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML|HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
+        fprintf(stderr, "hwloc/nolibxml: Failed to allocate input diff buffer copy.\n");
       goto out;
+    }
     buflen = xmlbuflen;
     memcpy(buffer, xmlbuffer, xmlbuflen);
     buffer[xmlbuflen-1] = '\0'; /* make sure it's there as requested in the API */
 
   } else {
     ret = hwloc_nolibxml_read_file(xmlpath, &buffer, &buflen);
-    if (ret < 0)
+    if (ret < 0) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML|HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
+        fprintf(stderr, "hwloc/nolibxml: Failed to read input diff file `%s': %s\n", xmlpath, strerror(errno));
       goto out;
+    }
   }
 
   /* skip headers */

@@ -627,7 +627,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     unsigned os_index = HWLOC_UNKNOWN_INDEX; /* no os_index except for PU and NUMANODE below */
 
     if (rs_getrad(rset, rad, sdl, i, 0)) {
-      if (HWLOC_SHOW_CRITICAL_ERRORS())
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
         fprintf(stderr, "hwloc/aix: rs_getrad(%d) failed: %s\n", i, strerror(errno));
       continue;
     }

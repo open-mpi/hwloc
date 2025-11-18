@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2025 Inria.  All rights reserved.
  * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -62,7 +62,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 
   clret = clGetPlatformIDs(0, NULL, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms) {
-    if (CL_SUCCESS != clret && HWLOC_CL_PLATFORM_NOT_FOUND_KHR != clret && HWLOC_SHOW_ALL_ERRORS()) {
+    if (CL_SUCCESS != clret && HWLOC_CL_PLATFORM_NOT_FOUND_KHR != clret && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OPENCL)) {
       fprintf(stderr, "hwloc/opencl: Failed to get number of platforms with clGetPlatformIDs(): %d\n", clret);
     }
     return -1;
