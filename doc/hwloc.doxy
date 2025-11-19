@@ -2424,7 +2424,7 @@ see other subsections above.
 Here is a non-exhaustive list of user-provided info attributes
 that have a special meaning:
 <dl>
-<dt>lstopoStyle=Background=#0000ff;Text=#ffffff</dt>
+<dt>lstopoStyle=Background=\#0000ff;Text=\#ffffff</dt>
 <dd>Enforces the style of an object (background and text colors)
  in the graphical output of lstopo.
  See CUSTOM COLORS in the lstopo(1) manpage for details.
@@ -3910,7 +3910,7 @@ non-hwloc tools such as numactl or taskset, or when reading hardware information
 from raw sources such as /proc/cpuinfo.
 
 Keep in mind is that physical indexes are internally used to fill
-CPU and node sets (::hwloc_cpuset_t and ::hwloc_nodeset_t</tt>)
+CPU and node sets (::hwloc_cpuset_t and ::hwloc_nodeset_t)
 because they are passed to operating systems for binding.
 Hence it is not recommended to display the contents of such sets
 (e.g. with <tt>hwloc_bitmap_list_snprintf()</tt>) without a clear indication
