@@ -1183,8 +1183,9 @@ following environment variables.
   from the OS or given by the user) to find groups of close objects.
   These groups are described by adding intermediate Group objects in the topology.
   Setting this environment variable to 0 will disable this grouping.
-  This variable supersedes the obsolete HWLOC_IGNORE_DISTANCES variable.
-  </dd>
+
+  See also HWLOC_GROUPING_VERBOSE for verbose messages about grouping.
+</dd>
 
 <dt>HWLOC_GROUPING_ACCURACY=0.05</dt>
   <dd>Relax distance comparison during grouping.
