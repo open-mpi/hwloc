@@ -1948,7 +1948,7 @@ subtype <tt>DRAM</tt> (for usual main memory),
 Note that some of these subtypes are guessed by the library,
 they might be missing or slightly wrong in some corner cases.
 See \ref heteromem for details, and HWLOC_MEMTIERS and HWLOC_MEMTIERS_GUESS
-in \ref envvar for tuning these.
+in \ref envvar_heuristics for tuning these.
 </li>
 <li>Groups:
 subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
@@ -2582,7 +2582,7 @@ If the operating system provides efficiency information
 (e.g. Windows 10, MacOS X / Darwin and some Linux kernels),
 it is used to rank hwloc CPU kinds by efficiency.
 Otherwise, hwloc implements several heuristics based on frequencies
-and core types (see HWLOC_CPUKINDS_RANKING in \ref envvar).
+and core types (see HWLOC_CPUKINDS_RANKING in \ref envvar_heuristics).
 
 The ranking shows energy-efficient CPUs first, and high-performance
 power-hungry cores last.
@@ -2690,7 +2690,7 @@ Tiers are then sorted by bandwidth so that the highest bandwidth
 is ranked first, etc.
 
 If hwloc fails to build tiers properly, see <tt>HWLOC_MEMTIERS</tt>
-and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar.
+and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar_heuristics.
 
 <br/>
 
@@ -2862,7 +2862,7 @@ The lstopo program can also serve as a XML topology export tool.
 XML topologies may then be reloaded later with hwloc_topology_set_xml()
 and hwloc_topology_set_xmlbuffer().
 The HWLOC_XMLFILE environment variable also tells hwloc to load the topology
-from the given XML file (see \ref envvar).
+from the given XML file (see \ref envvar_source).
 
 \note Loading XML topologies disables binding because the loaded
 topology may not correspond to the physical machine that loads it.
@@ -3427,7 +3427,7 @@ If no topology configuration functions such as
 <tt>hwloc_topology_set_synthetic()</tt> have been called,
 components may be selected with environment variables such as
 <tt>HWLOC_XMLFILE</tt>, <tt>HWLOC_SYNTHETIC</tt>,
-<tt>HWLOC_FSROOT</tt>, or <tt>HWLOC_CPUID_PATH</tt> (see \ref envvar).
+<tt>HWLOC_FSROOT</tt>, or <tt>HWLOC_CPUID_PATH</tt> (see \ref envvar_source).
 
 Finally, the environment variable <tt>HWLOC_COMPONENTS</tt>
 resets the list of selected components.
@@ -3474,7 +3474,7 @@ Plugins are built as independent dynamic libraries that are installed
 in <tt>$libdir/hwloc</tt>.
 All plugins found in this directory are loaded during
 <tt>topology_init()</tt>
-(unless blacklisted in <tt>HWLOC_PLUGINS_BLACKLIST</tt>, see \ref envvar).
+(unless blacklisted in <tt>HWLOC_PLUGINS_BLACKLIST</tt>, see \ref envvar_components).
 A specific list of directories (colon-separated) to scan may be
 specified in the <tt>HWLOC_PLUGINS_PATH</tt> environment variable.
 
@@ -3492,7 +3492,7 @@ embedding hwloc in another project, see \ref embed for details.
 All components distributed within hwloc are listed below.
 The list of actually available components may be listed
 at running with the <tt>HWLOC_COMPONENTS_VERBOSE</tt>
-environment variable (see \ref envvar).
+environment variable (see \ref envvar_verbose).
 
 <dl>
 
@@ -4225,7 +4225,7 @@ See also \ref xml.
 may be used to load a XML topology that contains the entire machine
 and restrict it to the part that is actually available to the current
 process (e.g. when Linux Cgroup/Cpuset are used to restrict the set
-of resources). See \ref envvar.
+of resources). See \ref envvar_allowed.
 
 Shared-memory topologies consist in one process exposing its topology
 in a shared-memory buffer so that other processes (running on the same machine)

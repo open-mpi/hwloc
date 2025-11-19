@@ -61,7 +61,7 @@ extern "C" {
  * hwloc tries to compute efficiencies by comparing CPU kinds using
  * frequencies (on ARM), or core types and frequencies (on other architectures).
  * The environment variable HWLOC_CPUKINDS_RANKING may be used
- * to change this heuristics, see \ref envvar.
+ * to change this heuristics, see \ref envvar_heuristics.
  *
  * If hwloc fails to rank any kind, for instance because the operating
  * system does not expose efficiencies and core frequencies,
