@@ -1193,7 +1193,7 @@ following environment variables.
 
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
-<dd>changes the locality of I/O devices behing the specified PCI buses.
+<dd>changes the locality of I/O devices behind the specified PCI buses.
   If no I/O locality information is available or if the BIOS reports
   incorrect information, it is possible to move a I/O device tree
   (OS and/or PCI devices with optional bridges)
@@ -1332,7 +1332,7 @@ following environment variables.
 
   If <tt>xml</tt> or <tt>synthetic</tt> components are selected,
   the corresponding XML filename or synthetic description string
-  should be pass in <tt>HWLOC_XMLFILE</tt> or <tt>HWLOC_SYNTHETIC</tt>
+  should be passed in <tt>HWLOC_XMLFILE</tt> or <tt>HWLOC_SYNTHETIC</tt>
   respectively.
 
   Since this variable is the low-level and more generic way to
