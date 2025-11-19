@@ -4632,7 +4632,7 @@ as either memory or a memory-side cache
 (reported as a L3 cache by hwloc by default,
 see <tt>HWLOC_KNL_MSCACHE_L3</tt> in \ref envvar).
 There are also several clustering modes that significantly affect the memory organization
-(see \ref faq_knl_numa for more information about these modes).
+(see \ref faq_hybrid_numa for more information about these modes).
 Details about these are currently only available to privileged users.
 Without them, hwloc relies on a heuristic for guessing the modes.
 
