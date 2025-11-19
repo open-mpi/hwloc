@@ -983,18 +983,18 @@ following environment variables.
 <dl>
 
 <dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
-  <dd>enforces the discovery from the given XML file as if
+  <dd>Enforce the discovery from the given XML file as if
   hwloc_topology_set_xml() had been called.
-  This file may have been generated earlier with lstopo file.xml.
-  For convenience, this backend provides empty binding hooks which just
+  This file may have been generated earlier with <tt>lstopo file.xml</tt>.
+  For convenience, the XML backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
   See also \ref xml.
   </dd>
 
-<dt>HWLOC_SYNTHETIC=synthetic_description</dt>
-  <dd>enforces the discovery through a synthetic description string
+<dt>HWLOC_SYNTHETIC=pack:3 [numa] L2:2 core:4 pu:2</dt>
+  <dd>Enforce the discovery through a synthetic description string
   as if hwloc_topology_set_synthetic() had been called.
   For convenience, this backend provides empty binding hooks which just
   return success.
@@ -1002,18 +1002,19 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_THISSYSTEM=1</dt>
-  <dd>enforces the return value of hwloc_topology_is_thissystem(), as if
-  ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
-  It means that it makes hwloc assume that the selected backend provides the
-  topology for the system on which we are running, even if it is not the
-  OS-specific backend but the XML backend for instance.
+  <dd>Assume that the selected backend provides the topology for the system on
+  which we are running, even if it is not the OS-specific backend but the XML
+  backend for instance.
   This means making the binding functions actually call the OS-specific
   system calls and really do binding, while the XML backend would otherwise
   provide empty hooks just returning success.
   This can be used for efficiency reasons to first detect the topology once,
   save it to a XML file, and quickly reload it later through the XML
   backend, but still having binding functions actually do bind.
-  This also enables support for the variable HWLOC_THISSYSTEM_ALLOWED_RESOURCES.
+
+  It enforces the return value of hwloc_topology_is_thissystem(), as if
+  ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
+  It also enables support for the variable HWLOC_THISSYSTEM_ALLOWED_RESOURCES.
   </dd>
 
 <dt>HWLOC_THISSYSTEM_ALLOWED_RESOURCES=1</dt>
@@ -1023,6 +1024,7 @@ following environment variables.
   with hwloc_topology_set_flags().
   This variable requires the topology to match the current system
   (see the variable HWLOC_THISSYSTEM).
+
   This is useful when the topology is not loaded directly from the
   local machine (e.g. for performance reason) and it comes with all
   resources, but the running process is restricted to only a part
@@ -1038,7 +1040,7 @@ following environment variables.
 
 
 <dt>HWLOC_SHOW_ERRORS=critical</dt>
-  <dd>enables or disables verbose reporting of errors.
+  <dd>Enable or disable verbose reporting of errors.
   The hwloc library may issue warnings and errors to the standard error stream
   when it detects a problem during topology discovery, for instance
   if the operating system (or user) gives contradictory topology
@@ -1080,14 +1082,15 @@ following environment variables.
 
 
 <dt>HWLOC_USE_NUMA_DISTANCES=7</dt>
-  <dd>enables or disables the use of NUMA distances.
-  NUMA distances and memory target/initiator information may be used
-  to improve the locality of NUMA nodes, especially CPU-less nodes.
+  <dd>Enable or disable some use of NUMA distances and memory target/initiator
+  information to improve the locality of NUMA nodes, especially CPU-less nodes.
+
   Bits in the value of this environment variable enable different features:
   Bit 0 enables the gathering of NUMA distances from the operating system.
   Bit 1 further enables the use of NUMA distances to improve the
   locality of CPU-less nodes.
   Bit 2 enables the use of target/initiator information.
+  By default, all bits are set (7).
   </dd>
 
 <dt>HWLOC_MEMTIERS_GUESS=none</dt>
@@ -1110,14 +1113,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_MEMTIERS_REFRESH=1</dt>
-  <dd>Force the rebuilding of memory tiers.
+  <dd>If set, this variable forces the rebuilding of memory tiers.
   This is mostly useful when importing a XML topology from an old hwloc
   version which was not able to guess memory subtypes and tiers.
   </dd>
 
 <dt>HWLOC_GROUPING=1</dt>
-  <dd>enables or disables objects grouping based on distances.
-  By default, hwloc uses distance matrices between objects (either read
+  <dd>Enable or disable object grouping based on distances.
+  By default (1), hwloc uses distance matrices between objects (either read
   from the OS or given by the user) to find groups of close objects.
   These groups are described by adding intermediate Group objects in the topology.
   Setting this environment variable to 0 will disable this grouping.
@@ -1125,20 +1128,22 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_GROUPING_ACCURACY=0.05</dt>
-  <dd>relaxes distance comparison during grouping.
+  <dd>Relax distance comparison during grouping.
   By default, objects may be grouped if their distances form a minimal
   distance graph. When setting this variable to 0.02, and when
   ::HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE is given, these distances
   do not have to be strictly equal anymore, they may just be equal
   with a 2% error.
+
   If set to <tt>try</tt> instead of a numerical value, hwloc will try
   to group with perfect accuracy (0, the default), then with 0.01, 0.02,
   0.05 and finally 0.1.
+
   Numbers given in this environment variable should always use a dot
   as a decimal mark (for instance 0.01 instead of 0,01).</dd>
 
 <dt>HWLOC_GROUPING_VERBOSE=0</dt>
-  <dd>enables or disables some verbose messages during grouping.
+  <dd>Enable or disable some verbose messages during grouping.
   If this variable is set to 1, some debug messages will be displayed
   during distance-based grouping of objects even if debug was not specific
   at configure time.
@@ -1146,13 +1151,13 @@ following environment variables.
   accuracy.</dd>
 
 <dt>HWLOC_CPUKINDS_RANKING=default</dt>
-  <dd>change the ranking policy for CPU kinds.
+  <dd>Change the ranking policy for CPU kinds.
   hwloc tries to rank CPU kinds that are energy efficiency first,
   and then CPUs that are rather high-performance and power hungry.
-  <br/>
+
   By default, if available, the OS-provided efficiency is used for ranking.
   Otherwise, the frequency and/or core types are used when available.
-  <br/>
+
   This environment variable may be set to
   <tt>coretype+frequency</tt>, <tt>coretype+frequency_strict</tt>, <tt>coretype</tt>,
   <tt>frequency</tt>, <tt>frequency_base</tt>, <tt>frequency_max</tt>,
@@ -1161,13 +1166,13 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_CPUKINDS_MAXFREQ=adjust=10</dt>
-  <dd>change the use of the max frequency in the Linux backend.
+  <dd>Change the use of the max frequency in the Linux backend.
   hwloc tries to read the base and max frequencies of each core on Linux.
   Some hardware features such as Intel Turbo Boost Max 3.0 make some cores
   report slightly higher max frequencies than others in the same CPU package.
   Despite having slightly different frequencies, these cores are considered
   identical instead of exposing an hybrid CPU.
-  Hence, by default, hwloc uniformizes the max frequencies of cores
+  Hence, by default (<tt>adjust=10</tt>), hwloc uniformizes the max frequencies of cores
   that have the same base frequency (higher values are downgraded by up
   to 10%).
   When available, the CPU capacity value is also adjusted accordingly.
@@ -1180,7 +1185,7 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_CPUKINDS_HOMOGENEOUS=0</dt>
-  <dd>uniformize max frequency, base frequency and Linux capacity to
+  <dd>Uniformize max frequency, base frequency and Linux capacity to
   force a single homogeneous kind of CPUs.
   This is enabled by default on NVIDIA Grace but may be disabled
   if set to 0 (or enabled on other platforms if set to 1).
@@ -1188,17 +1193,17 @@ following environment variables.
 
 <dt>HWLOC_PCI_LOCALITY=&lt;domain/bus&gt; &lt;cpuset&gt;;...</dt>
 <dt>HWLOC_PCI_LOCALITY=/path/to/pci/locality/file</dt>
-<dd>changes the locality of I/O devices behind the specified PCI buses.
+<dd>Change the locality of I/O devices behind the specified PCI buses.
   If no I/O locality information is available or if the BIOS reports
-  incorrect information, it is possible to move a I/O device tree
+  incorrect information, this variable allows to move a I/O device tree
   (OS and/or PCI devices with optional bridges)
   near a custom set of processors.
-  <br/>
+
   Localities are given either inside the environment variable itself,
   or in the pointed file.
   They may be separated either by semi-colons or by line-breaks.
   Invalid localities are silently ignored, hence it is possible to insert comments between actual localities.
-  <br/>
+
   Each locality contains a domain/bus specification (in hexadecimal numbers as usual)
   followed by a whitespace and a cpuset:
   <ul>
@@ -1212,15 +1217,14 @@ following environment variables.
   the variable should be HWLOC_PCI_LOCALITY="0000:00-09 <cpuset>".
   It supersedes the old HWLOC_PCI_0000_00_LOCALCPUS=&lt;cpuset&gt;
   which only works when hostbridges exist in the topology.
-  <br/>
+
   If the variable is defined to empty or invalid, no forced PCI locality is applied
   but hwloc's internal automatic locality quirks are disabled, which means the exact
   PCI locality reported by the platform is used.
   </dd>
 
 <dt>HWLOC_X86_TOPOEXT_NUMANODES=0</dt>
-  <dd>use AMD topoext CPUID leaf in the x86 backend to detect NUMA nodes.
-  When using the x86 backend, setting this variable to 1 enables the building
+  <dd>When using the x86 backend, setting this variable to 1 enables the building
   of NUMA nodes from AMD processor CPUID instructions.
   However this strategy does not always reflect BIOS configuration such as NUMA interleaving.
   And node indexes may be different from those of the operating system.
@@ -1229,9 +1233,9 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=0</dt>
-  <dd>show or hide NUMA nodes that correspond to NVIDIA GPU memory.
+  <dd>Show or hide NUMA nodes that correspond to NVIDIA GPU memory.
   By default they are ignored on POWER platforms to avoid interleaved
-  memory being allocated on GPU by mistake.
+  memory being allocated on all CPUs and GPUs by mistake.
 
   Setting this environment variable to 0 hides the NUMA nodes (default on POWER).
   Setting to 1 exposes these NUMA nodes (default on non-POWER platforms such as NVIDIA Grace Hopper).
@@ -1243,7 +1247,7 @@ following environment variables.
 
 <dt>HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS=0</dt>
   <dd>Expose Windows processor groups as hwloc Group objects.
-  By default, these groups are disabled because they may be incompatible
+  By default (0), these groups are disabled because they may be incompatible
   with the hierarchy of resources that hwloc builds (leading to warnings).
   Setting this variable to 1 reenables the addition of these groups to the topology.
 
@@ -1260,15 +1264,15 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
-  <dd>switches to reading the topology from the specified
+  <dd>Switch to reading the topology from the specified
   Linux filesystem root instead of the main file-system root.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-topology</tt>.
-  <br/>
+
   One should likely also set <tt>HWLOC_COMPONENTS=linux,stop</tt>
   so that non-Linux backends are disabled
   (the <tt>-i</tt> option of command-line tools takes care of both).
-  <br/>
+
   Not using the main file-system root causes hwloc_topology_is_thissystem()
   to return 0.
   For convenience, this backend provides empty binding hooks which just
@@ -1278,15 +1282,15 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
-  <dd>forces the x86 backend to read dumped CPUIDs from the given directory
+  <dd>Force the x86 backend to read dumped CPUIDs from the given directory
   instead of executing actual x86 CPUID instructions.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-cpuid</tt>.
-  <br/>
+
   One should likely also set <tt>HWLOC_COMPONENTS=x86,stop</tt>
   so that non-x86 backends are disabled
   (the <tt>-i</tt> option of command-line tools takes care of both).
-  <br/>
+
   It causes hwloc_topology_is_thissystem() to return 0.
   For convenience, this backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
@@ -1295,8 +1299,7 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
-  <dd>forces a list of components to enable or disable.
-  Enable or disable the given comma-separated list of components
+  <dd>Enable or disable the given comma-separated list of components
   (if they do not conflict with each other). Component names prefixed with
   <tt>-</tt> are disabled (a single phase may also be disabled).
 
@@ -1306,6 +1309,11 @@ following environment variables.
   list.
   If <tt>stop</tt> is met, the enabling loop immediately stops, no
   more component is enabled.
+
+  This is useful for understanding whether a topology issue comes
+  from the native operating system backend or from the x86 backend:
+  Setting to <tt>x86,stop</tt> or <tt>linux,stop</tt> will test
+  one backend without the other.
 
   If <tt>xml</tt> or <tt>synthetic</tt> components are selected,
   the corresponding XML filename or synthetic description string
@@ -1324,8 +1332,7 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_COMPONENTS_VERBOSE=1</dt>
-  <dd>displays verbose information about components.
-  Display messages when components are registered or enabled.
+  <dd>Display messages when components are registered or enabled.
   This is the recommended way to list the available components
   with their priority
   (all of them are <em>registered</em> at startup).
@@ -1335,14 +1342,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
-  <dd>changes the default search directory for plugins.
+  <dd>Change the default search directory for plugins.
   By default, <tt>$libdir/hwloc</tt> is used.
   The variable may contain several colon-separated directories.
   </dd>
 
 <dt>HWLOC_PLUGINS_VERBOSE=1</dt>
-  <dd>displays verbose information about plugins.
-  List which directories are scanned, which files are loaded,
+  <dd>Display verbose information about plugins:
+  list which directories are scanned, which files are loaded,
   and which components are successfully loaded.
 
   Error messages about plugins are controled by the <tt>plugins</tt>
@@ -1350,14 +1357,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_PLUGINS_BLACKLIST=filename1,filename2,...</dt>
-  <dd>prevents plugins from being loaded if their filename
+  <dd>Prevent plugins from being loaded if their filename
   (without path) is listed.
   Plugin filenames may be found in verbose messages outputted
   when HWLOC_PLUGINS_VERBOSE=1.
   </dd>
 
 <dt>HWLOC_DEBUG_VERBOSE=0</dt>
-  <dd>disables all verbose messages that are enabled by default
+  <dd>Disable all verbose messages that are enabled by default
   when <tt>--enable-debug</tt> is passed to configure.
   When set to more than 1, even more verbose messages are displayed.
   The default is 1.
