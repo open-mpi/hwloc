@@ -390,7 +390,7 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
  * May be configured with the HWLOC_SHOW_ERRORS environment variable
  * lstopo enables all error messages (HWLOC_SHOW_ERRORS=all).
  * hwloc-bind enables binding error messages (HWLOC_SHOW_ERRORS=bind).
- * See \ref envvar
+ * See \ref envvar_verbose
  *
  * Callers should rather use HWLOC_SHOW_ERRORS() to directly check
  * if some kind of messages are enabled.

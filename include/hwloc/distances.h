@@ -426,7 +426,7 @@ enum hwloc_distances_add_flag_e {
   HWLOC_DISTANCES_ADD_FLAG_GROUP = (1UL<<0),
   /** \brief If grouping, consider the distance values as inaccurate and relax the
    * comparisons during the grouping algorithms. The actual accuracy may be modified
-   * through the HWLOC_GROUPING_ACCURACY environment variable (see \ref envvar).
+   * through the HWLOC_GROUPING_ACCURACY environment variable (see \ref envvar_heuristics).
    * \hideinitializer
    */
   HWLOC_DISTANCES_ADD_FLAG_GROUP_INACCURATE = (1UL<<1)
