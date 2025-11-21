@@ -31,10 +31,9 @@
 
 static void
 hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
-				    const char *string /* must contain a ' ' */,
-				    unsigned *allocated)
+				    const char *string /* must contain a ' ' */)
 {
-  unsigned nr = topology->pci_forced_locality_nr;
+  struct hwloc_pci_locality_s *locality;
   unsigned domain, bus_first, bus_last, dummy;
   hwloc_bitmap_t set;
   char *tmp;
@@ -63,26 +62,22 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
     goto out;
   hwloc_bitmap_sscanf(set, tmp);
 
-  if (!*allocated) {
-    topology->pci_forced_locality = malloc(sizeof(*topology->pci_forced_locality));
-    if (!topology->pci_forced_locality)
-      goto out_with_set; /* failed to allocate, ignore this forced locality */
-    *allocated = 1;
-  } else if (nr >= *allocated) {
-    struct hwloc_pci_forced_locality_s *tmplocs;
-    tmplocs = realloc(topology->pci_forced_locality,
-		      2 * *allocated * sizeof(*topology->pci_forced_locality));
-    if (!tmplocs)
-      goto out_with_set; /* failed to allocate, ignore this forced locality */
-    topology->pci_forced_locality = tmplocs;
-    *allocated *= 2;
-  }
+  locality = malloc(sizeof(*locality));
+  if (!locality)
+    goto out_with_set; /* failed to allocate, ignore this forced locality */
 
-  topology->pci_forced_locality[nr].domain = domain;
-  topology->pci_forced_locality[nr].bus_first = bus_first;
-  topology->pci_forced_locality[nr].bus_last = bus_last;
-  topology->pci_forced_locality[nr].cpuset = set;
-  topology->pci_forced_locality_nr++;
+  locality->domain = domain;
+  locality->bus_min = bus_first;
+  locality->bus_max = bus_last;
+  locality->cpuset = set;
+  locality->parent = NULL;
+  locality->prev = topology->pci_forced_locality_last;
+  locality->next = NULL;
+  if (topology->pci_forced_locality_last)
+    topology->pci_forced_locality_last->next = locality;
+  else
+    topology->pci_forced_locality_first = locality;
+  topology->pci_forced_locality_last = locality;
   return;
 
  out_with_set:
@@ -95,7 +90,6 @@ static void
 hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_env)
 {
   char *env = strdup(_env);
-  unsigned allocated = 0;
   char *tmp = env;
 
   while (1) {
@@ -109,7 +103,7 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
     }
 
     if (tmp[0] != '#' && tmp[0] != '/') /* ignore comments */
-      hwloc_pci_forced_locality_parse_one(topology, tmp, &allocated);
+      hwloc_pci_forced_locality_parse_one(topology, tmp);
 
     if (next)
       tmp = next;
@@ -124,9 +118,7 @@ void
 hwloc_pci_discovery_init(struct hwloc_topology *topology)
 {
   topology->pci_has_forced_locality = 0;
-  topology->pci_forced_locality_nr = 0;
-  topology->pci_forced_locality = NULL;
-
+  topology->pci_forced_locality_first = topology->pci_forced_locality_last = NULL;
   topology->first_pci_locality = topology->last_pci_locality = NULL;
 
 #define HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A (1ULL<<0)
@@ -177,15 +169,19 @@ void
 hwloc_pci_discovery_exit(struct hwloc_topology *topology)
 {
   struct hwloc_pci_locality_s *cur;
-  unsigned i;
 
-  for(i=0; i<topology->pci_forced_locality_nr; i++)
-    hwloc_bitmap_free(topology->pci_forced_locality[i].cpuset);
-  free(topology->pci_forced_locality);
+  cur = topology->pci_forced_locality_first;
+  while (cur) {
+    struct hwloc_pci_locality_s *next = cur->next;
+    hwloc_bitmap_free(cur->cpuset);
+    free(cur);
+    cur = next;
+  }
 
   cur = topology->first_pci_locality;
   while (cur) {
     struct hwloc_pci_locality_s *next = cur->next;
+    assert(!cur->cpuset);
     free(cur);
     cur = next;
   }
@@ -550,7 +546,6 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
   hwloc_obj_t parent;
   int forced = 0;
   int noquirks = 0, got_quirked = 0;
-  unsigned i;
   int err;
 
   hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
@@ -558,11 +553,12 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
 
   /* try to match a forced locality */
   if (topology->pci_has_forced_locality) {
-    for(i=0; i<topology->pci_forced_locality_nr; i++) {
-      if (busid->domain == topology->pci_forced_locality[i].domain
-	  && busid->bus >= topology->pci_forced_locality[i].bus_first
-	  && busid->bus <= topology->pci_forced_locality[i].bus_last) {
-	hwloc_bitmap_copy(cpuset, topology->pci_forced_locality[i].cpuset);
+    struct hwloc_pci_locality_s *locality;
+    for(locality = topology->pci_forced_locality_first; locality; locality=locality->next) {
+      if (busid->domain == locality->domain
+	  && busid->bus >= locality->bus_min
+	  && busid->bus <= locality->bus_max) {
+	hwloc_bitmap_copy(cpuset, locality->cpuset);
 	forced = 1;
 	break;
       }
@@ -700,6 +696,7 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
     loc->bus_min = bus_min;
     loc->bus_max = bus_max;
     loc->parent = parent;
+    loc->cpuset = NULL;
 
     hwloc_debug("Adding PCI locality %s P#%u for bus %04x:[%02x:%02x]\n",
 		hwloc_obj_type_string(parent->type), parent->os_index, loc->domain, loc->bus_min, loc->bus_max);

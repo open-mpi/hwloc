@@ -258,13 +258,17 @@ struct hwloc_topology {
   struct hwloc_numanode_attr_s machine_memory;
 
   /* pci stuff */
-  int pci_has_forced_locality;
-  unsigned pci_forced_locality_nr;
-  struct hwloc_pci_forced_locality_s {
+  /* FIXME: keep until topo destroy and reuse for finding specific buses */
+  struct hwloc_pci_locality_s {
     unsigned domain;
-    unsigned bus_first, bus_last;
-    hwloc_bitmap_t cpuset;
-  } * pci_forced_locality;
+    unsigned bus_min;
+    unsigned bus_max;
+    hwloc_bitmap_t cpuset; /* used for forced */
+    hwloc_obj_t parent; /* used for non-forced */
+    struct hwloc_pci_locality_s *prev, *next;
+  } *first_pci_locality, *last_pci_locality,
+    *pci_forced_locality_first, *pci_forced_locality_last;
+  int pci_has_forced_locality; /* to disable quirks even if nothing was actually forced */
   hwloc_uint64_t pci_locality_quirks;
 
   /* component blacklisting */
@@ -273,15 +277,6 @@ struct hwloc_topology {
     struct hwloc_disc_component *component;
     unsigned phases;
   } *blacklisted_components;
-
-  /* FIXME: keep until topo destroy and reuse for finding specific buses */
-  struct hwloc_pci_locality_s {
-    unsigned domain;
-    unsigned bus_min;
-    unsigned bus_max;
-    hwloc_obj_t parent;
-    struct hwloc_pci_locality_s *prev, *next;
-  } *first_pci_locality, *last_pci_locality;
 };
 
 extern void hwloc_alloc_root_sets(hwloc_obj_t root);
