@@ -288,7 +288,6 @@ struct hwloc_topology {
     unsigned domain;
     unsigned bus_min;
     unsigned bus_max;
-    hwloc_bitmap_t cpuset;
     hwloc_obj_t parent;
     struct hwloc_pci_locality_s *prev, *next;
   } *first_pci_locality, *last_pci_locality;

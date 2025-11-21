@@ -186,7 +186,6 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
   cur = topology->first_pci_locality;
   while (cur) {
     struct hwloc_pci_locality_s *next = cur->next;
-    hwloc_bitmap_free(cur->cpuset);
     free(cur);
     cur = next;
   }
@@ -675,13 +674,6 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
     loc->bus_min = bus_min;
     loc->bus_max = bus_max;
     loc->parent = parent;
-    loc->cpuset = hwloc_bitmap_dup(parent->cpuset);
-    if (!loc->cpuset) {
-      /* fallback to attaching to root */
-      free(loc);
-      parent = hwloc_get_root_obj(topology);
-      goto done;
-    }
 
     hwloc_debug("Adding PCI locality %s P#%u for bus %04x:[%02x:%02x]\n",
 		hwloc_obj_type_string(parent->type), parent->os_index, loc->domain, loc->bus_min, loc->bus_max);
