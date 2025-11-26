@@ -1252,7 +1252,7 @@ char nvmlInit ();
       echo "**** RSMI configuration"
 
       # Try to find the ROCm default path a specific ROCm version
-      # Use --with-rocm-version first, or $CUDA_VERSION
+      # Use --with-rocm-version first, or $ROCM_VERSION
       rocm_version=$ROCM_VERSION
       if test "x$with_rocm_version" != xno -a "x$with_rocm_version" != x; then
         rocm_version=$with_rocm_version
