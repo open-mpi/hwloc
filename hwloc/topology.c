@@ -84,7 +84,10 @@ unsigned long hwloc_show_errors_mask(void)
           tmp++;
         }
         len = strcspn(tmp, " ,|+");
-        next = tmp+len+1;
+        if (!tmp[len])
+          next = tmp+len; /* point to the ending \0 */
+        else
+          next = tmp+len+1; /* point to next keyword */
 
 #define HWLOC_SHOWMSG_TOGGLE(NAME) do {     \
         if (negate)                         \
