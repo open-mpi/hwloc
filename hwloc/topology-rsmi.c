@@ -398,9 +398,16 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
          * Try with func=0 instead.
          */
         uint32_t partid = 0;
-        get_device_partition_id(i, &partid);
-        if (func == partid)
-          parent = hwloc_pci_find_parent_by_busid(topology, domain, bus, device, 0);
+        if (get_device_partition_id(i, &partid) < 0) {
+          static int warned = 0;
+          if ((!warned && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL)) || HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_RSMI)) {
+            fprintf(stderr, "hwloc/rsmi: Failed to retrieve partition ID, RSMI device locality will likely be wrong\n");
+            warned = 1;
+          }
+        } else {
+          if (func == partid)
+            parent = hwloc_pci_find_parent_by_busid(topology, domain, bus, device, 0);
+        }
       }
       if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE)
         get_device_pci_linkspeed(i, &parent->attr->pcidev.linkspeed);
