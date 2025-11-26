@@ -135,6 +135,13 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
 		[AS_IF([test "x$withval" = xyes -o "x$withval" = x],
 		       [AC_MSG_ERROR([--with-rocm=<dir> missing the installation directory])])]
 		)
+    # AMDGPU install path
+    AC_ARG_WITH([amdgpu],
+                AS_HELP_STRING([--with-amdgpu=<dir>],
+		               [Specify the AMDGPU installation directory (/opt/amdgpu by default)]),
+		[AS_IF([test "x$withval" = xyes -o "x$withval" = x],
+		       [AC_MSG_ERROR([--with-amdgpu=<dir> missing the installation directory])])]
+		)
 
     # LevelZero
     AC_ARG_ENABLE([levelzero],

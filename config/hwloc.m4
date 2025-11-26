@@ -1282,6 +1282,19 @@ char nvmlInit ();
 	 fi
       fi
 
+      # ROCM 6.4+ requires at least headers from /opt/amdgpu
+      if test "x$with_amdgpu" != x -a "x$with_amdgpu" != xyes; then
+        amdgpu_dir=$with_amdgpu
+        AC_MSG_NOTICE([using custom AMDGPU install path $amdgpu_dir ...])
+      else
+        amdgpu_dir=/opt/amdgpu
+        AC_MSG_NOTICE([using standard AMDGPU install path $amdgpu_dir ...])
+      fi
+      if test "x$amdgpu_dir" -a -d "$amdgpu_dir/include"; then
+        HWLOC_RSMI_CPPFLAGS="$HWLOC_RSMI_CPPFLAGS -I$amdgpu_dir/include/"
+        HWLOC_RSMI_LDFLAGS="$HWLOC_RSMI_LDFLAGS -L$amdgpu_dir/lib/"
+      fi
+
       hwloc_rsmi_happy=yes
       CPPFLAGS_save="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
