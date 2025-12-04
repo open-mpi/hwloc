@@ -548,26 +548,14 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t parent;
-  int noquirks = 0, got_quirked = 0;
+  int got_quirked = 0;
   int err;
 
   hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
 	      busid->domain, busid->bus, busid->dev, busid->func);
 
-  /* try to match a forced locality */
-  if (topology->pci_has_forced_locality) {
-    struct hwloc_pci_locality_s *locality;
-    for(locality = topology->pci_forced_locality_first; locality; locality=locality->next) {
-      if (busid->domain == locality->domain
-	  && busid->bus >= locality->bus_min
-	  && busid->bus <= locality->bus_max)
-        return locality->parent;
-    }
-    /* if pci locality was forced, even empty, don't let quirks change what the OS reports */
-    noquirks = 1;
-  }
-
-  if (!noquirks && topology->pci_locality_quirks /* either quirks are unknown yet, or some are enabled */) {
+  if (!topology->pci_has_forced_locality /* if pci locality was forced, even empty, don't let quirks change what the OS reports */
+      && topology->pci_locality_quirks /* either quirks are unknown yet, or some are enabled */) {
     err = hwloc__pci_find_busid_parent_quirk(topology, busid, cpuset);
     if (err > 0)
       got_quirked = 1;
@@ -619,7 +607,7 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
 
   while (tree) {
     struct hwloc_obj *obj, *pciobj;
-    struct hwloc_obj *parent;
+    struct hwloc_obj *parent = NULL;
     struct hwloc_pci_locality_s *loc;
     unsigned domain, bus_min, bus_max;
 
@@ -645,7 +633,23 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
     }
 
     /* find where to attach that PCI bus */
-    parent = hwloc__pci_find_busid_parent(topology, &pciobj->attr->pcidev);
+
+    /* try to match a forced locality */
+    if (topology->pci_has_forced_locality) {
+      struct hwloc_pci_locality_s *locality;
+      for(locality = topology->pci_forced_locality_first; locality; locality=locality->next) {
+        if (pciobj->attr->pcidev.domain == locality->domain
+            && pciobj->attr->pcidev.bus >= locality->bus_min
+            && pciobj->attr->pcidev.bus <= locality->bus_max) {
+          parent = locality->parent;
+          break;
+        }
+      }
+    }
+
+    /* or ask OS and quirks */
+    if (!parent)
+      parent = hwloc__pci_find_busid_parent(topology, &pciobj->attr->pcidev);
 
     /* reuse the previous locality if possible */
     if (topology->last_pci_locality
@@ -712,7 +716,18 @@ hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
   if (parent)
     return parent;
 
-  /* try to find the locality of that bus instead */
+  /* try to match a forced locality for that bus */
+  if (topology->pci_has_forced_locality) {
+    struct hwloc_pci_locality_s *locality;
+    for(locality = topology->pci_forced_locality_first; locality; locality=locality->next) {
+      if (domain == locality->domain
+	  && bus >= locality->bus_min
+	  && bus <= locality->bus_max)
+        return locality->parent;
+    }
+  }
+
+  /* try to find the actual locality of that bus from OS or quirks */
   busid.domain = domain;
   busid.bus = bus;
   busid.dev = dev;
