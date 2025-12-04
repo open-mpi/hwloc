@@ -46,15 +46,21 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   } else if (sscanf(string, "%x %x", &domain, &dummy) == 2) {
     bus_first = 0;
     bus_last = 255;
-  } else
+  } else {
+    if (HWLOC_SHOW_CRITICAL_ERRORS())
+      fprintf(stderr, "hwloc/pci: Ignoring unparseable HWLOC_PCI_LOCALITY line `%s'\n",
+              string);
     return;
+  }
 
   tmp = strchr(string, ' ');
-  if (!tmp)
+  if (!tmp) /* things like c7-c8... match %x %x in the 3rd case above?! */
     return;
   tmp++;
 
   set = hwloc_bitmap_alloc();
+  if (!set)
+    goto out;
   hwloc_bitmap_sscanf(set, tmp);
 
   if (!*allocated) {
@@ -81,6 +87,7 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
 
  out_with_set:
   hwloc_bitmap_free(set);
+ out:
   return;
 }
 
