@@ -108,7 +108,8 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
 	next = &tmp[len]+1;
     }
 
-    hwloc_pci_forced_locality_parse_one(topology, tmp, &allocated);
+    if (tmp[0] != '#' && tmp[0] != '/') /* ignore comments */
+      hwloc_pci_forced_locality_parse_one(topology, tmp, &allocated);
 
     if (next)
       tmp = next;
