@@ -1106,7 +1106,8 @@ following environment variables.
   Localities are given either inside the environment variable itself,
   or in the pointed file.
   They may be separated either by semi-colons or by line-breaks.
-  Invalid localities are silently ignored, hence it is possible to insert comments between actual localities.
+  Invalid localities are ignored,
+  and it is possible to insert comments between actual localities by starting the line with <tt>#</tt> or <tt>//</tt>.
 
   Each locality contains a domain/bus specification (in hexadecimal numbers as usual)
   followed by a whitespace and a cpuset:
