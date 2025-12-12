@@ -275,8 +275,6 @@ struct hwloc_topology {
     hwloc_obj_t parent;
     struct hwloc_pci_locality_s *prev, *next;
   } *first_pci_locality, *last_pci_locality; /* contains unsorted forced localities first, then sorted real ones */
-  int pci_has_forced_locality; /* to disable quirks even if nothing was actually forced */
-  hwloc_uint64_t pci_locality_quirks;
 
   /* component blacklisting */
   unsigned nr_blacklisted_components;
