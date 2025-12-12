@@ -209,27 +209,18 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
 void
 hwloc_pci_discovery_init(struct hwloc_topology *topology)
 {
-  topology->pci_has_forced_locality = 0;
   topology->first_pci_locality = topology->last_pci_locality = NULL;
-
-#define HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A (1ULL<<0)
-#define HWLOC_PCI_LOCALITY_QUIRK_FAKE (1ULL<<62)
-  topology->pci_locality_quirks = (uint64_t) -1;
-  /* -1 is unknown, 0 is disabled, >0 is bitmask of enabled quirks.
-   * bit 63 should remain unused so that -1 is unaccessible as a bitmask.
-   */
 }
 
 void
 hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
 {
+  const char *dmi_board_name;
   char *env;
 
   env = getenv("HWLOC_PCI_LOCALITY");
   if (env) {
     int fd;
-
-    topology->pci_has_forced_locality = 1;
 
     fd = open(env, O_RDONLY);
     if (fd >= 0) {
@@ -253,6 +244,60 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
       close(fd);
     } else
       hwloc_pci_forced_locality_parse(topology, env);
+
+    /* don't apply quirks */
+    return;
+  }
+
+  dmi_board_name = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "DMIBoardName");
+  if (dmi_board_name && !strcmp(dmi_board_name, "HPE CRAY EX235A")) {
+    /* AMD Trento has xGMI ports connected to individual CCDs (8 cores + L3)
+     * instead of NUMA nodes (pairs of CCDs within Trento) as is usual in AMD EPYC CPUs.
+     * This is not described by the ACPI tables, hence we need to manually hardwire
+     * the xGMI locality for the (currently single) server that currently uses that CPU.
+     * It's not clear if ACPI tables can/will ever be fixed (would require one initiator
+     * proximity domain per CCD), or if Linux can/will work around the issue.
+     */
+    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+    if (cpuset) {
+      unsigned i;
+      hwloc_debug("Enabling for PCI locality quirk for HPE Cray EX235A\n");
+      for(i=0; i<8; i++) {
+        unsigned bus_min, bus_max, pu_stride;
+        hwloc_obj_t parent;
+        switch (i) {
+          /* buses must be inserted in order since we just append to the locality list */
+        case 0: pu_stride = 6; bus_min = 0xc0; bus_max = 0xc1; break;
+        case 1: pu_stride = 7; bus_min = 0xc4; bus_max = 0xc6; break;
+        case 2: pu_stride = 2; bus_min = 0xc8; bus_max = 0xc9; break;
+        case 3: pu_stride = 3; bus_min = 0xcc; bus_max = 0xce; break;
+        case 4: pu_stride = 0; bus_min = 0xd0; bus_max = 0xd1; break;
+        case 5: pu_stride = 1; bus_min = 0xd4; bus_max = 0xd6; break;
+        case 6: pu_stride = 4; bus_min = 0xd8; bus_max = 0xd9; break;
+        case 7: pu_stride = 5; bus_min = 0xdc; bus_max = 0xde; break;
+        default: assert(0);
+        }
+        hwloc_bitmap_zero(cpuset);
+        hwloc_bitmap_set_range(cpuset, pu_stride*8, pu_stride*8+7);
+        hwloc_bitmap_set_range(cpuset, pu_stride*8+64, pu_stride*8+71);
+        parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+        if (parent)
+          hwloc__pci_add_locality_before(topology, 0, bus_min, bus_max, parent, NULL);
+      }
+      hwloc_bitmap_free(cpuset);
+    }
+    return;
+  }
+
+  env = getenv("HWLOC_PCI_LOCALITY_QUIRK_FAKE");
+  if (env && atoi(env)) {
+    unsigned last;
+    struct hwloc_obj *lastpu;
+    hwloc_debug("Enabling for PCI locality fake quirk (attaching the entire domain 0000 to last PU)\n");
+    last = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
+    lastpu = topology->levels[0][last];
+    hwloc__pci_add_locality_before(topology, 0, 0, 255, lastpu, NULL);
+    return;
   }
 }
 
@@ -535,111 +580,16 @@ hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
   return new;
 }
 
-/* return 1 if a quirk was applied */
-static int
-hwloc__pci_find_busid_parent_quirk(struct hwloc_topology *topology,
-                                   struct hwloc_pcidev_attr_s *busid,
-                                   hwloc_cpuset_t cpuset)
-{
-  if (topology->pci_locality_quirks == (uint64_t)-1 /* unknown */) {
-    const char *dmi_board_name, *env;
-
-    /* first invokation, detect which quirks are needed */
-    topology->pci_locality_quirks = 0; /* no quirk yet */
-
-    dmi_board_name = hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "DMIBoardName");
-    if (dmi_board_name && !strcmp(dmi_board_name, "HPE CRAY EX235A")) {
-      hwloc_debug("enabling for PCI locality quirk for HPE Cray EX235A\n");
-      topology->pci_locality_quirks |= HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A;
-    }
-
-    env = getenv("HWLOC_PCI_LOCALITY_QUIRK_FAKE");
-    if (env && atoi(env)) {
-      hwloc_debug("enabling for PCI locality fake quirk (attaching everything to last PU)\n");
-      topology->pci_locality_quirks |= HWLOC_PCI_LOCALITY_QUIRK_FAKE;
-    }
-  }
-
-  if (topology->pci_locality_quirks & HWLOC_PCI_LOCALITY_QUIRK_FAKE) {
-    unsigned last = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
-    hwloc_bitmap_set(cpuset, last);
-    return 1;
-  }
-
-  if (topology->pci_locality_quirks & HWLOC_PCI_LOCALITY_QUIRK_CRAY_EX235A) {
-    /* AMD Trento has xGMI ports connected to individual CCDs (8 cores + L3)
-     * instead of NUMA nodes (pairs of CCDs within Trento) as is usual in AMD EPYC CPUs.
-     * This is not described by the ACPI tables, hence we need to manually hardwire
-     * the xGMI locality for the (currently single) server that currently uses that CPU.
-     * It's not clear if ACPI tables can/will ever be fixed (would require one initiator
-     * proximity domain per CCD), or if Linux can/will work around the issue.
-     */
-    if (busid->domain == 0) {
-      if (busid->bus >= 0xd0 && busid->bus <= 0xd1) {
-        hwloc_bitmap_set_range(cpuset, 0, 7);
-        hwloc_bitmap_set_range(cpuset, 64, 71);
-        return 1;
-      }
-      if (busid->bus >= 0xd4 && busid->bus <= 0xd6) {
-        hwloc_bitmap_set_range(cpuset, 8, 15);
-        hwloc_bitmap_set_range(cpuset, 72, 79);
-        return 1;
-      }
-      if (busid->bus >= 0xc8 && busid->bus <= 0xc9) {
-        hwloc_bitmap_set_range(cpuset, 16, 23);
-        hwloc_bitmap_set_range(cpuset, 80, 87);
-        return 1;
-      }
-      if (busid->bus >= 0xcc && busid->bus <= 0xce) {
-        hwloc_bitmap_set_range(cpuset, 24, 31);
-        hwloc_bitmap_set_range(cpuset, 88, 95);
-        return 1;
-      }
-      if (busid->bus >= 0xd8 && busid->bus <= 0xd9) {
-        hwloc_bitmap_set_range(cpuset, 32, 39);
-        hwloc_bitmap_set_range(cpuset, 96, 103);
-        return 1;
-      }
-      if (busid->bus >= 0xdc && busid->bus <= 0xde) {
-        hwloc_bitmap_set_range(cpuset, 40, 47);
-        hwloc_bitmap_set_range(cpuset, 104, 111);
-        return 1;
-      }
-      if (busid->bus >= 0xc0 && busid->bus <= 0xc1) {
-        hwloc_bitmap_set_range(cpuset, 48, 55);
-        hwloc_bitmap_set_range(cpuset, 112, 119);
-        return 1;
-      }
-      if (busid->bus >= 0xc4 && busid->bus <= 0xc6) {
-        hwloc_bitmap_set_range(cpuset, 56, 63);
-        hwloc_bitmap_set_range(cpuset, 120, 127);
-        return 1;
-      }
-    }
-  }
-
-  return 0;
-}
-
 static struct hwloc_obj *
 hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   hwloc_obj_t parent;
-  int got_quirked = 0;
   int err;
 
   hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
 	      busid->domain, busid->bus, busid->dev, busid->func);
 
-  if (!topology->pci_has_forced_locality /* if pci locality was forced, even empty, don't let quirks change what the OS reports */
-      && topology->pci_locality_quirks /* either quirks are unknown yet, or some are enabled */) {
-    err = hwloc__pci_find_busid_parent_quirk(topology, busid, cpuset);
-    if (err > 0)
-      got_quirked = 1;
-  }
-
-  if (!got_quirked) {
     /* get the cpuset by asking the backend that provides the relevant hook, if any. */
     struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
     if (backend)
@@ -649,7 +599,6 @@ hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcide
     if (err < 0)
       /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
-  }
 
   hwloc_debug_bitmap("  will attach PCI bus to cpuset %s\n", cpuset);
 
@@ -751,7 +700,7 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
       }
     }
 
-    /* or ask OS and quirks */
+    /* or ask OS */
     parent = hwloc__pci_find_busid_parent(topology, &pciobj->attr->pcidev);
 
     /* reuse or extend the previous locality if possible. */
@@ -822,7 +771,7 @@ hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
   if (parent)
     return parent;
 
-  /* try to find the actual locality of that bus from OS or quirks */
+  /* try to find the actual locality of that bus from OS */
   busid.domain = domain;
   busid.bus = bus;
   busid.dev = dev;
