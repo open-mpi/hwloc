@@ -806,7 +806,6 @@ extern "C" {
 
 #define hwloc_special_level_s HWLOC_NAME(special_level_s)
 
-#define hwloc_pci_forced_locality_s HWLOC_NAME(pci_forced_locality_s)
 #define hwloc_pci_locality_s HWLOC_NAME(pci_locality_s)
 
 #define hwloc_topology_forced_component_s HWLOC_NAME(topology_forced_component_s)
