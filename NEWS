@@ -68,8 +68,6 @@ Version 3.0.0
     - hwloc_obj_type_sscanf()
     - hwloc_cpuset_to_nodeset_strict()
     - hwloc_cpuset_from_nodeset_strict()
-  + HWLOC_PCI_<domain>_<bus>_LOCALCPUS environment variables,
-    superseded with a single HWLOC_PCI_LOCALITY since 2.0.
 * Misc
   + The HWLOC_SHOW_ERRORS environment variable replaces HWLOC_HIDE_ERRORS,
     HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE, with more configuration options,
