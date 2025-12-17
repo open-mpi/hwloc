@@ -1100,9 +1100,6 @@ following environment variables.
   If the variable is defined to empty or invalid, no forced PCI locality is applied
   but hwloc's internal automatic locality quirks are disabled, which means the exact
   PCI locality reported by the platform is used.
-
-  This supersedes the old HWLOC_PCI_0000_00_LOCALCPUS=&lt;cpuset&gt;
-  which only works when hostbridges exist in the topology.
   </dd>
 
 <dt>HWLOC_X86_TOPOEXT_NUMANODES=0</dt>
