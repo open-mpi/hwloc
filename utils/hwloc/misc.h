@@ -241,7 +241,8 @@ hwloc_utils_autodetect_input_format(const char *input, int verbose)
 }
 
 static __hwloc_inline int
-hwloc_utils_enable_input_format(struct hwloc_topology *topology, unsigned long flags,
+hwloc_utils_enable_input_format(struct hwloc_topology *topology,
+				unsigned long flags __hwloc_attribute_unused,
 				const char *input,
 				struct hwloc_utils_input_format_s *input_formatp,
 				int verbose, const char *callname)
