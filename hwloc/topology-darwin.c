@@ -895,7 +895,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   if (gotnuma)
     topology->support.discovery->numa = 1;
   if (gotnumamemory)
-    topology->support.discovery->numa = 1;
+    topology->support.discovery->numa_memory = 1;
 
   /* add PU objects */
   hwloc_setup_pu_level(topology, nprocs);
