@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2015-2025 Inria.  All rights reserved.
+ * Copyright © 2015-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -380,13 +380,13 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     /* eax is number of subleaves but subleaves aren't documented?! */
   }
 
-  /* 0x21 is Unimplemented on Intel (always returns 0) ; Reserved on AMD */
+  /* 0x21 = Reserved */
   if (highest_cpuid >= 0x21) {
     regs[0] = 0x21; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
   }
 
-  /* TODO 0x22 is reserved on Intel and AMD? */
+  /* 0x22 = Reserved */
   if (highest_cpuid >= 0x22) {
     regs[0] = 0x22; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
@@ -407,8 +407,14 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0x24 is Converged Vector ISA Main Leaf on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x24) {
+    unsigned subleafmax;
     regs[0] = 0x24; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
+    subleafmax = regs[0];
+    for(i=1; i<=subleafmax && i<256; i++) {
+      regs[0] = 0x24; regs[2] = i;
+      dump_one_cpuid(output, regs, 0x5);
+    }
   }
 
   if (highest_cpuid > 0x25) {
