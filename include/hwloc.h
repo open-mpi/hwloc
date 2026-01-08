@@ -1658,7 +1658,7 @@ typedef enum {
   /** \brief Reset the memory allocation policy to the system default.
    * Depending on the operating system, this may correspond to
    * ::HWLOC_MEMBIND_FIRSTTOUCH (Linux, FreeBSD),
-   * or ::HWLOC_MEMBIND_BIND (AIX, HP-UX, Solaris, Windows).
+   * or ::HWLOC_MEMBIND_BIND (AIX, Solaris, Windows).
    * This policy is never returned by get membind functions.
    * The nodeset argument is ignored.
    * \hideinitializer */

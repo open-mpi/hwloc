@@ -55,7 +55,7 @@
 #endif
 
 #ifdef HAVE_CLOCK_GETTIME
-# ifndef CLOCK_MONOTONIC /* HP-UX doesn't have CLOCK_MONOTONIC */
+# ifndef CLOCK_MONOTONIC /* some OS such as HP-UX don't have CLOCK_MONOTONIC */
 #  define CLOCK_MONOTONIC CLOCK_REALTIME
 # endif
 #endif

@@ -360,10 +360,6 @@ extern void hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *binding_hooks, s
 extern void hwloc_set_netbsd_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_NETBSD_SYS */
 
-#ifdef HWLOC_HPUX_SYS
-extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
-#endif /* HWLOC_HPUX_SYS */
-
 extern int hwloc_look_hardwired_fujitsu_k(struct hwloc_topology *topology);
 extern int hwloc_look_hardwired_fujitsu_fx10(struct hwloc_topology *topology);
 extern int hwloc_look_hardwired_fujitsu_fx100(struct hwloc_topology *topology);

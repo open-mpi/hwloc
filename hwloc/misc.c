@@ -216,7 +216,7 @@ hwloc_progname(struct hwloc_topology *topology __hwloc_attribute_unused)
   name = __progname; /* fallback for most unix, used for OpenBSD */
 #else
   /* TODO: _NSGetExecutablePath(path, &size) on Darwin */
-  /* TODO: AIX, HPUX */
+  /* TODO: AIX */
   name = NULL;
 #endif
   if (!name)

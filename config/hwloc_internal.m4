@@ -579,7 +579,6 @@ int foo(void) {
 	hwloc_config_prefix[tests/hwloc/ports/topology-darwin.c]:hwloc_config_prefix[hwloc/topology-darwin.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-freebsd.c]:hwloc_config_prefix[hwloc/topology-freebsd.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-netbsd.c]:hwloc_config_prefix[hwloc/topology-netbsd.c]
-	hwloc_config_prefix[tests/hwloc/ports/topology-hpux.c]:hwloc_config_prefix[hwloc/topology-hpux.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-opencl.c]:hwloc_config_prefix[hwloc/topology-opencl.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-cuda.c]:hwloc_config_prefix[hwloc/topology-cuda.c]
 	hwloc_config_prefix[tests/hwloc/ports/topology-nvml.c]:hwloc_config_prefix[hwloc/topology-nvml.c]

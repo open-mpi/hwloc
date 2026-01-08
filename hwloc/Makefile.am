@@ -153,11 +153,6 @@ sources += topology-aix.c
 ldflags += -lpthread
 endif HWLOC_HAVE_AIX
 
-if HWLOC_HAVE_HPUX
-sources += topology-hpux.c
-ldflags += -lpthread
-endif HWLOC_HAVE_HPUX
-
 if HWLOC_HAVE_WINDOWS
 sources += topology-windows.c
 endif HWLOC_HAVE_WINDOWS

@@ -579,9 +579,6 @@
 /* Define to 1 if you have x86 cpuid */
 #define HWLOC_HAVE_X86_CPUID 1
 
-/* Define to 1 on HP-UX */
-/* #undef HWLOC_HPUX_SYS */
-
 /* Define to 1 on Irix */
 /* #undef HWLOC_IRIX_SYS */
 
@@ -663,11 +660,6 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
-/* Enable extensions on HP-UX. */
-#ifndef _HPUX_SOURCE
-# define _HPUX_SOURCE 1
-#endif
-
 
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
@@ -697,9 +689,6 @@
 
 /* Define to 1 if the X Window System is missing or not being used. */
 /* #undef X_DISPLAY_MISSING */
-
-/* Are we building for HP-UX? */
-#define _HPUX_SOURCE 1
 
 /* Define to 1 if on MINIX. */
 /* #undef _MINIX */

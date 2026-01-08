@@ -775,7 +775,6 @@ extern "C" {
 #define hwloc_aix_component HWLOC_NAME(aix_component)
 #define hwloc_darwin_component HWLOC_NAME(darwin_component)
 #define hwloc_freebsd_component HWLOC_NAME(freebsd_component)
-#define hwloc_hpux_component HWLOC_NAME(hpux_component)
 #define hwloc_linux_component HWLOC_NAME(linux_component)
 #define hwloc_netbsd_component HWLOC_NAME(netbsd_component)
 #define hwloc_noos_component HWLOC_NAME(noos_component)
@@ -852,7 +851,6 @@ extern "C" {
 #define hwloc_set_darwin_hooks HWLOC_NAME(set_darwin_hooks)
 #define hwloc_set_freebsd_hooks HWLOC_NAME(set_freebsd_hooks)
 #define hwloc_set_netbsd_hooks HWLOC_NAME(set_netbsd_hooks)
-#define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
 
 #define hwloc_look_hardwired_fujitsu_k HWLOC_NAME(look_hardwired_fujitsu_k)
 #define hwloc_look_hardwired_fujitsu_fx10 HWLOC_NAME(look_hardwired_fujitsu_fx10)

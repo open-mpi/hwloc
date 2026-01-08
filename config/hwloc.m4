@@ -179,15 +179,6 @@ EOF])
         HWLOC_GCC_CFLAGS="$HWLOC_GCC_CFLAGS -Wpointer-arith -Wcast-align"
     fi
 
-    # Enample system extensions for O_DIRECTORY, fdopen, fssl, etc.
-    AH_VERBATIM([USE_HPUX_SYSTEM_EXTENSIONS],
-[/* Enable extensions on HP-UX. */
-#ifndef _HPUX_SOURCE
-# undef _HPUX_SOURCE
-#endif
-])
-    AC_DEFINE([_HPUX_SOURCE], [1], [Are we building for HP-UX?])
-
     AC_LANG_PUSH([C])
 
     # Check to see if we're producing a 32 or 64 bit executable by
@@ -247,12 +238,6 @@ EOF])
         hwloc_aix=yes
         AC_MSG_RESULT([AIX])
         hwloc_components="$hwloc_components aix"
-        ;;
-      *-*-hpux*)
-        AC_DEFINE(HWLOC_HPUX_SYS, 1, [Define to 1 on HP-UX])
-        hwloc_hpux=yes
-        AC_MSG_RESULT([HP-UX])
-        hwloc_components="$hwloc_components hpux"
         ;;
       *-*-mingw*|*-*-cygwin*)
         AC_DEFINE(HWLOC_WIN_SYS, 1, [Define to 1 on WINDOWS])
@@ -1852,7 +1837,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_NETBSD], [test "x$hwloc_netbsd" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SOLARIS], [test "x$hwloc_solaris" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_AIX], [test "x$hwloc_aix" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_HPUX], [test "x$hwloc_hpux" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_WINDOWS], [test "x$hwloc_windows" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
 

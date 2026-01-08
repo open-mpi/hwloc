@@ -89,7 +89,6 @@ and NumaScale NumaConnect.</li>
 <li>Darwin / OS X</li>
 <li>FreeBSD and its variants (such as kFreeBSD/GNU)</li>
 <li>NetBSD</li>
-<li>HP-UX</li>
 <li>Microsoft Windows</li>
 </ul>
 
@@ -3493,7 +3492,7 @@ environment variable (see \ref envvar_verbose).
  but requires the pci component for adding vendor/device names to PCI objects.
  It also discovers many kinds of Linux-specific OS devices.
 </dd>
-<dt>aix, darwin, freebsd, hpux, netbsd, solaris, windows</dt>
+<dt>aix, darwin, freebsd, netbsd, solaris, windows</dt>
 <dd>
  Each officially supported operating system has its own native component,
  which is statically built when supported, and which is used by default.

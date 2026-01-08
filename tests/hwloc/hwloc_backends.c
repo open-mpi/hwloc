@@ -240,10 +240,6 @@ int main(void)
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "aix");
   assert(!err);
 #endif
-#ifdef HWLOC_HPUX_SYS
-  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "hpux");
-  assert(!err);
-#endif
 #ifdef HWLOC_WIN_SYS
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "windows");
   assert(!err);

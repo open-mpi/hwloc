@@ -80,7 +80,7 @@ test x$NO_CHECK = xtrue || scan-build -plist --intercept-first --analyze-headers
 
 # Run cppcheck analysis
 SOURCES_TO_ANALYZE="hwloc tests utils"
-SOURCES_TO_EXCLUDE="-itests/hwloc/ports -ihwloc/topology-aix.c -ihwloc/topology-darwin.c -ihwloc/topology-freebsd.c -ihwloc/topology-hpux.c -ihwloc/topology-netbsd.c -ihwloc/topology-solaris.c -ihwloc/topology-solaris-chiptype.c -ihwloc/topology-windows.c -ihwloc/topology-cuda.c -ihwloc/topology-gl.c -ihwloc/topology-nvml.c -ihwloc/topology-rsmi.c -ihwloc/topology-levelzero.c -ihwloc/topology-opencl.c -iutils/lstopo/lstopo-windows.c -iutils/lstopo/lstopo-android.c"
+SOURCES_TO_EXCLUDE="-itests/hwloc/ports -ihwloc/topology-aix.c -ihwloc/topology-darwin.c -ihwloc/topology-freebsd.c -ihwloc/topology-netbsd.c -ihwloc/topology-solaris.c -ihwloc/topology-solaris-chiptype.c -ihwloc/topology-windows.c -ihwloc/topology-cuda.c -ihwloc/topology-gl.c -ihwloc/topology-nvml.c -ihwloc/topology-rsmi.c -ihwloc/topology-levelzero.c -ihwloc/topology-opencl.c -iutils/lstopo/lstopo-windows.c -iutils/lstopo/lstopo-android.c"
 CPPCHECK_INCLUDES="-Iinclude -Ihwloc -Iutils/lstopo -Iutils/hwloc"
 CPPCHECK="cppcheck -v -f --language=c --platform=unix64 --enable=all --xml --xml-version=2 --suppress=purgedConfiguration --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES}"
 # Main cppcheck
@@ -95,8 +95,6 @@ ${CPPCHECK} ${DEFINITIONS} hwloc/topology-darwin.c -Itests/hwloc/ports/include/d
 DEFINITIONS="-Dhwloc_thread_t=pthread_t -DCPU_WHICH_DOMAIN=6"
 ${CPPCHECK} ${DEFINITIONS} hwloc/topology-freebsd.c -Itests/hwloc/ports/include/freebsd 2> hwloc-cppcheck-freebsd.xml
 DEFINITIONS="-DMAP_MEM_FIRST_TOUCH=2 -Dhwloc_thread_t=pthread_t"
-${CPPCHECK} ${DEFINITIONS} hwloc/topology-hpux.c -Itests/hwloc/ports/include/hpux 2> hwloc-cppcheck-hpux.xml
-DEFINITIONS="-Dhwloc_thread_t=pthread_t"
 ${CPPCHECK} ${DEFINITIONS} hwloc/topology-netbsd.c -Itests/hwloc/ports/include/netbsd 2> hwloc-cppcheck-netbsd.xml
 DEFINITIONS="-DMADV_ACCESS_LWP=7"
 ${CPPCHECK} ${DEFINITIONS} hwloc/topology-solaris.c hwloc/topology-solaris-chiptype.c -Itests/hwloc/ports/include/solaris 2> hwloc-cppcheck-solaris.xml

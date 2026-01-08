@@ -17,7 +17,6 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_synthetic_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_aix_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_darwin_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_freebsd_component;
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_hpux_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_linux_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_netbsd_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_noos_component;

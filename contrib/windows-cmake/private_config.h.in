@@ -520,9 +520,6 @@
 /* Define to 1 if function `syscall' is available */
 /* #undef HWLOC_HAVE_SYSCALL */
 
-/* Define to 1 on HP-UX */
-/* #undef HWLOC_HPUX_SYS */
-
 /* Define to 1 on Linux */
 /* #undef HWLOC_LINUX_SYS */
 
@@ -598,11 +595,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* Enable extensions on HP-UX. */
-#ifndef _HPUX_SOURCE
-# define _HPUX_SOURCE 1
-#endif
 
 
 /* Enable extensions on AIX 3, Interix.  */

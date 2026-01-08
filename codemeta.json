@@ -45,8 +45,7 @@
         "FreeBSD",
         "kFreeBSD/GNU",
         "AIX",
-        "Solaris",
-        "HP-UX"
+        "Solaris"
     ],
     "author": [
         {
