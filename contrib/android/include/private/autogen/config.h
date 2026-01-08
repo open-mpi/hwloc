@@ -579,9 +579,6 @@
 /* Define to 1 if you have x86 cpuid */
 #define HWLOC_HAVE_X86_CPUID 1
 
-/* Define to 1 on Irix */
-/* #undef HWLOC_IRIX_SYS */
-
 /* Define to 1 on Linux */
 #define HWLOC_LINUX_SYS 1
 

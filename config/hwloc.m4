@@ -215,12 +215,6 @@ EOF])
 	  fi
 	fi
         ;;
-      *-*-irix*)
-        AC_DEFINE(HWLOC_IRIX_SYS, 1, [Define to 1 on Irix])
-        hwloc_irix=yes
-        AC_MSG_RESULT([IRIX])
-        # no irix component yet
-        ;;
       *-*-darwin*)
         AC_DEFINE(HWLOC_DARWIN_SYS, 1, [Define to 1 on Darwin])
         hwloc_darwin=yes
@@ -1831,7 +1825,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$hwloc_install_doxs" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_LINUX], [test "x$hwloc_linux" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_IRIX], [test "x$hwloc_irix" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_DARWIN], [test "x$hwloc_darwin" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_FREEBSD], [test "x$hwloc_freebsd" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_NETBSD], [test "x$hwloc_netbsd" = "xyes"])
