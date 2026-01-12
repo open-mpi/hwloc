@@ -17,6 +17,10 @@ Version 2.13
 ------------
 * Adjust sysfs capacity on Intel CPUs on Linux 6.16+ together with
   max frequencies when they differ because of Turbo Boost Max 3.0.
+* Disable Linux cpukinds on AMD before Zen5 since these CPUs are
+  homogeneous and it may cause slowness on some platforms.
+  The new env var HWLOC_LINUX_CPUKINDS=1 may be used to reenable it.
+  Thanks to Benedikt Steinbusch and Jan André Reuter for the report.
 * Send the lstopo ASCII output to a pager (less by default).
 * Plugins are now supported for OpenCL, CUDA and XML components
   on Windows using the HWLOC_ENABLE_PLUGINS CMake option,

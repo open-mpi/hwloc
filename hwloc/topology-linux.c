@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -60,6 +60,7 @@ struct hwloc_linux_backend_data_s {
   } arch;
   int is_knl;
   int is_amd_with_CU;
+  int is_amd_homogeneous;
   int is_fake_numa_uniform; /* 0 if not fake, -1 if fake non-uniform, N if fake=<N>U */
   int use_numa_distances;
   int use_numa_distances_for_cpuless;
@@ -4841,6 +4842,7 @@ static int
 look_sysfscpukinds(struct hwloc_topology *topology,
                    struct hwloc_linux_backend_data_s *data)
 {
+  int enabled = -1; /* not decided yet */
   int nr_pus;
   struct hwloc_linux_cpukinds_by_pu *by_pu;
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
@@ -4854,6 +4856,24 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   int force_homogeneous;
   const char *info;
   int pu, i;
+
+  env = getenv("HWLOC_LINUX_CPUKINDS");
+  if (env) {
+    if (!strcmp(env, "none") || !strcmp(env, "0"))
+      enabled = 0;
+    else
+      /* if variable is given, assume anything else means enabled */
+      enabled = 1;
+  }
+  if (enabled != 0 && data->is_amd_homogeneous) {
+    /* If not disabled but on pre-Zen5 AMD, disable since useless.
+     * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
+     */
+    hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
+    enabled = 0;
+  }
+  if (!enabled)
+    return 0;
 
   env = getenv("HWLOC_CPUKINDS_MAXFREQ");
   if (env) {
@@ -6186,11 +6206,13 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 	  && cpumodelnumber && (!strcmp(cpumodelnumber, "87")
 	  || !strcmp(cpumodelnumber, "133")))
 	data->is_knl = 1;
-      if (cpuvendor && !strcmp(cpuvendor, "AuthenticAMD")
-	  && cpufamilynumber
-	  && (!strcmp(cpufamilynumber, "21")
-	      || !strcmp(cpufamilynumber, "22")))
-	data->is_amd_with_CU = 1;
+      if (cpuvendor && !strcmp(cpuvendor, "AuthenticAMD")) {
+        if (cpufamilynumber && (!strcmp(cpufamilynumber, "21")
+                                || !strcmp(cpufamilynumber, "22")))
+          data->is_amd_with_CU = 1;
+        else if (cpufamilynumber && (atoi(cpufamilynumber) < 0x1a))
+          data->is_amd_homogeneous = 1; /* hybrid CPUs started with Zen5 = family 0x1a */
+      }
   }
 
   /**********************
@@ -7920,6 +7942,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->is_knl = 0;
   data->is_amd_with_CU = 0;
+  data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
