@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2013, 2015, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015 Intel, Inc.  All rights reserved.
@@ -40,6 +40,7 @@
 #include <mntent.h>
 #include <stddef.h>
 #include <endian.h>
+#include <sys/mount.h>
 
 struct hwloc_linux_backend_data_s {
   char *root_path; /* NULL if unused */
@@ -461,6 +462,87 @@ static __hwloc_inline long hwloc_move_pages(int pid __hwloc_attribute_unused,
 #endif
 }
 
+#ifndef __NR_listmount
+# ifdef __alpha__
+#  define __NR_listmount 568
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_listmount 5458
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_listmount 6458
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_listmount 4458
+# else
+#  define __NR_listmount 458
+# endif
+#endif
+static __hwloc_inline ssize_t hwloc_listmount(uint64_t mnt_id __hwloc_attribute_unused,
+                                              uint64_t mnt_ns_id __hwloc_attribute_unused,
+                                              uint64_t last_mnt_id __hwloc_attribute_unused,
+                                              uint64_t *list __hwloc_attribute_unused,
+                                              uint64_t num __hwloc_attribute_unused,
+                                              unsigned int flags __hwloc_attribute_unused)
+{
+#if (defined __NR_listmount) && (defined HWLOC_HAVE_SYSCALL)
+  struct mnt_id_req req = {
+    .size = MNT_ID_REQ_SIZE_VER0,
+    .mnt_id = mnt_id,
+    .param = last_mnt_id,
+  };
+
+  if (mnt_ns_id) {
+    req.size = MNT_ID_REQ_SIZE_VER1;
+    req.mnt_ns_id = mnt_ns_id;
+  }
+
+  return (ssize_t) syscall(__NR_listmount, &req, list, num, flags);
+#else
+#warning "don't know the syscall number for listmount on this architecture, will not support"
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
+#ifndef __NR_statmount
+# ifdef __alpha__
+#  define __NR_statmount 567
+# elif defined(__mips__) && _MIPS_SIM == _ABI64
+#  define __NR_statmount 5457
+# elif defined(__mips__) && _MIPS_SIM == _ABIN32
+#  define __NR_statmount 6457
+# elif defined(__mips__) && _MIPS_SIM == _ABIO32
+#  define __NR_statmount 4457
+# else
+#  define __NR_statmount 457
+# endif
+#endif
+static __hwloc_inline int hwloc_statmount(uint64_t mnt_id __hwloc_attribute_unused,
+                                          uint64_t mnt_ns_id __hwloc_attribute_unused,
+                                          uint64_t mask __hwloc_attribute_unused,
+                                          struct statmount *smbuf __hwloc_attribute_unused,
+                                          size_t bufsize __hwloc_attribute_unused,
+                                          unsigned int flags __hwloc_attribute_unused)
+{
+#if (defined __NR_statmount) && (defined HWLOC_HAVE_SYSCALL)
+  struct mnt_id_req req = {
+    .size = MNT_ID_REQ_SIZE_VER0,
+    .mnt_id = mnt_id,
+    .param = mask,
+  };
+
+  if (mnt_ns_id) {
+    req.size = MNT_ID_REQ_SIZE_VER1;
+    req.mnt_ns_id = mnt_ns_id;
+  }
+
+  return (int) syscall(__NR_statmount, &req, smbuf, bufsize, flags);
+#warning "don't know the syscall number for statmount on this architecture, will not support"
+  errno = ENOSYS;
+  return -1;
+#endif
+}
+
+/* max mounts per listmount call */
+#define MAXMOUNT 1024
 
 /* Added for ntohl() */
 #include <arpa/inet.h>
@@ -2377,6 +2459,86 @@ enum hwloc_linux_cgroup_type_e {
       HWLOC_LINUX_CPUSET
 };
 
+static struct statmount *
+hwloc_statmount_alloc(uint64_t mnt_id, uint64_t mnt_ns_id, size_t bufsize)
+{
+  struct statmount *sm, *tmp = malloc(bufsize);
+  uint64_t mask = STATMOUNT_MNT_POINT |
+                  STATMOUNT_FS_TYPE;
+  int ret;
+
+  ret = hwloc_statmount(mnt_id, mnt_ns_id, mask, tmp, bufsize, 0);
+  if (ret < 0)
+    return NULL;
+
+  if (tmp->size > bufsize)
+    return NULL;
+
+  sm = malloc(tmp->size);
+  if (!sm)
+    return NULL;
+
+  memcpy(sm, tmp, tmp->size);
+  free(tmp);
+  return sm;
+}
+
+/**
+ * TODO
+ * static int
+ * hwloc_get_mnt_ns_id()
+ * { }
+ */
+
+static int
+hwloc_find_mount_point(enum hwloc_linux_cgroup_type_e *cgtype, char **mntpnt)
+{
+  size_t bufsize = 1 << 15;
+  uint64_t list[MAXMOUNT],
+           last_mnt_id = 0,
+           mnt_ns_id   = 0;
+  ssize_t nr_mounts;
+  struct statmount *sm;
+
+  for (;;) {
+    nr_mounts = hwloc_listmount(LSMT_ROOT, mnt_ns_id, last_mnt_id, list, MAXMOUNT, 0);
+    for (ssize_t i = 0; i < nr_mounts; i++) {
+      sm = hwloc_statmount_alloc(list[i], mnt_ns_id, bufsize);
+      if (!sm)
+        continue;
+
+      if (!(sm->mask & (STATMOUNT_MNT_POINT |
+                        STATMOUNT_FS_TYPE)))
+        continue;
+
+      if (!strcmp(&sm->str[sm->fs_type], "cgroup2")) {
+        *cgtype = HWLOC_LINUX_CGROUP2;
+        *mntpnt = strdup(&sm->str[sm->mnt_point]);
+        free(sm);
+        return 0;
+      } else if (!strcmp(&sm->str[sm->fs_type], "cgroup")) {
+        *cgtype = HWLOC_LINUX_CGROUP2;
+        *mntpnt = strdup(&sm->str[sm->mnt_point]);
+        free(sm);
+        return 0;
+      } else if (!strcmp(&sm->str[sm->fs_type], "cpuset")) {
+        *cgtype = HWLOC_LINUX_CGROUP2;
+        *mntpnt = strdup(&sm->str[sm->mnt_point]);
+        free(sm);
+        return 0;
+      }
+
+      free(sm);
+    }
+
+    if (nr_mounts < MAXMOUNT)
+      break;
+    last_mnt_id = list[nr_mounts - 1];
+  }
+
+  return -1;
+}
+
 static void
 hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mntpnt, const char *root_path, int fsroot_fd)
 {
@@ -2386,6 +2548,9 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
   FILE *fd;
   int err;
   size_t bufsize;
+
+  /* */
+  /** hwloc_find_mount_point(cgtype, mntpnt); */
 
   /* try standard mount points */
   if (!hwloc_access("/sys/fs/cgroup/cpuset.cpus.effective", R_OK, fsroot_fd)) {
