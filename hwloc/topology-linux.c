@@ -4861,11 +4861,14 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   if (env) {
     if (!strcmp(env, "none") || !strcmp(env, "0"))
       enabled = 0;
-    else
+    else {
       /* if variable is given, assume anything else means enabled */
       enabled = 1;
+      if (!strncmp(env, "cppc=", 5))
+        use_cppc_nominal_freq = atoi(env+5);
+    }
   }
-  if (enabled != 0 && data->is_amd_homogeneous) {
+  if (enabled == -1 && data->is_amd_homogeneous) {
     /* If not disabled but on pre-Zen5 AMD, disable since useless.
      * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
      */
@@ -4909,11 +4912,13 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", pu);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
       by_pu[i].max_freq = maxfreq;
-    /* base_frequency is in intel_pstate and works fine */
-    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", pu);
-    if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
-      by_pu[i].base_freq = basefreq;
-      use_cppc_nominal_freq = 0;
+    if (use_cppc_nominal_freq != 1) {
+      /* base_frequency is in intel_pstate and works fine */
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", pu);
+      if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
+        by_pu[i].base_freq = basefreq;
+        use_cppc_nominal_freq = 0;
+      }
     }
     /* try acpi_cppc/nominal_freq only if cpufreq/base_frequency failed
      * acpi_cppc/nominal_freq is widely available, but it returns 0 on some Intel SPR,
