@@ -1247,6 +1247,7 @@ following environment variables.
   <dd>Try to enable the discovery of CPU kinds on Linux.
   This is enabled by default except on old AMD CPUs known to be homogeneous.
   Setting to <tt>1</tt> always enables it, while <tt>0</tt> always disables it.
+  Setting to <tt>cppc=0</tt> enables it without using ACPI CPPC nominal frequency.
   </dd>
 
 
