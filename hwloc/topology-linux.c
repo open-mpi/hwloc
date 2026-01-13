@@ -5273,7 +5273,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   struct hwloc_infos_s global_infos;
   int numprocs;
   int already_pus;
-  int already_numanodes;
   int old_siblings_filenames = 0;
   int err;
 
@@ -5290,17 +5289,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   already_pus = (topology->levels[0][0]->complete_cpuset != NULL
 		 && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset));
   /* if there are PUs, still look at memory information
-   * since x86 misses NUMA node information (unless we forced AMD topoext NUMA nodes)
-   * memory size.
+   * since x86 misses NUMA node information memory size.
    */
-  already_numanodes = (topology->levels[0][0]->complete_nodeset != NULL
-		       && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_nodeset));
-  /* if there are already NUMA nodes, we'll just annotate them with memory information,
-   * which requires the NUMA level to be connected.
-   */
-  if (already_numanodes)
-    hwloc__reconnect(topology, 0);
-
   hwloc_alloc_root_sets(topology->levels[0][0]);
 
   /**********************
