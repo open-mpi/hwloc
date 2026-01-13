@@ -9,7 +9,6 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # Add your tests here.
 cpuid_sysfs_tests = \
 	64amd64-4p2n4ca2co.test \
-	64amd64-4p2n4ca2co+topoextnuma.test \
 	5intel64-hybrid-lakefield.test
 
 # Add your expected outputs here.

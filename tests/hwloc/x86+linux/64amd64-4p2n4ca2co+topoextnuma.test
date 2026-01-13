@@ -1,6 +1,0 @@
-# AMD CPUID TopoExt NUMA, annotated by Linux for size/pages
-# Fortunately the output is identical when Linux performs the entire NUMA discovery.
-source: 64amd64-4p2n4ca2co.tar.bz2
-target: 64amd64-4p2n4ca2co.xml
-env:    HWLOC_X86_TOPOEXT_NUMANODES=1
-env:    export HWLOC_X86_TOPOEXT_NUMANODES

@@ -20,9 +20,6 @@ export HWLOC_DONT_ADD_VERSION_INFO
 HWLOC_XML_EXPORT_SUPPORT=0
 export HWLOC_XML_EXPORT_SUPPORT
 
-HWLOC_X86_TOPOEXT_NUMANODES=1
-export HWLOC_X86_TOPOEXT_NUMANODES
-
 # make sure we use default numeric formats (only XML outputs are dis-localized when supported)
 LANG=C
 LC_ALL=C

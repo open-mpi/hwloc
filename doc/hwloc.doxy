@@ -1101,15 +1101,6 @@ following environment variables.
   PCI locality reported by the platform is used.
   </dd>
 
-<dt>HWLOC_X86_TOPOEXT_NUMANODES=0</dt>
-  <dd>When using the x86 backend, setting this variable to 1 enables the building
-  of NUMA nodes from AMD processor CPUID instructions.
-  However this strategy does not always reflect BIOS configuration such as NUMA interleaving.
-  And node indexes may be different from those of the operating system.
-  Hence this should only be used when OS backends are wrong
-  and the user is sure that CPUID returns correct NUMA information.
-  </dd>
-
 <dt>HWLOC_KEEP_NVIDIA_GPU_NUMA_NODES=0</dt>
   <dd>Show or hide NUMA nodes that correspond to NVIDIA GPU memory.
   By default they are ignored on POWER platforms to avoid interleaved

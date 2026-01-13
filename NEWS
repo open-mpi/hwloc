@@ -60,6 +60,7 @@ Version 3.0.0
   + Importing and exporting from/to hwloc 1.x XML.
   + Intel Knights Landing Xeon Phi specific NUMA support in the Linux backend.
   + BlueGene/Q and HP-UX support.
+  + Optional use of AMD topoext for buildind NUMA nodes in the x86 backend.
   + Functions that were deprecated since 2.0:
     - memory-binding functions with the "_nodeset" suffix,
       e.g. hwloc_get_proc_membind_nodeset()

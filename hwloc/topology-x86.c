@@ -187,7 +187,6 @@ static void cpuid_or_from_dump(unsigned *eax, unsigned *ebx, unsigned *ecx, unsi
 
 enum hwloc_x86_disc_flags {
   HWLOC_X86_DISC_FLAG_FULL = (1<<0), /* discover everything instead of only annotating */
-  HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES = (1<<1) /* use AMD topoext numanode information */
 };
 
 #define has_topoext(features) ((features)[6] & (1 << 22))
@@ -213,7 +212,7 @@ struct procinfo {
   unsigned apicid;
 #define PKG 0
 #define CORE 1
-#define NODE 2
+#define NODE 2 /* not used for building NUMA nodes, but still used to identify objects (e.g. same core ids in different NUMA nodes on Hygon Dhyana) */
 #define UNIT 3
 #define TILE 4
 #define MODULE 5
@@ -491,7 +490,7 @@ static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_
 /* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
 static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump)
 {
-  unsigned apic_id, nodes_per_proc = 0;
+  unsigned apic_id;
   unsigned eax, ebx, ecx, edx;
 
   eax = 0x8000001e;
@@ -501,16 +500,9 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
     if (infos->cpufamilynumber == 0x16) {
       /* ecx is reserved */
       infos->ids[NODE] = 0;
-      nodes_per_proc = 1;
     } else {
       /* AMD other families or Hygon family 18h */
       infos->ids[NODE] = ecx & 0xff;
-      nodes_per_proc = ((ecx >> 8) & 7) + 1;
-    }
-    if ((infos->cpufamilynumber == 0x15 && nodes_per_proc > 2)
-	|| ((infos->cpufamilynumber == 0x17 || infos->cpufamilynumber == 0x18) && nodes_per_proc > 4)
-        || (infos->cpufamilynumber == 0x19 && nodes_per_proc > 1)) {
-      hwloc_debug("warning: undefined nodes_per_proc value %u, assuming it means %u\n", nodes_per_proc, nodes_per_proc);
     }
 
   if (infos->cpufamilynumber <= 0x16) { /* topoext appeared in 0x15 and compute-units were only used in 0x15 and 0x16 */
@@ -519,7 +511,7 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
     infos->ids[UNIT] = ebx & 0xff;
     data->found_unit_ids = 1;
     cores_per_unit = ((ebx >> 8) & 0xff) + 1;
-    hwloc_debug("topoext %08x, %u nodes, node %u, %u cores in unit %u\n", apic_id, nodes_per_proc, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
+    hwloc_debug("topoext %08x, node %u, %u cores in unit %u\n", apic_id, infos->ids[NODE], cores_per_unit, infos->ids[UNIT]);
     /* coreid and unitid are package-wide (core 0-15 and unit 0-7 on 16-core 2-NUMAnode processor).
      * The Linux kernel reduces theses to NUMA-node-wide (by applying %core_per_node and %unit_per node respectively).
      * It's not clear if we should do this as well.
@@ -528,7 +520,7 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
     unsigned threads_per_core;
     infos->ids[CORE] = ebx & 0xff;
     threads_per_core = ((ebx >> 8) & 0xff) + 1;
-    hwloc_debug("topoext %08x, %u nodes, node %u, %u threads in core %u\n", apic_id, nodes_per_proc, infos->ids[NODE], threads_per_core, infos->ids[CORE]);
+    hwloc_debug("topoext %08x, node %u, %u threads in core %u\n", apic_id, infos->ids[NODE], threads_per_core, infos->ids[CORE]);
   }
 }
 
@@ -765,17 +757,13 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008 && !has_x2apic(features)) {
     /* Get core/thread information from cpuid 0x80000008
      * (not supported on Intel)
-     * We could ignore this codepath when x2apic is supported, but we may need
-     * nodeids if HWLOC_X86_TOPOEXT_NUMANODES is set.
      */
     read_amd_cores_legacy(infos, src_cpuiddump);
   }
 
   if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
     /* Get apicid, nodeid, unitid/coreid from cpuid 0x8000001e (AMD topology extension).
-     * Requires read_amd_cores_legacy() for coreid on family 0x15-16.
-     *
-     * Only needed when x2apic supported if NUMA nodes are needed.
+     * Must be combined with read_amd_cores_legacy() for coreid on family 0x15-16 (no support for x2apic).
      */
     read_amd_cores_topoext(data, infos, flags, src_cpuiddump);
   }
@@ -1056,46 +1044,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	  break;
 	}
       }
-    }
-  }
-
-  /* Look for Numa nodes inside packages (cannot be filtered-out) */
-  if (fulldiscovery && (flags & HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES)) {
-    hwloc_bitmap_t node_cpuset;
-    hwloc_obj_t node;
-
-    /* FIXME: if there's memory inside the root object, divide it into NUMA nodes? */
-
-    hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
-    while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-      unsigned packageid = infos[i].ids[PKG];
-      unsigned nodeid = infos[i].ids[NODE];
-
-      if (nodeid == (unsigned)-1) {
-        hwloc_bitmap_clr(remaining_cpuset, i);
-	continue;
-      }
-
-      node_cpuset = hwloc_bitmap_alloc();
-      for (j = i; j < nbprocs; j++) {
-	if (infos[j].ids[NODE] == (unsigned) -1) {
-	  hwloc_bitmap_clr(remaining_cpuset, j);
-	  continue;
-	}
-
-        if (infos[j].ids[PKG] == packageid && infos[j].ids[NODE] == nodeid) {
-          hwloc_bitmap_set(node_cpuset, j);
-          hwloc_bitmap_clr(remaining_cpuset, j);
-        }
-      }
-      node = hwloc_alloc_setup_object(topology, HWLOC_OBJ_NUMANODE, nodeid);
-      node->cpuset = node_cpuset;
-      node->nodeset = hwloc_bitmap_alloc();
-      hwloc_bitmap_set(node->nodeset, nodeid);
-      hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
-          nodeid, node_cpuset);
-      hwloc__insert_object_by_cpuset(topology, NULL, node, "x86:numa");
-      gotnuma++;
     }
   }
 
@@ -1729,10 +1677,6 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING) {
     /* TODO: Things would work if there's a single PU, no need to rebind */
     return 0;
-  }
-
-  if (getenv("HWLOC_X86_TOPOEXT_NUMANODES")) {
-    flags |= HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES;
   }
 
 #if HAVE_DECL_RUNNING_ON_VALGRIND
