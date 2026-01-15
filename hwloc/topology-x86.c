@@ -972,7 +972,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
   unsigned i, j, l, level;
   int one = -1;
   hwloc_bitmap_t remaining_cpuset;
-  int gotnuma = 0;
   int fulldiscovery = (flags & HWLOC_X86_DISC_FLAG_FULL);
 
 #ifdef HWLOC_DEBUG
@@ -1301,9 +1300,6 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
   hwloc_bitmap_free(remaining_cpuset);
   hwloc_bitmap_free(complete_cpuset);
-
-  if (gotnuma)
-    topology->support.discovery->numa = 1;
 }
 
 static int
