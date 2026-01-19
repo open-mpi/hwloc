@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2015-2024 Inria.  All rights reserved.
+# Copyright © 2015-2026 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -8,6 +8,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 # Add your tests files here.
 cpuid_tests = \
+	Intel-ArrowLake-CoreUltra5-225U.test \
 	Intel-RaptorLake-Corei7-1370P.test \
 	Intel-SapphireRapids-2xXeonMax9460.test \
 	Intel-CPUID.1A-1p2co2t.test \
@@ -44,6 +45,7 @@ cpuid_tests = \
 # XML outputs shouldn't have gp_index attributes to avoid spurious errors.
 # Remove them with: sed -r -e 's/ gp_index=\"[0-9]+\"//' -i foo.outpu
 cpuid_xml_outputs = \
+	Intel-ArrowLake-CoreUltra5-225U.xml \
 	Intel-RaptorLake-Corei7-1370P.xml \
 	Intel-SapphireRapids-2xXeonMax9460.xml \
 	Intel-CPUID.1A-1p2co2t.xml \
@@ -79,6 +81,7 @@ cpuid_xml_outputs = \
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # specifying which tarball to use
 cpuid_tarballs = \
+	Intel-ArrowLake-CoreUltra5-225U.tar.bz2 \
 	Intel-RaptorLake-Corei7-1370P.tar.bz2 \
 	Intel-SapphireRapids-2xXeonMax9460.tar.bz2 \
 	Intel-CPUID.1A-1p2co2t.tar.bz2 \
