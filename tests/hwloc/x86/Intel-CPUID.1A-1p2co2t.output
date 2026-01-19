@@ -41,10 +41,10 @@
       </object>
     </object>
   </object>
-  <cpukind cpuset="0x00000003">
+  <cpukind cpuset="0x00000003" forced_efficiency="0">
     <info name="CoreType" value="IntelAtom"/>
   </cpukind>
-  <cpukind cpuset="0x0000000c">
+  <cpukind cpuset="0x0000000c" forced_efficiency="1">
     <info name="CoreType" value="IntelCore"/>
   </cpukind>
 </topology>

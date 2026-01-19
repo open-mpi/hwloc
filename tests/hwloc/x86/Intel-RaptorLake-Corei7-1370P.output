@@ -171,10 +171,10 @@
       </object>
     </object>
   </object>
-  <cpukind cpuset="0x000ff000">
+  <cpukind cpuset="0x000ff000" forced_efficiency="0">
     <info name="CoreType" value="IntelAtom"/>
   </cpukind>
-  <cpukind cpuset="0x00000fff">
+  <cpukind cpuset="0x00000fff" forced_efficiency="1">
     <info name="CoreType" value="IntelCore"/>
   </cpukind>
 </topology>

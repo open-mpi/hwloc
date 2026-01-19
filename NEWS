@@ -21,6 +21,8 @@ Version 2.13
   homogeneous and it may cause slowness on some platforms.
   The new env var HWLOC_LINUX_CPUKINDS=1 may be used to reenable it.
   Thanks to Benedikt Steinbusch and Jan André Reuter for the report.
+* Put Intel LP E-cores in the IntelLowPower cpukind in the x86 backend,
+  thanks to Dmitri N Mokhov for the patch.
 * Send the lstopo ASCII output to a pager (less by default).
 * Plugins are now supported for OpenCL, CUDA and XML components
   on Windows using the HWLOC_ENABLE_PLUGINS CMake option,
