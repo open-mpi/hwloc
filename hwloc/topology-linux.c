@@ -3380,73 +3380,8 @@ list_sysfsnode(struct hwloc_topology *topology,
 }
 
 static int
-annotate_sysfsnode(struct hwloc_topology *topology,
-		   struct hwloc_linux_backend_data_s *data,
-		   unsigned *found)
-{
-  unsigned nbnodes;
-  hwloc_obj_t * nodes; /* the array of NUMA node objects, to be used for inserting distances */
-  hwloc_obj_t node;
-  unsigned * indexes;
-  uint64_t * distances;
-  unsigned i;
-
-  /* NUMA nodes cannot be filtered out */
-  indexes = list_sysfsnode(topology, data, &nbnodes);
-  if (!indexes)
-    return 0;
-
-  nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
-  distances = malloc(nbnodes*nbnodes*sizeof(*distances));
-  if (NULL == nodes || NULL == distances) {
-    free(nodes);
-    free(indexes);
-    free(distances);
-    return 0;
-  }
-
-  for(node=hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
-      node != NULL;
-      node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) {
-    assert(node); /* list_sysfsnode() ensured that sysfs nodes and existing nodes match */
-
-    /* hwloc_parse_nodes_distances() requires nodes in physical index order,
-     * and inserting distances requires nodes[] and indexes[] in same order.
-     */
-    for(i=0; i<nbnodes; i++)
-      if (indexes[i] == node->os_index) {
-	nodes[i] = node;
-	break;
-      }
-
-    hwloc_get_sysfs_node_meminfo(data, node->os_index, &node->attr->numanode);
-  }
-
-  topology->support.discovery->numa = 1;
-  topology->support.discovery->numa_memory = 1;
-  topology->support.discovery->disallowed_numa = 1;
-
-  if (nbnodes >= 2
-      && data->use_numa_distances
-      && !hwloc_parse_nodes_distances(nbnodes, indexes, distances, data->root_fd)
-      && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
-    hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
-				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY,
-				 HWLOC_DISTANCES_ADD_FLAG_GROUP);
-  } else {
-    free(nodes);
-    free(distances);
-  }
-
-  free(indexes);
-  *found = nbnodes;
-  return 0;
-}
-
-static int
 look_sysfsnode(struct hwloc_topology *topology,
-	       struct hwloc_linux_backend_data_s *data,
-	       unsigned *found)
+	       struct hwloc_linux_backend_data_s *data)
 {
   unsigned osnode;
   unsigned nbnodes;
@@ -3711,7 +3646,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	free(nodes);
 
  out:
-  *found = nbnodes - failednodes;
   return 0;
 }
 
@@ -5267,7 +5201,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  unsigned nbnodes;
   char *cpuset_name = NULL;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_infos_s global_infos;
@@ -5368,12 +5301,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 
   /* Gather NUMA information if enabled in the kernel. */
   if (!hwloc_access("/sys/devices/system/node", R_OK|X_OK, data->root_fd)) {
-    if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE) > 0)
-      annotate_sysfsnode(topology, data, &nbnodes);
-    else
-      look_sysfsnode(topology, data, &nbnodes);
-  } else
-    nbnodes = 0;
+    look_sysfsnode(topology, data);
+  }
 
   if (cpuset_name) {
     hwloc__add_info(&topology->infos, "LinuxCgroup", cpuset_name);
