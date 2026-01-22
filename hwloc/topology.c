@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2022 IBM Corporation.  All rights reserved.
@@ -3690,6 +3690,10 @@ hwloc_discover(struct hwloc_topology *topology,
   if (topology->backend_phases & HWLOC_DISC_PHASE_ANNOTATE) {
     dstatus->phase = HWLOC_DISC_PHASE_ANNOTATE;
     hwloc_discover_by_phase(topology, dstatus, "ANNOTATE");
+  }
+  if (topology->backend_phases & HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT) {
+    dstatus->phase = HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT;
+    hwloc_discover_by_phase(topology, dstatus, "INDEPENDENT");
   }
 
   hwloc_pci_discovery_exit(topology); /* pci needed up to annotate */

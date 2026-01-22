@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeaux
  * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
@@ -495,6 +495,7 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 				   |HWLOC_DISC_PHASE_IO
 				   |HWLOC_DISC_PHASE_MISC
 				   |HWLOC_DISC_PHASE_ANNOTATE
+				   |HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT
 				   |HWLOC_DISC_PHASE_TWEAK))) {
     if (hwloc_show_component_errors)
       fprintf(stderr, "hwloc: Cannot register discovery component `%s' with invalid phases 0x%x\n",
@@ -702,6 +703,8 @@ hwloc_phases_from_string(const char *s)
       return HWLOC_DISC_PHASE_MISC;
     if (!strcasecmp(s, "annotate"))
       return HWLOC_DISC_PHASE_ANNOTATE;
+    if (!strcasecmp(s, "independent"))
+      return HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT;
     if (!strcasecmp(s, "tweak"))
       return HWLOC_DISC_PHASE_TWEAK;
     return 0;
@@ -823,7 +826,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
     if (comp->phases == HWLOC_DISC_PHASE_GLOBAL) {
       char *env = getenv("HWLOC_ANNOTATE_GLOBAL_COMPONENTS");
       if (env && atoi(env))
-	topology->backend_excluded_phases &= ~HWLOC_DISC_PHASE_ANNOTATE;
+	topology->backend_excluded_phases &= ~HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT;
     }
 
     return err;

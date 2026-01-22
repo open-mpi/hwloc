@@ -6928,10 +6928,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
-    /* Doesn't work when annotating XML/synthetic because hwloc_pci_find_by_busid()
-     * doesn't have any PCI localities.
-     * That's good news because we don't want to annotate a random XML with local PCI slot info.
-     * We should disable this phase when XML/synthetic is used but this is not enabled by default anyway.
+    /* Requires PCI localities so that hwloc_pci_find_by_busid() works.
+     * This phase is disabled after other backends inserting PCI (XML).
      */
 #ifdef HWLOC_HAVE_LINUXPCI
     hwloc_linuxfs_pci_look_pcislots(backend);
@@ -6966,10 +6964,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 #endif /* HWLOC_HAVE_LINUXIO */
 
   if (dstatus->phase != HWLOC_DISC_PHASE_ANNOTATE && data->need_global_infos) {
-    /* only insert those global infos if we actually inserted some objects,
-     * not if we only annotated existing stuff, e.g. PCI slots,
-     * and not if we did nothing on top of XML.
-     */
+    /* only insert those global infos if we actually inserted some objects */
     hwloc__move_infos(&topology->infos, &data->global_infos);
     hwloc__get_dmi_id_info(data, topology->levels[0][0]);
     hwloc__add_info(&topology->infos, "Backend", "Linux");
