@@ -67,6 +67,7 @@ struct hwloc_linux_backend_data_s {
   int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
   int need_global_infos;
+  struct hwloc_infos_s global_infos;
 };
 
 
@@ -2832,7 +2833,6 @@ hwloc__get_dmi_id_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
 
 static void
 hwloc__get_soc_one_info(struct hwloc_linux_backend_data_s *data,
-                        hwloc_obj_t obj,
                         char *path, int n, const char *info_suffix)
 {
   char soc_line[64];
@@ -2846,12 +2846,12 @@ hwloc__get_soc_one_info(struct hwloc_linux_backend_data_s *data,
     if (tmp)
       *tmp = '\0';
     snprintf(infoname, sizeof(infoname), "SoC%d%s", n, info_suffix);
-    hwloc_obj_add_info(obj, infoname, soc_line);
+    hwloc__add_info(&data->global_infos, infoname, soc_line);
   }
 }
 
 static void
-hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
+hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data)
 {
   char path[128];
   struct dirent *dirent;
@@ -2869,11 +2869,11 @@ hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
       continue;
 
     snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/soc_id", i);
-    hwloc__get_soc_one_info(data, obj, path, i, "ID");
+    hwloc__get_soc_one_info(data, path, i, "ID");
     snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/family", i);
-    hwloc__get_soc_one_info(data, obj, path, i, "Family");
+    hwloc__get_soc_one_info(data, path, i, "Family");
     snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/revision", i);
-    hwloc__get_soc_one_info(data, obj, path, i, "Revision");
+    hwloc__get_soc_one_info(data, path, i, "Revision");
   }
   closedir(dir);
 }
@@ -4017,7 +4017,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   assert(i == nr_pus);
 
   /* NVIDIA Grace is homogeneous with slight variations of max frequency, ignore those */
-  info = hwloc_obj_get_info_by_name(topology->levels[0][0], "SoC0ID");
+  info = hwloc_get_info_by_name(&data->global_infos, "SoC0ID");
   force_homogeneous = info && !strcmp(info, "jep106:036b:0241");
   /* force homogeneity ? */
   env = getenv("HWLOC_CPUKINDS_HOMOGENEOUS");
@@ -6898,10 +6898,11 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 #endif /* HWLOC_HAVE_LINUXIO */
 
   if (data->need_global_infos) {
+    /* gather some info in data without actually adding them to the topology yet */
     hwloc_gather_system_info(topology, data);
     hwloc_linuxfs_check_kernel_cmdline(data);
     /* soc info needed for cpukinds quirks in hwloc_linuxfs_look_cpu() */
-    hwloc__get_soc_info(data, topology->levels[0][0]);
+    hwloc__get_soc_info(data);
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
@@ -6962,6 +6963,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
  out:
   if (data->need_global_infos) {
+    hwloc__move_infos(&topology->infos, &data->global_infos);
     hwloc__get_dmi_id_info(data, topology->levels[0][0]);
     hwloc__add_info(&topology->infos, "Backend", "Linux");
     /* data->utsname was filled with real uname or \0, we can safely pass it */
@@ -6990,6 +6992,7 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
   if (data->udev)
     udev_unref(data->udev);
 #endif
+  hwloc__free_infos(&data->global_infos);
 }
 
 static struct hwloc_backend *
@@ -7022,6 +7025,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
   data->need_global_infos = 1;
+  data->global_infos.count = 0;
+  data->global_infos.array = NULL;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
