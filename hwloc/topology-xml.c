@@ -1893,7 +1893,6 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   /* the root may have changed if we had to reinsert a Machine */
   root = topology->levels[0][0];
 
-    /* find v2 distances */
     while (1) {
       ret = state.global->find_child(&state, &childstate, &tag);
       if (ret < 0)
