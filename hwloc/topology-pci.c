@@ -96,9 +96,9 @@ hwloc_pci_get_obj_names(hwloc_obj_t obj, struct pci_id_match *m)
   m->device_id = obj->attr->pcidev.device_id;
   pci_get_strings(m, &devicename, &vendorname, NULL, NULL);
   if (vendorname && *vendorname)
-    hwloc_obj_add_info(obj, "PCIVendor", vendorname);
+    hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REPLACE, "PCIVendor", vendorname);
   if (devicename && *devicename)
-    hwloc_obj_add_info(obj, "PCIDevice", devicename);
+    hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REPLACE, "PCIDevice", devicename);
 }
 
 static void
