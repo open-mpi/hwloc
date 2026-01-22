@@ -6928,6 +6928,11 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
+    /* Doesn't work when annotating XML/synthetic because hwloc_pci_find_by_busid()
+     * doesn't have any PCI localities.
+     * That's good news because we don't want to annotate a random XML with local PCI slot info.
+     * We should disable this phase when XML/synthetic is used but this is not enabled by default anyway.
+     */
 #ifdef HWLOC_HAVE_LINUXPCI
     hwloc_linuxfs_pci_look_pcislots(backend);
 #endif /* HWLOC_HAVE_LINUXPCI */
