@@ -6907,7 +6907,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
     hwloc_linuxfs_look_cpu(backend, dstatus);
-    goto out;
   }
 
 #ifdef HWLOC_HAVE_LINUXIO
@@ -6961,8 +6960,11 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 #endif /* HWLOC_HAVE_LINUXIO */
 
- out:
-  if (data->need_global_infos) {
+  if (dstatus->phase != HWLOC_DISC_PHASE_ANNOTATE && data->need_global_infos) {
+    /* only insert those global infos if we actually inserted some objects,
+     * not if we only annotated existing stuff, e.g. PCI slots,
+     * and not if we did nothing on top of XML.
+     */
     hwloc__move_infos(&topology->infos, &data->global_infos);
     hwloc__get_dmi_id_info(data, topology->levels[0][0]);
     hwloc__add_info(&topology->infos, "Backend", "Linux");
