@@ -1040,8 +1040,8 @@ following environment variables.
 <dt>HWLOC_ANNOTATE_GLOBAL_COMPONENTS=0</dt>
   <dd>Allow components to annotate the topology even if they are
   usually excluded by global components by default.
-  Setting this variable to 1 and also setting <tt>HWLOC_COMPONENTS=xml,pci,stop</tt>
-  enables the addition of PCI vendor and model info attributes to a XML topology
+  For instance, setting this variable to 1 enables the addition of
+  PCI vendor and model string info attributes to a XML topology
   that was generated without those names (if pciaccess was missing).
   </dd>
 
