@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2025 Inria.  All rights reserved.
+ * Copyright © 2010-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -637,6 +637,7 @@ extern "C" {
 #define HWLOC_DISC_PHASE_IO HWLOC_NAME_CAPS(DISC_PHASE_IO)
 #define HWLOC_DISC_PHASE_MISC HWLOC_NAME_CAPS(DISC_PHASE_MISC)
 #define HWLOC_DISC_PHASE_ANNOTATE HWLOC_NAME_CAPS(DISC_PHASE_ANNOTATE)
+#define HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT HWLOC_NAME_CAPS(DISC_PHASE_ANNOTATE_INDEPENDENT)
 #define HWLOC_DISC_PHASE_TWEAK HWLOC_NAME_CAPS(DISC_PHASE_TWEAK)
 #define hwloc_disc_phase_t HWLOC_NAME(disc_phase_t)
 #define hwloc_disc_component HWLOC_NAME(disc_component)

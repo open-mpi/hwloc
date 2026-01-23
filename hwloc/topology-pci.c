@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux
  * Copyright © 2014-2018 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2015      Research Organization for Information Science
@@ -96,9 +96,9 @@ hwloc_pci_get_obj_names(hwloc_obj_t obj, struct pci_id_match *m)
   m->device_id = obj->attr->pcidev.device_id;
   pci_get_strings(m, &devicename, &vendorname, NULL, NULL);
   if (vendorname && *vendorname)
-    hwloc_obj_add_info(obj, "PCIVendor", vendorname);
+    hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REPLACE, "PCIVendor", vendorname);
   if (devicename && *devicename)
-    hwloc_obj_add_info(obj, "PCIDevice", devicename);
+    hwloc_modify_infos(&obj->infos, HWLOC_MODIFY_INFOS_OP_REPLACE, "PCIDevice", devicename);
 }
 
 static void
@@ -154,7 +154,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       && pfilter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE) {
+  if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT) {
     hwloc_pci_get_names(topology);
     return 0;
   }
@@ -377,7 +377,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   /* no need to run another PCI phase */
   dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;
   /* no need to run the annotate phase, we did it above */
-  backend->phases &= HWLOC_DISC_PHASE_ANNOTATE;
+  backend->phases &= ~HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT;
 
   if (added)
     hwloc_modify_infos(hwloc_topology_get_infos(topology), HWLOC_MODIFY_INFOS_OP_ADD, "Backend", "PCI");
@@ -409,7 +409,7 @@ hwloc_pci_component_instantiate(struct hwloc_topology *topology,
 
 static struct hwloc_disc_component hwloc_pci_disc_component = {
   "pci",
-  HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_ANNOTATE,
+  HWLOC_DISC_PHASE_PCI | HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT,
   HWLOC_DISC_PHASE_GLOBAL,
   hwloc_pci_component_instantiate,
   20,

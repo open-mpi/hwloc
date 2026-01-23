@@ -67,6 +67,7 @@ struct hwloc_linux_backend_data_s {
   int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
   int need_global_infos;
+  struct hwloc_infos_s global_infos;
 };
 
 
@@ -2832,7 +2833,6 @@ hwloc__get_dmi_id_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
 
 static void
 hwloc__get_soc_one_info(struct hwloc_linux_backend_data_s *data,
-                        hwloc_obj_t obj,
                         char *path, int n, const char *info_suffix)
 {
   char soc_line[64];
@@ -2846,12 +2846,12 @@ hwloc__get_soc_one_info(struct hwloc_linux_backend_data_s *data,
     if (tmp)
       *tmp = '\0';
     snprintf(infoname, sizeof(infoname), "SoC%d%s", n, info_suffix);
-    hwloc_obj_add_info(obj, infoname, soc_line);
+    hwloc__add_info(&data->global_infos, infoname, soc_line);
   }
 }
 
 static void
-hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
+hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data)
 {
   char path[128];
   struct dirent *dirent;
@@ -2869,11 +2869,11 @@ hwloc__get_soc_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
       continue;
 
     snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/soc_id", i);
-    hwloc__get_soc_one_info(data, obj, path, i, "ID");
+    hwloc__get_soc_one_info(data, path, i, "ID");
     snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/family", i);
-    hwloc__get_soc_one_info(data, obj, path, i, "Family");
+    hwloc__get_soc_one_info(data, path, i, "Family");
     snprintf(path, sizeof(path), "/sys/bus/soc/devices/soc%d/revision", i);
-    hwloc__get_soc_one_info(data, obj, path, i, "Revision");
+    hwloc__get_soc_one_info(data, path, i, "Revision");
   }
   closedir(dir);
 }
@@ -3380,73 +3380,8 @@ list_sysfsnode(struct hwloc_topology *topology,
 }
 
 static int
-annotate_sysfsnode(struct hwloc_topology *topology,
-		   struct hwloc_linux_backend_data_s *data,
-		   unsigned *found)
-{
-  unsigned nbnodes;
-  hwloc_obj_t * nodes; /* the array of NUMA node objects, to be used for inserting distances */
-  hwloc_obj_t node;
-  unsigned * indexes;
-  uint64_t * distances;
-  unsigned i;
-
-  /* NUMA nodes cannot be filtered out */
-  indexes = list_sysfsnode(topology, data, &nbnodes);
-  if (!indexes)
-    return 0;
-
-  nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
-  distances = malloc(nbnodes*nbnodes*sizeof(*distances));
-  if (NULL == nodes || NULL == distances) {
-    free(nodes);
-    free(indexes);
-    free(distances);
-    return 0;
-  }
-
-  for(node=hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, NULL);
-      node != NULL;
-      node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) {
-    assert(node); /* list_sysfsnode() ensured that sysfs nodes and existing nodes match */
-
-    /* hwloc_parse_nodes_distances() requires nodes in physical index order,
-     * and inserting distances requires nodes[] and indexes[] in same order.
-     */
-    for(i=0; i<nbnodes; i++)
-      if (indexes[i] == node->os_index) {
-	nodes[i] = node;
-	break;
-      }
-
-    hwloc_get_sysfs_node_meminfo(data, node->os_index, &node->attr->numanode);
-  }
-
-  topology->support.discovery->numa = 1;
-  topology->support.discovery->numa_memory = 1;
-  topology->support.discovery->disallowed_numa = 1;
-
-  if (nbnodes >= 2
-      && data->use_numa_distances
-      && !hwloc_parse_nodes_distances(nbnodes, indexes, distances, data->root_fd)
-      && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)) {
-    hwloc_internal_distances_add(topology, "NUMALatency", nbnodes, nodes, distances,
-				 HWLOC_DISTANCES_KIND_FROM_OS|HWLOC_DISTANCES_KIND_VALUE_LATENCY,
-				 HWLOC_DISTANCES_ADD_FLAG_GROUP);
-  } else {
-    free(nodes);
-    free(distances);
-  }
-
-  free(indexes);
-  *found = nbnodes;
-  return 0;
-}
-
-static int
 look_sysfsnode(struct hwloc_topology *topology,
-	       struct hwloc_linux_backend_data_s *data,
-	       unsigned *found)
+	       struct hwloc_linux_backend_data_s *data)
 {
   unsigned osnode;
   unsigned nbnodes;
@@ -3711,7 +3646,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	free(nodes);
 
  out:
-  *found = nbnodes - failednodes;
   return 0;
 }
 
@@ -4083,7 +4017,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   assert(i == nr_pus);
 
   /* NVIDIA Grace is homogeneous with slight variations of max frequency, ignore those */
-  info = hwloc_obj_get_info_by_name(topology->levels[0][0], "SoC0ID");
+  info = hwloc_get_info_by_name(&data->global_infos, "SoC0ID");
   force_homogeneous = info && !strcmp(info, "jep106:036b:0241");
   /* force homogeneity ? */
   env = getenv("HWLOC_CPUKINDS_HOMOGENEOUS");
@@ -5267,7 +5201,6 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  unsigned nbnodes;
   char *cpuset_name = NULL;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_infos_s global_infos;
@@ -5368,12 +5301,8 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
 
   /* Gather NUMA information if enabled in the kernel. */
   if (!hwloc_access("/sys/devices/system/node", R_OK|X_OK, data->root_fd)) {
-    if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE) > 0)
-      annotate_sysfsnode(topology, data, &nbnodes);
-    else
-      look_sysfsnode(topology, data, &nbnodes);
-  } else
-    nbnodes = 0;
+    look_sysfsnode(topology, data);
+  }
 
   if (cpuset_name) {
     hwloc__add_info(&topology->infos, "LinuxCgroup", cpuset_name);
@@ -6969,15 +6898,15 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 #endif /* HWLOC_HAVE_LINUXIO */
 
   if (data->need_global_infos) {
+    /* gather some info in data without actually adding them to the topology yet */
     hwloc_gather_system_info(topology, data);
     hwloc_linuxfs_check_kernel_cmdline(data);
     /* soc info needed for cpukinds quirks in hwloc_linuxfs_look_cpu() */
-    hwloc__get_soc_info(data, topology->levels[0][0]);
+    hwloc__get_soc_info(data);
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
     hwloc_linuxfs_look_cpu(backend, dstatus);
-    goto out;
   }
 
 #ifdef HWLOC_HAVE_LINUXIO
@@ -6999,6 +6928,9 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
+    /* Requires PCI localities so that hwloc_pci_find_by_busid() works.
+     * This phase is disabled after other backends inserting PCI (XML).
+     */
 #ifdef HWLOC_HAVE_LINUXPCI
     hwloc_linuxfs_pci_look_pcislots(backend);
 #endif /* HWLOC_HAVE_LINUXPCI */
@@ -7031,8 +6963,9 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 #endif /* HWLOC_HAVE_LINUXIO */
 
- out:
-  if (data->need_global_infos) {
+  if (dstatus->phase != HWLOC_DISC_PHASE_ANNOTATE && data->need_global_infos) {
+    /* only insert those global infos if we actually inserted some objects */
+    hwloc__move_infos(&topology->infos, &data->global_infos);
     hwloc__get_dmi_id_info(data, topology->levels[0][0]);
     hwloc__add_info(&topology->infos, "Backend", "Linux");
     /* data->utsname was filled with real uname or \0, we can safely pass it */
@@ -7061,6 +6994,7 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
   if (data->udev)
     udev_unref(data->udev);
 #endif
+  hwloc__free_infos(&data->global_infos);
 }
 
 static struct hwloc_backend *
@@ -7093,6 +7027,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
   data->need_global_infos = 1;
+  data->global_infos.count = 0;
+  data->global_infos.array = NULL;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");

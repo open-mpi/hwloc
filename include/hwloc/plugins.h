@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2013-2025 Inria.  All rights reserved.
+ * Copyright © 2013-2026 Inria.  All rights reserved.
  * Copyright © 2016 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
@@ -124,12 +124,17 @@ typedef enum hwloc_disc_phase_e {
    * \hideinitializer */
   HWLOC_DISC_PHASE_ANNOTATE = (1U<<6),
 
+  /** \brief Annotating existing objects with a OS/hardware independent things,
+   * for instance converting PCI vendor/model IDs into strings.
+   * \hideinitializer */
+  HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT = (1U<<7),
+
   /** \brief Final tweaks to a ready-to-use topology.
    * This phase runs once the topology is loaded, before it is returned to the topology.
    * Hence it may only use the main hwloc API for modifying the topology,
    * for instance by restricting it, adding info attributes, etc.
    * \hideinitializer */
-  HWLOC_DISC_PHASE_TWEAK = (1U<<7)
+  HWLOC_DISC_PHASE_TWEAK = (1U<<8)
 } hwloc_disc_phase_t;
 
 /** \brief Discovery status flags */
