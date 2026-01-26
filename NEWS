@@ -55,7 +55,6 @@ Version 3.0.0
   + hwloc-info --objects, --topology and --support are deprecated in
     favor of passing levels, topology and support as targets.
 * Removed features
-  + Netloc.
   + page_type NUMA node attributes, replaced with PageSizes topology info.
   + Importing and exporting from/to hwloc 1.x XML.
   + Intel Knights Landing Xeon Phi specific NUMA support in the Linux backend.
