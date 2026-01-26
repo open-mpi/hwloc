@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2011 Université Bordeaux
- * Copyright © 2012-2025 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -18,8 +18,9 @@
 
 static unsigned hwloc_cuda_cores_per_MP(int major, int minor)
 {
-  /* FP32 cores per MP, based on CUDA C Programming Guide, Annex "Compute
-   * Capabilities" */
+  /* FP32 cores per MP,
+   * from "Throughput of Native Arithmetic Instructions" in "CUDA C++ Best Practices Guide"
+   */
   switch (major) {
     case 1:
       switch (minor) {
