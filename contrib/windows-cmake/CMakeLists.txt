@@ -1,6 +1,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2021-2024 Inria.  All rights reserved.
+# Copyright © 2021-2026 Inria.  All rights reserved.
 # Copyright © 2025 Siemens Corporation and/or its affiliates.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(hwloc
     LANGUAGES C
-    VERSION 2.13.0)
+    VERSION 2.14.0)
 
 enable_testing()
 
