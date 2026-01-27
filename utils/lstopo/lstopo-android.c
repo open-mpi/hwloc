@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2019-2023 Inria.  All rights reserved.
+ * Copyright © 2019-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -29,7 +29,7 @@ static void native_android_box(struct lstopo_output *loutput, const struct lstop
     unsigned cpukind_style = lstopo_obj_cpukind_style(loutput, obj);
     int viewid = -1;
     int r = lcolor->r, g = lcolor->g, b = lcolor->b;
-    char * info = malloc(1096);
+    char info[1096] = "";
     const char * sep = " ";
     unsigned style = 0;
 
