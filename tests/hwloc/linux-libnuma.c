@@ -20,10 +20,11 @@ int main(void)
 {
   hwloc_topology_t topology;
   hwloc_bitmap_t set, set2, nocpunomemnodeset, nocpubutmemnodeset, nomembutcpunodeset, nomembutcpucpuset;
-  hwloc_obj_t node;
+  hwloc_obj_t node, parent;
   struct bitmask *bitmask, *bitmask2;
   unsigned long mask;
   unsigned long maxnode;
+  unsigned bit;
   int i;
 
   if (numa_available() < 0)
@@ -65,7 +66,7 @@ int main(void)
 
   bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, set);
   /* numa_all_nodes_ptr contains NODES with no CPU but with memory */
-  hwloc_bitmap_foreach_begin(i, nocpubutmemnodeset) { numa_bitmask_setbit(bitmask, i); } hwloc_bitmap_foreach_end();
+  hwloc_bitmap_foreach_begin(bit, nocpubutmemnodeset) { numa_bitmask_setbit(bitmask, bit); } hwloc_bitmap_foreach_end();
   assert(numa_bitmask_equal(bitmask, numa_all_nodes_ptr));
   numa_bitmask_free(bitmask);
 
@@ -156,7 +157,14 @@ int main(void)
     /* convert first node between cpuset and libnuma */
     bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, node->cpuset);
     assert(numa_bitmask_isbitset(bitmask, node->os_index));
-    numa_bitmask_clearbit(bitmask, node->os_index);
+    /* clear bits of all local NUMA nodes */
+    parent = node->parent;
+    while (hwloc_obj_type_is_memory(parent->type))
+      parent = parent->parent;
+    hwloc_bitmap_foreach_begin(i, parent->nodeset) {
+      numa_bitmask_clearbit(bitmask, i);
+    } hwloc_bitmap_foreach_end();
+    /* check the remaining bitmask is empty */
     bitmask2 = numa_bitmask_alloc(node->os_index + 1);
     assert(numa_bitmask_equal(bitmask, bitmask2));
     numa_bitmask_free(bitmask);
@@ -168,8 +176,10 @@ int main(void)
       assert(!maxnode);
       assert(!mask);
     } else {
-      assert(maxnode == node->os_index + 1);
-      assert(mask == (1UL << node->os_index));
+      unsigned hwloc_max = hwloc_bitmap_last(parent->nodeset);
+      assert(maxnode == hwloc_max + 1);
+      assert(mask & (1UL << node->os_index));
+      assert(mask & (1UL << hwloc_max));
     }
 
     set = hwloc_bitmap_alloc();
