@@ -7028,6 +7028,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->is_fake_numa_uniform = 0;
   data->need_global_infos = 1;
   data->global_infos.count = 0;
+  data->global_infos.allocated = 0;
   data->global_infos.array = NULL;
   data->is_real_fsroot = 1;
   data->root_path = NULL;
