@@ -71,7 +71,8 @@ if ! "$lstopo" --no-io --ignore misc -.xml \
      | grep -v DAX \
      | grep -v MemoryTier \
      | sed -r -e '/<object type="NUMANode"/s| subtype=\"[^\"]+\"||' \
-     | sed -r -z 's|(<object [^>]+[^/])>\n *</object>|\1/>|g' \
+     | tr '\n' ' ' \
+     | sed -r -e 's|(<object [^>]+[^/])> *</object>|\1/>|g' \
      > "$tmpdir/save1.xml" ; then
     error "Failed"
     exit 1
@@ -99,7 +100,8 @@ if ! "$lstopo" --no-io --ignore misc -.xml \
      | grep -v DAX \
      | grep -v MemoryTier \
      | sed -r -e '/<object type="NUMANode"/s| subtype=\"[^\"]+\"||' \
-     | sed -r -z 's|(<object [^>]+[^/])>\n *</object>|\1/>|g' \
+     | tr '\n' ' ' \
+     | sed -r -e 's|(<object [^>]+[^/])> *</object>|\1/>|g' \
      > "$tmpdir/save2.xml" ; then
     error "Failed"
     exit 1
