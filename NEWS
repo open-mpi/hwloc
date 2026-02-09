@@ -1,6 +1,6 @@
 SPDX-License-Identifier: BSD-3-Clause
 Copyright © 2009 CNRS
-Copyright © 2009-2025 Inria.  All rights reserved.
+Copyright © 2009-2026 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
@@ -80,6 +80,37 @@ Version 3.0.0
   + XML format switches to 3.0 by default. Exporting to 2.x is
     possible with the new V2 XML export flag.
   + The tool hwloc-dump-hwdata is removed.
+
+
+Version 2.13
+------------
+* CPU kind improvements
+  + Put Intel LP E-cores in the IntelLowPower cpukind in the x86 backend,
+    thanks to Dmitri N Mokhov for the patch.
+  + Adjust sysfs capacity on Intel CPUs on Linux 6.16+ together with
+    max frequencies when they differ because of Turbo Boost Max 3.0.
+  + Disable Linux cpukinds on AMD before Zen5 since these CPUs are
+    homogeneous and it may cause slowness on some platforms.
+    The new env var HWLOC_LINUX_CPUKINDS=1 may be used to reenable it.
+    Thanks to Benedikt Steinbusch and Jan André Reuter for the report.
+* Fix CUDACoresPerMP on NVIDIA GPUs with compute capability 7.x.
+* Tools
+  + Send the lstopo ASCII output to a pager (less by default).
+  + hwloc-patch now has a --dry-run option.
+* Plugins are now supported for OpenCL, CUDA and XML components
+  on Windows using the HWLOC_ENABLE_PLUGINS CMake option,
+  thanks to Julian Hornich.
+  + HWLOC_BUILD_SHARED_LIBS is removed in favor of BUILD_SHARED_LIBS.
+* FAQ
+  + "How do I find the local MCDRAM NUMA node on Intel Xeon Phi
+     processor?" is replaced with "How do I find the local HBM NUMA node
+     on heterogeneous memory systems?"
+  +  Add "How do I convert between logical and OS/physical indexes?"
+     and further clarify that cpusets and nodesets contain physical indexes.
+* Removals
+  + Drop support for Windows before 7 or Server 2008 R2.
+  + Remove the HWLOC_PCI_<domain>_<bus>_LOCALCPUS environment variables,
+    superseded with a single HWLOC_PCI_LOCALITY since 2.0.
 
 
 Version 2.12.2
