@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2018-2025 Inria.  All rights reserved.
+# Copyright © 2018-2026 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 exit_usage() {
@@ -78,5 +78,5 @@ echo "Looking for URLs to be updated in links in main pages:"
 echo "- Link to examples:"
 grep -H ' id="cli_examples">' *.html || echo "Not found!"
 echo "- Link to API upgrade in NEWS and tutorials:"
-grep -H ' class="title">Upgrading to the hwloc .* API<' *.html || echo "Not found!"
+grep -H ' class="title">Upgrading to the hwloc .* API *<' *.html || echo "Not found!"
 cd ../..
