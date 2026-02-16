@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl SPDX-License-Identifier: BSD-3-Clause
-dnl Copyright © 2010-2025 Inria.  All rights reserved.
+dnl Copyright © 2010-2026 Inria.  All rights reserved.
 dnl Copyright © 2009, 2011 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -145,6 +145,17 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
 		               [Specify the AMDGPU installation directory (/opt/amdgpu by default)]),
 		[AS_IF([test "x$withval" = xyes -o "x$withval" = x],
 		       [AC_MSG_ERROR([--with-amdgpu=<dir> missing the installation directory])])]
+		)
+
+    # OpenCL
+    AC_ARG_ENABLE([opencl],
+                  AS_HELP_STRING([--disable-opencl],
+                                 [Disable the OpenCL device discovery]))
+    AC_ARG_WITH([opencl],
+                AS_HELP_STRING([--with-opencl=<dir>],
+		               [Specify the OpenCL installation directory]),
+		[AS_IF([test "x$withval" = xyes -o "x$withval" = x],
+		       [AC_MSG_ERROR([--with-opencl=<dir> missing the installation directory])])]
 		)
 
     # LevelZero
