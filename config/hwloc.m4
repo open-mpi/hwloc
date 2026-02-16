@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl SPDX-License-Identifier: BSD-3-Clause
-dnl Copyright © 2009-2025 Inria.  All rights reserved.
+dnl Copyright © 2009-2026 Inria.  All rights reserved.
 dnl Copyright © 2009-2012, 2015-2017, 2020, 2023, 2025 Université Bordeaux
 dnl Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -1333,6 +1333,18 @@ return rsmi_init(0);
       echo "**** OpenCL configuration"
 
       hwloc_opencl_happy=yes
+
+      if test "x$with_opencl" != x -a "x$with_opencl" != xyes; then
+        opencl_dir=$with_opencl
+        AC_MSG_NOTICE([using custom OpenCL install path $opencl_dir ...])
+      else
+        AC_MSG_NOTICE([assuming OpenCL is installed in standard directories ...])
+      fi
+      if test "x$opencl_dir" != x; then
+        HWLOC_OPENCL_CPPFLAGS="-I$opencl_dir/include/"
+        HWLOC_OPENCL_LDFLAGS="-L$opencl_dir/lib/"
+      fi
+
       case ${target} in
       *-*-darwin*)
         # On Darwin, only use the OpenCL framework
@@ -1355,8 +1367,8 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
       ;;
       *)
         # On Others, look for OpenCL at normal locations
-        HWLOC_OPENCL_CPPFLAGS="$HWLOC_CUDA_COMMON_CPPFLAGS"
-        HWLOC_OPENCL_LDFLAGS="$HWLOC_CUDA_COMMON_LDFLAGS"
+        HWLOC_OPENCL_CPPFLAGS="$HWLOC_OPENCL_CPPFLAGS $HWLOC_CUDA_COMMON_CPPFLAGS"
+        HWLOC_OPENCL_LDFLAGS="$HWLOC_OPENCL_LDFLAGS $HWLOC_CUDA_COMMON_LDFLAGS"
         if test "x$rocm_dir" != x; then
 	   if test -d "$rocm_dir/include/CL"; then
              HWLOC_OPENCL_CPPFLAGS="$HWLOC_OPENCL_CPPFLAGS -I$rocm_dir/include/"
