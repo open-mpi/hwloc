@@ -172,8 +172,7 @@ libhwloc_port_levelzero_la_SOURCES = \
         include/levelzero/level_zero/ze_api.h \
         include/levelzero/level_zero/zes_api.h
 libhwloc_port_levelzero_la_CPPFLAGS = $(common_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/levelzero \
-        -DHWLOC_HAVE_ZEDEVICEPCIGETPROPERTIESEXT=1
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/levelzero
 
 nodist_libhwloc_port_gl_la_SOURCES = topology-gl.c
 libhwloc_port_gl_la_SOURCES = \
