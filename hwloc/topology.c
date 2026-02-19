@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2022 IBM Corporation.  All rights reserved.
@@ -503,6 +503,11 @@ int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp,
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
   unsigned alloccount = (dst_count + src_count + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
+
+  if (!src_count)
+    /* nothing to do */
+    return 0;
+
   if (dst_count != alloccount) {
     struct hwloc_info_s *tmp_infos = realloc(dst_infos, alloccount*sizeof(*dst_infos));
     if (!tmp_infos)
@@ -545,6 +550,11 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
 {
   struct hwloc_info_s *newi;
   unsigned i, j;
+
+  if (!oldc)
+    /* nothing to do */
+    return 0;
+
   newi = hwloc_tma_calloc(tma, oldc * sizeof(*newi));
   if (!newi)
     return -1;
