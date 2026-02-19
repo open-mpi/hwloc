@@ -692,6 +692,10 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
   unsigned dst_count, src_count;
   unsigned i;
 
+  if (!src_infos->count)
+    /* nothing to do */
+    return 0;
+
   src_count = src_infos->count;
   src_array = src_infos->array;
 
@@ -732,6 +736,11 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
 {
   struct hwloc_info_s *newa;
   unsigned i, j;
+
+  if (!oldi->count)
+    /* nothing to do */
+    return 0;
+
   newa = hwloc_tma_calloc(tma, oldi->allocated * sizeof(*newa));
   if (!newa)
     return -1;
