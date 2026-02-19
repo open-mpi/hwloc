@@ -437,7 +437,8 @@ void hwloc__free_infos(struct hwloc_info_s *infos, unsigned count)
     free(infos[i].name);
     free(infos[i].value);
   }
-  free(infos);
+  if (count)
+    free(infos);
 }
 
 int hwloc__add_info(struct hwloc_info_s **infosp, unsigned *countp, const char *name, const char *value)
@@ -4853,6 +4854,8 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
 {
   hwloc_uint64_t total_memory;
   hwloc_obj_t child;
+
+  assert(!obj->infos == !obj->infos_count); /* count and array must be valid at same time */
 
   assert(!hwloc_bitmap_isset(gp_indexes, obj->gp_index));
   hwloc_bitmap_set(gp_indexes, obj->gp_index);
