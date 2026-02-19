@@ -696,6 +696,13 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
     /* nothing to do */
     return 0;
 
+  if (!dst_infos->count) {
+    /* just move src into dst */
+    memcpy(dst_infos, src_infos, sizeof(*src_infos));
+    memset(src_infos, 0, sizeof(*src_infos));
+    return 0;
+  }
+
   src_count = src_infos->count;
   src_array = src_infos->array;
 
