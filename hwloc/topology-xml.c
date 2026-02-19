@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2020 Université Bordeaux
  * Copyright © 2009-2018 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1602,9 +1602,7 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
   struct hwloc_infos_s infos;
   int ret;
 
-  infos.array = NULL;
-  infos.count = 0;
-  infos.allocated = 0;
+  hwloc__init_infos(&infos);
 
   while (1) {
     char *attrname, *attrvalue;

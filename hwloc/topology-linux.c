@@ -3733,9 +3733,7 @@ hwloc_linux_cpukinds_register_one(struct hwloc_topology *topology,
   struct hwloc_infos_s infos;
   infoattr.name = infoname;
   infoattr.value = infovalue;
-  infos.array = &infoattr;
-  infos.count = 1;
-  infos.allocated = 0;
+  hwloc__init_infos_static(&infos, 1, &infoattr);
   hwloc_internal_cpukinds_register(topology, cpuset, efficiency, &infos, 0);
   /* the cpuset is given to the callee */
 }
@@ -4866,9 +4864,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       Lprocs = tmp;
     }
     Lprocs[curproc].Pproc = Pproc;
-    Lprocs[curproc].infos.array = NULL;
-    Lprocs[curproc].infos.count = 0;
-    Lprocs[curproc].infos.allocated = 0;
+    hwloc__init_infos(&Lprocs[curproc].infos);
     getprocnb_end() else {
 
       /* we can't assume that we already got a processor index line:
@@ -5229,9 +5225,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   /**********************
    * /proc/cpuinfo
    */
-  global_infos.array = NULL;
-  global_infos.count = 0;
-  global_infos.allocated = 0;
+  hwloc__init_infos(&global_infos);
   numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos);
   if (numprocs < 0)
     numprocs = 0;
@@ -6508,9 +6502,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
   hwloc_obj_t misc;
   int foundinfo = 0;
 
-  infos.array = NULL;
-  infos.count = 0;
-  infos.allocated = 0;
+  hwloc__init_infos(&infos);
 
   /* start after the header */
   foff = header->length;
@@ -7027,9 +7019,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
   data->need_global_infos = 1;
-  data->global_infos.count = 0;
-  data->global_infos.allocated = 0;
-  data->global_infos.array = NULL;
+  hwloc__init_infos(&data->global_infos);
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");

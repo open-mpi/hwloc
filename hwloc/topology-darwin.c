@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -332,9 +332,7 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
     if (kinds->kinds[i].compatible) {
       infoattr.name = (char *) "DarwinCompatible";
       infoattr.value = kinds->kinds[i].compatible;
-      infos.array = &infoattr;
-      infos.count = 1;
-      infos.allocated = 0;
+      hwloc__init_infos_static(&infos, 1, &infoattr);
     }
     if (kinds->kinds[i].perflevel >= 0) {
       /* perflevel0 always refers to the highest performance core type in the system. */

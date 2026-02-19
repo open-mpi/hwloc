@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -8,6 +8,8 @@
 #include "hwloc-calc.h"
 #include "hwloc.h"
 #include "misc.h"
+
+#include "private/private.h" /* for hwloc__init_infos_static() */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -751,9 +753,7 @@ int main(int argc, char *argv[])
           struct hwloc_info_s info;
           info.name = ckiname;
           info.value = ckivalue;
-          infos.count = 1;
-          infos.array = &info;
-          infos.allocated = 0;
+          hwloc__init_infos_static(&infos, 1, &info);
           if (hwloc_cpukinds_register(topology, ckcpuset, ckefficiency,
                                       ckiname ? &infos : NULL,
                                       ckflags) < 0) {

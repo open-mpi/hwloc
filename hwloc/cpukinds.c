@@ -173,6 +173,7 @@ hwloc_internal_cpukinds_register(hwloc_topology_t topology, hwloc_cpuset_t cpuse
       return -1;
     }
     memset(&kinds[topology->nr_cpukinds_allocated], 0, (max - topology->nr_cpukinds_allocated) * sizeof(*kinds));
+    /*  no need for hwloc__init_infos() */
     topology->nr_cpukinds_allocated = max;
     topology->cpukinds = kinds;
   }

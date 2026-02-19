@@ -840,6 +840,8 @@ extern "C" {
 #define hwloc__move_infos HWLOC_NAME(_move_infos)
 #define hwloc__free_infos HWLOC_NAME(_free_infos)
 #define hwloc__tma_dup_infos HWLOC_NAME(_tma_dup_infos)
+#define hwloc__init_infos HWLOC_NAME(_init_infos)
+#define hwloc__init_infos_static HWLOC_NAME(_init_infos_static)
 
 #define hwloc_binding_hooks HWLOC_NAME(binding_hooks)
 #define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)

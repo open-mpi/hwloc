@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009      CNRS
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2012, 2020 Université Bordeaux
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -326,6 +326,18 @@ extern int hwloc__remove_infos(struct hwloc_infos_s *infos, const char *name, co
 extern int hwloc__move_infos(struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
 extern int hwloc__tma_dup_infos(struct hwloc_tma *tma, struct hwloc_infos_s *dst_infos, struct hwloc_infos_s *src_infos);
 extern void hwloc__free_infos(struct hwloc_infos_s *infos);
+static __hwloc_inline void hwloc__init_infos(struct hwloc_infos_s *infos)
+{
+  infos->array = NULL;
+  infos->count = 0;
+  infos->allocated = 0;
+}
+static __hwloc_inline void hwloc__init_infos_static(struct hwloc_infos_s *infos, unsigned count, struct hwloc_info_s *static_array)
+{
+  infos->array = static_array;
+  infos->count = count;
+  infos->allocated = 0; /* means we won't free */
+}
 
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);

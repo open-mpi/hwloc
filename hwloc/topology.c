@@ -699,7 +699,7 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
   if (!dst_infos->count) {
     /* just move src into dst */
     memcpy(dst_infos, src_infos, sizeof(*src_infos));
-    memset(src_infos, 0, sizeof(*src_infos));
+    hwloc__init_infos(src_infos);
     return 0;
   }
 
@@ -719,8 +719,7 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
   dst_infos->array = dst_array;
   dst_infos->count = dst_count;
   free(src_array);
-  src_infos->array = NULL;
-  src_infos->count = 0;
+  hwloc__init_infos(src_infos);
   return 0;
 
  drop:
@@ -730,9 +729,7 @@ int hwloc__move_infos(struct hwloc_infos_s *dst_infos,
     free(src_array[i].value);
   }
   free(src_array);
-  src_infos->array = NULL;
-  src_infos->count = 0;
-  src_infos->allocated = 0;
+  hwloc__init_infos(src_infos);
   return -1;
 }
 
@@ -768,9 +765,7 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
     free(newa[i].name);
     free(newa[i].value);
   }
-  newi->array = NULL;
-  newi->count = 0;
-  newi->allocated = 0;
+  hwloc__init_infos(newi);
   return -1;
 }
 
@@ -816,7 +811,8 @@ hwloc_replace_linked_object(hwloc_obj_t old, hwloc_obj_t new)
   /* copy new contents to old now that tree pointers are OK */
   memcpy(old, new, sizeof(*old));
   /* clear new to that we may free it */
-  memset(new, 0,sizeof(*new));
+  memset(new, 0, sizeof(*new));
+  /* no need for hwloc__init_infos() */
 }
 
 /* Remove an object and its children from its parent and free them.
@@ -2058,6 +2054,7 @@ hwloc_alloc_setup_object(hwloc_topology_t topology,
   if (!obj)
     return NULL;
   memset(obj, 0, sizeof(*obj));
+  /*  no need for hwloc__init_infos() */
   obj->type = type;
   obj->os_index = os_index;
   obj->gp_index = topology->next_gp_index++;

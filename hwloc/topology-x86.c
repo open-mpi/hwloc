@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2010-2025 Inria.  All rights reserved.
+ * Copyright © 2010-2026 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1397,9 +1397,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
           struct hwloc_info_s infoattr;
           infoattr.name = (char *) "CoreType";
           infoattr.value = (char *) "IntelLowPower";
-          _infos.array = &infoattr;
-          _infos.count = 1;
-          _infos.allocated = 0;
+          hwloc__init_infos_static(&_infos, 1, &infoattr);
           hwloc_internal_cpukinds_register(topology, lpset, efficiency++, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
           /* the cpuset is given to the callee */
         } else {
@@ -1411,9 +1409,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
           struct hwloc_info_s infoattr;
           infoattr.name = (char *) "CoreType";
           infoattr.value = (char *) "IntelAtom";
-          _infos.array = &infoattr;
-          _infos.count = 1;
-          _infos.allocated = 0;
+          hwloc__init_infos_static(&_infos, 1, &infoattr);
           hwloc_internal_cpukinds_register(topology, atomset, efficiency++, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
           /* the cpuset is given to the callee */
         } else {
@@ -1425,9 +1421,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
           struct hwloc_info_s infoattr;
           infoattr.name = (char *) "CoreType";
           infoattr.value = (char *) "IntelCore";
-          _infos.array = &infoattr;
-          _infos.count = 1;
-          _infos.allocated = 0;
+          hwloc__init_infos_static(&_infos, 1, &infoattr);
           hwloc_internal_cpukinds_register(topology, coreset, efficiency++, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
           /* the cpuset is given to the callee */
         } else {

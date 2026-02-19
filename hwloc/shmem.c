@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2017-2023 Inria.  All rights reserved.
+ * Copyright © 2017-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -232,9 +232,7 @@ hwloc_shmem_topology_adopt(hwloc_topology_t *topologyp,
   new->userdata_export_cb = NULL;
   new->userdata_import_cb = NULL;
   /* duplicate topo infos so that we can modify them */
-  new->infos.array = NULL;
-  new->infos.count = 0;
-  new->infos.allocated = 0;
+  hwloc__init_infos(&new->infos);
   hwloc__tma_dup_infos(NULL, &new->infos, &old->infos);
 
 #ifndef HWLOC_DEBUG
