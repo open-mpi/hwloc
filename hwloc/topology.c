@@ -508,6 +508,16 @@ int hwloc__move_infos(struct hwloc_info_s **dst_infosp, unsigned *dst_countp,
     /* nothing to do */
     return 0;
 
+  if (!dst_count) {
+    /* just move src into dst */
+    *dst_infosp = src_infos;
+    *dst_countp = src_count;
+    *src_infosp = NULL;
+    *src_countp = 0;
+    return 0;
+  }
+
+
   if (dst_count != alloccount) {
     struct hwloc_info_s *tmp_infos = realloc(dst_infos, alloccount*sizeof(*dst_infos));
     if (!tmp_infos)
