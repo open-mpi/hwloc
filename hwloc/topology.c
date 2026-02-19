@@ -523,13 +523,17 @@ void hwloc__free_infos(struct hwloc_infos_s *infos)
     free(infos->array[i].name);
     free(infos->array[i].value);
   }
-  free(infos->array);
+  if (infos->allocated) /* static infos array has allocated=0 to avoid free() */
+    free(infos->array);
 }
 
 static int hwloc__realloc_infos(struct hwloc_infos_s *infos, unsigned nr)
 {
   struct hwloc_info_s *tmparray;
   unsigned alloccount;
+
+  /* static infos cannot be reallocated, they have array!=NULL && allocated==0 */
+  assert(!(infos->array && !infos->allocated));
 
   if (infos->allocated > infos->count + nr)
     return 0;
@@ -744,6 +748,10 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
   if (!oldi->count)
     /* nothing to do */
     return 0;
+
+  /* we currently never duplicate static infos, they have array!=NULL && allocated==0
+   * if we ever need, we should set allocated to count */
+  assert(!(oldi->array && !oldi->allocated));
 
   newa = hwloc_tma_calloc(tma, oldi->allocated * sizeof(*newa));
   if (!newa)
@@ -4998,6 +5006,9 @@ hwloc__check_object(hwloc_topology_t topology, hwloc_bitmap_t gp_indexes, hwloc_
 {
   hwloc_uint64_t total_memory;
   hwloc_obj_t child;
+
+  assert(!obj->infos.array == !obj->infos.count); /* count and array must be valid at same time */
+  assert(!(obj->infos.array && !obj->infos.allocated)); /* array may exist with allocated=0 if static */
 
   assert(!hwloc_bitmap_isset(gp_indexes, obj->gp_index));
   hwloc_bitmap_set(gp_indexes, obj->gp_index);
