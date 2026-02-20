@@ -188,6 +188,25 @@ hwloc__pci_merge_next_localities(struct hwloc_topology *topology,
   }
 }
 
+static struct hwloc_pci_locality_s *
+hwloc__pci_find_bus_locality(struct hwloc_topology *topology,
+                             unsigned domain, unsigned bus)
+{
+  struct hwloc_pci_locality_s *loc;
+  hwloc_debug("pcidisc looking for bus %04x:%02x\n", domain, bus);
+  loc = topology->first_pci_locality;
+  while (loc) {
+    if (loc->domain == domain && loc->bus_min <= bus && loc->bus_max >= bus) {
+      assert(loc->parent);
+      hwloc_debug("  found pci locality for %04x:[%02x:%02x]\n",
+		  loc->domain, loc->bus_min, loc->bus_max);
+      return loc;
+    }
+    loc = loc->next;
+  }
+  return NULL;
+}
+
 /**************************************
  * Init/Exit and Forced PCI localities
  */
@@ -510,22 +529,15 @@ hwloc_pci_find_by_busid(struct hwloc_topology *topology,
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   hwloc_obj_t parent = NULL;
 
-  hwloc_debug("pcidisc looking for bus id %04x:%02x:%02x.%01x\n", domain, bus, dev, func);
-  loc = topology->first_pci_locality;
-  while (loc) {
-    if (loc->domain == domain && loc->bus_min <= bus && loc->bus_max >= bus) {
-      parent = loc->parent;
-      assert(parent);
-      hwloc_debug("  found pci locality for %04x:[%02x:%02x]\n",
-		  loc->domain, loc->bus_min, loc->bus_max);
-      break;
-    }
-    loc = loc->next;
-  }
-  /* if we failed to insert localities, look at root too */
-  if (!parent)
+  /* find the parent of the tree that contains that bus */
+  loc = hwloc__pci_find_bus_locality(topology, domain, bus);
+  if (loc)
+    parent = loc->parent;
+  else
+    /* otherwise look in the tree attached at root */
     parent = root;
 
+  /* now find the object in that tree */
   hwloc_debug("  looking for bus %04x:%02x:%02x.%01x below %s P#%u\n",
 	      domain, bus, dev, func,
 	      hwloc_obj_type_string(parent->type), parent->os_index);
