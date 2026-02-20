@@ -401,6 +401,152 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
 }
 
 
+/*********************************
+ * Finding PCI objects or parents
+ */
+
+static struct hwloc_obj *
+hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
+{
+  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+  hwloc_obj_t parent;
+  int err;
+
+  hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
+	      busid->domain, busid->bus, busid->dev, busid->func);
+
+    /* get the cpuset by asking the backend that provides the relevant hook, if any. */
+    struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
+    if (backend)
+      err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
+    else
+      err = -1;
+    if (err < 0)
+      /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
+      hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+
+  hwloc_debug_bitmap("  will attach PCI bus to cpuset %s\n", cpuset);
+
+  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+  if (!parent) {
+    /* Fallback to root */
+    parent = hwloc_get_root_obj(topology);
+  }
+
+  hwloc_bitmap_free(cpuset);
+  return parent;
+}
+
+struct hwloc_obj *
+hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
+			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  struct hwloc_pcidev_attr_s busid;
+  hwloc_obj_t parent;
+
+  /* try to find that exact busid */
+  parent = hwloc_pci_find_by_busid(topology, domain, bus, dev, func);
+  if (parent)
+    return parent;
+
+  /* try to find the actual locality of that bus from OS */
+  busid.domain = domain;
+  busid.bus = bus;
+  busid.dev = dev;
+  busid.func = func;
+  return hwloc__pci_find_busid_parent(topology, &busid);
+}
+
+/* return the smallest object that contains the desired busid */
+static struct hwloc_obj *
+hwloc__pci_find_by_busid(hwloc_obj_t parent,
+			 unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  hwloc_obj_t child;
+
+  for_each_io_child(child, parent) {
+    if (child->type == HWLOC_OBJ_PCI_DEVICE
+	|| (child->type == HWLOC_OBJ_BRIDGE
+	    && child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
+      if (child->attr->pcidev.domain == domain
+	  && child->attr->pcidev.bus == bus
+	  && child->attr->pcidev.dev == dev
+	  && child->attr->pcidev.func == func)
+	/* that's the right bus id */
+	return child;
+      if (child->attr->pcidev.domain > domain
+	  || (child->attr->pcidev.domain == domain
+	      && child->attr->pcidev.bus > bus))
+	/* bus id too high, won't find anything later, return parent */
+	return parent;
+      if (child->type == HWLOC_OBJ_BRIDGE
+	  && child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+	  && child->attr->bridge.downstream.pci.domain == domain
+	  && child->attr->bridge.downstream.pci.secondary_bus <= bus
+	  && child->attr->bridge.downstream.pci.subordinate_bus >= bus)
+	/* not the right bus id, but it's included in the bus below that bridge */
+	return hwloc__pci_find_by_busid(child, domain, bus, dev, func);
+
+    } else if (child->type == HWLOC_OBJ_BRIDGE
+	       && child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI
+	       && child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+	       /* non-PCI to PCI bridge, just look at the subordinate bus */
+	       && child->attr->bridge.downstream.pci.domain == domain
+	       && child->attr->bridge.downstream.pci.secondary_bus <= bus
+	       && child->attr->bridge.downstream.pci.subordinate_bus >= bus) {
+      /* contains our bus, recurse */
+      return hwloc__pci_find_by_busid(child, domain, bus, dev, func);
+    }
+  }
+  /* didn't find anything, return parent */
+  return parent;
+}
+
+struct hwloc_obj *
+hwloc_pci_find_by_busid(struct hwloc_topology *topology,
+			unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  struct hwloc_pci_locality_s *loc;
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
+  hwloc_obj_t parent = NULL;
+
+  hwloc_debug("pcidisc looking for bus id %04x:%02x:%02x.%01x\n", domain, bus, dev, func);
+  loc = topology->first_pci_locality;
+  while (loc) {
+    if (loc->domain == domain && loc->bus_min <= bus && loc->bus_max >= bus) {
+      parent = loc->parent;
+      assert(parent);
+      hwloc_debug("  found pci locality for %04x:[%02x:%02x]\n",
+		  loc->domain, loc->bus_min, loc->bus_max);
+      break;
+    }
+    loc = loc->next;
+  }
+  /* if we failed to insert localities, look at root too */
+  if (!parent)
+    parent = root;
+
+  hwloc_debug("  looking for bus %04x:%02x:%02x.%01x below %s P#%u\n",
+	      domain, bus, dev, func,
+	      hwloc_obj_type_string(parent->type), parent->os_index);
+  parent = hwloc__pci_find_by_busid(parent, domain, bus, dev, func);
+  if (parent == root) {
+    hwloc_debug("  found nothing better than root object, ignoring\n");
+    return NULL;
+  } else {
+    if (parent->type == HWLOC_OBJ_PCI_DEVICE
+	|| (parent->type == HWLOC_OBJ_BRIDGE && parent->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
+      hwloc_debug("  found busid %04x:%02x:%02x.%01x\n",
+		  parent->attr->pcidev.domain, parent->attr->pcidev.bus,
+		  parent->attr->pcidev.dev, parent->attr->pcidev.func);
+    else
+      hwloc_debug("  found parent %s P#%u\n",
+		  hwloc_obj_type_string(parent->type), parent->os_index);
+    return parent;
+  }
+}
+
+
 /******************************
  * Inserting in Tree by Bus ID
  */
@@ -615,38 +761,6 @@ hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
   return new;
 }
 
-static struct hwloc_obj *
-hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
-{
-  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-  hwloc_obj_t parent;
-  int err;
-
-  hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
-	      busid->domain, busid->bus, busid->dev, busid->func);
-
-    /* get the cpuset by asking the backend that provides the relevant hook, if any. */
-    struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
-    if (backend)
-      err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
-    else
-      err = -1;
-    if (err < 0)
-      /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
-      hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
-
-  hwloc_debug_bitmap("  will attach PCI bus to cpuset %s\n", cpuset);
-
-  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-  if (!parent) {
-    /* Fallback to root */
-    parent = hwloc_get_root_obj(topology);
-  }
-
-  hwloc_bitmap_free(cpuset);
-  return parent;
-}
-
 int
 hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree)
 {
@@ -764,120 +878,6 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
   hwloc_pcidebug_show_localities("  PCI localities after inserting trees", topology, 1);
 
   return 0;
-}
-
-
-/*********************************
- * Finding PCI objects or parents
- */
-
-struct hwloc_obj *
-hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
-			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
-{
-  struct hwloc_pcidev_attr_s busid;
-  hwloc_obj_t parent;
-
-  /* try to find that exact busid */
-  parent = hwloc_pci_find_by_busid(topology, domain, bus, dev, func);
-  if (parent)
-    return parent;
-
-  /* try to find the actual locality of that bus from OS */
-  busid.domain = domain;
-  busid.bus = bus;
-  busid.dev = dev;
-  busid.func = func;
-  return hwloc__pci_find_busid_parent(topology, &busid);
-}
-
-/* return the smallest object that contains the desired busid */
-static struct hwloc_obj *
-hwloc__pci_find_by_busid(hwloc_obj_t parent,
-			 unsigned domain, unsigned bus, unsigned dev, unsigned func)
-{
-  hwloc_obj_t child;
-
-  for_each_io_child(child, parent) {
-    if (child->type == HWLOC_OBJ_PCI_DEVICE
-	|| (child->type == HWLOC_OBJ_BRIDGE
-	    && child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)) {
-      if (child->attr->pcidev.domain == domain
-	  && child->attr->pcidev.bus == bus
-	  && child->attr->pcidev.dev == dev
-	  && child->attr->pcidev.func == func)
-	/* that's the right bus id */
-	return child;
-      if (child->attr->pcidev.domain > domain
-	  || (child->attr->pcidev.domain == domain
-	      && child->attr->pcidev.bus > bus))
-	/* bus id too high, won't find anything later, return parent */
-	return parent;
-      if (child->type == HWLOC_OBJ_BRIDGE
-	  && child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
-	  && child->attr->bridge.downstream.pci.domain == domain
-	  && child->attr->bridge.downstream.pci.secondary_bus <= bus
-	  && child->attr->bridge.downstream.pci.subordinate_bus >= bus)
-	/* not the right bus id, but it's included in the bus below that bridge */
-	return hwloc__pci_find_by_busid(child, domain, bus, dev, func);
-
-    } else if (child->type == HWLOC_OBJ_BRIDGE
-	       && child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI
-	       && child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
-	       /* non-PCI to PCI bridge, just look at the subordinate bus */
-	       && child->attr->bridge.downstream.pci.domain == domain
-	       && child->attr->bridge.downstream.pci.secondary_bus <= bus
-	       && child->attr->bridge.downstream.pci.subordinate_bus >= bus) {
-      /* contains our bus, recurse */
-      return hwloc__pci_find_by_busid(child, domain, bus, dev, func);
-    }
-  }
-  /* didn't find anything, return parent */
-  return parent;
-}
-
-struct hwloc_obj *
-hwloc_pci_find_by_busid(struct hwloc_topology *topology,
-			unsigned domain, unsigned bus, unsigned dev, unsigned func)
-{
-  struct hwloc_pci_locality_s *loc;
-  hwloc_obj_t root = hwloc_get_root_obj(topology);
-  hwloc_obj_t parent = NULL;
-
-  hwloc_debug("pcidisc looking for bus id %04x:%02x:%02x.%01x\n", domain, bus, dev, func);
-  loc = topology->first_pci_locality;
-  while (loc) {
-    if (loc->domain == domain && loc->bus_min <= bus && loc->bus_max >= bus) {
-      parent = loc->parent;
-      assert(parent);
-      hwloc_debug("  found pci locality for %04x:[%02x:%02x]\n",
-		  loc->domain, loc->bus_min, loc->bus_max);
-      break;
-    }
-    loc = loc->next;
-  }
-  /* if we failed to insert localities, look at root too */
-  if (!parent)
-    parent = root;
-
-  hwloc_debug("  looking for bus %04x:%02x:%02x.%01x below %s P#%u\n",
-	      domain, bus, dev, func,
-	      hwloc_obj_type_string(parent->type), parent->os_index);
-  parent = hwloc__pci_find_by_busid(parent, domain, bus, dev, func);
-  if (parent == root) {
-    hwloc_debug("  found nothing better than root object, ignoring\n");
-    return NULL;
-  } else {
-    if (parent->type == HWLOC_OBJ_PCI_DEVICE
-	|| (parent->type == HWLOC_OBJ_BRIDGE && parent->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
-      hwloc_debug("  found busid %04x:%02x:%02x.%01x\n",
-		  parent->attr->pcidev.domain, parent->attr->pcidev.bus,
-		  parent->attr->pcidev.dev, parent->attr->pcidev.func);
-    else
-      hwloc_debug("  found parent %s P#%u\n",
-		  hwloc_obj_type_string(parent->type), parent->os_index);
-    return parent;
-  }
 }
 
 
