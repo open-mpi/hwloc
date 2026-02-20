@@ -24,6 +24,90 @@
 #define close _close
 #endif
 
+/****************
+ * Debug Helpers
+ */
+
+#ifdef HWLOC_DEBUG
+static void
+hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
+			    struct hwloc_obj *pcidev)
+{
+  char busid[14];
+  hwloc_obj_t parent;
+
+  /* indent */
+  parent = pcidev->parent;
+  while (parent) {
+    hwloc_debug("%s", "  ");
+    parent = parent->parent;
+  }
+
+  snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
+           pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus, pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+
+  if (pcidev->type == HWLOC_OBJ_BRIDGE) {
+    if (pcidev->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
+      hwloc_debug("HostBridge");
+    else
+      hwloc_debug("%s Bridge [%04x:%04x]", busid,
+		  pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id);
+    if (pcidev->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)
+      hwloc_debug(" to %04x:[%02x:%02x]\n",
+                  pcidev->attr->bridge.downstream.pci.domain, pcidev->attr->bridge.downstream.pci.secondary_bus, pcidev->attr->bridge.downstream.pci.subordinate_bus);
+    else
+      assert(0);
+  } else
+    hwloc_debug("%s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", busid,
+		pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id,
+		pcidev->attr->pcidev.subvendor_id, pcidev->attr->pcidev.subdevice_id,
+		pcidev->attr->pcidev.revision, pcidev->attr->pcidev.class_id);
+}
+
+static void
+hwloc_pci_traverse(void * cbdata, struct hwloc_obj *tree,
+		   void (*cb)(void * cbdata, struct hwloc_obj *))
+{
+  hwloc_obj_t child;
+  cb(cbdata, tree);
+  for_each_io_child(child, tree) {
+    if (child->type == HWLOC_OBJ_BRIDGE)
+      hwloc_pci_traverse(cbdata, child, cb);
+  }
+}
+
+static void
+hwloc_pcidebug_show_tree(const char *string, struct hwloc_obj *tree)
+{
+  hwloc_debug("\n%s:\n", string);
+  hwloc_pci_traverse(NULL, tree, hwloc_pci_traverse_print_cb);
+  hwloc_debug("\n");
+}
+
+static void
+hwloc_pcidebug_show_localities(const char *string, struct hwloc_topology *topology, int checkorder)
+{
+  struct hwloc_pci_locality_s *tmp;
+  hwloc_debug("\n%s:\n", string);
+  for(tmp = topology->first_pci_locality; tmp; tmp=tmp->next) {
+    char busid[12];
+    snprintf(busid, sizeof(busid), "%04x:%02x-%02x", tmp->domain, tmp->bus_min, tmp->bus_max);
+    hwloc_debug_1arg_bitmap("    %s = %s\n", busid, tmp->parent->cpuset);
+    if (checkorder) {
+      /* check order and no overlapping */
+      if (tmp->prev)
+        assert(tmp->domain > tmp->prev->domain
+               || (tmp->domain == tmp->prev->domain && tmp->bus_min > tmp->prev->bus_max));
+    }
+  }
+  hwloc_debug("\n");
+}
+#else
+#define hwloc_pcidebug_show_tree(string, tree) do { /* nothing */ } while (0);
+#define hwloc_pcidebug_show_localities(string, topology, checkorder) do { /* nothing */ } while (0); 
+#endif
+
+
 /************************
  * Locality List Helpers
  */
@@ -321,55 +405,6 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
  * Inserting in Tree by Bus ID
  */
 
-#ifdef HWLOC_DEBUG
-static void
-hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
-			    struct hwloc_obj *pcidev)
-{
-  char busid[14];
-  hwloc_obj_t parent;
-
-  /* indent */
-  parent = pcidev->parent;
-  while (parent) {
-    hwloc_debug("%s", "  ");
-    parent = parent->parent;
-  }
-
-  snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
-           pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus, pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
-
-  if (pcidev->type == HWLOC_OBJ_BRIDGE) {
-    if (pcidev->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
-      hwloc_debug("HostBridge");
-    else
-      hwloc_debug("%s Bridge [%04x:%04x]", busid,
-		  pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id);
-    if (pcidev->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI)
-      hwloc_debug(" to %04x:[%02x:%02x]\n",
-                  pcidev->attr->bridge.downstream.pci.domain, pcidev->attr->bridge.downstream.pci.secondary_bus, pcidev->attr->bridge.downstream.pci.subordinate_bus);
-    else
-      assert(0);
-  } else
-    hwloc_debug("%s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", busid,
-		pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id,
-		pcidev->attr->pcidev.subvendor_id, pcidev->attr->pcidev.subdevice_id,
-		pcidev->attr->pcidev.revision, pcidev->attr->pcidev.class_id);
-}
-
-static void
-hwloc_pci_traverse(void * cbdata, struct hwloc_obj *tree,
-		   void (*cb)(void * cbdata, struct hwloc_obj *))
-{
-  hwloc_obj_t child;
-  cb(cbdata, tree);
-  for_each_io_child(child, tree) {
-    if (child->type == HWLOC_OBJ_BRIDGE)
-      hwloc_pci_traverse(cbdata, child, cb);
-  }
-}
-#endif /* HWLOC_DEBUG */
-
 enum hwloc_pci_busid_comparison_e {
   HWLOC_PCI_BUSID_LOWER,
   HWLOC_PCI_BUSID_HIGHER,
@@ -622,19 +657,8 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
     /* found nothing, exit */
     return 0;
 
-#ifdef HWLOC_DEBUG
-  hwloc_debug("%s", "\nPCI hierarchy:\n");
-  hwloc_pci_traverse(NULL, tree, hwloc_pci_traverse_print_cb);
-  hwloc_debug("%s", "\n");
-
-  hwloc_debug("\n  Forced PCI localities:\n");
-  for(tmp = topology->first_pci_locality; tmp; tmp=tmp->next) {
-    char busid[12];
-    snprintf(busid, sizeof(busid), "%04x:%02x-%02x", tmp->domain, tmp->bus_min, tmp->bus_max);
-    hwloc_debug_1arg_bitmap("    %s = %s\n", busid, tmp->parent->cpuset);
-  }
-  hwloc_debug("\n");
-#endif
+  hwloc_pcidebug_show_tree("PCI hierarchy", tree);
+  hwloc_pcidebug_show_localities("  Forced PCI localities", topology, 0);
 
   bfilter = topology->type_filter[HWLOC_OBJ_BRIDGE];
   if (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
@@ -737,19 +761,7 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
     hwloc_insert_object_by_parent(topology, parent, obj);
   }
 
-#ifdef HWLOC_DEBUG
-  hwloc_debug("\n  PCI localities after inserting trees:\n");
-  for(tmp = topology->first_pci_locality; tmp; tmp=tmp->next) {
-    char busid[12];
-    snprintf(busid, sizeof(busid), "%04x:%02x-%02x", tmp->domain, tmp->bus_min, tmp->bus_max);
-    hwloc_debug_1arg_bitmap("    %s = %s\n", busid, tmp->parent->cpuset);
-    /* check order and no overlapping */
-    if (tmp->prev)
-      assert(tmp->domain > tmp->prev->domain
-             || (tmp->domain == tmp->prev->domain && tmp->bus_min > tmp->prev->bus_max));
-  }
-  hwloc_debug("\n");
-#endif
+  hwloc_pcidebug_show_localities("  PCI localities after inserting trees", topology, 1);
 
   return 0;
 }
