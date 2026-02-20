@@ -24,8 +24,8 @@
 #define close _close
 #endif
 
-/*********************
- * Helpers
+/************************
+ * Locality List Helpers
  */
 
 static void
@@ -869,8 +869,8 @@ hwloc_pci_find_by_busid(struct hwloc_topology *topology,
 }
 
 
-/*******************************
- * Parsing the PCI Config Space
+/*******************************************
+ * Helpers for Parsing the PCI Config Space
  */
 
 #define HWLOC_PCI_STATUS 0x06
