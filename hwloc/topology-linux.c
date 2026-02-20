@@ -4855,7 +4855,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     if (numprocs > allocated_Lprocs) {
       struct hwloc_linux_cpuinfo_proc * tmp;
       if (!allocated_Lprocs)
-	allocated_Lprocs = 8;
+	allocated_Lprocs = 256;
       else
         allocated_Lprocs *= 2;
       tmp = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
