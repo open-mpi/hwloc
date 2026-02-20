@@ -1284,6 +1284,10 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   if (err < 0)
     goto out_with_topology;
 
+  err = hwloc_pci_dup(new, old);
+  if (err < 0)
+    goto out_with_topology;
+
   /* we connected everything during duplication */
   new->modified = 0;
 
@@ -3694,7 +3698,7 @@ hwloc_discover(struct hwloc_topology *topology,
   /*
    * Additional discovery
    */
-  hwloc_pci_discovery_prepare(topology);
+  hwloc_pci_prepare(topology);
 
   if (topology->backend_phases & HWLOC_DISC_PHASE_PCI) {
     dstatus->phase = HWLOC_DISC_PHASE_PCI;
@@ -3716,8 +3720,6 @@ hwloc_discover(struct hwloc_topology *topology,
     dstatus->phase = HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT;
     hwloc_discover_by_phase(topology, dstatus, "INDEPENDENT");
   }
-
-  hwloc_pci_discovery_exit(topology); /* pci needed up to annotate */
 
   if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
     hwloc_debug_sort_children(topology->levels[0][0]);
@@ -3856,7 +3858,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
 
   hwloc_components_init(); /* uses malloc without tma, but won't need it since dup() caller already took a reference */
   hwloc_topology_components_init(topology);
-  hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
+  hwloc_pci_init(topology); /* make sure both dup() and load() get sane variables */
 
   /* Setup topology context */
   topology->state = HWLOC_TOPOLOGY_STATE_IS_INIT | HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
@@ -4173,6 +4175,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_backends_disable_all(topology);
   hwloc_topology_components_fini(topology);
   hwloc_components_fini();
+  hwloc_pci_exit(topology);
 
   hwloc_topology_clear(topology);
 
@@ -4355,7 +4358,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   return 0;
 
  out:
-  hwloc_pci_discovery_exit(topology);
+  hwloc_pci_exit(topology);
   hwloc_topology_clear(topology);
   hwloc_topology_setup_defaults(topology);
   hwloc_backends_disable_all(topology);
@@ -4615,7 +4618,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
     hwloc_internal_memattrs_need_refresh(topology);
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
     hwloc_internal_cpukinds_restrict(topology);
-
+  hwloc_pci_refresh(topology);
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);

@@ -829,9 +829,11 @@ extern "C" {
 
 #define hwloc_get_obj_by_type_and_gp_index HWLOC_NAME(get_obj_by_type_and_gp_index)
 
-#define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
-#define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
-#define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
+#define hwloc_pci_init HWLOC_NAME(pci_init)
+#define hwloc_pci_prepare HWLOC_NAME(pci_prepare)
+#define hwloc_pci_refresh HWLOC_NAME(pci_refresh)
+#define hwloc_pci_dup HWLOC_NAME(pci_dup)
+#define hwloc_pci_exit HWLOC_NAME(pci_exit)
 #define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(find_insert_io_parent_by_complete_cpuset)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)

@@ -188,7 +188,7 @@ hwloc__pci_merge_next_localities(struct hwloc_topology *topology,
     struct hwloc_pci_locality_s *next = new->next;
     if (next->domain == new->domain && next->bus_min <= new->bus_max) {
       if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_PCI|HWLOC_SHOWMSG_CRITICAL))
-        fprintf(stderr, "[hwloc/pci] Merging PCI localities %04x:%02x-%02x into previous overlapping %04x:%02x-%02x even but the IO parents are different\n",
+        fprintf(stderr, "[hwloc/pci] Merging PCI localities %04x:%02x-%02x into previous overlapping %04x:%02x-%02x even if the IO parents are different\n",
                 next->domain, next->bus_min, next->bus_max,
                 new->domain, new->bus_min, new->bus_max);
       if (new->bus_max < next->bus_max)
@@ -317,13 +317,13 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
 }
 
 void
-hwloc_pci_discovery_init(struct hwloc_topology *topology)
+hwloc_pci_init(struct hwloc_topology *topology)
 {
   topology->first_pci_locality = topology->last_pci_locality = NULL;
 }
 
 void
-hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
+hwloc_pci_prepare(struct hwloc_topology *topology)
 {
   const char *dmi_board_name;
   char *env;
@@ -417,7 +417,74 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
 }
 
 void
-hwloc_pci_discovery_exit(struct hwloc_topology *topology)
+hwloc_pci_refresh(struct hwloc_topology *topology)
+{
+  struct hwloc_pci_locality_s *cur;
+
+  cur = topology->first_pci_locality;
+  while (cur) {
+    struct hwloc_pci_locality_s *next = cur->next;
+    /* refresh the cpuset */
+    if (cur->cpuset) {
+      hwloc_bitmap_and(cur->cpuset, cur->cpuset, hwloc_topology_get_topology_cpuset(topology));
+      if (hwloc_bitmap_iszero(cur->cpuset)) {
+        hwloc_bitmap_free(cur->cpuset);
+        cur->cpuset = NULL;
+      }
+    }
+    /* refresh the parent */
+    cur->parent = NULL;
+    if (cur->cpuset) {
+      hwloc_obj_t largeparent = hwloc_get_obj_covering_cpuset(topology, cur->cpuset);
+      if (largeparent) {
+        while (largeparent ->parent && largeparent->parent->arity == 1)
+          largeparent = largeparent->parent;
+        cur->parent = largeparent;
+      }
+    }
+    if (!cur->parent)
+      cur->parent = hwloc_get_root_obj(topology);
+    cur = next;
+  }
+
+  hwloc_pcidebug_show_localities("  Refreshed PCI localities", topology, 0);
+}
+
+int
+hwloc_pci_dup(hwloc_topology_t new, hwloc_topology_t old)
+{
+  struct hwloc_tma *tma = new->tma;
+  struct hwloc_pci_locality_s *oldcur;
+
+  oldcur = old->first_pci_locality;
+  while (oldcur) {
+    struct hwloc_pci_locality_s *newcur = hwloc_tma_malloc(tma, sizeof(*newcur));
+    if (!newcur)
+      goto error;
+    memcpy(newcur, oldcur, sizeof(*newcur));
+    newcur->cpuset = hwloc_bitmap_tma_dup(tma, oldcur->cpuset);
+    if (!newcur) {
+      assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
+      free(newcur);
+      goto error;
+    }
+    newcur->parent = NULL; /* we'll refresh below */
+    hwloc___pci_insert_locality_before(new, newcur, NULL);
+
+    oldcur = oldcur->next;
+  }
+
+  hwloc_topology_refresh(new);
+  return 0;
+
+ error:
+  /* in case some localities got duplicated before failure */
+  hwloc_topology_refresh(new);
+  return -1;
+}
+
+void
+hwloc_pci_exit(struct hwloc_topology *topology)
 {
   struct hwloc_pci_locality_s *cur;
 
@@ -429,7 +496,7 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
     cur = next;
   }
 
-  hwloc_pci_discovery_init(topology);
+  hwloc_pci_init(topology);
 }
 
 
