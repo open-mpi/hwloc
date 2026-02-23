@@ -838,8 +838,6 @@ extern "C" {
 #define hwloc_pci_xml_import_locality HWLOC_NAME(pci_xml_import_locality)
 #define hwloc_pci_xml_import_refresh_localities HWLOC_NAME(pci_xml_import_refresh_localities)
 
-#define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(find_insert_io_parent_by_complete_cpuset)
-
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__replace_infos HWLOC_NAME(_replace_infos)
 #define hwloc__remove_infos HWLOC_NAME(_remove_infos)

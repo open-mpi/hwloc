@@ -24,6 +24,63 @@
 #define close _close
 #endif
 
+
+
+/******************************
+ * Finding/Inserting IO parent
+ */
+
+/* if an object exists with this cpuset, return the highest one,
+ * or create a better group.
+ * if the cpuset is empty, return root.
+ */
+static hwloc_obj_t
+hwloc__pci_find_insert_io_parent_by_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset)
+{
+  hwloc_obj_t group_obj, largeparent, parent;
+
+  if (hwloc_bitmap_iszero(cpuset))
+    return hwloc_get_root_obj(topology);
+
+  /* find the smallest object covering the cpuset */
+  largeparent = hwloc_get_obj_covering_cpuset(topology, cpuset);
+
+  /* if we found the exact cpuset, we're good.
+   * if not and we cannot insert a better group, done too.
+   */
+  if (hwloc_bitmap_isequal(largeparent->cpuset, cpuset)
+      || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+    /* walk up identical parents to return the highest one */
+    while (largeparent->parent && largeparent->parent->arity == 1)
+      largeparent = largeparent->parent;
+    return largeparent;
+  }
+
+  /* we need to insert an intermediate group */
+  group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+  if (!group_obj)
+    /* Failed to insert the exact Group, fallback to largeparent */
+    return largeparent;
+
+  group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+  group_obj->attr->group.kind = HWLOC_GROUP_KIND_IO;
+  parent = hwloc__insert_object_by_cpuset(topology, largeparent, group_obj, "topology:io_parent");
+  if (!parent)
+    /* Failed to insert the Group, maybe a conflicting cpuset */
+    return largeparent;
+
+  /* Group couldn't get merged or we would have gotten the right largeparent earlier */
+  assert(parent == group_obj);
+
+  /* Group inserted without being merged, everything OK, setup its sets */
+  hwloc_obj_add_children_sets(group_obj);
+
+  return parent;
+}
+
+
 /****************
  * Debug Helpers
  */
@@ -338,13 +395,9 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
     goto out;
   hwloc_bitmap_sscanf(set, tmp);
 
-  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, set);
-  if (!parent) {
-    /* Fallback to root */
-    parent = hwloc_get_root_obj(topology);
-  }
+  hwloc_bitmap_and(set, set, hwloc_topology_get_topology_cpuset(topology));
 
-  /* now save it */
+  parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, set);
   hwloc__pci_add_locality_before(topology, domain, bus_first, bus_last, set, parent, next);
   /* no need to free set */
 
@@ -456,12 +509,8 @@ hwloc_pci_prepare(struct hwloc_topology *topology)
         hwloc_bitmap_zero(cpuset);
         hwloc_bitmap_set_range(cpuset, pu_stride*8, pu_stride*8+7);
         hwloc_bitmap_set_range(cpuset, pu_stride*8+64, pu_stride*8+71);
-        parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-        if (parent)
-          hwloc__pci_add_locality_before(topology, 0, bus_min, bus_max, cpuset, parent, NULL);
-        else
-          /* better force nothing than something wrong */
-          hwloc_bitmap_free(cpuset);
+        parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, cpuset);
+        hwloc__pci_add_locality_before(topology, 0, bus_min, bus_max, cpuset, parent, NULL);
       }
     }
     return;
@@ -585,6 +634,9 @@ hwloc__pci_get_busid_cpuset(struct hwloc_topology *topology,
   if (err < 0)
     /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
     hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+  else
+    /* otherwise sanitize it */
+    hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
 
   hwloc_debug_bitmap("  got PCI bus cpuset %s\n", cpuset);
   return err;
@@ -617,12 +669,9 @@ hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
     return hwloc_get_root_obj(topology);
   }
 
-  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+  parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, cpuset);
   hwloc_bitmap_free(cpuset);
-  if (parent)
-    return parent;
-  else
-    return hwloc_get_root_obj(topology);
+  return parent;
 }
 
 /* return the smallest object that contains the desired busid */
@@ -1034,9 +1083,7 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
     }
 
     /* create a new locality */
-    parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-    if (!parent)
-      parent = hwloc_get_root_obj(topology);
+    parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, cpuset);
     hwloc_debug("Adding PCI locality %s P#%u for bus %04x:[%02x:%02x]\n",
                 hwloc_obj_type_string(parent->type), parent->os_index, domain, bus_min, bus_max);
 

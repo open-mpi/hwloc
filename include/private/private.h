@@ -321,12 +321,6 @@ extern void hwloc_pci_exit(struct hwloc_topology *topology);
 extern void hwloc_pci_xml_import_locality(struct hwloc_topology *topology, unsigned domain, unsigned bus_min, unsigned bus_max, hwloc_obj_t parent, hwloc_cpuset_t cpuset);
 extern void hwloc_pci_xml_import_refresh_localities(struct hwloc_topology *topology);
 
-/* Look for an object matching complete cpuset exactly, or insert one.
- * Return NULL on failure.
- * Return a good fallback (object above) on failure to insert.
- */
-extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
-
 extern int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value);
 extern int hwloc__replace_infos(struct hwloc_infos_s *infos, const char *name, const char *value);
 extern int hwloc__remove_infos(struct hwloc_infos_s *infos, const char *name, const char *value);
