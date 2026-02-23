@@ -605,10 +605,6 @@ output_ascii(struct lstopo_output *loutput, const char *filename)
 
 #if defined(HAVE_SYS_WAIT_H) && defined(HAVE_ISATTY)
   if (use_pager) {
-#ifdef HWLOC_HAVE_LIBTERMCAP
-    /* Flush ncurses */
-    refresh();
-#endif
     fflush(stdout);
 
     /* Now that we have set up colors on the tty (which the pager doesn't
