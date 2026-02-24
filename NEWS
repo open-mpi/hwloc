@@ -13,6 +13,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.14.0
+--------------
+* Add CXI OS devices for Cray Slingshot NICs, e.g. cxi0,
+  thanks to Edgar Leon for the suggestion.
+
+
 Version 2.13
 ------------
 * CPU kind improvements
