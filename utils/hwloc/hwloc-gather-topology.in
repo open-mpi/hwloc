@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright © 2009 CNRS
-# Copyright © 2009-2025 Inria.  All rights reserved.
+# Copyright © 2009-2026 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux
 # Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -317,6 +317,7 @@ if [ x$gatherio = x1 ]; then
   saveclassdir "$destdir/$basename" net
   saveclassdir "$destdir/$basename" ve
   saveclassdir "$destdir/$basename" bxi
+  saveclassdir "$destdir/$basename" cxi
   saveclassdir "$destdir/$basename" mic
   # udev block data
   ls -d /run/udev/data/b* 2>/dev/null | while read -r path ; do savefile "$destdir/$basename" "$path" ; done

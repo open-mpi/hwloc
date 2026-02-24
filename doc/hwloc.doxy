@@ -1675,7 +1675,7 @@ components when I/O discovery is enabled and supported.
 <li>Network interfaces (::HWLOC_OBJ_OSDEV_NETWORK)
  <ul>
  <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
- <li><em>hsn0</em> with "Slingshot" subtype for HPE Cray HSNs (Linux component).</li>
+ <li><em>cxi0</em> and <em>hsn0</em> with "Slingshot" subtype for HPE Cray HSNs (Linux component).</li>
  <li><em>bxi0</em> with "BXI" subtype for Atos/Bull BXI HCAs (Linux component).</li>
  <li>OpenFabrics devices as explained below.
  </ul>
@@ -2308,6 +2308,10 @@ interface, such as <tt>eth4</tt> on Linux.
 the state of a port #1 (value is 4 when active),
 the LID and LID mask count of port #2,
 and GID #1 of port #3.
+</dd>
+<dt>CassiniVersion=1.1</dt>
+<dt>NID=0x6913</dt>
+<dd>The version of the Cassini NIC and the node ID for a Slingshot CXI interface.
 </dd>
 <dt>BXIUUID=0x720109782dfd (Network BXI OS devices)</dt>
 <dd>The UUID of an Atos/Bull BXI HCA.
