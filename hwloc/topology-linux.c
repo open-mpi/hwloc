@@ -6042,6 +6042,68 @@ hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_fla
 }
 
 static void
+hwloc_linuxfs_cxi_class_fillinfos(int root_fd,
+                                  struct hwloc_obj *obj, const char *osdevpath)
+{
+  char path[296]; /* osdevpath <= 256 */
+  char tmp[64];
+  obj->subtype = strdup("Slingshot");
+
+  snprintf(path, sizeof(path), "%s/device/properties/cassini_version", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    char *end = strchr(tmp, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_obj_add_info(obj, "CassiniVersion", tmp);
+  }
+
+  snprintf(path, sizeof(path), "%s/device/properties/nid", osdevpath);
+  if (hwloc_read_path_by_length(path, tmp, sizeof(tmp), root_fd) > 0) {
+    char *end = strchr(tmp, '\n');
+    if (end)
+      *end = '\0';
+    hwloc_obj_add_info(obj, "NID", tmp);
+  }
+}
+
+static int
+hwloc_linuxfs_lookup_cxi_class(struct hwloc_backend *backend, unsigned osdev_flags)
+{
+  struct hwloc_linux_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
+  int root_fd = data->root_fd;
+  DIR *dir;
+  struct dirent *dirent;
+
+  dir = hwloc_opendir("/sys/class/cxi", root_fd);
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    char path[256];
+    hwloc_obj_t obj, parent;
+    int err;
+
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+
+    err = snprintf(path, sizeof(path), "/sys/class/cxi/%s", dirent->d_name);
+    if ((size_t) err > sizeof(path))
+      continue;
+    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    if (!parent)
+      continue;
+
+    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
+
+    hwloc_linuxfs_cxi_class_fillinfos(root_fd, obj, path);
+  }
+
+  closedir(dir);
+
+  return 0;
+}
+
+static void
 hwloc_linuxfs_ve_class_fillinfos(int root_fd,
                                  struct hwloc_obj *obj, const char *osdevpath)
 {
@@ -6942,6 +7004,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_ve_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_bxi_class(backend, osdev_flags);
+    hwloc_linuxfs_lookup_cxi_class(backend, osdev_flags);
     hwloc_linuxfs_lookup_cxlmem(backend, osdev_flags);
     if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
       hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
