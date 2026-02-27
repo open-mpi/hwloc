@@ -1,0 +1,12 @@
+# Fake 4-package machine with HWLOC_PCI_LOCALITY envvar to test merging/extending of localities
+source:  fakepcilocalities.tar.bz2
+target:  fakepcilocalities.xml
+options: --whole-io
+env:     HWLOC_PCI_LOCALITY="0000:0a-0b 0x11,11111111;0000:3f-40 0x22,00000;0000:44 0x8800;0000:7e 0x44;0000:82-c0 0x88,88888888;0000:c8 0x11000000"
+env:     export HWLOC_PCI_LOCALITY
+# 0000:0a-0b 0x11,11111111 doesn't merge but should with with 00-09 since the locality is identical (1st package)
+# 0000:3f-40 0x22,00000 overlaps with 0000:[40-43] thus merges and changes its locality (only 2 cores of 2nd package)
+# 0000:44 0x8800 doesn't overlap and has different locality, hence not merged but creates a group of PUs (in 4th package)
+# 0000:7e 0x44,44444444 has same locality as 0000:[80-86] but doesn't touch it, hence not merged
+# 0000:82-c0 0x88,88888888 overlap withs 0000:[80-86] with different locality, and 0000:[c0-c6] with same locality, hence merges them in 4th package
+# 0000:c8 0x11000000 as different locality and doesn't touch 0000:[c0-c6], hence not merged but creates a group of PUs (in 1st package)
