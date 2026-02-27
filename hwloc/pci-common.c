@@ -987,7 +987,7 @@ hwloc_pcicommon_tree_add_hostbridges(struct hwloc_topology *topology,
 int
 hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree)
 {
-  struct hwloc_pci_locality_s *tmp, *next, *prev, *last_used;
+  struct hwloc_pci_locality_s *next, *prev, *last_used;
   enum hwloc_type_filter_e bfilter;
 
   if (!tree)
@@ -1003,6 +1003,8 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
   }
 
   last_used = NULL;
+
+  hwloc_debug("\nAttaching PCI trees...\n");
 
   while (tree) {
     struct hwloc_obj *obj, *pciobj;
@@ -1035,34 +1037,32 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
      * PCI buses are added in order, so we usually insert in/after the last used locality.
      * That's not always the last of the list because some localities could have been forced for later buses.
      * Hence, start walking the list at the last used locality.
-     * If nothing matches, keep the one immediately before us in the list to ease list modifications below.
      */
-    /* we'll insert last if we end the loop without finding anything */
-    prev = topology->last_pci_locality;
-    next = NULL;
-    for(tmp = last_used ? last_used : topology->first_pci_locality; tmp; tmp=tmp->next) {
-      if (domain == tmp->domain
-          && !(bus_min > tmp->bus_max || tmp->bus_min > bus_max)) {
-        /* the new bus range overlaps with that existing locality, extend the existing one if needed and reuse it */
-        if (tmp->bus_max < bus_max)
-          tmp->bus_max = bus_max;
-        if (tmp->bus_min > bus_min)
-          tmp->bus_min = bus_min;
-        hwloc__pci_merge_next_localities(topology, tmp);
-        parent = tmp->parent;
-        last_used = tmp;
-        goto done;
-      }
-      if (domain < tmp->domain
-          || (domain == tmp->domain && bus_max < tmp->bus_min)) {
-        /* we should be before that one, stop here */
-        next = tmp;
-        prev = tmp->prev;
-        break;
-      }
-    }
+    next = hwloc__pci_find_locality_notbefore_bus(topology, domain, bus_min, last_used);
 
-    /* or ask OS */
+    /* do we overlap with that next one? */
+    if (next && domain == next->domain
+        && !(bus_min > next->bus_max || next->bus_min > bus_max)) {
+      /* the new bus range overlaps with that existing locality, extend the existing one if needed and reuse it */
+      if (next->bus_max < bus_max)
+        next->bus_max = bus_max;
+      if (next->bus_min > bus_min)
+        next->bus_min = bus_min;
+      hwloc_debug("  Extending overlapping locality %04x:%02x-%02x for %04x:%02x-%02x\n",
+                  next->domain, next->bus_min, next->bus_max,
+                  domain, bus_min, bus_max);
+      hwloc__pci_merge_next_localities(topology, next);
+      last_used = next;
+      parent = next->parent;
+      goto done;
+    }
+    prev = next ? next->prev : topology->last_pci_locality;
+
+    /* no matching locality, ask the OS */
+    hwloc_debug("  No existing locality covers %04x:%02x-%02x\n",
+                domain, bus_min, bus_max);
+    hwloc_debug("    Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
+                domain, bus_min, pciobj->attr->pcidev.dev, pciobj->attr->pcidev.func);
     cpuset = hwloc_bitmap_alloc();
     if (!cpuset) {
       /* couldn't get the locality, just attach to root without setting locality info */
@@ -1075,22 +1075,39 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
       hwloc_bitmap_free(cpuset);
       goto done;
     }
+    hwloc_debug_bitmap("    will attach PCI bus to cpuset %s\n", cpuset);
+    /* we will go between prev and next */
 
-    /* reuse or extend the previous locality if possible. */
+    /* can we extend the previous locality? */
     if (prev
         && hwloc_bitmap_isequal(cpuset, prev->cpuset)
         && domain == prev->domain
         && (bus_min == prev->bus_max
             || bus_min == prev->bus_max+1)) {
-      hwloc_debug("  Reusing PCI locality up to bus %04x:%02x\n",
+      hwloc_debug("  Reusing PCI locality %04x:%02x-%02x up to bus %04x:%02x\n",
+                  prev->domain, prev->bus_min, prev->bus_max,
                   domain, bus_max);
-      if (prev->bus_max < bus_max) {
-        /* extend */
-        prev->bus_max = bus_max;
-        hwloc__pci_merge_next_localities(topology, prev);
-      }
-      last_used = prev;
+      prev->bus_max = bus_max;
+      hwloc__pci_merge_next_localities(topology, prev);
       parent = prev->parent;
+      last_used = prev;
+      hwloc_bitmap_free(cpuset);
+      goto done;
+    }
+
+    /* can we extend the next locality? */
+    if (next
+        && hwloc_bitmap_isequal(cpuset, next->cpuset)
+        && domain == next->domain
+        && (bus_max == next->bus_min
+            || bus_max+1 == next->bus_min)) {
+      hwloc_debug("  Reusing PCI locality %04x:%02x-%02x down to bus %04x:%02x\n",
+                  next->domain, next->bus_min, next->bus_max,
+                  domain, bus_min);
+      next->bus_min = bus_min;
+      /* no need to merge since we would have extended prev instead above */
+      last_used = next;
+      parent = next->parent;
       hwloc_bitmap_free(cpuset);
       goto done;
     }

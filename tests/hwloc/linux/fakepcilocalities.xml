@@ -252,8 +252,7 @@
   </distances2>
   <info name="LinuxCgroup" value="/torque/513099.master.cm.cluster"/>
   <info name="Backend" value="Linux"/>
-  <pci_locality domain="0x0" bus_min="0x0" bus_max="0x9" cpuset="0x00000011,0x11111111"/>
-  <pci_locality domain="0x0" bus_min="0xa" bus_max="0xb" cpuset="0x00000011,0x11111111"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0xb" cpuset="0x00000011,0x11111111"/>
   <pci_locality domain="0x0" bus_min="0x3f" bus_max="0x43" cpuset="0x00000022,0x0"/>
   <pci_locality domain="0x0" bus_min="0x44" bus_max="0x44" cpuset="0x00008800"/>
   <pci_locality domain="0x0" bus_min="0x7e" bus_max="0x7e" cpuset="0x00000044"/>
