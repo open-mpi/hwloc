@@ -340,6 +340,23 @@ hwloc__pci_find_bus_locality(struct hwloc_topology *topology,
   return NULL;
 }
 
+/* find the first locality that isn't strictly before the given bus,
+ * starting from prev if any
+ */
+static struct hwloc_pci_locality_s*
+hwloc__pci_find_locality_notbefore_bus(struct hwloc_topology *topology,
+                                       unsigned domain, unsigned bus,
+                                       struct hwloc_pci_locality_s* prev)
+{
+  struct hwloc_pci_locality_s *loc;
+  loc = prev ? prev : topology->first_pci_locality;
+  while (loc &&
+         (loc->domain < domain
+          || (loc->domain == domain && loc->bus_max < bus)))
+    loc = loc->next;
+  return loc;
+}
+
 /**************************************
  * Init/Exit and Forced PCI localities
  */
@@ -369,11 +386,7 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   }
 
   /* find the first locality that isn't strictly before us */
-  next = topology->first_pci_locality;
-  while (next &&
-         (next->domain < domain
-          || (next->domain == domain && next->bus_max < bus_first)))
-    next = next->next;
+  next = hwloc__pci_find_locality_notbefore_bus(topology, domain, bus_first, NULL);
 
   /* next isn't before us, check if it intersects */
   if (next && next->domain == domain
