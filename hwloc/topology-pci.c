@@ -363,7 +363,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 		device_class, prog_if, pcidev->vendor_id, pcidev->device_id);
 
     hwloc_pci_get_obj_names(obj, &m);
-    hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
+    hwloc_pcicommon_tree_insert_by_busid(&tree, obj);
     added++;
   }
 
@@ -372,7 +372,7 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   pci_system_cleanup();
   HWLOC_PCIACCESS_UNLOCK();
 
-  hwloc_pcidisc_tree_attach(topology, tree);
+  hwloc_pcicommon_tree_attach(topology, tree);
 
   /* no need to run another PCI phase */
   dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;

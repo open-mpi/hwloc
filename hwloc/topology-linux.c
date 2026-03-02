@@ -6874,12 +6874,12 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       attr->linkspeed = speed*width/8;
     }
 
-    hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
+    hwloc_pcicommon_tree_insert_by_busid(&tree, obj);
   }
 
   closedir(dir);
 
-  hwloc_pcidisc_tree_attach(backend->topology, tree);
+  hwloc_pcicommon_tree_attach(backend->topology, tree);
   return 0;
 }
 

@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -676,8 +676,8 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
 }
 
 void
-hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep,
-				   struct hwloc_obj *obj)
+hwloc_pcicommon_tree_insert_by_busid(struct hwloc_obj **treep,
+                                     struct hwloc_obj *obj)
 {
   hwloc_pci_add_object(NULL /* no parent on top of tree */, treep, obj);
 }
@@ -688,8 +688,8 @@ hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep,
  */
 
 static struct hwloc_obj *
-hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
-			      struct hwloc_obj *old_tree)
+hwloc_pcicommon_tree_add_hostbridges(struct hwloc_topology *topology,
+                                     struct hwloc_obj *old_tree)
 {
   struct hwloc_obj * new = NULL, **newp = &new;
 
@@ -762,7 +762,7 @@ hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
 }
 
 int
-hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree)
+hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree)
 {
   struct hwloc_pci_locality_s *tmp, *next, *prev, *last_used;
   enum hwloc_type_filter_e bfilter;
@@ -776,7 +776,7 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
 
   bfilter = topology->type_filter[HWLOC_OBJ_BRIDGE];
   if (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-    tree = hwloc_pcidisc_add_hostbridges(topology, tree);
+    tree = hwloc_pcicommon_tree_add_hostbridges(topology, tree);
   }
 
   last_used = NULL;

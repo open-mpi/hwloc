@@ -625,14 +625,14 @@ HWLOC_DECLSPEC int hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus
  *
  * If \p treep points to \c NULL, the new object is inserted there.
  */
-HWLOC_DECLSPEC void hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep, struct hwloc_obj *obj);
+HWLOC_DECLSPEC void hwloc_pcicommon_tree_insert_by_busid(struct hwloc_obj **treep, struct hwloc_obj *obj);
 
 /** \brief Add some hostbridges on top of the given tree of PCI objects and attach them to the topology.
  *
  * Other backends may lookup PCI objects or localities (for instance to attach OS devices)
  * by using hwloc_pci_find_by_busid() or hwloc_pci_find_busid_parent().
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree);
+HWLOC_DECLSPEC int hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree);
 
 /** @} */
 
