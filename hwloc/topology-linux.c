@@ -6772,15 +6772,15 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       prog_if = fullclass & 0xff;
     }
 
-    type = hwloc_pcidisc_check_bridge_type(class_id, config_space_cache);
+    type = hwloc_pcicommon_configspace_check_bridge_type(class_id, config_space_cache);
     /* only HWLOC_OBJ_BRIDGE for bridges to-PCI */
     if (type == HWLOC_OBJ_BRIDGE) {
       /* since 4.13, there's secondary_bus_number and subordinate_bus_number in sysfs,
        * but reading them from the config-space is easy anyway.
        */
-      if (hwloc_pcidisc_find_bridge_buses(domain, bus, dev, func,
-					  &secondary_bus, &subordinate_bus,
-					  config_space_cache) < 0)
+      if (hwloc_pcicommon_configspace_find_bridge_buses(domain, bus, dev, func,
+                                                        &secondary_bus, &subordinate_bus,
+                                                        config_space_cache) < 0)
 	continue;
     }
 
@@ -6856,9 +6856,9 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
 
     /* try to get the link speed */
-    offset = hwloc_pcidisc_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
+    offset = hwloc_pcicommon_configspace_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
     if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE) {
-      hwloc_pcidisc_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
+      hwloc_pcicommon_configspace_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
     } else {
       /* if not available from config-space (extended part is root-only), look in sysfs files added in 4.13 */
       float speed = 0.f;

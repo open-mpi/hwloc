@@ -596,20 +596,20 @@ hwloc_filter_check_keep_object(hwloc_topology_t topology, hwloc_obj_t obj)
  *
  * This function requires a 256-bytes config space. Unknown/unavailable bytes should be set to 0xff.
  */
-HWLOC_DECLSPEC unsigned hwloc_pcidisc_find_cap(const unsigned char *config, unsigned cap);
+HWLOC_DECLSPEC unsigned hwloc_pcicommon_configspace_find_cap(const unsigned char *config, unsigned cap);
 
 /** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset.
  *
  * Needs 20 bytes of EXP capability block starting at offset in the config space
  * for registers up to link status.
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
+HWLOC_DECLSPEC int hwloc_pcicommon_configspace_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
 
 /** \brief Return the hwloc object type (PCI device or Bridge) for the given class and configuration space.
  *
  * This function requires 16 bytes of common configuration header at the beginning of config.
  */
-HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *config);
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcicommon_configspace_check_bridge_type(unsigned device_class, const unsigned char *config);
 
 /** \brief Fills the attributes of the given PCI bridge using the given PCI config space.
  *
@@ -617,9 +617,9 @@ HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcidisc_check_bridge_type(unsigned device_
  *
  * Returns -1 and destroys /p obj if bridge fields are invalid.
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
-						   unsigned *secondary_busp, unsigned *subordinate_busp,
-						   const unsigned char *config);
+HWLOC_DECLSPEC int hwloc_pcicommon_configspace_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
+                                                                 unsigned *secondary_busp, unsigned *subordinate_busp,
+                                                                 const unsigned char *config);
 
 /** \brief Insert a PCI object in the given PCI tree by looking at PCI bus IDs.
  *

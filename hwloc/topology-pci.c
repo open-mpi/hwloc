@@ -214,12 +214,12 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     prog_if = pcidev->device_class & 0xff;
 
     /* bridge or pci dev? */
-    type = hwloc_pcidisc_check_bridge_type(device_class, config_space_cache);
+    type = hwloc_pcicommon_configspace_check_bridge_type(device_class, config_space_cache);
     /* only HWLOC_OBJ_BRIDGE for bridges to-PCI */
     if (type == HWLOC_OBJ_BRIDGE) {
-      if (hwloc_pcidisc_find_bridge_buses(domain, bus, dev, func,
-					  &secondary_bus, &subordinate_bus,
-					  config_space_cache) < 0)
+      if (hwloc_pcicommon_configspace_find_bridge_buses(domain, bus, dev, func,
+                                                          &secondary_bus, &subordinate_bus,
+                                                          config_space_cache) < 0)
 	continue;
     }
 
@@ -311,10 +311,10 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
     }
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
-    offset = hwloc_pcidisc_find_cap(config_space_cache, PCI_CAP_ID_EXP);
+    offset = hwloc_pcicommon_configspace_find_cap(config_space_cache, PCI_CAP_ID_EXP);
 
     if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE) {
-      hwloc_pcidisc_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
+      hwloc_pcicommon_configspace_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
 #ifdef HWLOC_LINUX_SYS
     } else {
       /* if not available from config-space (extended part is root-only), look in Linux sysfs files added in 4.13 */

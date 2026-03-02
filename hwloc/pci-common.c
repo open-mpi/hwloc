@@ -892,7 +892,7 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
 #define HWLOC_PCI_CAP_LIST_NEXT 1
 
 unsigned
-hwloc_pcidisc_find_cap(const unsigned char *config, unsigned cap)
+hwloc_pcicommon_configspace_find_cap(const unsigned char *config, unsigned cap)
 {
   unsigned char seen[256] = { 0 };
   unsigned char ptr; /* unsigned char to make sure we stay within the 256-byte config space */
@@ -924,8 +924,8 @@ hwloc_pcidisc_find_cap(const unsigned char *config, unsigned cap)
 #define HWLOC_PCI_EXP_LNKSTA_WIDTH 0x03f0
 
 int
-hwloc_pcidisc_find_linkspeed(const unsigned char *config,
-			     unsigned offset, float *linkspeed)
+hwloc_pcicommon_configspace_find_linkspeed(const unsigned char *config,
+                                           unsigned offset, float *linkspeed)
 {
   unsigned linksta, speed, width;
 
@@ -942,7 +942,7 @@ hwloc_pcidisc_find_linkspeed(const unsigned char *config,
 #define HWLOC_PCI_CLASS_BRIDGE_PCI 0x0604
 
 hwloc_obj_type_t
-hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *config)
+hwloc_pcicommon_configspace_check_bridge_type(unsigned device_class, const unsigned char *config)
 {
   unsigned char headertype;
 
@@ -959,9 +959,9 @@ hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *conf
 #define HWLOC_PCI_SUBORDINATE_BUS 0x1a
 
 int
-hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
-				unsigned *secondary_busp, unsigned *subordinate_busp,
-				const unsigned char *config)
+hwloc_pcicommon_configspace_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
+                                              unsigned *secondary_busp, unsigned *subordinate_busp,
+                                              const unsigned char *config)
 {
   unsigned secondary_bus, subordinate_bus;
 
