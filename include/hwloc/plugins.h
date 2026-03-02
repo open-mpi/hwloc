@@ -603,7 +603,7 @@ HWLOC_DECLSPEC void hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep,
 /** \brief Add some hostbridges on top of the given tree of PCI objects and attach them to the topology.
  *
  * Other backends may lookup PCI objects or localities (for instance to attach OS devices)
- * by using hwloc_pcidisc_find_by_busid() or hwloc_pcidisc_find_busid_parent().
+ * by using hwloc_pci_find_by_busid() or hwloc_pci_find_busid_parent().
  */
 HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree);
 
