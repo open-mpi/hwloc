@@ -424,36 +424,28 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
  * Finding PCI objects or parents
  */
 
-static struct hwloc_obj *
-hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
+static int
+hwloc__pci_get_busid_cpuset(struct hwloc_topology *topology,
+                            hwloc_cpuset_t cpuset,
+                            struct hwloc_pcidev_attr_s *busid)
 {
-  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-  hwloc_obj_t parent;
   int err;
 
-  hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
+  hwloc_debug("Looking for cpuset of PCI busid %04x:%02x:%02x.%01x\n",
 	      busid->domain, busid->bus, busid->dev, busid->func);
 
-    /* get the cpuset by asking the backend that provides the relevant hook, if any. */
-    struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
-    if (backend)
-      err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
-    else
-      err = -1;
-    if (err < 0)
-      /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
-      hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+  /* get the cpuset by asking the backend that provides the relevant hook, if any. */
+  struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
+  if (backend)
+    err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
+  else
+    err = -1;
+  if (err < 0)
+    /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
+    hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
 
-  hwloc_debug_bitmap("  will attach PCI bus to cpuset %s\n", cpuset);
-
-  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-  if (!parent) {
-    /* Fallback to root */
-    parent = hwloc_get_root_obj(topology);
-  }
-
-  hwloc_bitmap_free(cpuset);
-  return parent;
+  hwloc_debug_bitmap("  got PCI bus cpuset %s\n", cpuset);
+  return err;
 }
 
 struct hwloc_obj *
@@ -461,6 +453,7 @@ hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
 			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
 {
   struct hwloc_pcidev_attr_s busid;
+  hwloc_bitmap_t cpuset;
   hwloc_obj_t parent;
 
   /* try to find that exact busid */
@@ -469,11 +462,25 @@ hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
     return parent;
 
   /* try to find the actual locality of that bus from OS */
+  cpuset = hwloc_bitmap_alloc();
+  if (!cpuset)
+    return hwloc_get_root_obj(topology);
+
   busid.domain = domain;
   busid.bus = bus;
   busid.dev = dev;
   busid.func = func;
-  return hwloc__pci_find_busid_parent(topology, &busid);
+  if (hwloc__pci_get_busid_cpuset(topology, cpuset, &busid) < 0) {
+    hwloc_bitmap_free(cpuset);
+    return hwloc_get_root_obj(topology);
+  }
+
+  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+  hwloc_bitmap_free(cpuset);
+  if (parent)
+    return parent;
+  else
+    return hwloc_get_root_obj(topology);
 }
 
 /* return the smallest object that contains the desired busid */
@@ -796,6 +803,7 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
   while (tree) {
     struct hwloc_obj *obj, *pciobj;
     struct hwloc_obj *parent = NULL;
+    hwloc_cpuset_t cpuset = NULL;
     unsigned domain, bus_min, bus_max;
 
     obj = tree;
@@ -851,7 +859,14 @@ hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *t
     }
 
     /* or ask OS */
-    parent = hwloc__pci_find_busid_parent(topology, &pciobj->attr->pcidev);
+    cpuset = hwloc_bitmap_alloc();
+    if (cpuset) {
+      if (!hwloc__pci_get_busid_cpuset(topology, cpuset, &pciobj->attr->pcidev))
+        parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
+      hwloc_bitmap_free(cpuset);
+    }
+    if (!parent)
+      parent = hwloc_get_root_obj(topology);
 
     /* reuse or extend the previous locality if possible. */
     if (prev
