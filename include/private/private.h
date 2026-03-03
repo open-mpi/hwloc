@@ -272,7 +272,8 @@ struct hwloc_topology {
     unsigned domain;
     unsigned bus_min;
     unsigned bus_max;
-    hwloc_obj_t parent;
+    hwloc_cpuset_t cpuset;
+    hwloc_obj_t parent; /* may need to refreshed from cpuset on topology changes */
     struct hwloc_pci_locality_s *prev, *next;
   } *first_pci_locality, *last_pci_locality; /* contains unsorted forced localities first, then sorted real ones */
 
