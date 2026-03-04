@@ -3366,7 +3366,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     /* One more level!  */
     hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
-    hwloc_debug(" has number %u\n\n", topology->nb_levels);
+    hwloc_debug(" at depth %u\n", topology->nb_levels);
 
     if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
       topology->type_depth[top_obj->type] = (int) topology->nb_levels;
@@ -4401,7 +4401,7 @@ restrict_object_by_cpuset(hwloc_topology_t topology, unsigned long flags, hwloc_
       && hwloc_bitmap_iszero(obj->cpuset)
       && (obj->type != HWLOC_OBJ_NUMANODE || (flags & HWLOC_RESTRICT_FLAG_REMOVE_CPULESS))) {
     /* remove object */
-    hwloc_debug("%s", "\nRemoving object during restrict by cpuset");
+    hwloc_debug("Removing object during restrict by cpuset ");
     hwloc_debug_print_object(0, obj);
 
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
@@ -4460,7 +4460,7 @@ restrict_object_by_nodeset(hwloc_topology_t topology, unsigned long flags, hwloc
       && hwloc_bitmap_iszero(obj->nodeset)
       && (obj->type != HWLOC_OBJ_PU || (flags & HWLOC_RESTRICT_FLAG_REMOVE_MEMLESS))) {
     /* remove object */
-    hwloc_debug("%s", "\nRemoving object during restrict by nodeset");
+    hwloc_debug("Removing object during restrict by nodeset ");
     hwloc_debug_print_object(0, obj);
 
     if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO)) {
