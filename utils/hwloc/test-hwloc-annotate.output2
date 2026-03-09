@@ -238,4 +238,8 @@
   <info name="Backend" value="CUDA"/>
   <info name="Backend" value="NVML"/>
   <info name="Backend" value="OpenCL"/>
+  <pci_locality domain="0x2" bus_min="0x0" bus_max="0x1" cpuset="0x03030303"/>
+  <pci_locality domain="0x3" bus_min="0x0" bus_max="0x1" cpuset="0x03030303"/>
+  <pci_locality domain="0xa" bus_min="0x0" bus_max="0x1" cpuset="0x00000303,0x03030000,,0x0"/>
+  <pci_locality domain="0xb" bus_min="0x0" bus_max="0x1" cpuset="0x00000303,0x03030000,,0x0"/>
 </topology>

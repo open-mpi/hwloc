@@ -2343,4 +2343,9 @@
   <info name="OSVersion" value="#1 SMP Tue Feb 19 11:07:00 UTC 2013 (1576ecd)"/>
   <info name="HostName" value="uv2000"/>
   <info name="Architecture" value="x86_64"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0xc" cpuset="0x000000ff,,,,,,0x000000ff"/>
+  <pci_locality domain="0x1" bus_min="0x0" bus_max="0x2" cpuset="0x0000ff00,,,,,,0x0000ff00"/>
+  <pci_locality domain="0x2" bus_min="0x0" bus_max="0x4" cpuset="0x000000ff,,,,,,0x000000ff,0x0"/>
+  <pci_locality domain="0x3" bus_min="0x0" bus_max="0x1" cpuset="0x00ff0000,,,,,,0x00ff0000,0x0"/>
+  <pci_locality domain="0x4" bus_min="0x0" bus_max="0x2" cpuset="0x000000ff,,,,,,0x000000ff,,0x0"/>
 </topology>

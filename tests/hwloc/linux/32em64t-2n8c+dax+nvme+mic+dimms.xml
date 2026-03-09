@@ -533,4 +533,8 @@
   <info name="Backend" value="Linux"/>
   <info name="PageSizeNr" value="2"/>
   <info name="PageSizes" value="4096,2097152"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0x6" cpuset="0x000000ff"/>
+  <pci_locality domain="0x0" bus_min="0x7f" bus_max="0x7f" cpuset="0x0000ffff"/>
+  <pci_locality domain="0x0" bus_min="0x80" bus_max="0x83" cpuset="0x0000ff00"/>
+  <pci_locality domain="0x0" bus_min="0xff" bus_max="0xff" cpuset="0x0000ffff"/>
 </topology>

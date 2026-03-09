@@ -136,19 +136,18 @@ hwloc___pci_insert_locality_before(struct hwloc_topology *topology,
   }
 }
 
-/* cpuset is given by the caller, caller shouldn't touch it anymore, even on error */
 static struct hwloc_pci_locality_s *
-hwloc__pci_add_locality_before(struct hwloc_topology *topology,
-                               unsigned domain,
-                               unsigned bus_min, unsigned bus_max,
-                               hwloc_bitmap_t cpuset,
-                               hwloc_obj_t parent,
-                               struct hwloc_pci_locality_s *next)
+hwloc___pci_add_locality_before(struct hwloc_topology *topology,
+                                unsigned domain,
+                                unsigned bus_min, unsigned bus_max,
+                                hwloc_bitmap_t cpuset,
+                                hwloc_obj_t parent,
+                                struct hwloc_pci_locality_s *next)
 {
   struct hwloc_pci_locality_s *new;
 
-  assert(parent);
   assert(cpuset);
+  /* parent may be NULL on XML import */
 
   new = malloc(sizeof *new);
   if (!new) {
@@ -163,6 +162,19 @@ hwloc__pci_add_locality_before(struct hwloc_topology *topology,
   new->parent = parent;
   hwloc___pci_insert_locality_before(topology, new, next);
   return new;
+}
+
+/* parent is mandatory */
+static struct hwloc_pci_locality_s *
+hwloc__pci_add_locality_before(struct hwloc_topology *topology,
+                               unsigned domain,
+                               unsigned bus_min, unsigned bus_max,
+                               hwloc_bitmap_t cpuset,
+                               hwloc_obj_t parent,
+                               struct hwloc_pci_locality_s *next)
+{
+  assert(parent);
+  return hwloc___pci_add_locality_before(topology, domain, bus_min, bus_max, cpuset, parent, next);
 }
 
 static void
@@ -197,6 +209,60 @@ hwloc__pci_merge_next_localities(struct hwloc_topology *topology,
     } else
       break;
   }
+}
+
+/* either duplicate the parent cpuset, or use the given cpuset.
+ * parent is not saved since it'll be refreshed later
+ */
+void
+hwloc_pci_xml_import_locality(struct hwloc_topology *topology,
+                              unsigned domain,
+                              unsigned bus_min, unsigned bus_max,
+                              hwloc_obj_t parent,
+                              hwloc_cpuset_t cpuset)
+{
+  if (parent) {
+    assert(!cpuset);
+    /* only parent was given, use a copy of its cpuset */
+    cpuset = hwloc_bitmap_dup(parent->cpuset);
+    if (!cpuset)
+      return;
+  } else {
+    /* only a cpuset was given, keep it */
+    assert(cpuset);
+  }
+
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  hwloc___pci_add_locality_before(topology, domain, bus_min, bus_max, cpuset, NULL, NULL);
+}
+
+void
+hwloc_pci_xml_import_refresh_localities(struct hwloc_topology *topology)
+{
+  struct hwloc_pci_locality_s *cur = topology->first_pci_locality;
+  while (cur) {
+    struct hwloc_pci_locality_s *next = cur->next;
+    if (next
+        && (next->domain < cur->domain
+            || (next->domain == cur->domain && next->bus_min <= cur->bus_max))) {
+      /* next isn't strictly after cur, drop it */
+      static unsigned warned = 0;
+      if (!warned && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML)) {
+        fprintf(stderr, "hwloc/xml/pci: overlapping pci localities are ignored.\n");
+        warned = 1;
+      }
+      if (next->next)
+        next->next->prev = cur;
+      else
+        topology->last_pci_locality = cur;
+      cur->next = next->next;
+      hwloc_bitmap_free(next->cpuset);
+      free(next);
+    } else {
+      cur = cur->next;
+    }
+  }
+  hwloc_pci_refresh(topology);
 }
 
 static struct hwloc_pci_locality_s *
@@ -424,26 +490,22 @@ hwloc_pci_refresh(struct hwloc_topology *topology)
   cur = topology->first_pci_locality;
   while (cur) {
     struct hwloc_pci_locality_s *next = cur->next;
+    hwloc_obj_t largeparent;
+
     /* refresh the cpuset */
-    if (cur->cpuset) {
-      hwloc_bitmap_and(cur->cpuset, cur->cpuset, hwloc_topology_get_topology_cpuset(topology));
-      if (hwloc_bitmap_iszero(cur->cpuset)) {
-        hwloc_bitmap_free(cur->cpuset);
-        cur->cpuset = NULL;
-      }
-    }
+    hwloc_bitmap_and(cur->cpuset, cur->cpuset, hwloc_topology_get_topology_cpuset(topology));
+
     /* refresh the parent */
     cur->parent = NULL;
-    if (cur->cpuset) {
-      hwloc_obj_t largeparent = hwloc_get_obj_covering_cpuset(topology, cur->cpuset);
-      if (largeparent) {
-        while (largeparent ->parent && largeparent->parent->arity == 1)
-          largeparent = largeparent->parent;
-        cur->parent = largeparent;
-      }
+    largeparent = hwloc_get_obj_covering_cpuset(topology, cur->cpuset);
+    if (largeparent) {
+      while (largeparent ->parent && largeparent->parent->arity == 1)
+        largeparent = largeparent->parent;
+      cur->parent = largeparent;
     }
     if (!cur->parent)
       cur->parent = hwloc_get_root_obj(topology);
+
     cur = next;
   }
 

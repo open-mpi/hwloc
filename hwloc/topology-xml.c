@@ -958,6 +958,26 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  /* generate PCI localities from top level bridges or pcidevs if importing from v2 */
+  if (data->version_major < 3
+      && obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+      && obj->parent->cpuset) {
+    hwloc_pci_xml_import_locality(topology,
+                                  obj->attr->bridge.downstream.pci.domain,
+                                  obj->attr->bridge.downstream.pci.secondary_bus,
+                                  obj->attr->bridge.downstream.pci.subordinate_bus,
+                                  obj->parent, NULL);
+  }
+  if (data->version_major < 3
+      && obj->type == HWLOC_OBJ_PCI_DEVICE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+      && obj->parent->cpuset) {
+    hwloc_pci_xml_import_locality(topology,
+                                  obj->attr->pcidev.domain,
+                                  obj->attr->pcidev.bus,
+                                  obj->attr->pcidev.bus,
+                                  obj->parent, NULL);
+  }
+
   /* filter AFTER having updated the osdevice attribute from v2 */
   if (!hwloc_filter_check_keep_object(topology, obj)) {
     /* Ignore this object instead of inserting it.
@@ -1674,6 +1694,51 @@ hwloc__xml_import_cpukind(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_import_pcilocality(hwloc_topology_t topology,
+                              hwloc__xml_import_state_t state)
+{
+  hwloc_bitmap_t cpuset = NULL;
+  unsigned domain, bus_min, bus_max;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "cpuset")) {
+      if (!cpuset)
+        cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(cpuset, attrvalue);
+    } else if (!strcmp(attrname, "domain")) {
+      domain = strtoul(attrvalue, NULL, 0);
+    } else if (!strcmp(attrname, "bus_min")) {
+      bus_min = strtoul(attrvalue, NULL, 0);
+    } else if (!strcmp(attrname, "bus_max")) {
+      bus_max = strtoul(attrvalue, NULL, 0);
+    } else {
+      if (state->global->show_errors)
+        fprintf(stderr, "%s: ignoring unknown pci_locality attribute %s\n",
+                state->global->msgprefix, attrname);
+      hwloc_bitmap_free(cpuset);
+      return -1;
+    }
+  }
+
+  if (!cpuset) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring pci_locality without cpuset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+
+  hwloc_pci_xml_import_locality(topology, domain, bus_min, bus_max, NULL, cpuset);
+  return 0;
+
+ error:
+  hwloc_bitmap_free(cpuset);
+  return -1;
+}
+
+static int
 hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 			   hwloc_topology_diff_t *firstdiffp,
 			   hwloc_topology_diff_t *lastdiffp)
@@ -1924,6 +1989,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
           goto failed;
         if (infoname && infovalue)
           hwloc__add_info(&topology->infos, infoname, infovalue);
+      } else if (!strcmp(tag, "pci_locality")) {
+        ret = hwloc__xml_import_pcilocality(topology, &childstate);
+        if (ret < 0)
+          goto failed;
       } else {
 	if (data->show_errors)
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
@@ -2022,6 +2091,8 @@ done:
     topology->support.discovery->numa_memory = 1; // FIXME
     topology->support.discovery->disallowed_numa = 1;
   }
+
+  hwloc_pci_xml_import_refresh_localities(topology);
 
   if (data->look_done)
     data->look_done(data, 0);
@@ -2721,6 +2792,34 @@ hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t top
 }
 
 static void
+hwloc__xml_export_pcilocalities(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  struct hwloc_pci_locality_s *loc = topology->first_pci_locality;
+  while (loc) {
+    struct hwloc__xml_export_state_s cstate;
+    char *setstring;
+    char tmp[11];
+
+    state->new_child(state, &cstate, "pci_locality");
+
+    snprintf(tmp, sizeof(tmp), "0x%x", loc->domain);
+    cstate.new_prop(&cstate, "domain", tmp);
+    snprintf(tmp, sizeof(tmp), "0x%x", loc->bus_min);
+    cstate.new_prop(&cstate, "bus_min", tmp);
+    snprintf(tmp, sizeof(tmp), "0x%x", loc->bus_max);
+    cstate.new_prop(&cstate, "bus_max", tmp);
+
+    hwloc_bitmap_asprintf(&setstring, loc->cpuset);
+    cstate.new_prop(&cstate, "cpuset", setstring);
+    free(setstring);
+
+    cstate.end_object(&cstate, "pci_locality");
+
+    loc = loc->next;
+  }
+}
+
+static void
 hwloc__xml_export_infos(hwloc__xml_export_state_t state, hwloc_topology_t topology)
 {
   unsigned j;
@@ -2741,8 +2840,10 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
       hwloc__xml_v2export_support(state, topology);
     hwloc__xml_export_memattrs(state, topology);
     hwloc__xml_export_cpukinds(state, topology);
-    if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2))
+    if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
       hwloc__xml_export_infos(state, topology);
+      hwloc__xml_export_pcilocalities(state, topology);
+    }
 }
 
 void

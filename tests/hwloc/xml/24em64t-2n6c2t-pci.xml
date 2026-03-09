@@ -208,4 +208,6 @@
   <info name="OSVersion" value="#1 SMP 2009-11-23 12:57:38 +0100"/>
   <info name="HostName" value="mirage004"/>
   <info name="Architecture" value="x86_64"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0xf" cpuset="0x00555555"/>
+  <pci_locality domain="0x0" bus_min="0x10" bus_max="0x1f" cpuset="0x00aaaaaa"/>
 </topology>

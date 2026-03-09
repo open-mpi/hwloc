@@ -824,4 +824,9 @@
   <info name="OSVersion" value="#1 SMP Tue Jun 14 09:42:28 UTC 2011"/>
   <info name="HostName" value="bertha"/>
   <info name="Architecture" value="x86_64"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0x2" cpuset="0x00ffffff"/>
+  <pci_locality domain="0x0" bus_min="0x3" bus_max="0x4" cpuset="0x00ffffff"/>
+  <pci_locality domain="0x0" bus_min="0x30" bus_max="0x34" cpuset="0x0000ffff,0xff000000"/>
+  <pci_locality domain="0x0" bus_min="0x60" bus_max="0x64" cpuset="0x000000ff,0xffff0000,0x0"/>
+  <pci_locality domain="0x0" bus_min="0x90" bus_max="0x94" cpuset="0xffffff00,,0x0"/>
 </topology>
