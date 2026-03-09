@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2020-2025 Inria.  All rights reserved.
+ * Copyright © 2020-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -73,7 +73,8 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
 
   if (!prop) {
     /* no properties were given, get ours */
-    memset(&_prop, 0, sizeof(_prop));
+    _prop.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES;
+    _prop.pNext = NULL;
     res = zeDeviceGetProperties(zeh, &_prop);
     if (res == ZE_RESULT_SUCCESS)
       prop = &_prop;
@@ -121,7 +122,8 @@ hwloc__levelzero_properties_get(ze_device_handle_t zeh, zes_device_handle_t zesh
     return;
 
   /* try to get additional info from sysman if enabled */
-  memset(&prop2, 0, sizeof(prop2));
+  prop2.stype = ZES_STRUCTURE_TYPE_DEVICE_PROPERTIES;
+  prop2.pNext = NULL;
   res = zesDeviceGetProperties(zesh, &prop2);
   if (res == ZE_RESULT_SUCCESS) {
     /* old implementations may return "Unknown", recent may return "unknown" */
@@ -152,9 +154,13 @@ hwloc__levelzero_cqprops_get(ze_device_handle_t zeh,
 
   cqprops = malloc(nr_cqprops * sizeof(*cqprops));
   if (cqprops) {
+    unsigned k;
+    for(k=0; k<nr_cqprops; k++) {
+      cqprops[k].stype = ZE_STRUCTURE_TYPE_COMMAND_QUEUE_GROUP_PROPERTIES;
+      cqprops[k].pNext = NULL;
+    }
     res = zeDeviceGetCommandQueueGroupProperties(zeh, &nr_cqprops, cqprops);
     if (res == ZE_RESULT_SUCCESS) {
-      unsigned k;
       char tmp[32];
       snprintf(tmp, sizeof(tmp), "%u", nr_cqprops);
       hwloc_obj_add_info(osdev, "LevelZeroCQGroups", tmp);
@@ -197,6 +203,8 @@ hwloc__levelzero_memory_get(zes_device_handle_t zesh,
       unsigned m;
       for(m=0; m<nr_mems; m++) {
         zes_mem_properties_t mprop;
+        mprop.stype = ZES_STRUCTURE_TYPE_MEM_PROPERTIES;
+        mprop.pNext = NULL;
         res = zesMemoryGetProperties(mh[m], &mprop);
         if (res == ZE_RESULT_SUCCESS) {
           const char *type;
@@ -206,6 +214,8 @@ hwloc__levelzero_memory_get(zes_device_handle_t zesh,
           if (!mprop.physicalSize) {
             /* unknown, but memory state should have it */
             zes_mem_state_t s;
+            s.stype = ZES_STRUCTURE_TYPE_MEM_STATE;
+            s.pNext = NULL;
             res = zesMemoryGetState(mh[m], &s);
             if (res == ZE_RESULT_SUCCESS) {
               hwloc_debug("L0/Sysman: found size 0 for memory modules #%u, using memory state size instead\n", m);
@@ -336,6 +346,8 @@ hwloc__levelzero_ports_get(zes_device_handle_t zesh,
 
   for(i=0; i<nr_new; i++) {
     unsigned id = hports->nr;
+    hports->ports[id].props.stype = ZES_STRUCTURE_TYPE_FABRIC_PORT_PROPERTIES;
+    hports->ports[id].props.pNext = NULL;
     res = zesFabricPortGetProperties(ports[i], &hports->ports[id].props);
     if (res != ZE_RESULT_SUCCESS)
       continue;
@@ -354,6 +366,8 @@ hwloc__levelzero_ports_get(zes_device_handle_t zesh,
       hports->ports[id].parent_osdev = NULL;
     }
 
+    hports->ports[id].state.stype = ZES_STRUCTURE_TYPE_FABRIC_PORT_STATE;
+    hports->ports[id].state.pNext = NULL;
     res = zesFabricPortGetState(ports[i], &hports->ports[id].state);
     if (res != ZE_RESULT_SUCCESS)
       continue;
@@ -463,6 +477,8 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       ze_bool_t onSubdevice = 0;
       uint32_t subdeviceId = 0;
 
+      props.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES;
+      props.pNext = NULL,
       res = zeDeviceGetProperties(zeh, &props);
       if (res != ZE_RESULT_SUCCESS) {
         if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
@@ -510,6 +526,8 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
             ze_device_handle_t subzeh = subzehs[k];
             zes_device_handle_t subzesh = NULL;
 
+            props.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES;
+            props.pNext = NULL,
             res = zeDeviceGetProperties(subzeh, &props);
             if (res != ZE_RESULT_SUCCESS) {
               if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_L0))
@@ -578,6 +596,8 @@ hwloc__levelzero_devices_get(struct hwloc_topology *topology,
       if (!parent) {
         /* try getting PCI BDF+speed from sysman */
         zes_pci_properties_t pci;
+        pci.stype = ZES_STRUCTURE_TYPE_PCI_PROPERTIES;
+        pci.pNext = NULL;
         res = zesDevicePciGetProperties(zesh, &pci);
         if (res == ZE_RESULT_SUCCESS) {
           parent = hwloc_pci_find_parent_by_busid(topology,

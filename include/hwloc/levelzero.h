@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2021-2024 Inria.  All rights reserved.
+ * Copyright © 2021-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -137,6 +137,8 @@ hwloc_levelzero_get_sysman_device_cpuset(hwloc_topology_t topology __hwloc_attri
     return -1;
   }
 
+  pci.stype =  ZES_STRUCTURE_TYPE_PCI_PROPERTIES;
+  pci.pNext = NULL;
   res = zesDevicePciGetProperties(device, &pci);
   if (res != ZE_RESULT_SUCCESS) {
     errno = EINVAL;
@@ -255,6 +257,8 @@ hwloc_levelzero_get_sysman_device_osdev(hwloc_topology_t topology, zes_device_ha
     return NULL;
   }
 
+  pci.stype = ZES_STRUCTURE_TYPE_PCI_PROPERTIES;
+  pci.pNext = NULL;
   res = zesDevicePciGetProperties(device, &pci);
   if (res != ZE_RESULT_SUCCESS) {
     errno = EINVAL;
