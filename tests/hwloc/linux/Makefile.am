@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright © 2009-2025 Inria.  All rights reserved.
+# Copyright © 2009-2026 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -54,6 +54,7 @@ sysfs_tests = \
 	fakeheterocpunuma.test \
 	fakeheteromemtiers.test \
 	fakememinitiators-1np2c+1npp+gi.test \
+	fakepcilocalities.test \
 	memorysidecaches.test \
 	nvidiagpunumanodes.test \
 	nvidiagpunumanodes-kept.test \
@@ -100,6 +101,7 @@ sysfs_tarballs = \
 	fakeheterocpunuma.tar.bz2 \
 	fakeheteromemtiers.tar.bz2 \
 	fakememinitiators-1np2c+1npp+gi.tar.bz2 \
+	fakepcilocalities.tar.bz2 \
 	memorysidecaches.tar.bz2 \
 	nvidiagpunumanodes.tar.bz2 \
 	offline-cpu0-node0.tar.bz2
@@ -156,7 +158,8 @@ sysfs_xml_outputs = \
 	32amd64-4s2n4c-cgroup2.xml \
 	32em64t-2n8c+dax+nvme+mic+dimms.xml \
 	40intel64-2g2n4c+pcilocality.xml \
-	fakeheterocpunuma.xml
+	fakeheterocpunuma.xml \
+	fakepcilocalities.xml
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP

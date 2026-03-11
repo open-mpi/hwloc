@@ -235,6 +235,18 @@ struct hwloc_topology {
   float grouping_accuracies[5];
   unsigned grouping_next_subkind;
 
+  /* pci localities */
+  /* FIXME: reuse for finding specific buses */
+  /* FIXME: save to XML */
+  struct hwloc_pci_locality_s {
+    unsigned domain;
+    unsigned bus_min;
+    unsigned bus_max;
+    hwloc_cpuset_t cpuset;
+    hwloc_obj_t parent; /* may need to refreshed from cpuset on topology changes */
+    struct hwloc_pci_locality_s *prev, *next;
+  } *first_pci_locality, *last_pci_locality; /* contains unsorted forced localities first, then sorted real ones */
+
   /* list of enabled backends. */
   struct hwloc_backend * backends;
   struct hwloc_backend * get_pci_busid_cpuset_backend; /* first backend that provides get_pci_busid_cpuset() callback */
@@ -265,16 +277,6 @@ struct hwloc_topology {
    * and actually used later by the core.
    */
   struct hwloc_numanode_attr_s machine_memory;
-
-  /* pci stuff */
-  /* FIXME: keep until topo destroy and reuse for finding specific buses */
-  struct hwloc_pci_locality_s {
-    unsigned domain;
-    unsigned bus_min;
-    unsigned bus_max;
-    hwloc_obj_t parent;
-    struct hwloc_pci_locality_s *prev, *next;
-  } *first_pci_locality, *last_pci_locality; /* contains unsorted forced localities first, then sorted real ones */
 
   /* component blacklisting */
   unsigned nr_blacklisted_components;
@@ -310,15 +312,14 @@ extern struct hwloc_obj * hwloc__attach_memory_object(struct hwloc_topology *top
 
 extern hwloc_obj_t hwloc_get_obj_by_type_and_gp_index(hwloc_topology_t topology, hwloc_obj_type_t type, uint64_t gp_index);
 
-extern void hwloc_pci_discovery_init(struct hwloc_topology *topology);
-extern void hwloc_pci_discovery_prepare(struct hwloc_topology *topology);
-extern void hwloc_pci_discovery_exit(struct hwloc_topology *topology);
+extern void hwloc_pci_init(struct hwloc_topology *topology);
+extern void hwloc_pci_prepare(struct hwloc_topology *topology);
+extern void hwloc_pci_refresh(struct hwloc_topology *topology);
+extern int hwloc_pci_dup(hwloc_topology_t new, hwloc_topology_t old);
+extern void hwloc_pci_exit(struct hwloc_topology *topology);
 
-/* Look for an object matching complete cpuset exactly, or insert one.
- * Return NULL on failure.
- * Return a good fallback (object above) on failure to insert.
- */
-extern hwloc_obj_t hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset);
+extern void hwloc_pci_xml_import_locality(struct hwloc_topology *topology, unsigned domain, unsigned bus_min, unsigned bus_max, hwloc_obj_t parent, hwloc_cpuset_t cpuset);
+extern void hwloc_pci_xml_import_refresh_localities(struct hwloc_topology *topology);
 
 extern int hwloc__add_info(struct hwloc_infos_s *infos, const char *name, const char *value);
 extern int hwloc__replace_infos(struct hwloc_infos_s *infos, const char *name, const char *value);

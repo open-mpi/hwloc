@@ -279,4 +279,6 @@
   <info name="Architecture" value="x86_64"/>
   <info name="Backend" value="CUDA"/>
   <info name="Backend" value="OpenCL"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0x5" cpuset="0x00ff00ff"/>
+  <pci_locality domain="0x0" bus_min="0x80" bus_max="0x84" cpuset="0xff00ff00"/>
 </topology>

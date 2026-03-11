@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
- * Copyright © 2009-2024 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1280,6 +1280,25 @@ hwloc_get_pcidev_by_busidstring(hwloc_topology_t topology, const char *busid)
 
   return hwloc_get_pcidev_by_busid(topology, domain, bus, dev, func);
 }
+
+/** \brief Find the locality of a given PCI bus id
+ *
+ * Fill CPU set \ cpuset with the locality of the given PCI device.
+ *
+ * Contrary to \p hwloc_get_pcidev_by_busid(), the corresponding PCI device
+ * hwloc object does not need to exist in the topology.
+ * If could be disabled or have been filtered-out.
+ *
+ * \p dev and \p func numbers may ignored and set to \p 0 since the
+ * locality of a PCI device is the locality of its parent bus.
+ *
+ * On error, \c -1 is returned and \p cpuset is set to the entire topology
+ * CPU set.
+ */
+HWLOC_DECLSPEC int
+hwloc_get_pci_busid_cpuset(hwloc_topology_t topology,
+                           hwloc_cpuset_t cpuset,
+                           unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** \brief Get the next OS device in the system.
  *

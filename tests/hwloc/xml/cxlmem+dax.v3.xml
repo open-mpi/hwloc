@@ -174,4 +174,6 @@
   <info name="OSVersion" value="#1 SMP PREEMPT_DYNAMIC Thu Dec  1 15:21:30 CET 2022"/>
   <info name="HostName" value="efi"/>
   <info name="Architecture" value="x86_64"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0x0" cpuset="0x0000000f"/>
+  <pci_locality domain="0x0" bus_min="0xc" bus_max="0x16" cpuset="0x0000000f"/>
 </topology>

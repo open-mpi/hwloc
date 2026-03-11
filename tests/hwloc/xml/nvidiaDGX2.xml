@@ -475,4 +475,8 @@
   <info name="hwlocVersion" value="PR-436-20201209.1647.gitfc946998"/>
   <info name="ProcessName" value="lstopo-no-graphics"/>
   <info name="Backend" value="NVML"/>
+  <pci_locality domain="0x0" bus_min="0x2b" bus_max="0x3b" cpuset="0x00000003"/>
+  <pci_locality domain="0x0" bus_min="0x4e" bus_max="0x67" cpuset="0x00000003"/>
+  <pci_locality domain="0x0" bus_min="0xae" bus_max="0xc7" cpuset="0x03000000"/>
+  <pci_locality domain="0x0" bus_min="0xd7" bus_max="0xe7" cpuset="0x03000000"/>
 </topology>

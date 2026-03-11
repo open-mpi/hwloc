@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2010-2024 Inria.  All rights reserved.
+ * Copyright © 2010-2026 Inria.  All rights reserved.
  * Copyright © 2010-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -81,7 +81,6 @@ hwloc_cuda_get_device_pci_ids(hwloc_topology_t topology __hwloc_attribute_unused
  *
  * Store in \p set the CPU-set describing the locality of the CUDA device \p cudevice.
  *
- * Topology \p topology and device \p cudevice must match the local machine.
  * I/O devices detection and the CUDA component are not needed in the topology.
  *
  * The function only returns the locality of the device.
@@ -90,7 +89,7 @@ hwloc_cuda_get_device_pci_ids(hwloc_topology_t topology __hwloc_attribute_unused
  * and hwloc_cuda_get_device_osdev_by_index().
  *
  * This function is currently only implemented in a meaningful way for
- * Linux; other systems will simply get a full cpuset.
+ * Linux; other systems will simply get the cpuset of the entire topology.
  *
  * \return 0 on success.
  * \return -1 on error, for instance if device information could not be found.
@@ -99,10 +98,6 @@ static __hwloc_inline int
 hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 			     CUdevice cudevice, hwloc_cpuset_t set)
 {
-#ifdef HWLOC_LINUX_SYS
-  /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_CUDA_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_CUDA_DEVICE_SYSFS_PATH_MAX];
   int domainid, busid, deviceid;
 
   if (hwloc_cuda_get_device_pci_ids(topology, cudevice, &domainid, &busid, &deviceid))
@@ -113,15 +108,7 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", domainid, busid, deviceid);
-  if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-      || hwloc_bitmap_iszero(set))
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-  /* Non-Linux systems simply get a full cpuset */
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+  return hwloc_get_pci_busid_cpuset(topology, set, domainid, busid, deviceid, 0);
 }
 
 /** \brief Get the hwloc PCI device object corresponding to the

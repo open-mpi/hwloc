@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2025 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -40,9 +40,9 @@ hwloc__nvml_get_peer_obj_by_pci(struct hwloc_topology *topology, hwloc_obj_t gpu
   hwloc_obj_t obj;
 
   /* we want the exact object here because we'll use it PCI class below
-   * (we can't use hwloc_pci_find_parent_by_busid() which is enough for inserting OSdev by locality).
+   * (we can't use hwloc_pci_get_parent_by_busid() which is enough for inserting OSdev by locality).
    */
-  obj = hwloc_pci_find_by_busid(topology, peer_bdf.domain, peer_bdf.bus, peer_bdf.device, 0);
+  obj = hwloc_pci_get_obj_by_busid(topology, peer_bdf.domain, peer_bdf.bus, peer_bdf.device, 0);
   if (!obj) {
     enum hwloc_type_filter_e pfilter;
     hwloc_topology_get_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, &pfilter);
@@ -263,7 +263,7 @@ hwloc_nvml_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
 #ifdef NVML_NVLINK_MAX_LINKS
       gpu_bdfs[i] = pci;
 #endif
-      parent = hwloc_pci_find_parent_by_busid(topology, pci.domain, pci.bus, pci.device, 0);
+      parent = hwloc_pci_get_parent_by_busid(topology, pci.domain, pci.bus, pci.device, 0);
 #if HAVE_DECL_NVMLDEVICEGETCURRPCIELINKGENERATION
       if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE) {
 	unsigned maxwidth = 0, maxgen = 0;

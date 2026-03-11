@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -42,7 +42,6 @@ extern "C" {
  *
  * Store in \p set the CPU-set describing the locality of the NVML device \p device.
  *
- * Topology \p topology and device \p device must match the local machine.
  * I/O devices detection and the NVML component are not needed in the topology.
  *
  * The function only returns the locality of the device.
@@ -51,7 +50,7 @@ extern "C" {
  * and hwloc_nvml_get_device_osdev_by_index().
  *
  * This function is currently only implemented in a meaningful way for
- * Linux; other systems will simply get a full cpuset.
+ * Linux; other systems will simply get the cpuset of the entire topology.
  *
  * \return 0 on success.
  * \return -1 on error, for instance if device information could not be found.
@@ -60,10 +59,6 @@ static __hwloc_inline int
 hwloc_nvml_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 			     nvmlDevice_t device, hwloc_cpuset_t set)
 {
-#ifdef HWLOC_LINUX_SYS
-  /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_NVML_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_NVML_DEVICE_SYSFS_PATH_MAX];
   nvmlReturn_t nvres;
   nvmlPciInfo_t pci;
 
@@ -78,15 +73,7 @@ hwloc_nvml_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", pci.domain, pci.bus, pci.device);
-  if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-      || hwloc_bitmap_iszero(set))
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-  /* Non-Linux systems simply get a full cpuset */
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+  return hwloc_get_pci_busid_cpuset(topology, set, pci.domain, pci.bus, pci.device, 0);
 }
 
 /** \brief Get the hwloc OS device object corresponding to the

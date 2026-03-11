@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2012-2013 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -128,7 +128,7 @@ hwloc_gl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       if (productname)
 	hwloc_obj_add_info(osdev, "GPUModel", productname);
 
-      parent = hwloc_pci_find_parent_by_busid(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
+      parent = hwloc_pci_get_parent_by_busid(topology, (unsigned)nv_ctrl_pci_domain, (unsigned)nv_ctrl_pci_bus, (unsigned)nv_ctrl_pci_device, (unsigned)nv_ctrl_pci_func);
       if (!parent)
 	parent = hwloc_get_root_obj(topology);
 

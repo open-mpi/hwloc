@@ -280,6 +280,7 @@ extern "C" {
 #define hwloc_get_next_pcidev HWLOC_NAME(get_next_pcidev)
 #define hwloc_get_pcidev_by_busid HWLOC_NAME(get_pcidev_by_busid)
 #define hwloc_get_pcidev_by_busidstring HWLOC_NAME(get_pcidev_by_busidstring)
+#define hwloc_get_pci_busid_cpuset HWLOC_NAME(get_pci_busid_cpuset)
 #define hwloc_get_next_osdev HWLOC_NAME(get_next_osdev)
 #define hwloc_get_next_bridge HWLOC_NAME(get_next_bridge)
 #define hwloc_bridge_covers_pcibus HWLOC_NAME(bridge_covers_pcibus)
@@ -671,15 +672,15 @@ extern "C" {
 #define hwloc_filter_check_keep_object_type HWLOC_NAME(filter_check_keep_object_type)
 #define hwloc_filter_check_keep_object HWLOC_NAME(filter_check_keep_object)
 
-#define hwloc_pcidisc_find_cap HWLOC_NAME(pcidisc_find_cap)
-#define hwloc_pcidisc_find_linkspeed HWLOC_NAME(pcidisc_find_linkspeed)
-#define hwloc_pcidisc_check_bridge_type HWLOC_NAME(pcidisc_check_bridge_type)
-#define hwloc_pcidisc_find_bridge_buses HWLOC_NAME(pcidisc_find_bridge_buses)
-#define hwloc_pcidisc_tree_insert_by_busid HWLOC_NAME(pcidisc_tree_insert_by_busid)
-#define hwloc_pcidisc_tree_attach HWLOC_NAME(pcidisc_tree_attach)
+#define hwloc_pcicommon_configspace_find_cap HWLOC_NAME(pcicommon_configspace_find_cap)
+#define hwloc_pcicommon_configspace_find_linkspeed HWLOC_NAME(pcicommon_configspace_find_linkspeed)
+#define hwloc_pcicommon_configspace_check_bridge_type HWLOC_NAME(pcicommon_configspace_check_bridge_type)
+#define hwloc_pcicommon_configspace_find_bridge_buses HWLOC_NAME(pcicommon_configspace_find_bridge_buses)
+#define hwloc_pcicommon_tree_insert_by_busid HWLOC_NAME(pcicommon_tree_insert_by_busid)
+#define hwloc_pcicommon_tree_attach HWLOC_NAME(pcicommon_tree_attach)
 
-#define hwloc_pci_find_by_busid HWLOC_NAME(pci_find_by_busid)
-#define hwloc_pci_find_parent_by_busid HWLOC_NAME(pci_find_parent_by_busid)
+#define hwloc_pci_get_obj_by_busid HWLOC_NAME(pci_get_obj_by_busid)
+#define hwloc_pci_get_parent_by_busid HWLOC_NAME(pci_get_parent_by_busid)
 
 #define hwloc_backend_distances_add_handle_t HWLOC_NAME(backend_distances_add_handle_t)
 #define hwloc_backend_distances_add_create HWLOC_NAME(backend_distances_add_create)
@@ -829,10 +830,14 @@ extern "C" {
 
 #define hwloc_get_obj_by_type_and_gp_index HWLOC_NAME(get_obj_by_type_and_gp_index)
 
-#define hwloc_pci_discovery_init HWLOC_NAME(pci_discovery_init)
-#define hwloc_pci_discovery_prepare HWLOC_NAME(pci_discovery_prepare)
-#define hwloc_pci_discovery_exit HWLOC_NAME(pci_discovery_exit)
-#define hwloc_find_insert_io_parent_by_complete_cpuset HWLOC_NAME(find_insert_io_parent_by_complete_cpuset)
+#define hwloc_pci_init HWLOC_NAME(pci_init)
+#define hwloc_pci_prepare HWLOC_NAME(pci_prepare)
+#define hwloc_pci_refresh HWLOC_NAME(pci_refresh)
+#define hwloc_pci_dup HWLOC_NAME(pci_dup)
+#define hwloc_pci_exit HWLOC_NAME(pci_exit)
+
+#define hwloc_pci_xml_import_locality HWLOC_NAME(pci_xml_import_locality)
+#define hwloc_pci_xml_import_refresh_localities HWLOC_NAME(pci_xml_import_refresh_localities)
 
 #define hwloc__add_info HWLOC_NAME(_add_info)
 #define hwloc__replace_infos HWLOC_NAME(_replace_infos)

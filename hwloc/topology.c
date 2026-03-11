@@ -1284,6 +1284,10 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   if (err < 0)
     goto out_with_topology;
 
+  err = hwloc_pci_dup(new, old);
+  if (err < 0)
+    goto out_with_topology;
+
   /* we connected everything during duplication */
   new->modified = 0;
 
@@ -2311,81 +2315,6 @@ hwloc_topology_insert_misc_object(struct hwloc_topology *topology, hwloc_obj_t p
     hwloc_topology_check(topology);
 
   return obj;
-}
-
-/* assuming set is included in the topology complete_cpuset
- * and all objects have a proper complete_cpuset,
- * return the best one containing set.
- * if some object are equivalent (same complete_cpuset), return the highest one.
- */
-static hwloc_obj_t
-hwloc_get_highest_obj_covering_complete_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set)
-{
-  hwloc_obj_t current = hwloc_get_root_obj(topology);
-  hwloc_obj_t child;
-
-  if (hwloc_bitmap_isequal(set, current->complete_cpuset))
-    /* root cpuset is exactly what we want, no need to look at children, we want the highest */
-    return current;
-
- recurse:
-  /* find the right child */
-  for_each_child(child, current) {
-    if (hwloc_bitmap_isequal(set, child->complete_cpuset))
-      /* child puset is exactly what we want, no need to look at children, we want the highest */
-      return child;
-    if (!hwloc_bitmap_iszero(child->complete_cpuset) && hwloc_bitmap_isincluded(set, child->complete_cpuset))
-      break;
-  }
-
-  if (child) {
-    current = child;
-    goto recurse;
-  }
-
-  /* no better child */
-  return current;
-}
-
-hwloc_obj_t
-hwloc_find_insert_io_parent_by_complete_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset)
-{
-  hwloc_obj_t group_obj, largeparent, parent;
-
-  /* restrict to the existing complete cpuset to avoid errors later */
-  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_complete_cpuset(topology));
-  if (hwloc_bitmap_iszero(cpuset))
-    /* remaining cpuset is empty, invalid */
-    return NULL;
-
-  largeparent = hwloc_get_highest_obj_covering_complete_cpuset(topology, cpuset);
-  if (hwloc_bitmap_isequal(largeparent->complete_cpuset, cpuset)
-      || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP))
-    /* Found a valid object (normal case) */
-    return largeparent;
-
-  /* we need to insert an intermediate group */
-  group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
-  if (!group_obj)
-    /* Failed to insert the exact Group, fallback to largeparent */
-    return largeparent;
-
-  group_obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
-  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
-  group_obj->cpuset = hwloc_bitmap_dup(cpuset);
-  group_obj->attr->group.kind = HWLOC_GROUP_KIND_IO;
-  parent = hwloc__insert_object_by_cpuset(topology, largeparent, group_obj, "topology:io_parent");
-  if (!parent)
-    /* Failed to insert the Group, maybe a conflicting cpuset */
-    return largeparent;
-
-  /* Group couldn't get merged or we would have gotten the right largeparent earlier */
-  assert(parent == group_obj);
-
-  /* Group inserted without being merged, everything OK, setup its sets */
-  hwloc_obj_add_children_sets(group_obj);
-
-  return parent;
 }
 
 /* Propagate memory counts */
@@ -3694,7 +3623,7 @@ hwloc_discover(struct hwloc_topology *topology,
   /*
    * Additional discovery
    */
-  hwloc_pci_discovery_prepare(topology);
+  hwloc_pci_prepare(topology);
 
   if (topology->backend_phases & HWLOC_DISC_PHASE_PCI) {
     dstatus->phase = HWLOC_DISC_PHASE_PCI;
@@ -3716,8 +3645,6 @@ hwloc_discover(struct hwloc_topology *topology,
     dstatus->phase = HWLOC_DISC_PHASE_ANNOTATE_INDEPENDENT;
     hwloc_discover_by_phase(topology, dstatus, "INDEPENDENT");
   }
-
-  hwloc_pci_discovery_exit(topology); /* pci needed up to annotate */
 
   if (getenv("HWLOC_DEBUG_SORT_CHILDREN"))
     hwloc_debug_sort_children(topology->levels[0][0]);
@@ -3856,7 +3783,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
 
   hwloc_components_init(); /* uses malloc without tma, but won't need it since dup() caller already took a reference */
   hwloc_topology_components_init(topology);
-  hwloc_pci_discovery_init(topology); /* make sure both dup() and load() get sane variables */
+  hwloc_pci_init(topology); /* make sure both dup() and load() get sane variables */
 
   /* Setup topology context */
   topology->state = HWLOC_TOPOLOGY_STATE_IS_INIT | HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
@@ -4173,6 +4100,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_backends_disable_all(topology);
   hwloc_topology_components_fini(topology);
   hwloc_components_fini();
+  hwloc_pci_exit(topology);
 
   hwloc_topology_clear(topology);
 
@@ -4355,7 +4283,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   return 0;
 
  out:
-  hwloc_pci_discovery_exit(topology);
+  hwloc_pci_exit(topology);
   hwloc_topology_clear(topology);
   hwloc_topology_setup_defaults(topology);
   hwloc_backends_disable_all(topology);
@@ -4615,7 +4543,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
     hwloc_internal_memattrs_need_refresh(topology);
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
     hwloc_internal_cpukinds_restrict(topology);
-
+  hwloc_pci_refresh(topology);
 
   hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
   propagate_total_memory(topology->levels[0][0]);

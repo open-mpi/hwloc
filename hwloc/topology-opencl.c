@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2025 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -175,7 +175,7 @@ hwloc_opencl_discover(struct hwloc_backend *backend, struct hwloc_disc_status *d
 
       parent = NULL;
       if (hwloc_opencl_get_device_pci_busid(device_ids[i], &pcidomain, &pcibus, &pcidev, &pcifunc) == 0) {
-	parent = hwloc_pci_find_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
+	parent = hwloc_pci_get_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
       } else {
 	hwloc_debug("Failed to find the PCI id of the device\n");
       }

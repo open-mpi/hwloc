@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2025 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -391,7 +391,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
       bus = ((bdfid & 0xffff)>>8) & 0xff;
       device = ((bdfid & 0xff)>>3) & 0x1f;
       func = bdfid & 0x7;
-      parent = hwloc_pci_find_parent_by_busid(topology, domain, bus, device, func);
+      parent = hwloc_pci_get_parent_by_busid(topology, domain, bus, device, func);
       if ((!parent || parent->type != HWLOC_OBJ_PCI_DEVICE) && func > 0) {
         /* Partitioned MI devices may return the partition ID in a fake BDF func,
          * hence we would fail to find a pcidev parent.
@@ -406,7 +406,7 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
           }
         } else {
           if (func == partid)
-            parent = hwloc_pci_find_parent_by_busid(topology, domain, bus, device, 0);
+            parent = hwloc_pci_get_parent_by_busid(topology, domain, bus, device, 0);
         }
       }
       if (parent && parent->type == HWLOC_OBJ_PCI_DEVICE)

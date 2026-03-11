@@ -49,6 +49,7 @@ Version 3.0.0
       infos as such a structure.
   + Distances structure "MEANS" kinds are renamed to "VALUE", and the new
     "HOPS" kind is used for the XGMIHops matrix instead of "LATENCY.
+  + Add hwloc_get_pci_busid_cpuset() in hwloc/helpers.h.
 * Tools
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.

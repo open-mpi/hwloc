@@ -5447,7 +5447,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
   if (foundpci) {
     /* attach to a PCI parent or to a normal (non-I/O) parent found by PCI affinity */
-    parent = hwloc_pci_find_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
+    parent = hwloc_pci_get_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
     if (parent)
       return parent;
   }
@@ -6772,15 +6772,15 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       prog_if = fullclass & 0xff;
     }
 
-    type = hwloc_pcidisc_check_bridge_type(class_id, config_space_cache);
+    type = hwloc_pcicommon_configspace_check_bridge_type(class_id, config_space_cache);
     /* only HWLOC_OBJ_BRIDGE for bridges to-PCI */
     if (type == HWLOC_OBJ_BRIDGE) {
       /* since 4.13, there's secondary_bus_number and subordinate_bus_number in sysfs,
        * but reading them from the config-space is easy anyway.
        */
-      if (hwloc_pcidisc_find_bridge_buses(domain, bus, dev, func,
-					  &secondary_bus, &subordinate_bus,
-					  config_space_cache) < 0)
+      if (hwloc_pcicommon_configspace_find_bridge_buses(domain, bus, dev, func,
+                                                        &secondary_bus, &subordinate_bus,
+                                                        config_space_cache) < 0)
 	continue;
     }
 
@@ -6856,9 +6856,9 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
     attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
 
     /* try to get the link speed */
-    offset = hwloc_pcidisc_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
+    offset = hwloc_pcicommon_configspace_find_cap(config_space_cache, HWLOC_PCI_CAP_ID_EXP);
     if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE) {
-      hwloc_pcidisc_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
+      hwloc_pcicommon_configspace_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
     } else {
       /* if not available from config-space (extended part is root-only), look in sysfs files added in 4.13 */
       float speed = 0.f;
@@ -6874,12 +6874,12 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
       attr->linkspeed = speed*width/8;
     }
 
-    hwloc_pcidisc_tree_insert_by_busid(&tree, obj);
+    hwloc_pcicommon_tree_insert_by_busid(&tree, obj);
   }
 
   closedir(dir);
 
-  hwloc_pcidisc_tree_attach(backend->topology, tree);
+  hwloc_pcicommon_tree_attach(backend->topology, tree);
   return 0;
 }
 
@@ -6907,7 +6907,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 	  && hwloc_read_path_by_length(path, buf, sizeof(buf), root_fd) > 0
 	  && sscanf(buf, "%x:%x:%x", &domain, &bus, &dev) == 3) {
 	/* may also be %x:%x without a device number but that's only for hotplug when nothing is plugged, ignore those */
-	hwloc_obj_t obj = hwloc_pci_find_by_busid(topology, domain, bus, dev, 0);
+	hwloc_obj_t obj = hwloc_pci_get_obj_by_busid(topology, domain, bus, dev, 0);
 	/* obj may be higher in the hierarchy that requested (if that exact bus didn't exist),
 	 * we'll check below whether the bus ID is correct.
 	 */
@@ -6982,7 +6982,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
-    /* Requires PCI localities so that hwloc_pci_find_by_busid() works.
+    /* Requires PCI localities so that hwloc_pci_get_obj_by_busid() works.
      * This phase is disabled after other backends inserting PCI (XML).
      */
 #ifdef HWLOC_HAVE_LINUXPCI

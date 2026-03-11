@@ -332,4 +332,6 @@
   </object>
   <support name="custom.exported_support"/>
   <info name="Architecture" value="x86_64"/>
+  <pci_locality domain="0x0" bus_min="0x0" bus_max="0x15" cpuset="0x000000ff"/>
+  <pci_locality domain="0x0" bus_min="0x80" bus_max="0x8c" cpuset="0x0000ff00"/>
 </topology>

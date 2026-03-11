@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2009-2025 Inria.  All rights reserved.
+ * Copyright © 2009-2026 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -23,6 +23,63 @@
 #define read _read
 #define close _close
 #endif
+
+
+
+/******************************
+ * Finding/Inserting IO parent
+ */
+
+/* if an object exists with this cpuset, return the highest one,
+ * or create a better group.
+ * if the cpuset is empty, return root.
+ */
+static hwloc_obj_t
+hwloc__pci_find_insert_io_parent_by_cpuset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset)
+{
+  hwloc_obj_t group_obj, largeparent, parent;
+
+  if (hwloc_bitmap_iszero(cpuset))
+    return hwloc_get_root_obj(topology);
+
+  /* find the smallest object covering the cpuset */
+  largeparent = hwloc_get_obj_covering_cpuset(topology, cpuset);
+
+  /* if we found the exact cpuset, we're good.
+   * if not and we cannot insert a better group, done too.
+   */
+  if (hwloc_bitmap_isequal(largeparent->cpuset, cpuset)
+      || !hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
+    /* walk up identical parents to return the highest one */
+    while (largeparent->parent && largeparent->parent->arity == 1)
+      largeparent = largeparent->parent;
+    return largeparent;
+  }
+
+  /* we need to insert an intermediate group */
+  group_obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, HWLOC_UNKNOWN_INDEX);
+  if (!group_obj)
+    /* Failed to insert the exact Group, fallback to largeparent */
+    return largeparent;
+
+  group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+  group_obj->attr->group.kind = HWLOC_GROUP_KIND_IO;
+  parent = hwloc__insert_object_by_cpuset(topology, largeparent, group_obj, "topology:io_parent");
+  if (!parent)
+    /* Failed to insert the Group, maybe a conflicting cpuset */
+    return largeparent;
+
+  /* Group couldn't get merged or we would have gotten the right largeparent earlier */
+  assert(parent == group_obj);
+
+  /* Group inserted without being merged, everything OK, setup its sets */
+  hwloc_obj_add_children_sets(group_obj);
+
+  return parent;
+}
+
 
 /****************
  * Debug Helpers
@@ -92,7 +149,7 @@ hwloc_pcidebug_show_localities(const char *string, struct hwloc_topology *topolo
   for(tmp = topology->first_pci_locality; tmp; tmp=tmp->next) {
     char busid[12];
     snprintf(busid, sizeof(busid), "%04x:%02x-%02x", tmp->domain, tmp->bus_min, tmp->bus_max);
-    hwloc_debug_1arg_bitmap("    %s = %s\n", busid, tmp->parent->cpuset);
+    hwloc_debug_1arg_bitmap("    %s = %s\n", busid, tmp->cpuset);
     if (checkorder) {
       /* check order and no overlapping */
       if (tmp->prev)
@@ -137,21 +194,44 @@ hwloc___pci_insert_locality_before(struct hwloc_topology *topology,
 }
 
 static struct hwloc_pci_locality_s *
-hwloc__pci_add_locality_before(struct hwloc_topology *topology,
-                               unsigned domain,
-                               unsigned bus_min, unsigned bus_max,
-                               hwloc_obj_t parent,
-                               struct hwloc_pci_locality_s *next)
+hwloc___pci_add_locality_before(struct hwloc_topology *topology,
+                                unsigned domain,
+                                unsigned bus_min, unsigned bus_max,
+                                hwloc_bitmap_t cpuset,
+                                hwloc_obj_t parent,
+                                struct hwloc_pci_locality_s *next)
 {
-  struct hwloc_pci_locality_s *new = malloc(sizeof *new);
-  if (!new)
+  struct hwloc_pci_locality_s *new;
+
+  assert(cpuset);
+  /* parent may be NULL on XML import */
+
+  new = malloc(sizeof *new);
+  if (!new) {
+    hwloc_bitmap_free(cpuset);
     return NULL;
+  }
+
   new->domain = domain;
   new->bus_min = bus_min;
   new->bus_max = bus_max;
+  new->cpuset = cpuset;
   new->parent = parent;
   hwloc___pci_insert_locality_before(topology, new, next);
   return new;
+}
+
+/* parent is mandatory */
+static struct hwloc_pci_locality_s *
+hwloc__pci_add_locality_before(struct hwloc_topology *topology,
+                               unsigned domain,
+                               unsigned bus_min, unsigned bus_max,
+                               hwloc_bitmap_t cpuset,
+                               hwloc_obj_t parent,
+                               struct hwloc_pci_locality_s *next)
+{
+  assert(parent);
+  return hwloc___pci_add_locality_before(topology, domain, bus_min, bus_max, cpuset, parent, next);
 }
 
 static void
@@ -177,7 +257,7 @@ hwloc__pci_merge_next_localities(struct hwloc_topology *topology,
     struct hwloc_pci_locality_s *next = new->next;
     if (next->domain == new->domain && next->bus_min <= new->bus_max) {
       if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_PCI|HWLOC_SHOWMSG_CRITICAL))
-        fprintf(stderr, "[hwloc/pci] Merging PCI localities %04x:%02x-%02x into previous overlapping %04x:%02x-%02x even but the IO parents are different\n",
+        fprintf(stderr, "[hwloc/pci] Merging PCI localities %04x:%02x-%02x into previous overlapping %04x:%02x-%02x even if the IO parents are different\n",
                 next->domain, next->bus_min, next->bus_max,
                 new->domain, new->bus_min, new->bus_max);
       if (new->bus_max < next->bus_max)
@@ -186,6 +266,95 @@ hwloc__pci_merge_next_localities(struct hwloc_topology *topology,
     } else
       break;
   }
+}
+
+/* either duplicate the parent cpuset, or use the given cpuset.
+ * parent is not saved since it'll be refreshed later
+ */
+void
+hwloc_pci_xml_import_locality(struct hwloc_topology *topology,
+                              unsigned domain,
+                              unsigned bus_min, unsigned bus_max,
+                              hwloc_obj_t parent,
+                              hwloc_cpuset_t cpuset)
+{
+  if (parent) {
+    assert(!cpuset);
+    /* only parent was given, use a copy of its cpuset */
+    cpuset = hwloc_bitmap_dup(parent->cpuset);
+    if (!cpuset)
+      return;
+  } else {
+    /* only a cpuset was given, keep it */
+    assert(cpuset);
+  }
+
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  hwloc___pci_add_locality_before(topology, domain, bus_min, bus_max, cpuset, NULL, NULL);
+}
+
+void
+hwloc_pci_xml_import_refresh_localities(struct hwloc_topology *topology)
+{
+  struct hwloc_pci_locality_s *cur = topology->first_pci_locality;
+  while (cur) {
+    struct hwloc_pci_locality_s *next = cur->next;
+    if (next
+        && (next->domain < cur->domain
+            || (next->domain == cur->domain && next->bus_min <= cur->bus_max))) {
+      /* next isn't strictly after cur, drop it */
+      static unsigned warned = 0;
+      if (!warned && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_XML)) {
+        fprintf(stderr, "hwloc/xml/pci: overlapping pci localities are ignored.\n");
+        warned = 1;
+      }
+      if (next->next)
+        next->next->prev = cur;
+      else
+        topology->last_pci_locality = cur;
+      cur->next = next->next;
+      hwloc_bitmap_free(next->cpuset);
+      free(next);
+    } else {
+      cur = cur->next;
+    }
+  }
+  hwloc_pci_refresh(topology);
+}
+
+static struct hwloc_pci_locality_s *
+hwloc__pci_find_bus_locality(struct hwloc_topology *topology,
+                             unsigned domain, unsigned bus)
+{
+  struct hwloc_pci_locality_s *loc;
+  hwloc_debug("pcidisc looking for bus %04x:%02x\n", domain, bus);
+  loc = topology->first_pci_locality;
+  while (loc) {
+    if (loc->domain == domain && loc->bus_min <= bus && loc->bus_max >= bus) {
+      hwloc_debug("  found pci locality for %04x:[%02x:%02x]\n",
+		  loc->domain, loc->bus_min, loc->bus_max);
+      return loc;
+    }
+    loc = loc->next;
+  }
+  return NULL;
+}
+
+/* find the first locality that isn't strictly before the given bus,
+ * starting from prev if any
+ */
+static struct hwloc_pci_locality_s*
+hwloc__pci_find_locality_notbefore_bus(struct hwloc_topology *topology,
+                                       unsigned domain, unsigned bus,
+                                       struct hwloc_pci_locality_s* prev)
+{
+  struct hwloc_pci_locality_s *loc;
+  loc = prev ? prev : topology->first_pci_locality;
+  while (loc &&
+         (loc->domain < domain
+          || (loc->domain == domain && loc->bus_max < bus)))
+    loc = loc->next;
+  return loc;
 }
 
 /**************************************
@@ -217,11 +386,7 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   }
 
   /* find the first locality that isn't strictly before us */
-  next = topology->first_pci_locality;
-  while (next &&
-         (next->domain < domain
-          || (next->domain == domain && next->bus_max < bus_first)))
-    next = next->next;
+  next = hwloc__pci_find_locality_notbefore_bus(topology, domain, bus_first, NULL);
 
   /* next isn't before us, check if it intersects */
   if (next && next->domain == domain
@@ -243,21 +408,14 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
     goto out;
   hwloc_bitmap_sscanf(set, tmp);
 
-  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, set);
-  if (!parent) {
-    /* Fallback to root */
-    parent = hwloc_get_root_obj(topology);
-  }
+  hwloc_bitmap_and(set, set, hwloc_topology_get_topology_cpuset(topology));
 
-  /* now save it */
-  if (!hwloc__pci_add_locality_before(topology, domain, bus_first, bus_last, parent, next))
-    goto out_with_set;
+  parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, set);
+  hwloc__pci_add_locality_before(topology, domain, bus_first, bus_last, set, parent, next);
+  /* no need to free set */
 
-  hwloc_bitmap_free(set);
   return;
 
- out_with_set:
-  hwloc_bitmap_free(set);
  out:
   return;
 }
@@ -291,13 +449,13 @@ hwloc_pci_forced_locality_parse(struct hwloc_topology *topology, const char *_en
 }
 
 void
-hwloc_pci_discovery_init(struct hwloc_topology *topology)
+hwloc_pci_init(struct hwloc_topology *topology)
 {
   topology->first_pci_locality = topology->last_pci_locality = NULL;
 }
 
 void
-hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
+hwloc_pci_prepare(struct hwloc_topology *topology)
 {
   const char *dmi_board_name;
   char *env;
@@ -342,13 +500,13 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
      * It's not clear if ACPI tables can/will ever be fixed (would require one initiator
      * proximity domain per CCD), or if Linux can/will work around the issue.
      */
-    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-    if (cpuset) {
-      unsigned i;
-      hwloc_debug("Enabling for PCI locality quirk for HPE Cray EX235A\n");
-      for(i=0; i<8; i++) {
-        unsigned bus_min, bus_max, pu_stride;
-        hwloc_obj_t parent;
+    unsigned i;
+    hwloc_debug("Enabling for PCI locality quirk for HPE Cray EX235A\n");
+    for(i=0; i<8; i++) {
+      unsigned bus_min, bus_max, pu_stride;
+      hwloc_obj_t parent;
+      hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+      if (cpuset) {
         switch (i) {
           /* buses must be inserted in order since we just append to the locality list */
         case 0: pu_stride = 6; bus_min = 0xc0; bus_max = 0xc1; break;
@@ -364,11 +522,9 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
         hwloc_bitmap_zero(cpuset);
         hwloc_bitmap_set_range(cpuset, pu_stride*8, pu_stride*8+7);
         hwloc_bitmap_set_range(cpuset, pu_stride*8+64, pu_stride*8+71);
-        parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-        if (parent)
-          hwloc__pci_add_locality_before(topology, 0, bus_min, bus_max, parent, NULL);
+        parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, cpuset);
+        hwloc__pci_add_locality_before(topology, 0, bus_min, bus_max, cpuset, parent, NULL);
       }
-      hwloc_bitmap_free(cpuset);
     }
     return;
   }
@@ -376,28 +532,95 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
   env = getenv("HWLOC_PCI_LOCALITY_QUIRK_FAKE");
   if (env && atoi(env)) {
     unsigned last;
+    hwloc_cpuset_t cpuset;
     struct hwloc_obj *lastpu;
     hwloc_debug("Enabling for PCI locality fake quirk (attaching the entire domain 0000 to last PU)\n");
     last = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
     lastpu = topology->levels[0][last];
-    hwloc__pci_add_locality_before(topology, 0, 0, 255, lastpu, NULL);
+    cpuset = hwloc_bitmap_dup(lastpu->cpuset);
+    if (cpuset)
+      hwloc__pci_add_locality_before(topology, 0, 0, 255, cpuset, lastpu, NULL);
     return;
   }
 }
 
 void
-hwloc_pci_discovery_exit(struct hwloc_topology *topology)
+hwloc_pci_refresh(struct hwloc_topology *topology)
 {
   struct hwloc_pci_locality_s *cur;
 
   cur = topology->first_pci_locality;
   while (cur) {
     struct hwloc_pci_locality_s *next = cur->next;
+    hwloc_obj_t largeparent;
+
+    /* refresh the cpuset */
+    hwloc_bitmap_and(cur->cpuset, cur->cpuset, hwloc_topology_get_topology_cpuset(topology));
+
+    /* refresh the parent */
+    cur->parent = NULL;
+    largeparent = hwloc_get_obj_covering_cpuset(topology, cur->cpuset);
+    if (largeparent) {
+      while (largeparent ->parent && largeparent->parent->arity == 1)
+        largeparent = largeparent->parent;
+      cur->parent = largeparent;
+    }
+    if (!cur->parent)
+      cur->parent = hwloc_get_root_obj(topology);
+
+    cur = next;
+  }
+
+  hwloc_pcidebug_show_localities("  Refreshed PCI localities", topology, 0);
+}
+
+int
+hwloc_pci_dup(hwloc_topology_t new, hwloc_topology_t old)
+{
+  struct hwloc_tma *tma = new->tma;
+  struct hwloc_pci_locality_s *oldcur;
+
+  oldcur = old->first_pci_locality;
+  while (oldcur) {
+    struct hwloc_pci_locality_s *newcur = hwloc_tma_malloc(tma, sizeof(*newcur));
+    if (!newcur)
+      goto error;
+    memcpy(newcur, oldcur, sizeof(*newcur));
+    newcur->cpuset = hwloc_bitmap_tma_dup(tma, oldcur->cpuset);
+    if (!newcur) {
+      assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
+      free(newcur);
+      goto error;
+    }
+    newcur->parent = NULL; /* we'll refresh below */
+    hwloc___pci_insert_locality_before(new, newcur, NULL);
+
+    oldcur = oldcur->next;
+  }
+
+  hwloc_topology_refresh(new);
+  return 0;
+
+ error:
+  /* in case some localities got duplicated before failure */
+  hwloc_topology_refresh(new);
+  return -1;
+}
+
+void
+hwloc_pci_exit(struct hwloc_topology *topology)
+{
+  struct hwloc_pci_locality_s *cur;
+
+  cur = topology->first_pci_locality;
+  while (cur) {
+    struct hwloc_pci_locality_s *next = cur->next;
+    hwloc_bitmap_free(cur->cpuset);
     free(cur);
     cur = next;
   }
 
-  hwloc_pci_discovery_init(topology);
+  hwloc_pci_init(topology);
 }
 
 
@@ -405,62 +628,14 @@ hwloc_pci_discovery_exit(struct hwloc_topology *topology)
  * Finding PCI objects or parents
  */
 
+/* recurse under a PCI tree parent to return
+ * the object matching the given busid (and set *exact = 1)
+ * or the smallest object that should contain it
+ */
 static struct hwloc_obj *
-hwloc__pci_find_busid_parent(struct hwloc_topology *topology, struct hwloc_pcidev_attr_s *busid)
-{
-  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-  hwloc_obj_t parent;
-  int err;
-
-  hwloc_debug("Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
-	      busid->domain, busid->bus, busid->dev, busid->func);
-
-    /* get the cpuset by asking the backend that provides the relevant hook, if any. */
-    struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
-    if (backend)
-      err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
-    else
-      err = -1;
-    if (err < 0)
-      /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
-      hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
-
-  hwloc_debug_bitmap("  will attach PCI bus to cpuset %s\n", cpuset);
-
-  parent = hwloc_find_insert_io_parent_by_complete_cpuset(topology, cpuset);
-  if (!parent) {
-    /* Fallback to root */
-    parent = hwloc_get_root_obj(topology);
-  }
-
-  hwloc_bitmap_free(cpuset);
-  return parent;
-}
-
-struct hwloc_obj *
-hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
-			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
-{
-  struct hwloc_pcidev_attr_s busid;
-  hwloc_obj_t parent;
-
-  /* try to find that exact busid */
-  parent = hwloc_pci_find_by_busid(topology, domain, bus, dev, func);
-  if (parent)
-    return parent;
-
-  /* try to find the actual locality of that bus from OS */
-  busid.domain = domain;
-  busid.bus = bus;
-  busid.dev = dev;
-  busid.func = func;
-  return hwloc__pci_find_busid_parent(topology, &busid);
-}
-
-/* return the smallest object that contains the desired busid */
-static struct hwloc_obj *
-hwloc__pci_find_by_busid(hwloc_obj_t parent,
-			 unsigned domain, unsigned bus, unsigned dev, unsigned func)
+hwloc__pci_recurse_in_tree_for_busid(hwloc_obj_t parent,
+                                     unsigned domain, unsigned bus, unsigned dev, unsigned func,
+                                     int *exactp)
 {
   hwloc_obj_t child;
 
@@ -471,21 +646,25 @@ hwloc__pci_find_by_busid(hwloc_obj_t parent,
       if (child->attr->pcidev.domain == domain
 	  && child->attr->pcidev.bus == bus
 	  && child->attr->pcidev.dev == dev
-	  && child->attr->pcidev.func == func)
+	  && child->attr->pcidev.func == func) {
 	/* that's the right bus id */
+        *exactp = 1;
 	return child;
+      }
       if (child->attr->pcidev.domain > domain
 	  || (child->attr->pcidev.domain == domain
-	      && child->attr->pcidev.bus > bus))
+	      && child->attr->pcidev.bus > bus)) {
 	/* bus id too high, won't find anything later, return parent */
+        *exactp = 0;
 	return parent;
+      }
       if (child->type == HWLOC_OBJ_BRIDGE
 	  && child->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
 	  && child->attr->bridge.downstream.pci.domain == domain
 	  && child->attr->bridge.downstream.pci.secondary_bus <= bus
 	  && child->attr->bridge.downstream.pci.subordinate_bus >= bus)
 	/* not the right bus id, but it's included in the bus below that bridge */
-	return hwloc__pci_find_by_busid(child, domain, bus, dev, func);
+	return hwloc__pci_recurse_in_tree_for_busid(child, domain, bus, dev, func, exactp);
 
     } else if (child->type == HWLOC_OBJ_BRIDGE
 	       && child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI
@@ -495,54 +674,132 @@ hwloc__pci_find_by_busid(hwloc_obj_t parent,
 	       && child->attr->bridge.downstream.pci.secondary_bus <= bus
 	       && child->attr->bridge.downstream.pci.subordinate_bus >= bus) {
       /* contains our bus, recurse */
-      return hwloc__pci_find_by_busid(child, domain, bus, dev, func);
+      return hwloc__pci_recurse_in_tree_for_busid(child, domain, bus, dev, func, exactp);
     }
   }
   /* didn't find anything, return parent */
+  *exactp = 0;
+  return parent;
+}
+
+static int
+hwloc__pci_get_busid_cpuset(struct hwloc_topology *topology,
+                            hwloc_cpuset_t cpuset,
+                            struct hwloc_pcidev_attr_s *busid)
+{
+  int err;
+
+  hwloc_debug("Looking for cpuset of PCI busid %04x:%02x:%02x.%01x\n",
+	      busid->domain, busid->bus, busid->dev, busid->func);
+
+  /* get the cpuset by asking the backend that provides the relevant hook, if any. */
+  struct hwloc_backend *backend = topology->get_pci_busid_cpuset_backend;
+  if (backend)
+    err = backend->get_pci_busid_cpuset(backend, busid, cpuset);
+  else
+    err = -1;
+  if (err < 0)
+    /* if we got nothing, assume this PCI bus is attached to the top of hierarchy */
+    hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+  else
+    /* otherwise sanitize it */
+    hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+
+  hwloc_debug_bitmap("  got PCI bus cpuset %s\n", cpuset);
+  return err;
+}
+
+HWLOC_DECLSPEC int
+hwloc_get_pci_busid_cpuset(struct hwloc_topology *topology,
+                           hwloc_cpuset_t cpuset,
+                           unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  struct hwloc_pcidev_attr_s busid;
+  busid.domain = domain;
+  busid.bus = bus;
+  busid.dev = dev;
+  busid.func = func;
+  return hwloc__pci_get_busid_cpuset(topology, cpuset, &busid);
+}
+
+struct hwloc_obj *
+hwloc_pci_get_parent_by_busid(struct hwloc_topology *topology,
+                              unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  struct hwloc_pci_locality_s *loc;
+  struct hwloc_pcidev_attr_s busid;
+  hwloc_bitmap_t cpuset;
+  hwloc_obj_t parent;
+
+  /* find the parent of the tree that contains that bus */
+  loc = hwloc__pci_find_bus_locality(topology, domain, bus);
+  if (loc) {
+    int exact __hwloc_attribute_unused;
+    parent = loc->parent;
+
+    /* now find the best parent by busid in that tree */
+    hwloc_debug("  recursively looking for busid %04x:%02x:%02x.%01x below %s P#%u\n",
+                domain, bus, dev, func,
+                hwloc_obj_type_string(parent->type), parent->os_index);
+    parent = hwloc__pci_recurse_in_tree_for_busid(parent, domain, bus, dev, func, &exact);
+    if (parent)
+      return parent;
+  }
+
+  /* try to find the actual locality of that bus from OS */
+  cpuset = hwloc_bitmap_alloc();
+  if (!cpuset)
+    return hwloc_get_root_obj(topology);
+
+  busid.domain = domain;
+  busid.bus = bus;
+  busid.dev = dev;
+  busid.func = func;
+  if (hwloc__pci_get_busid_cpuset(topology, cpuset, &busid) < 0) {
+    hwloc_bitmap_free(cpuset);
+    return hwloc_get_root_obj(topology);
+  }
+
+  parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, cpuset);
+  hwloc_bitmap_free(cpuset);
   return parent;
 }
 
 struct hwloc_obj *
-hwloc_pci_find_by_busid(struct hwloc_topology *topology,
-			unsigned domain, unsigned bus, unsigned dev, unsigned func)
+hwloc_pci_get_obj_by_busid(struct hwloc_topology *topology,
+                           unsigned domain, unsigned bus, unsigned dev, unsigned func)
 {
   struct hwloc_pci_locality_s *loc;
-  hwloc_obj_t root = hwloc_get_root_obj(topology);
-  hwloc_obj_t parent = NULL;
+  hwloc_obj_t parent;
+  hwloc_obj_t obj = NULL;
+  int exact = 0;
 
-  hwloc_debug("pcidisc looking for bus id %04x:%02x:%02x.%01x\n", domain, bus, dev, func);
-  loc = topology->first_pci_locality;
-  while (loc) {
-    if (loc->domain == domain && loc->bus_min <= bus && loc->bus_max >= bus) {
-      parent = loc->parent;
-      assert(parent);
-      hwloc_debug("  found pci locality for %04x:[%02x:%02x]\n",
-		  loc->domain, loc->bus_min, loc->bus_max);
-      break;
-    }
-    loc = loc->next;
-  }
-  /* if we failed to insert localities, look at root too */
-  if (!parent)
-    parent = root;
+  /* find the parent of the tree that contains that bus */
+  loc = hwloc__pci_find_bus_locality(topology, domain, bus);
+  if (loc)
+    parent = loc->parent;
+  else
+    /* otherwise look in the tree attached at root */
+    parent = hwloc_get_root_obj(topology);
 
-  hwloc_debug("  looking for bus %04x:%02x:%02x.%01x below %s P#%u\n",
+  /* now find the object in that tree */
+  hwloc_debug("  recursively looking for busid %04x:%02x:%02x.%01x below %s P#%u\n",
 	      domain, bus, dev, func,
 	      hwloc_obj_type_string(parent->type), parent->os_index);
-  parent = hwloc__pci_find_by_busid(parent, domain, bus, dev, func);
-  if (parent == root) {
-    hwloc_debug("  found nothing better than root object, ignoring\n");
+  obj = hwloc__pci_recurse_in_tree_for_busid(parent, domain, bus, dev, func, &exact);
+  if (!exact) {
+    hwloc_debug("  couldn't find the exact matching busid, ignoring\n");
     return NULL;
   } else {
-    if (parent->type == HWLOC_OBJ_PCI_DEVICE
-	|| (parent->type == HWLOC_OBJ_BRIDGE && parent->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
+    if (obj->type == HWLOC_OBJ_PCI_DEVICE
+	|| (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI))
       hwloc_debug("  found busid %04x:%02x:%02x.%01x\n",
-		  parent->attr->pcidev.domain, parent->attr->pcidev.bus,
-		  parent->attr->pcidev.dev, parent->attr->pcidev.func);
+		  obj->attr->pcidev.domain, obj->attr->pcidev.bus,
+		  obj->attr->pcidev.dev, obj->attr->pcidev.func);
     else
-      hwloc_debug("  found parent %s P#%u\n",
-		  hwloc_obj_type_string(parent->type), parent->os_index);
-    return parent;
+      hwloc_debug("  found obj %s P#%u\n",
+		  hwloc_obj_type_string(obj->type), obj->os_index);
+    return obj;
   }
 }
 
@@ -676,8 +933,8 @@ hwloc_pci_add_object(struct hwloc_obj *parent, struct hwloc_obj **parent_io_firs
 }
 
 void
-hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep,
-				   struct hwloc_obj *obj)
+hwloc_pcicommon_tree_insert_by_busid(struct hwloc_obj **treep,
+                                     struct hwloc_obj *obj)
 {
   hwloc_pci_add_object(NULL /* no parent on top of tree */, treep, obj);
 }
@@ -688,8 +945,8 @@ hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep,
  */
 
 static struct hwloc_obj *
-hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
-			      struct hwloc_obj *old_tree)
+hwloc_pcicommon_tree_add_hostbridges(struct hwloc_topology *topology,
+                                     struct hwloc_obj *old_tree)
 {
   struct hwloc_obj * new = NULL, **newp = &new;
 
@@ -762,9 +1019,9 @@ hwloc_pcidisc_add_hostbridges(struct hwloc_topology *topology,
 }
 
 int
-hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree)
+hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree)
 {
-  struct hwloc_pci_locality_s *tmp, *next, *prev, *last_used;
+  struct hwloc_pci_locality_s *next, *prev, *last_used;
   enum hwloc_type_filter_e bfilter;
 
   if (!tree)
@@ -776,14 +1033,17 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
 
   bfilter = topology->type_filter[HWLOC_OBJ_BRIDGE];
   if (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-    tree = hwloc_pcidisc_add_hostbridges(topology, tree);
+    tree = hwloc_pcicommon_tree_add_hostbridges(topology, tree);
   }
 
   last_used = NULL;
 
+  hwloc_debug("\nAttaching PCI trees...\n");
+
   while (tree) {
     struct hwloc_obj *obj, *pciobj;
     struct hwloc_obj *parent = NULL;
+    hwloc_cpuset_t cpuset;
     unsigned domain, bus_min, bus_max;
 
     obj = tree;
@@ -811,57 +1071,87 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
      * PCI buses are added in order, so we usually insert in/after the last used locality.
      * That's not always the last of the list because some localities could have been forced for later buses.
      * Hence, start walking the list at the last used locality.
-     * If nothing matches, keep the one immediately before us in the list to ease list modifications below.
      */
-    /* we'll insert last if we end the loop without finding anything */
-    prev = topology->last_pci_locality;
-    next = NULL;
-    for(tmp = last_used ? last_used : topology->first_pci_locality; tmp; tmp=tmp->next) {
-      if (domain == tmp->domain
-          && !(bus_min > tmp->bus_max || tmp->bus_min > bus_max)) {
-        /* the new bus range overlaps with that existing locality, extend the existing one if needed and reuse it */
-        if (tmp->bus_max < bus_max)
-          tmp->bus_max = bus_max;
-        if (tmp->bus_min > bus_min)
-          tmp->bus_min = bus_min;
-        hwloc__pci_merge_next_localities(topology, tmp);
-        parent = tmp->parent;
-        last_used = tmp;
-        goto done;
-      }
-      if (domain < tmp->domain
-          || (domain == tmp->domain && bus_max < tmp->bus_min)) {
-        /* we should be before that one, stop here */
-        next = tmp;
-        prev = tmp->prev;
-        break;
-      }
+    next = hwloc__pci_find_locality_notbefore_bus(topology, domain, bus_min, last_used);
+
+    /* do we overlap with that next one? */
+    if (next && domain == next->domain
+        && !(bus_min > next->bus_max || next->bus_min > bus_max)) {
+      /* the new bus range overlaps with that existing locality, extend the existing one if needed and reuse it */
+      if (next->bus_max < bus_max)
+        next->bus_max = bus_max;
+      if (next->bus_min > bus_min)
+        next->bus_min = bus_min;
+      hwloc_debug("  Extending overlapping locality %04x:%02x-%02x for %04x:%02x-%02x\n",
+                  next->domain, next->bus_min, next->bus_max,
+                  domain, bus_min, bus_max);
+      hwloc__pci_merge_next_localities(topology, next);
+      last_used = next;
+      parent = next->parent;
+      goto done;
     }
+    prev = next ? next->prev : topology->last_pci_locality;
 
-    /* or ask OS */
-    parent = hwloc__pci_find_busid_parent(topology, &pciobj->attr->pcidev);
+    /* no matching locality, ask the OS */
+    hwloc_debug("  No existing locality covers %04x:%02x-%02x\n",
+                domain, bus_min, bus_max);
+    hwloc_debug("    Looking for parent of PCI busid %04x:%02x:%02x.%01x\n",
+                domain, bus_min, pciobj->attr->pcidev.dev, pciobj->attr->pcidev.func);
+    cpuset = hwloc_bitmap_alloc();
+    if (!cpuset) {
+      /* couldn't get the locality, just attach to root without setting locality info */
+      parent = hwloc_get_root_obj(topology);
+      goto done;
+    }
+    if (hwloc__pci_get_busid_cpuset(topology, cpuset, &pciobj->attr->pcidev) < 0) {
+      /* couldn't get the locality, just attach to root without setting locality info */
+      parent = hwloc_get_root_obj(topology);
+      hwloc_bitmap_free(cpuset);
+      goto done;
+    }
+    hwloc_debug_bitmap("    will attach PCI bus to cpuset %s\n", cpuset);
+    /* we will go between prev and next */
 
-    /* reuse or extend the previous locality if possible. */
+    /* can we extend the previous locality? */
     if (prev
-        && parent == prev->parent
+        && hwloc_bitmap_isequal(cpuset, prev->cpuset)
         && domain == prev->domain
         && (bus_min == prev->bus_max
             || bus_min == prev->bus_max+1)) {
-      hwloc_debug("  Reusing PCI locality up to bus %04x:%02x\n",
+      hwloc_debug("  Reusing PCI locality %04x:%02x-%02x up to bus %04x:%02x\n",
+                  prev->domain, prev->bus_min, prev->bus_max,
                   domain, bus_max);
-      if (prev->bus_max < bus_max) {
-        /* extend */
-        prev->bus_max = bus_max;
-        hwloc__pci_merge_next_localities(topology, prev);
-      }
+      prev->bus_max = bus_max;
+      hwloc__pci_merge_next_localities(topology, prev);
+      parent = prev->parent;
       last_used = prev;
+      hwloc_bitmap_free(cpuset);
       goto done;
     }
 
-    /* create a new one */
+    /* can we extend the next locality? */
+    if (next
+        && hwloc_bitmap_isequal(cpuset, next->cpuset)
+        && domain == next->domain
+        && (bus_max == next->bus_min
+            || bus_max+1 == next->bus_min)) {
+      hwloc_debug("  Reusing PCI locality %04x:%02x-%02x down to bus %04x:%02x\n",
+                  next->domain, next->bus_min, next->bus_max,
+                  domain, bus_min);
+      next->bus_min = bus_min;
+      /* no need to merge since we would have extended prev instead above */
+      last_used = next;
+      parent = next->parent;
+      hwloc_bitmap_free(cpuset);
+      goto done;
+    }
+
+    /* create a new locality */
+    parent = hwloc__pci_find_insert_io_parent_by_cpuset(topology, cpuset);
     hwloc_debug("Adding PCI locality %s P#%u for bus %04x:[%02x:%02x]\n",
-		hwloc_obj_type_string(parent->type), parent->os_index, domain, bus_min, bus_max);
-    last_used = hwloc__pci_add_locality_before(topology, domain, bus_min, bus_max, parent, next);
+                hwloc_obj_type_string(parent->type), parent->os_index, domain, bus_min, bus_max);
+
+    last_used = hwloc__pci_add_locality_before(topology, domain, bus_min, bus_max, cpuset, parent, next);
     if (!last_used) {
       /* fallback to attaching to root */
       parent = hwloc_get_root_obj(topology);
@@ -892,7 +1182,7 @@ hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tre
 #define HWLOC_PCI_CAP_LIST_NEXT 1
 
 unsigned
-hwloc_pcidisc_find_cap(const unsigned char *config, unsigned cap)
+hwloc_pcicommon_configspace_find_cap(const unsigned char *config, unsigned cap)
 {
   unsigned char seen[256] = { 0 };
   unsigned char ptr; /* unsigned char to make sure we stay within the 256-byte config space */
@@ -924,8 +1214,8 @@ hwloc_pcidisc_find_cap(const unsigned char *config, unsigned cap)
 #define HWLOC_PCI_EXP_LNKSTA_WIDTH 0x03f0
 
 int
-hwloc_pcidisc_find_linkspeed(const unsigned char *config,
-			     unsigned offset, float *linkspeed)
+hwloc_pcicommon_configspace_find_linkspeed(const unsigned char *config,
+                                           unsigned offset, float *linkspeed)
 {
   unsigned linksta, speed, width;
 
@@ -942,7 +1232,7 @@ hwloc_pcidisc_find_linkspeed(const unsigned char *config,
 #define HWLOC_PCI_CLASS_BRIDGE_PCI 0x0604
 
 hwloc_obj_type_t
-hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *config)
+hwloc_pcicommon_configspace_check_bridge_type(unsigned device_class, const unsigned char *config)
 {
   unsigned char headertype;
 
@@ -959,9 +1249,9 @@ hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *conf
 #define HWLOC_PCI_SUBORDINATE_BUS 0x1a
 
 int
-hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
-				unsigned *secondary_busp, unsigned *subordinate_busp,
-				const unsigned char *config)
+hwloc_pcicommon_configspace_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
+                                              unsigned *secondary_busp, unsigned *subordinate_busp,
+                                              const unsigned char *config)
 {
   unsigned secondary_bus, subordinate_bus;
 

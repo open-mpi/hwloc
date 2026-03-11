@@ -596,20 +596,20 @@ hwloc_filter_check_keep_object(hwloc_topology_t topology, hwloc_obj_t obj)
  *
  * This function requires a 256-bytes config space. Unknown/unavailable bytes should be set to 0xff.
  */
-HWLOC_DECLSPEC unsigned hwloc_pcidisc_find_cap(const unsigned char *config, unsigned cap);
+HWLOC_DECLSPEC unsigned hwloc_pcicommon_configspace_find_cap(const unsigned char *config, unsigned cap);
 
 /** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset.
  *
  * Needs 20 bytes of EXP capability block starting at offset in the config space
  * for registers up to link status.
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
+HWLOC_DECLSPEC int hwloc_pcicommon_configspace_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
 
 /** \brief Return the hwloc object type (PCI device or Bridge) for the given class and configuration space.
  *
  * This function requires 16 bytes of common configuration header at the beginning of config.
  */
-HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcidisc_check_bridge_type(unsigned device_class, const unsigned char *config);
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcicommon_configspace_check_bridge_type(unsigned device_class, const unsigned char *config);
 
 /** \brief Fills the attributes of the given PCI bridge using the given PCI config space.
  *
@@ -617,22 +617,22 @@ HWLOC_DECLSPEC hwloc_obj_type_t hwloc_pcidisc_check_bridge_type(unsigned device_
  *
  * Returns -1 and destroys /p obj if bridge fields are invalid.
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
-						   unsigned *secondary_busp, unsigned *subordinate_busp,
-						   const unsigned char *config);
+HWLOC_DECLSPEC int hwloc_pcicommon_configspace_find_bridge_buses(unsigned domain, unsigned bus, unsigned dev, unsigned func,
+                                                                 unsigned *secondary_busp, unsigned *subordinate_busp,
+                                                                 const unsigned char *config);
 
 /** \brief Insert a PCI object in the given PCI tree by looking at PCI bus IDs.
  *
  * If \p treep points to \c NULL, the new object is inserted there.
  */
-HWLOC_DECLSPEC void hwloc_pcidisc_tree_insert_by_busid(struct hwloc_obj **treep, struct hwloc_obj *obj);
+HWLOC_DECLSPEC void hwloc_pcicommon_tree_insert_by_busid(struct hwloc_obj **treep, struct hwloc_obj *obj);
 
 /** \brief Add some hostbridges on top of the given tree of PCI objects and attach them to the topology.
  *
  * Other backends may lookup PCI objects or localities (for instance to attach OS devices)
  * by using hwloc_pci_find_by_busid() or hwloc_pci_find_busid_parent().
  */
-HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree);
+HWLOC_DECLSPEC int hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, struct hwloc_obj *tree);
 
 /** @} */
 
@@ -654,18 +654,18 @@ HWLOC_DECLSPEC int hwloc_pcidisc_tree_attach(struct hwloc_topology *topology, st
  *
  * If the exact PCI device with this bus ID exists, it is returned.
  * Otherwise (for instance if it was filtered out), the function returns
- * another object with similar locality (for instance a parent bridge,
+ * the best object with similar locality (for instance a parent bridge,
  * or the local CPU Package).
  */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_get_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** \brief Find the PCI device or bridge matching a PCI bus ID exactly.
  *
  * This is useful for adding specific information about some objects
  * based on their PCI id. When it comes to attaching objects based on
- * PCI locality, hwloc_pci_find_parent_by_busid() should be preferred.
+ * PCI locality, hwloc_pci_get_parent_by_busid() should be preferred.
  */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_get_obj_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 
 /** @} */
