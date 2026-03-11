@@ -148,7 +148,7 @@ hwloc_opencl_get_device_pci_busid(cl_device_id device,
  *
  * This function is currently only implemented in a meaningful way for
  * Linux with the AMD or NVIDIA OpenCL implementation; other systems will simply
- * get a full cpuset.
+ * get the cpuset of the entire topology.
  *
  * \return 0 on success.
  * \return -1 on error, for instance if the device could not be found.
