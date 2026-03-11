@@ -57,7 +57,7 @@ extern "C" {
  * and hwloc_ibv_get_device_osdev_by_name().
  *
  * This function is currently only implemented in a meaningful way for
- * Linux; other systems will simply get a full cpuset.
+ * Linux; other systems will simply get the cpuset of the entire topology.
  *
  * \return 0 on success.
  * \return -1 on error, for instance if device information could not be found.
