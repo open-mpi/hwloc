@@ -2206,7 +2206,6 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   root = topology->levels[0][0];
 
   if (data->version_major >= 2) {
-    /* find v2 distances */
     while (1) {
       ret = state.global->find_child(&state, &childstate, &tag);
       if (ret < 0)
