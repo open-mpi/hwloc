@@ -654,18 +654,18 @@ HWLOC_DECLSPEC int hwloc_pcicommon_tree_attach(struct hwloc_topology *topology, 
  *
  * If the exact PCI device with this bus ID exists, it is returned.
  * Otherwise (for instance if it was filtered out), the function returns
- * another object with similar locality (for instance a parent bridge,
+ * the best object with similar locality (for instance a parent bridge,
  * or the local CPU Package).
  */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_get_parent_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 /** \brief Find the PCI device or bridge matching a PCI bus ID exactly.
  *
  * This is useful for adding specific information about some objects
  * based on their PCI id. When it comes to attaching objects based on
- * PCI locality, hwloc_pci_find_parent_by_busid() should be preferred.
+ * PCI locality, hwloc_pci_get_parent_by_busid() should be preferred.
  */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_find_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_pci_get_obj_by_busid(struct hwloc_topology *topology, unsigned domain, unsigned bus, unsigned dev, unsigned func);
 
 
 /** @} */

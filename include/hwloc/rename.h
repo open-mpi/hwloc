@@ -678,8 +678,8 @@ extern "C" {
 #define hwloc_pcicommon_tree_insert_by_busid HWLOC_NAME(pcicommon_tree_insert_by_busid)
 #define hwloc_pcicommon_tree_attach HWLOC_NAME(pcicommon_tree_attach)
 
-#define hwloc_pci_find_by_busid HWLOC_NAME(pci_find_by_busid)
-#define hwloc_pci_find_parent_by_busid HWLOC_NAME(pci_find_parent_by_busid)
+#define hwloc_pci_get_obj_by_busid HWLOC_NAME(pci_get_obj_by_busid)
+#define hwloc_pci_get_parent_by_busid HWLOC_NAME(pci_get_parent_by_busid)
 
 #define hwloc_backend_distances_add_handle_t HWLOC_NAME(backend_distances_add_handle_t)
 #define hwloc_backend_distances_add_create HWLOC_NAME(backend_distances_add_create)

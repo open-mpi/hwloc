@@ -5447,7 +5447,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 
   if (foundpci) {
     /* attach to a PCI parent or to a normal (non-I/O) parent found by PCI affinity */
-    parent = hwloc_pci_find_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
+    parent = hwloc_pci_get_parent_by_busid(topology, pcidomain, pcibus, pcidev, pcifunc);
     if (parent)
       return parent;
   }
@@ -6907,7 +6907,7 @@ hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
 	  && hwloc_read_path_by_length(path, buf, sizeof(buf), root_fd) > 0
 	  && sscanf(buf, "%x:%x:%x", &domain, &bus, &dev) == 3) {
 	/* may also be %x:%x without a device number but that's only for hotplug when nothing is plugged, ignore those */
-	hwloc_obj_t obj = hwloc_pci_find_by_busid(topology, domain, bus, dev, 0);
+	hwloc_obj_t obj = hwloc_pci_get_obj_by_busid(topology, domain, bus, dev, 0);
 	/* obj may be higher in the hierarchy that requested (if that exact bus didn't exist),
 	 * we'll check below whether the bus ID is correct.
 	 */
@@ -6982,7 +6982,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (dstatus->phase == HWLOC_DISC_PHASE_ANNOTATE
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
-    /* Requires PCI localities so that hwloc_pci_find_by_busid() works.
+    /* Requires PCI localities so that hwloc_pci_get_obj_by_busid() works.
      * This phase is disabled after other backends inserting PCI (XML).
      */
 #ifdef HWLOC_HAVE_LINUXPCI

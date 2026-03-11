@@ -710,17 +710,28 @@ hwloc__pci_get_busid_cpuset(struct hwloc_topology *topology,
 }
 
 struct hwloc_obj *
-hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
-			       unsigned domain, unsigned bus, unsigned dev, unsigned func)
+hwloc_pci_get_parent_by_busid(struct hwloc_topology *topology,
+                              unsigned domain, unsigned bus, unsigned dev, unsigned func)
 {
+  struct hwloc_pci_locality_s *loc;
   struct hwloc_pcidev_attr_s busid;
   hwloc_bitmap_t cpuset;
   hwloc_obj_t parent;
 
-  /* try to find that exact busid */
-  parent = hwloc_pci_find_by_busid(topology, domain, bus, dev, func);
-  if (parent)
-    return parent;
+  /* find the parent of the tree that contains that bus */
+  loc = hwloc__pci_find_bus_locality(topology, domain, bus);
+  if (loc) {
+    int exact __hwloc_attribute_unused;
+    parent = loc->parent;
+
+    /* now find the best parent by busid in that tree */
+    hwloc_debug("  recursively looking for busid %04x:%02x:%02x.%01x below %s P#%u\n",
+                domain, bus, dev, func,
+                hwloc_obj_type_string(parent->type), parent->os_index);
+    parent = hwloc__pci_recurse_in_tree_for_busid(parent, domain, bus, dev, func, &exact);
+    if (parent)
+      return parent;
+  }
 
   /* try to find the actual locality of that bus from OS */
   cpuset = hwloc_bitmap_alloc();
@@ -742,8 +753,8 @@ hwloc_pci_find_parent_by_busid(struct hwloc_topology *topology,
 }
 
 struct hwloc_obj *
-hwloc_pci_find_by_busid(struct hwloc_topology *topology,
-			unsigned domain, unsigned bus, unsigned dev, unsigned func)
+hwloc_pci_get_obj_by_busid(struct hwloc_topology *topology,
+                           unsigned domain, unsigned bus, unsigned dev, unsigned func)
 {
   struct hwloc_pci_locality_s *loc;
   hwloc_obj_t parent;
