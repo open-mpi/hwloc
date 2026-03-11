@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2010-2024 Inria.  All rights reserved.
+ * Copyright © 2010-2026 Inria.  All rights reserved.
  * Copyright © 2010-2011 Université Bordeaux
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -79,7 +79,6 @@ hwloc_cudart_get_device_pci_ids(hwloc_topology_t topology __hwloc_attribute_unus
  * Store in \p set the CPU-set describing the locality of the CUDA device
  * whose index is \p idx.
  *
- * Topology \p topology and device \p idx must match the local machine.
  * I/O devices detection and the CUDA component are not needed in the topology.
  *
  * The function only returns the locality of the device.
@@ -96,10 +95,6 @@ static __hwloc_inline int
 hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 			       int idx, hwloc_cpuset_t set)
 {
-#ifdef HWLOC_LINUX_SYS
-  /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_CUDART_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_CUDART_DEVICE_SYSFS_PATH_MAX];
   int domain, bus, dev;
 
   if (hwloc_cudart_get_device_pci_ids(topology, idx, &domain, &bus, &dev))
@@ -110,15 +105,7 @@ hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", (unsigned) domain, (unsigned) bus, (unsigned) dev);
-  if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-      || hwloc_bitmap_iszero(set))
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-  /* Non-Linux systems simply get a full cpuset */
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+  return hwloc_get_pci_busid_cpuset(topology, set, (unsigned) domain, (unsigned) bus, (unsigned) dev, 0);
 }
 
 /** \brief Get the hwloc PCI device object corresponding to the

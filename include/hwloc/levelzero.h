@@ -45,7 +45,6 @@ extern "C" {
  * Store in \p set the CPU-set describing the locality of
  * the Level Zero device \p device.
  *
- * Topology \p topology and device \p device must match the local machine.
  * The Level Zero library must have been initialized with zeInit().
  * I/O devices detection and the Level Zero component are not needed in the
  * topology.
@@ -67,17 +66,8 @@ static __hwloc_inline int
 hwloc_levelzero_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
                                   ze_device_handle_t device, hwloc_cpuset_t set)
 {
-#ifdef HWLOC_LINUX_SYS
-  /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_LEVELZERO_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_LEVELZERO_DEVICE_SYSFS_PATH_MAX];
   ze_pci_ext_properties_t pci;
   ze_result_t res;
-
-  if (!hwloc_topology_is_thissystem(topology)) {
-    errno = EINVAL;
-    return -1;
-  }
 
   pci.stype =  ZE_STRUCTURE_TYPE_PCI_EXT_PROPERTIES;
   pci.pNext = NULL;
@@ -87,16 +77,8 @@ hwloc_levelzero_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_un
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
-          pci.address.domain, pci.address.bus, pci.address.device, pci.address.function);
-  if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-      || hwloc_bitmap_iszero(set))
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-  /* Non-Linux systems simply get a full cpuset */
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+  return hwloc_get_pci_busid_cpuset(topology, set,
+                                    pci.address.domain, pci.address.bus, pci.address.device, pci.address.function);
 }
 
 /** \brief Get the CPU set of logical processors that are physically
@@ -105,7 +87,6 @@ hwloc_levelzero_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_un
  * Store in \p set the CPU-set describing the locality of
  * the Level Zero device \p device.
  *
- * Topology \p topology and device \p device must match the local machine.
  * The Level Zero library must have been initialized with Sysman enabled
  * with zesInit().
  * I/O devices detection and the Level Zero component are not needed in the
@@ -125,17 +106,9 @@ static __hwloc_inline int
 hwloc_levelzero_get_sysman_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
                                          zes_device_handle_t device, hwloc_cpuset_t set)
 {
-#ifdef HWLOC_LINUX_SYS
-  /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_LEVELZERO_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_LEVELZERO_DEVICE_SYSFS_PATH_MAX];
+  hwloc_obj_t parent;
   zes_pci_properties_t pci;
   ze_result_t res;
-
-  if (!hwloc_topology_is_thissystem(topology)) {
-    errno = EINVAL;
-    return -1;
-  }
 
   pci.stype =  ZES_STRUCTURE_TYPE_PCI_PROPERTIES;
   pci.pNext = NULL;
@@ -145,16 +118,9 @@ hwloc_levelzero_get_sysman_device_cpuset(hwloc_topology_t topology __hwloc_attri
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
-          pci.address.domain, pci.address.bus, pci.address.device, pci.address.function);
-  if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-      || hwloc_bitmap_iszero(set))
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-  /* Non-Linux systems simply get a full cpuset */
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+  return hwloc_get_pci_busid_cpuset(topology,
+                                    set,
+                                    pci.address.domain, pci.address.bus, pci.address.device, pci.address.function);
 }
 
 /** \brief Get the hwloc OS device object corresponding to Level Zero device

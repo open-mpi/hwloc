@@ -709,6 +709,19 @@ hwloc__pci_get_busid_cpuset(struct hwloc_topology *topology,
   return err;
 }
 
+HWLOC_DECLSPEC int
+hwloc_get_pci_busid_cpuset(struct hwloc_topology *topology,
+                           hwloc_cpuset_t cpuset,
+                           unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  struct hwloc_pcidev_attr_s busid;
+  busid.domain = domain;
+  busid.bus = bus;
+  busid.dev = dev;
+  busid.func = func;
+  return hwloc__pci_get_busid_cpuset(topology, cpuset, &busid);
+}
+
 struct hwloc_obj *
 hwloc_pci_get_parent_by_busid(struct hwloc_topology *topology,
                               unsigned domain, unsigned bus, unsigned dev, unsigned func)

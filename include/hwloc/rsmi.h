@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * Copyright (c) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * Written by Advanced Micro Devices,
  * See COPYING in top-level directory.
@@ -45,7 +45,6 @@ extern "C" {
  * Store in \p set the CPU-set describing the locality of the AMD GPU device
  * whose index is \p dv_ind.
  *
- * Topology \p topology and device \p dv_ind must match the local machine.
  * I/O devices detection and the ROCm SMI component are not needed in the
  * topology.
  *
@@ -64,10 +63,6 @@ static __hwloc_inline int
 hwloc_rsmi_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
                              uint32_t dv_ind, hwloc_cpuset_t set)
 {
-#ifdef HWLOC_LINUX_SYS
-  /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_RSMI_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_RSMI_DEVICE_SYSFS_PATH_MAX];
   rsmi_status_t ret;
   uint64_t bdfid = 0;
   unsigned domain, device, bus;
@@ -86,15 +81,8 @@ hwloc_rsmi_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   bus = ((bdfid & 0xffff)>>8) & 0xff;
   device = ((bdfid & 0xff)>>3) & 0x1f;
 
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", domain, bus, device);
-  if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-      || hwloc_bitmap_iszero(set))
-    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-  /* Non-Linux systems simply get a full cpuset */
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+  return hwloc_get_pci_busid_cpuset(topology, set,
+                                    domain, bus, device, 0);
 }
 
 /** \brief Get the hwloc OS device object corresponding to the

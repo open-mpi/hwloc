@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright © 2012-2024 Inria.  All rights reserved.
+ * Copyright © 2012-2026 Inria.  All rights reserved.
  * Copyright © 2013, 2018 Université Bordeaux.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -138,7 +138,6 @@ hwloc_opencl_get_device_pci_busid(cl_device_id device,
  *
  * Store in \p set the CPU-set describing the locality of the OpenCL device \p device.
  *
- * Topology \p topology and device \p device must match the local machine.
  * I/O devices detection and the OpenCL component are not needed in the topology.
  *
  * The function only returns the locality of the device.
@@ -158,10 +157,6 @@ hwloc_opencl_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 			       cl_device_id device __hwloc_attribute_unused,
 			       hwloc_cpuset_t set)
 {
-#if (defined HWLOC_LINUX_SYS)
-	/* If we're on Linux, try AMD/NVIDIA extensions + the sysfs mechanism to get the local cpus */
-#define HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX 128
-	char path[HWLOC_OPENCL_DEVICE_SYSFS_PATH_MAX];
 	unsigned pcidomain, pcibus, pcidev, pcifunc;
 
 	if (!hwloc_topology_is_thissystem(topology)) {
@@ -174,15 +169,7 @@ hwloc_opencl_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 		return 0;
 	}
 
-	sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus", pcidomain, pcibus, pcidev, pcifunc);
-	if (hwloc_linux_read_path_as_cpumask(path, set) < 0
-	    || hwloc_bitmap_iszero(set))
-		hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#else
-	/* Non-Linux systems simply get a full cpuset */
-	hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-#endif
-  return 0;
+        return hwloc_get_pci_busid_cpuset(topology, set, pcidomain, pcibus, pcidev, pcifunc);
 }
 
 /** \brief Get the hwloc OS device object corresponding to the

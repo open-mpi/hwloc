@@ -280,6 +280,7 @@ extern "C" {
 #define hwloc_get_next_pcidev HWLOC_NAME(get_next_pcidev)
 #define hwloc_get_pcidev_by_busid HWLOC_NAME(get_pcidev_by_busid)
 #define hwloc_get_pcidev_by_busidstring HWLOC_NAME(get_pcidev_by_busidstring)
+#define hwloc_get_pci_busid_cpuset HWLOC_NAME(get_pci_busid_cpuset)
 #define hwloc_get_next_osdev HWLOC_NAME(get_next_osdev)
 #define hwloc_get_next_bridge HWLOC_NAME(get_next_bridge)
 #define hwloc_bridge_covers_pcibus HWLOC_NAME(bridge_covers_pcibus)
