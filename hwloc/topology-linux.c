@@ -665,6 +665,7 @@ hwloc_read_path_by_length(const char *path, char *string, size_t length, int fsr
   return ret;
 }
 
+/* only decimal values */
 static __hwloc_inline int
 hwloc_read_path_as_int(const char *path, int *value, int fsroot_fd)
 {
@@ -675,23 +676,25 @@ hwloc_read_path_as_int(const char *path, int *value, int fsroot_fd)
   return 0;
 }
 
+/* decimal, hexadecimal, etc. values */
 static __hwloc_inline int
 hwloc_read_path_as_uint(const char *path, unsigned *value, int fsroot_fd)
 {
   char string[11];
   if (hwloc_read_path_by_length(path, string, sizeof(string), fsroot_fd) <= 0)
     return -1;
-  *value = (unsigned) strtoul(string, NULL, 10);
+  *value = (unsigned) strtoul(string, NULL, 0);
   return 0;
 }
 
+/* decimal, hexadecimal, etc. values */
 static __hwloc_inline int
 hwloc_read_path_as_uint64(const char *path, uint64_t *value, int fsroot_fd)
 {
   char string[22];
   if (hwloc_read_path_by_length(path, string, sizeof(string), fsroot_fd) <= 0)
     return -1;
-  *value = (uint64_t) strtoull(string, NULL, 10);
+  *value = (uint64_t) strtoull(string, NULL, 0);
   return 0;
 }
 
