@@ -4589,24 +4589,28 @@ look_sysfsnode(struct hwloc_topology *topology,
  * sysfs CPU frequencies for cpukinds
  */
 
-struct hwloc_linux_cpukinds_by_pu {
-  unsigned pu;
-  unsigned long max_freq; /* kHz */
-  unsigned long base_freq; /* kHz */
-  unsigned long capacity;
-  int done; /* temporary bit to identify PU that were processed by the current algorithm
-             * (only hwloc_linux_cpukinds_adjust_maxfreqs() for now)
-             */
+struct hwloc_linux_cpukinds_arrays {
+  int nr_pus;
+  int use_cppc_nominal_freq; /* -1 means try, 0 no, 1 yes */
+  int max_without_basefreq; /* any cpu where we have maxfreq without basefreq? */
+  struct hwloc_linux_cpukinds_by_pu {
+    unsigned pu;
+    unsigned long max_freq; /* kHz */
+    unsigned long base_freq; /* kHz */
+    unsigned long capacity;
+    int done; /* temporary bit to identify PU that were processed by the current algorithm
+               * (only hwloc_linux_cpukinds_adjust_maxfreqs() for now)
+               */
+  } * by_pu;
 };
 
 static void
 hwloc_fill_sysfscpukinds_arrays(struct hwloc_topology *topology,
                                 struct hwloc_linux_backend_data_s *data,
-                                int nr_pus,
-                                struct hwloc_linux_cpukinds_by_pu *by_pu,
-                                int use_cppc_nominal_freq,
-                                int *max_without_basefreq)
+                                struct hwloc_linux_cpukinds_arrays *arrays)
 {
+  int nr_pus = arrays->nr_pus;
+  struct hwloc_linux_cpukinds_by_pu *by_pu = arrays->by_pu;
   char str[293];
   int pu, i;
 
@@ -4620,12 +4624,12 @@ hwloc_fill_sysfscpukinds_arrays(struct hwloc_topology *topology,
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", pu);
     if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
       by_pu[i].max_freq = maxfreq;
-    if (use_cppc_nominal_freq != 1) {
+    if (arrays->use_cppc_nominal_freq != 1) {
       /* base_frequency is in intel_pstate and works fine */
       sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", pu);
       if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
         by_pu[i].base_freq = basefreq;
-        use_cppc_nominal_freq = 0;
+        arrays->use_cppc_nominal_freq = 0;
       }
     }
     /* try acpi_cppc/nominal_freq only if cpufreq/base_frequency failed
@@ -4633,17 +4637,17 @@ hwloc_fill_sysfscpukinds_arrays(struct hwloc_topology *topology,
      * same freq for all cores on RPL,
      * maxfreq for E-cores and LP-E-cores but basefreq for P-cores on MTL.
      */
-    if (use_cppc_nominal_freq != 0) {
+    if (arrays->use_cppc_nominal_freq != 0) {
       sprintf(str, "/sys/devices/system/cpu/cpu%d/acpi_cppc/nominal_freq", pu);
       if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0 && basefreq > 0) {
         by_pu[i].base_freq = basefreq * 1000; /* nominal_freq is already in MHz */
-        use_cppc_nominal_freq = 1;
+        arrays->use_cppc_nominal_freq = 1;
       } else {
-        use_cppc_nominal_freq = 0;
+        arrays->use_cppc_nominal_freq = 0;
       }
     }
     if (maxfreq && !basefreq)
-      *max_without_basefreq = 1;
+      arrays->max_without_basefreq = 1;
     /* capacity */
     sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
     if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
@@ -4779,10 +4783,11 @@ hwloc_linux_cpukinds_destroy(struct hwloc_linux_cpukinds *cpukinds)
  * and uniformize to the min capacity
  */
 static void
-hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
-                                     struct hwloc_linux_cpukinds_by_pu *by_pu,
+hwloc_linux_cpukinds_adjust_maxfreqs(struct hwloc_linux_cpukinds_arrays *arrays,
                                      unsigned adjust_max)
 {
+  unsigned nr_pus = arrays->nr_pus;
+  struct hwloc_linux_cpukinds_by_pu *by_pu = arrays->by_pu;
   unsigned i, next = 0, done = 0;
   while (done < nr_pus) {
     /* start a new group of same base_frequency at next */
@@ -4840,9 +4845,10 @@ hwloc_linux_cpukinds_adjust_maxfreqs(unsigned nr_pus,
 
 static void
 hwloc_linux_cpukinds_force_homogeneous(struct hwloc_topology *topology,
-                                       unsigned nr_pus,
-                                       struct hwloc_linux_cpukinds_by_pu *by_pu)
+                                       struct hwloc_linux_cpukinds_arrays *arrays)
 {
+  unsigned nr_pus = arrays->nr_pus;
+  struct hwloc_linux_cpukinds_by_pu *by_pu = arrays->by_pu;
   unsigned i;
   unsigned long base_freq = ULONG_MAX;
   unsigned long max_freq = 0;
@@ -4903,16 +4909,18 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   int enabled = -1; /* not decided yet */
   int nr_pus;
   struct hwloc_linux_cpukinds_by_pu *by_pu;
+  struct hwloc_linux_cpukinds_arrays arrays;
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
-  int max_without_basefreq = 0; /* any cpu where we have maxfreq without basefreq? */
   char *env;
   hwloc_bitmap_t atom_pmu_set, core_pmu_set, lowp_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
-  int use_cppc_nominal_freq = -1; /* -1 means try, 0 no, 1 yes */
   unsigned adjust_max = 10;
   int force_homogeneous;
   const char *info;
   int i;
+
+  arrays.use_cppc_nominal_freq = -1;
+  arrays.max_without_basefreq = 0;
 
   env = getenv("HWLOC_LINUX_CPUKINDS");
   if (env) {
@@ -4922,7 +4930,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
       /* if variable is given, assume anything else means enabled */
       enabled = 1;
       if (!strncmp(env, "cppc=", 5))
-        use_cppc_nominal_freq = atoi(env+5);
+        arrays.use_cppc_nominal_freq = atoi(env+5);
     }
   }
   if (enabled == -1 && data->is_amd_homogeneous) {
@@ -4953,13 +4961,13 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     hwloc_debug("linux/cpufreq: max frequency values will be adjusted by up to %u%%\n",
                 adjust_max);
 
-  nr_pus = hwloc_bitmap_weight(topology->levels[0][0]->cpuset);
+  arrays.nr_pus = nr_pus = hwloc_bitmap_weight(topology->levels[0][0]->cpuset);
   assert(nr_pus > 0);
-  by_pu = calloc(nr_pus, sizeof(*by_pu));
+  arrays.by_pu = by_pu = calloc(nr_pus, sizeof(*by_pu));
   if (!by_pu)
     return -1;
 
-  hwloc_fill_sysfscpukinds_arrays(topology, data, nr_pus, by_pu, use_cppc_nominal_freq, &max_without_basefreq);
+  hwloc_fill_sysfscpukinds_arrays(topology, data, &arrays);
 
   /* NVIDIA Grace is homogeneous with slight variations of max frequency, ignore those */
   info = hwloc_obj_get_info_by_name(topology->levels[0][0], "SoC0ID");
@@ -4969,14 +4977,14 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   if (env)
     force_homogeneous = atoi(env);
   if (force_homogeneous) {
-    hwloc_linux_cpukinds_force_homogeneous(topology, (unsigned) nr_pus, by_pu);
+    hwloc_linux_cpukinds_force_homogeneous(topology, &arrays);
     free(by_pu);
     return 0;
   }
 
-  if (maxfreq_enabled == -1 && !max_without_basefreq)
+  if (maxfreq_enabled == -1 && !arrays.max_without_basefreq)
     /* we have basefreq, check maxfreq and ignore/fix it if turboboost 3.0 makes the max different on different cores */
-    hwloc_linux_cpukinds_adjust_maxfreqs(nr_pus, by_pu, adjust_max);
+    hwloc_linux_cpukinds_adjust_maxfreqs(&arrays, adjust_max);
 
   /* now store base+max frequency */
   hwloc_linux_cpukinds_init(&cpufreqs_max);
