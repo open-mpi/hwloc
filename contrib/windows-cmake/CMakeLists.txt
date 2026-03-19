@@ -227,10 +227,13 @@ if(NOT HWLOC_SKIP_TOOLS)
         hwloc-calc
         hwloc-diff
         hwloc-distrib
-        hwloc-gather-cpuid
         hwloc-info
         hwloc-patch
     )
+
+    if(HWLOC_HAVE_X86_CPUID)
+        list(APPEND TOOLS hwloc-gather-cpuid)
+    endif()
 
     foreach(tool IN ITEMS ${TOOLS})
         add_executable(${tool}
