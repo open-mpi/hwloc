@@ -4593,6 +4593,9 @@ struct hwloc_linux_cpukinds_arrays {
   int nr_pus;
   int use_cppc_nominal_freq; /* -1 means try, 0 no, 1 yes */
   int max_without_basefreq; /* any cpu where we have maxfreq without basefreq? */
+#define HWLOC_CPUKIND_FLAG_NEED_FREQS (1<<0)
+#define HWLOC_CPUKIND_FLAG_NEED_CAPACITY (1<<1)
+  unsigned flags;
   struct hwloc_linux_cpukinds_by_pu {
     unsigned pu;
     unsigned long max_freq; /* kHz */
@@ -4617,42 +4620,50 @@ hwloc_fill_sysfscpukinds_arrays(struct hwloc_topology *topology,
   /* gather all sysfs info in the by_pu array */
   i = 0;
   hwloc_bitmap_foreach_begin(pu, topology->levels[0][0]->cpuset) {
-    unsigned maxfreq = 0, basefreq = 0, capacity = 0;;
     by_pu[i].pu = pu;
 
-    /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
-    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", pu);
-    if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
-      by_pu[i].max_freq = maxfreq;
-    if (arrays->use_cppc_nominal_freq != 1) {
-      /* base_frequency is in intel_pstate and works fine */
-      sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", pu);
-      if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
-        by_pu[i].base_freq = basefreq;
-        arrays->use_cppc_nominal_freq = 0;
+    if (arrays->flags & HWLOC_CPUKIND_FLAG_NEED_FREQS) {
+      unsigned maxfreq = 0, basefreq = 0;
+      /* cpuinfo_max_freq is the hardware max. scaling_max_freq is the software policy current max */
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", pu);
+      if (hwloc_read_path_as_uint(str, &maxfreq, data->root_fd) >= 0)
+        by_pu[i].max_freq = maxfreq;
+      if (arrays->use_cppc_nominal_freq != 1) {
+        /* base_frequency is in intel_pstate and works fine */
+        sprintf(str, "/sys/devices/system/cpu/cpu%d/cpufreq/base_frequency", pu);
+        if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0) {
+          by_pu[i].base_freq = basefreq;
+          arrays->use_cppc_nominal_freq = 0;
+        }
       }
-    }
-    /* try acpi_cppc/nominal_freq only if cpufreq/base_frequency failed
-     * acpi_cppc/nominal_freq is widely available, but it returns 0 on some Intel SPR,
-     * same freq for all cores on RPL,
-     * maxfreq for E-cores and LP-E-cores but basefreq for P-cores on MTL.
-     */
-    if (arrays->use_cppc_nominal_freq != 0) {
-      sprintf(str, "/sys/devices/system/cpu/cpu%d/acpi_cppc/nominal_freq", pu);
-      if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0 && basefreq > 0) {
-        by_pu[i].base_freq = basefreq * 1000; /* nominal_freq is already in MHz */
-        arrays->use_cppc_nominal_freq = 1;
-      } else {
-        arrays->use_cppc_nominal_freq = 0;
+      /* try acpi_cppc/nominal_freq only if cpufreq/base_frequency failed
+       * acpi_cppc/nominal_freq is widely available, but it returns 0 on some Intel SPR,
+       * same freq for all cores on RPL,
+       * maxfreq for E-cores and LP-E-cores but basefreq for P-cores on MTL.
+       */
+      if (arrays->use_cppc_nominal_freq != 0) {
+        sprintf(str, "/sys/devices/system/cpu/cpu%d/acpi_cppc/nominal_freq", pu);
+        if (hwloc_read_path_as_uint(str, &basefreq, data->root_fd) >= 0 && basefreq > 0) {
+          by_pu[i].base_freq = basefreq * 1000; /* nominal_freq is already in MHz */
+          arrays->use_cppc_nominal_freq = 1;
+        } else {
+          arrays->use_cppc_nominal_freq = 0;
+        }
       }
+      if (maxfreq && !basefreq)
+        arrays->max_without_basefreq = 1;
     }
-    if (maxfreq && !basefreq)
-      arrays->max_without_basefreq = 1;
-    /* capacity */
-    sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
-    if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
-      by_pu[i].capacity = capacity;
+
+    if (arrays->flags & HWLOC_CPUKIND_FLAG_NEED_CAPACITY) {
+      /* capacity */
+      unsigned capacity = 0;
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
+      if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
+        by_pu[i].capacity = capacity;
+    }
+
     i++;
+
   } hwloc_bitmap_foreach_end();
 
   assert(i == nr_pus);
@@ -4967,6 +4978,7 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   if (!by_pu)
     return -1;
 
+  arrays.flags = HWLOC_CPUKIND_FLAG_NEED_FREQS | HWLOC_CPUKIND_FLAG_NEED_CAPACITY;
   hwloc_fill_sysfscpukinds_arrays(topology, data, &arrays);
 
   /* NVIDIA Grace is homogeneous with slight variations of max frequency, ignore those */
