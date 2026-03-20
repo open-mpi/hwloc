@@ -4913,46 +4913,25 @@ hwloc_linux_cpukinds_force_homogeneous(struct hwloc_topology *topology,
   }
 }
 
+/* use frequencies and capacities for finding cpukinds */
 static int
-look_sysfscpukinds(struct hwloc_topology *topology,
-                   struct hwloc_linux_backend_data_s *data)
+look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
+                           struct hwloc_linux_backend_data_s *data,
+                           int use_cppc_nominal_freq)
 {
-  int enabled = -1; /* not decided yet */
   int nr_pus;
   struct hwloc_linux_cpukinds_by_pu *by_pu;
   struct hwloc_linux_cpukinds_arrays arrays;
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
   char *env;
-  hwloc_bitmap_t atom_pmu_set, core_pmu_set, lowp_pmu_set;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   unsigned adjust_max = 10;
   int force_homogeneous;
   const char *info;
   int i;
 
-  arrays.use_cppc_nominal_freq = -1;
+  arrays.use_cppc_nominal_freq = use_cppc_nominal_freq;
   arrays.max_without_basefreq = 0;
-
-  env = getenv("HWLOC_LINUX_CPUKINDS");
-  if (env) {
-    if (!strcmp(env, "none") || !strcmp(env, "0"))
-      enabled = 0;
-    else {
-      /* if variable is given, assume anything else means enabled */
-      enabled = 1;
-      if (!strncmp(env, "cppc=", 5))
-        arrays.use_cppc_nominal_freq = atoi(env+5);
-    }
-  }
-  if (enabled == -1 && data->is_amd_homogeneous) {
-    /* If not disabled but on pre-Zen5 AMD, disable since useless.
-     * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
-     */
-    hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
-    enabled = 0;
-  }
-  if (!enabled)
-    return 0;
 
   env = getenv("HWLOC_CPUKINDS_MAXFREQ");
   if (env) {
@@ -5025,6 +5004,15 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   hwloc_linux_cpukinds_destroy(&cpu_capacity);
 
   free(by_pu);
+  return 0;
+}
+
+/* use Intel PMU sets for finding cpukinds */
+static int
+look_sysfscpukinds_by_pmu_sets(struct hwloc_topology *topology,
+                               struct hwloc_linux_backend_data_s *data)
+{
+  hwloc_bitmap_t atom_pmu_set, core_pmu_set, lowp_pmu_set;
 
   /* look at Intel core/atom PMUs */
   atom_pmu_set = hwloc__alloc_read_path_as_cpulist("/sys/devices/cpu_atom/cpus", data->root_fd);
@@ -5058,6 +5046,42 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   return 0;
 }
 
+static int
+look_sysfscpukinds(struct hwloc_topology *topology,
+                   struct hwloc_linux_backend_data_s *data)
+{
+  char *env;
+  int enabled = -1; /* not decided yet */
+  int use_cppc_nominal_freq = -1; /* -1 means try, 0 no, 1 yes */
+
+  env = getenv("HWLOC_LINUX_CPUKINDS");
+  if (env) {
+    if (!strcmp(env, "none") || !strcmp(env, "0"))
+      enabled = 0;
+    else {
+      /* if variable is given, assume anything else means enabled */
+      enabled = 1;
+      if (!strncmp(env, "cppc=", 5))
+        use_cppc_nominal_freq = atoi(env+5);
+    }
+  }
+  if (enabled == -1 && data->is_amd_homogeneous) {
+    /* If not disabled but on pre-Zen5 AMD, disable since useless.
+     * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
+     */
+    hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
+    enabled = 0;
+  }
+  if (!enabled)
+    return 0;
+
+  look_sysfscpukinds_by_freq(topology, data, use_cppc_nominal_freq);
+
+  if (data->arch == HWLOC_LINUX_ARCH_X86)
+    look_sysfscpukinds_by_pmu_sets(topology, data);
+
+  return 0;
+}
 
 /**********************************************
  * sysfs CPU discovery
