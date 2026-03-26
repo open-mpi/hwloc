@@ -2450,27 +2450,27 @@ power-hungry cores last.
 
 These CPU kinds may be annotated with the following native attributes:
 <dl>
-<dt>FrequencyMaxMHz (Linux)</dt>
+<dt>FrequencyMaxMHz=3900 (Linux)</dt>
 <dd>The maximal operating frequency of the core,
 as reported by <tt>cpufreq</tt> drivers on Linux.
 </dd>
-<dt>FrequencyBaseMHz (Linux)</dt>
+<dt>FrequencyBaseMHz=2000 (Linux)</dt>
 <dd>The base/nominal operating frequency of the core,
 as reported by some <tt>cpufreq</tt> or ACPI drivers on Linux
 (e.g. <tt>cpufreq_cppc</tt> or <tt>intel_pstate</tt>).
 </dd>
-<dt>CoreType (x86)</dt>
+<dt>CoreType=IntelCore (x86)</dt>
 <dd>A string describing the kind of core,
 currently <tt>IntelAtom</tt>, <tt>IntelCore</tt> or <tt>IntelLowPower</tt>,
 as reported by the x86 CPUID instruction and Linux PMU on some Intel processors.
 </dd>
-<dt>LinuxCapacity (Linux)</dt>
+<dt>LinuxCapacity=1024 (Linux)</dt>
 <dd>The Linux-specific CPU capacity found in sysfs,
 as reported by the Linux kernel on some recent platforms.
 Higher values usually mean that the Linux scheduler considers
 the core as high-performance rather than energy-efficient.
 </dd>
-<dt>DarwinCompatible (Darwin / Mac OS X)</dt>
+<dt>DarwinCompatible=apple,firestorm;ARM,v8 (Darwin / Mac OS X)</dt>
 <dd>The compatibility attribute of the CPUs as found
 in the IO registry on Darwin / Mac OS X.
 For instance <tt>apple,icestorm;ARM,v8</tt> for energy-efficient cores
