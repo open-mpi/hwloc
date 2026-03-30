@@ -1238,7 +1238,7 @@ following environment variables.
   as a decimal mark (for instance 0.01 instead of 0,01).</dd>
 
 <dt>HWLOC_CPUKINDS_RANKING=default</dt>
-  <dd>Change the ranking policy for CPU kinds.
+  <dd>Change the ranking policy when guessing CPU kinds from frequencies and core types.
   hwloc tries to rank CPU kinds that are energy efficiency first,
   and then CPUs that are rather high-performance and power hungry.
 
@@ -1283,6 +1283,7 @@ following environment variables.
   This is enabled by default except on old AMD CPUs known to be homogeneous.
   Setting to <tt>1</tt> always enables it, while <tt>0</tt> always disables it.
   Setting to <tt>cppc=0</tt> enables it without using ACPI CPPC nominal frequency.
+  Setting to <tt>midr=0</tt> enables it without using the ARM MIDR register.
   </dd>
 
 
@@ -2150,7 +2151,10 @@ or to the root object (Machine) if package locality information is missing.
 <dd>
 ARM-specific CPU information about the implementer, the sub-architecture,
 the variant and the part number,
-currently only available on Linux on some platforms.
+currently only available on Linux on most ARM platforms.
+
+Some attributes such as <tt>CPUPart</tt> may rather appear in cpukind infos
+if the CPU is hybrid, see \ref topoattrs_cpukinds.
 </dd>
 <dt>CPUFamily=Loongson-64bit</dt>
 <dd>
@@ -2612,7 +2616,21 @@ as reported by <tt>cpufreq</tt> drivers on Linux.
 as reported by some <tt>cpufreq</tt> or ACPI drivers on Linux
 (e.g. <tt>cpufreq_cppc</tt> or <tt>intel_pstate</tt>).
 </dd>
-<dt>CoreType=IntelCore (x86)</dt>
+<dt>CPUImplementer=0x48</dt>
+<dt>CPUArchitecture=8</dt>
+<dt>CPUVariant=0x1</dt>
+<dt>CPUPart=0xd01</dt>
+<dt>CPURevision=0x11 (Linux, ARM)</dt>
+<dd>
+ARM-specific CPU information about the implementer, the sub-architecture,
+the variant, the part number and the revision number,
+currently only available on Linux on most ARM platforms.
+
+Only those that are specific to some cores in hybrid CPUs appear
+in CPU kind info (typically <tt>CPUPart</tt>).
+Others remain in Package objects, see \ref attributes_info_cpu.
+</dd>
+<dt>CoreType (x86)</dt>
 <dd>A string describing the kind of core,
 currently <tt>IntelAtom</tt>, <tt>IntelCore</tt> or <tt>IntelLowPower</tt>,
 as reported by the x86 CPUID instruction and Linux PMU on some Intel processors.
