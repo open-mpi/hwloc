@@ -69,6 +69,7 @@ struct hwloc_linux_backend_data_s {
   unsigned pagesize;
   int need_global_infos;
   struct hwloc_infos_s global_infos;
+  struct hwloc_infos_s cpukinds_pkg_infos;
 };
 
 
@@ -4164,6 +4165,7 @@ look_sysfscpukinds_by_midr_regs(struct hwloc_topology *topology,
   struct hwloc_linux_cpukinds_by_pu *by_pu;
   struct hwloc_linux_cpukinds_arrays arrays;
   struct hwloc_linux_cpukinds midr_kinds;
+  unsigned long value;
   int nr_pus, i;
   unsigned j;
 
@@ -4217,7 +4219,7 @@ look_sysfscpukinds_by_midr_regs(struct hwloc_topology *topology,
     struct hwloc_infos_s infos;
     struct hwloc_info_s infoarray[5];
     char implementer[10], variant[10], part[10], revision[10], capacitys[25];
-    unsigned long value, capacity;
+    unsigned long capacity;
     unsigned k;
 
      /* get minimal the capacity */
@@ -4270,7 +4272,32 @@ look_sysfscpukinds_by_midr_regs(struct hwloc_topology *topology,
   }
 
  common:
-  /* TODO add common things to packages */
+  /* save common info to annotate package later */
+  value = midr_kinds.sets[0].value;
+  i = 0;
+  if (common & MIDR_COMMON_IMPL) {
+    char implementer[10];
+    hwloc_snprintf(implementer, sizeof(implementer), "0x%02x", MIDR_IMPL(value));
+    hwloc__add_info(&data->cpukinds_pkg_infos, "CPUImplementer", implementer);
+  }
+  if (common & MIDR_COMMON_ARCH) {
+    hwloc__add_info(&data->cpukinds_pkg_infos, "CPUArchitecture", get_arm_midr_architecture(MIDR_ARCH(value)));
+  }
+  if (common & MIDR_COMMON_VARIANT) {
+    char variant[10];
+    hwloc_snprintf(variant, sizeof(variant), "0x%x", MIDR_VARIANT(value));
+    hwloc__add_info(&data->cpukinds_pkg_infos, "CPUVariant", variant);
+  }
+  if (common & MIDR_COMMON_PART) {
+    char part[10];
+    hwloc_snprintf(part, sizeof(part), "0x%03x", MIDR_PART(value));
+    hwloc__add_info(&data->cpukinds_pkg_infos, "CPUPart", part);
+  }
+  if (common & MIDR_COMMON_REV) {
+    char revision[10];
+    hwloc_snprintf(revision, sizeof(revision), "%d", MIDR_REV(value));
+    hwloc__add_info(&data->cpukinds_pkg_infos, "CPURevision", revision);
+  }
 
  out:
   hwloc_linux_cpukinds_destroy(&midr_kinds);
@@ -4320,6 +4347,34 @@ look_sysfscpukinds(struct hwloc_topology *topology,
     look_sysfscpukinds_by_pmu_sets(topology, data);
 
   return 0;
+}
+
+static void
+hwloc__sysfscpukinds_annotate_obj(struct hwloc_obj *obj,
+                                  struct hwloc_infos_s *infos)
+{
+  unsigned i;
+  for(i=0; i<infos->count; i++)
+    hwloc__add_info(&obj->infos, infos->array[i].name, infos->array[i].value);
+}
+
+static void
+hwloc_sysfscpukinds_annotate_packages(struct hwloc_topology *topology,
+                                      struct hwloc_linux_backend_data_s *data)
+{
+  struct hwloc_infos_s *infos = &data->cpukinds_pkg_infos;
+
+  if (!infos->count)
+    return;
+
+  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PACKAGE)) {
+    hwloc_obj_t pkg = NULL;
+    while ((pkg = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PACKAGE, pkg)) != NULL) {
+      hwloc__sysfscpukinds_annotate_obj(pkg, infos);
+    }
+  } else {
+    hwloc__sysfscpukinds_annotate_obj(hwloc_get_root_obj(topology), infos);
+  }
 }
 
 /**********************************************
@@ -4849,8 +4904,8 @@ hwloc_linux_parse_cpuinfo_ia64(const char *prefix, const char *value,
 
 static int
 hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
-			      struct hwloc_infos_s *infos,
-			      int is_global __hwloc_attribute_unused)
+                              struct hwloc_infos_s *infos,
+                              int is_global __hwloc_attribute_unused)
 {
   if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
       || !strcmp("model name", prefix) /* new kernels with one model name per core */) {
@@ -4872,6 +4927,25 @@ hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
     if (value[0])
       hwloc__add_info(infos, "CPURevision", value);
   } else if (!strcmp("Hardware", prefix)) {
+    if (value[0])
+      hwloc__add_info(infos, "HardwareName", value);
+  } else if (!strcmp("Revision", prefix)) {
+    if (value[0])
+      hwloc__add_info(infos, "HardwareRevision", value);
+  } else if (!strcmp("Serial", prefix)) {
+    if (value[0])
+      hwloc__add_info(infos, "HardwareSerial", value);
+  }
+  return 0;
+}
+
+static int
+hwloc_linux_parse_cpuinfo_arm_midr(const char *prefix, const char *value,
+                                   struct hwloc_infos_s *infos,
+                                   int is_global __hwloc_attribute_unused)
+{
+  /* new kernels with MIDR sysfs registers, only gather other things */
+  if (!strcmp("Hardware", prefix)) {
     if (value[0])
       hwloc__add_info(infos, "HardwareName", value);
   } else if (!strcmp("Revision", prefix)) {
@@ -5015,7 +5089,11 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
     break;
   case HWLOC_LINUX_ARCH_ARM:
-    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
+    if (data->has_sysfs_midr_regs)
+      /* TODO: if cpukinds disabled or not using MIDR, use the no-midr one */
+      parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm_midr;
+    else
+      parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
     break;
   case HWLOC_LINUX_ARCH_POWER:
     parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ppc;
@@ -7224,6 +7302,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 #ifdef HWLOC_HAVE_LINUXPCI
     hwloc_linuxfs_pci_look_pcislots(backend);
 #endif /* HWLOC_HAVE_LINUXPCI */
+    hwloc_sysfscpukinds_annotate_packages(topology, data);
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_IO
@@ -7286,6 +7365,7 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
     udev_unref(data->udev);
 #endif
   hwloc__free_infos(&data->global_infos);
+  hwloc__free_infos(&data->cpukinds_pkg_infos);
 }
 
 static struct hwloc_backend *
@@ -7320,6 +7400,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->is_fake_numa_uniform = 0;
   data->need_global_infos = 1;
   hwloc__init_infos(&data->global_infos);
+  hwloc__init_infos(&data->cpukinds_pkg_infos);
   data->is_real_fsroot = 1;
   data->root_path = NULL;
   fsroot_path = getenv("HWLOC_FSROOT");
