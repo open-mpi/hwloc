@@ -4942,8 +4942,7 @@ look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
   char *env;
   int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   unsigned adjust_max = 10;
-  int force_homogeneous;
-  const char *info;
+  int force_homogeneous = 0;
   int i;
 
   arrays.use_cppc_nominal_freq = use_cppc_nominal_freq;
@@ -4976,9 +4975,6 @@ look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
   arrays.flags = HWLOC_CPUKIND_FLAG_NEED_FREQS | HWLOC_CPUKIND_FLAG_NEED_CAPACITY;
   hwloc_fill_sysfscpukinds_arrays(topology, data, &arrays);
 
-  /* NVIDIA Grace is homogeneous with slight variations of max frequency, ignore those */
-  info = hwloc_obj_get_info_by_name(topology->levels[0][0], "SoC0ID");
-  force_homogeneous = info && !strcmp(info, "jep106:036b:0241");
   /* force homogeneity ? */
   env = getenv("HWLOC_CPUKINDS_HOMOGENEOUS");
   if (env)

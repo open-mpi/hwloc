@@ -1274,8 +1274,7 @@ following environment variables.
 <dt>HWLOC_CPUKINDS_HOMOGENEOUS=0</dt>
   <dd>Uniformize max frequency, base frequency and Linux capacity to
   force a single homogeneous kind of CPUs.
-  This is enabled by default on NVIDIA Grace but may be disabled
-  if set to 0 (or enabled on other platforms if set to 1).
+  Setting to 1 enables this uniformization.
   </dd>
 
 <dt>HWLOC_LINUX_CPUKINDS=-1</dt>
