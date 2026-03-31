@@ -15,6 +15,11 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.14.0
 --------------
+* Use ARM MIDR to identify different kinds of CPU core on Linux,
+  instead of the frequency/capacity-based heuristics.
+  Remove NVIDIA-specific forcing of homogeneous cores when their
+  frequency varies slightly.
+  Thanks to Michael Kuron for the help.
 * Add CXI OS devices for Cray Slingshot NICs, e.g. cxi0,
   thanks to Edgar Leon for the suggestion.
 
