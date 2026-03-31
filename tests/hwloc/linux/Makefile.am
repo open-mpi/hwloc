@@ -63,6 +63,8 @@ sysfs_outputs = \
 		2arm-2c.output \
 		nvidiagpunumanodes.output \
 		nvidiagpunumanodes.kept.output \
+		nvidia-dgx-gb10.output \
+		nvidia-dgx-gb10-nomidr.output \
 		fakememinitiators-1np2c+1npp+gi.output \
 		fakecpuid1f-64intel64-2p4d2n2c2t.output \
 		fakeheterocpunuma.output \
@@ -137,6 +139,8 @@ sysfs_tarballs = \
 		2pa-pcidomain32bits-disabled.source \
 		nvidiagpunumanodes.tar.bz2 \
 		nvidiagpunumanodes.kept.source \
+		nvidia-dgx-gb10.tar.bz2 \
+		nvidia-dgx-gb10-nomidr.source \
 		fakememinitiators-1np2c+1npp+gi.tar.bz2 \
 		fakecpuid1f-64intel64-2p4d2n2c2t.tar.bz2 \
 		fakeheterocpunuma.tar.bz2 \
@@ -173,6 +177,7 @@ sysfs_envs = \
 		40intel64-4n10c+pci-conflicts.env \
 		64intel64-fakeKNL-SNC4-hybrid-msc.env \
 		nvidiagpunumanodes.kept.env \
+		nvidia-dgx-gb10-nomidr.env \
 		fakeheterocpunuma.env
 
 if HWLOC_HAVE_OPENAT
