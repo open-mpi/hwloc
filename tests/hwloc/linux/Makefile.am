@@ -168,6 +168,8 @@ sysfs_options = \
 		32amd64-4s2n4c-cgroup2.xml.options \
 		32em64t-2n8c+1mic.options \
 		40intel64-2g2n4c+pci.options \
+		nvidia-dgx-gb10.options \
+		nvidia-dgx-gb10-nomidr.options \
 		fakeheterocpunuma.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
