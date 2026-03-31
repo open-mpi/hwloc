@@ -58,6 +58,8 @@ sysfs_tests = \
 	memorysidecaches.test \
 	nvidiagpunumanodes.test \
 	nvidiagpunumanodes-kept.test \
+	nvidia-dgx-gb10.test \
+	nvidia-dgx-gb10-nomidr.test \
 	offline-cpu0-node0.test
 
 # Add your tests' input tarballs here
@@ -104,6 +106,7 @@ sysfs_tarballs = \
 	fakepcilocalities.tar.bz2 \
 	memorysidecaches.tar.bz2 \
 	nvidiagpunumanodes.tar.bz2 \
+	nvidia-dgx-gb10.tar.bz2 \
 	offline-cpu0-node0.tar.bz2
 
 # Add your expected console outputs here.
@@ -159,7 +162,9 @@ sysfs_xml_outputs = \
 	32em64t-2n8c+dax+nvme+mic+dimms.xml \
 	40intel64-2g2n4c+pcilocality.xml \
 	fakeheterocpunuma.xml \
-	fakepcilocalities.xml
+	fakepcilocalities.xml \
+	nvidia-dgx-gb10.xml \
+	nvidia-dgx-gb10-nomidr.xml
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP

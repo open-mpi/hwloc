@@ -1,0 +1,5 @@
+# DGX Spark with GB10
+# 2 sets of 10 hybrid cores
+# MIDR properly exposes hybrid cores while frequencies/capacity would show too many cpukinds
+source:  nvidia-dgx-gb10.tar.bz2
+target:  nvidia-dgx-gb10.xml
