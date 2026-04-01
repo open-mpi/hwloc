@@ -2464,10 +2464,12 @@ enum hwloc_type_filter_e {
    * structure to the topology. An object brings structure when it has multiple
    * children and it is not the only child of its parent.
    *
-   * If all objects in the level are the only child of their parent, and if none
-   * of them has multiple children, the entire level is removed.
+   * If all objects in the level are the only child of their parent, or if all
+   * of them have a single child, the entire level may be removed.
+   * A common example is caches that are private to each core.
    *
-   * Cannot be set for I/O and Misc objects since the topology structure does not matter there.
+   * This filter cannot be used for I/O and Misc objects since the topology structure
+   * does not matter there.
    * \hideinitializer
    */
   HWLOC_TYPE_FILTER_KEEP_STRUCTURE = 2,
