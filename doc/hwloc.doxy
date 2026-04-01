@@ -4501,7 +4501,7 @@ resulting topology will miss some objects and may be asymmetric
 ****************************************************************************
 \endverbatim
 
-These errors are common on large AMD platforms because of BIOS and/or Linux
+These errors were common on large AMD platforms in the past because of BIOS and/or Linux
 kernel bugs causing invalid L3 cache information.
 In the above example, the hardware reports
 a L3 cache that is shared by 2 cores in the first NUMA node and 4 cores
