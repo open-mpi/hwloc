@@ -2055,6 +2055,7 @@ See \ref heteromem.
 If several components were combined, multiple Backend pairs may exist,
 with different values, for instance <tt>x86</tt> and <tt>Linux</tt> in the root
 object and <tt>CUDA</tt> in CUDA OS device objects.
+Topologies build from synthetic strings also get a <tt>Synthetic</tt> Backend info in the root object.
 </dd>
 <dt>SyntheticDescription=Pack:1 [NUMA(memory=16GiB)] L2:6(size=1MiB) L1d:1(size=48kiB) Core:1 PU:2</dt>
 <dd>The description string that was given to hwloc to build this
