@@ -4465,7 +4465,7 @@ resulting topology will miss some objects and may be asymmetric
 ****************************************************************************
 \endverbatim
 
-These errors are common on large AMD platforms because of BIOS and/or Linux
+These errors were common on large AMD platforms in the past because of BIOS and/or Linux
 kernel bugs causing invalid L3 cache information.
 In the above example, the hardware reports
 a L3 cache that is shared by 2 cores in the first NUMA node and 4 cores
@@ -4787,15 +4787,14 @@ The general rule is that hwloc XML topology files are forward-compatible up-to t
 </ul>
 
 However, hwloc XMLs are not always backward-compatible.
-As a convenience feature, hwloc 3.0 XMLs may be imported by hwloc 2.10 but
-not by any older releases.
-2.10 import may fail for future 3.x XMLs if new features are added.
+As a convenience feature, hwloc 3.0 XMLs may be imported by latest hwloc 2.x releases
+but not by some older ones.
 <br/>
 
 As XMLs may be exchanged at runtime between some components of the software stack
 (for instance the resource managers and MPI processes),
 users are advised to use a single hwloc release (or at least a single
-release per major release series, e.g. 2.10 and 3.0 only).
+release per major release series, e.g. 2.14 and 3.0 only).
 Building all these components on the same (cluster-wide)
 hwloc installation is a good way to avoid such incompatibilities.
 For instance, some MPI implementations come with their own custom hwloc builds,
