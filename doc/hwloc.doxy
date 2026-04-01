@@ -3815,7 +3815,7 @@ non-interesting information out of the topology,
 see \ref faq_disable_faster below.
 
 
-\subsection faq_disable_faster What may I disable to make hwloc faster?
+\subsection faq_disable_faster What may I disable to make hwloc faster? and to make the topology smaller and simpler?
 
 Building a hwloc topology on a large machine may be slow because
 the discovery of hundreds of hardware cores or threads takes time
