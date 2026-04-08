@@ -5285,10 +5285,9 @@ hwloc__sysfscpukinds_annotate_obj(struct hwloc_obj *obj,
 }
 
 static void
-hwloc_sysfscpukinds_annotate_packages(struct hwloc_backend *backend)
+hwloc_sysfscpukinds_annotate_packages(struct hwloc_topology *topology,
+                                      struct hwloc_linux_backend_data_s *data)
 {
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   struct hwloc_info_s *infos = data->cpukinds_pkg_infos;
   unsigned infos_count = data->cpukinds_pkg_infos_count;
 
@@ -6282,11 +6281,9 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
 
 /* returns 0 on success, -1 on non-match or error during hardwired load */
 static int
-hwloc_linux_try_hardwired_cpuinfo(struct hwloc_backend *backend)
+hwloc_linux_try_hardwired_cpuinfo(struct hwloc_topology *topology,
+                                  struct hwloc_linux_backend_data_s *data)
 {
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-
   if (getenv("HWLOC_NO_HARDWIRED_TOPOLOGY"))
     return -1;
 
@@ -6336,11 +6333,9 @@ static void hwloc_linux__get_allowed_resources(hwloc_topology_t topology, const 
 }
 
 static void
-hwloc_linux_fallback_pu_level(struct hwloc_backend *backend)
+hwloc_linux_fallback_pu_level(struct hwloc_topology *topology,
+                              struct hwloc_linux_backend_data_s *data)
 {
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-
   if (data->fallback_nbprocessors >= 1)
     topology->support.discovery->pu = 1;
   else
@@ -6438,15 +6433,15 @@ hwloc_linuxfs_check_kernel_cmdline(struct hwloc_linux_backend_data_s *data)
 }
 
 static int
-hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_linuxfs_look_cpu(struct hwloc_topology *topology,
+                       struct hwloc_linux_backend_data_s *data,
+                       struct hwloc_disc_status *dstatus)
 {
   /*
    * This backend may be used with topology->is_thissystem set (default)
    * or not (modified fsroot path).
    */
 
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   unsigned nbnodes;
   char *cpuset_name = NULL;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
@@ -6549,7 +6544,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
     goto cpudone;
 
   /* Gather the list of cpus now */
-  err = hwloc_linux_try_hardwired_cpuinfo(backend);
+  err = hwloc_linux_try_hardwired_cpuinfo(topology, data);
   if (!err)
     goto cpudone;
 
@@ -6560,7 +6555,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_backend *backend, struct hwloc_disc_status *
   /* sysfs */
   if (look_sysfscpu(topology, data, old_siblings_filenames, Lprocs, numprocs) < 0)
     /* sysfs but we failed to read cpu topology, fallback */
-    hwloc_linux_fallback_pu_level(backend);
+    hwloc_linux_fallback_pu_level(topology, data);
 
  cpudone:
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
@@ -6676,10 +6671,9 @@ hwloc_linuxfs_read_osdev_numa_node(struct hwloc_topology *topology, int root_fd,
 }
 
 static hwloc_obj_t
-hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
+hwloc_linuxfs_find_osdev_parent(struct hwloc_topology *topology, int root_fd,
 				const char *osdevpath, unsigned osdev_flags)
 {
-  struct hwloc_topology *topology = backend->topology;
   char path[256];
   int foundpci;
   unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
@@ -6771,9 +6765,8 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_backend *backend, int root_fd,
 }
 
 static hwloc_obj_t
-hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
+hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
 {
-  struct hwloc_topology *topology = backend->topology;
   struct hwloc_obj *obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
   obj->name = strdup(name);
   obj->attr->osdev.type = type;
@@ -6785,12 +6778,10 @@ hwloc_linux_add_os_device(struct hwloc_backend *backend, struct hwloc_obj *pcide
 }
 
 static void
-hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused, int root_fd,
+hwloc_linuxfs_block_class_fillinfos(struct hwloc_linux_backend_data_s *data __hwloc_attribute_unused,
 				    struct hwloc_obj *obj, const char *osdevpath, unsigned osdev_flags)
 {
-#ifdef HWLOC_HAVE_LIBUDEV
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-#endif
+  int root_fd = data->root_fd;
   FILE *file;
   char path[296]; /* osdevpath <= 256 */
   char line[128];
@@ -6972,9 +6963,8 @@ hwloc_linuxfs_block_class_fillinfos(struct hwloc_backend *backend __hwloc_attrib
 }
 
 static int
-hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_block_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7003,7 +6993,7 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
     err = snprintf(path, sizeof(path), "/sys/class/block/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
@@ -7011,9 +7001,9 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
      * (unless WHOLE_IO is enabled).
      */
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+    obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
-    hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags);
+    hwloc_linuxfs_block_class_fillinfos(data, obj, path, osdev_flags);
   }
 
   closedir(dir);
@@ -7022,9 +7012,8 @@ hwloc_linuxfs_lookup_block_class(struct hwloc_backend *backend, unsigned osdev_f
 }
 
 static int
-hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_dax_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7046,15 +7035,15 @@ hwloc_linuxfs_lookup_dax_class(struct hwloc_backend *backend, unsigned osdev_fla
 
       /* FIXME: target_node could be better than numa_node for finding the locality, but it's not possible yet, see #529 */
       snprintf(path, sizeof(path), "/sys/bus/dax/devices/%s", dirent->d_name);
-      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
+      parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
       if (!parent)
 	continue;
 
-      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+      obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
       annotate_dax_parent(obj, dirent->d_name, root_fd);
 
-      hwloc_linuxfs_block_class_fillinfos(backend, root_fd, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
+      hwloc_linuxfs_block_class_fillinfos(data, obj, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
     }
     closedir(dir);
   }
@@ -7110,9 +7099,8 @@ hwloc_linuxfs_net_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_net_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7132,11 +7120,11 @@ hwloc_linuxfs_lookup_net_class(struct hwloc_backend *backend, unsigned osdev_fla
     err = snprintf(path, sizeof(path), "/sys/class/net/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
+    obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
 
     hwloc_linuxfs_net_class_fillinfos(root_fd, obj, path);
   }
@@ -7227,9 +7215,8 @@ hwloc_linuxfs_infiniband_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_infiniband_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7253,11 +7240,11 @@ hwloc_linuxfs_lookup_infiniband_class(struct hwloc_backend *backend, unsigned os
     err = snprintf(path, sizeof(path), "/sys/class/infiniband/%s", dirent->d_name);
     if ((size_t) err > sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
+    obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
 
     hwloc_linuxfs_infiniband_class_fillinfos(root_fd, obj, path);
   }
@@ -7285,9 +7272,8 @@ hwloc_linuxfs_bxi_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_bxi_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7307,11 +7293,11 @@ hwloc_linuxfs_lookup_bxi_class(struct hwloc_backend *backend, unsigned osdev_fla
     err = snprintf(path, sizeof(path), "/sys/class/bxi/%s", dirent->d_name);
     if ((size_t) err > sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
+    obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_OPENFABRICS, dirent->d_name);
 
     hwloc_linuxfs_bxi_class_fillinfos(root_fd, obj, path);
   }
@@ -7347,9 +7333,8 @@ hwloc_linuxfs_cxi_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_cxi_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_cxi_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7369,11 +7354,11 @@ hwloc_linuxfs_lookup_cxi_class(struct hwloc_backend *backend, unsigned osdev_fla
     err = snprintf(path, sizeof(path), "/sys/class/cxi/%s", dirent->d_name);
     if ((size_t) err > sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
+    obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_NETWORK, dirent->d_name);
 
     hwloc_linuxfs_cxi_class_fillinfos(root_fd, obj, path);
   }
@@ -7458,9 +7443,8 @@ hwloc_linuxfs_ve_class_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_ve_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_ve_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7480,11 +7464,11 @@ hwloc_linuxfs_lookup_ve_class(struct hwloc_backend *backend, unsigned osdev_flag
     err = snprintf(path, sizeof(path), "/sys/class/ve/%s", dirent->d_name);
     if ((size_t) err > sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_COPROC, dirent->d_name);
+    obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_COPROC, dirent->d_name);
 
     hwloc_linuxfs_ve_class_fillinfos(root_fd, obj, path);
   }
@@ -7495,9 +7479,8 @@ hwloc_linuxfs_lookup_ve_class(struct hwloc_backend *backend, unsigned osdev_flag
 }
 
 static int
-hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_drm_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7537,11 +7520,11 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_fla
     err = snprintf(path, sizeof(path), "/sys/class/drm/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_GPU, dirent->d_name);
+    hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_GPU, dirent->d_name);
   }
 
   closedir(dir);
@@ -7550,9 +7533,8 @@ hwloc_linuxfs_lookup_drm_class(struct hwloc_backend *backend, unsigned osdev_fla
 }
 
 static int
-hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7572,11 +7554,11 @@ hwloc_linuxfs_lookup_dma_class(struct hwloc_backend *backend, unsigned osdev_fla
     err = snprintf(path, sizeof(path), "/sys/class/dma/%s", dirent->d_name);
     if ((size_t) err >= sizeof(path))
       continue;
-    parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags);
+    parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags);
     if (!parent)
       continue;
 
-    hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_DMA, dirent->d_name);
+    hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_DMA, dirent->d_name);
   }
 
   closedir(dir);
@@ -7619,9 +7601,8 @@ hwloc_linuxfs_cxlmem_fillinfos(int root_fd,
 }
 
 static int
-hwloc_linuxfs_lookup_cxlmem(struct hwloc_backend *backend, unsigned osdev_flags)
+hwloc_linuxfs_lookup_cxlmem(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data, unsigned osdev_flags)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -7636,11 +7617,11 @@ hwloc_linuxfs_lookup_cxlmem(struct hwloc_backend *backend, unsigned osdev_flags)
 	continue;
 
       snprintf(path, sizeof(path), "/sys/bus/cxl/devices/%s", dirent->d_name);
-      parent = hwloc_linuxfs_find_osdev_parent(backend, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
+      parent = hwloc_linuxfs_find_osdev_parent(topology, root_fd, path, osdev_flags | HWLOC_LINUXFS_OSDEV_FLAG_UNDER_BUS | HWLOC_LINUXFS_OSDEV_FLAG_USE_PARENT_ATTRS);
       if (!parent)
 	continue;
 
-      obj = hwloc_linux_add_os_device(backend, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
+      obj = hwloc_linux_add_os_device(topology, parent, HWLOC_OBJ_OSDEV_BLOCK, dirent->d_name);
 
       hwloc_linuxfs_cxlmem_fillinfos(root_fd, obj, path);
     }
@@ -7971,10 +7952,9 @@ hwloc__get_firmware_dmi_memory_info(struct hwloc_topology *topology,
 #define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
 
 static int
-hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
+hwloc_linuxfs_pci_look_pcidevices(struct hwloc_topology *topology,
+                                  struct hwloc_linux_backend_data_s *data)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
-  struct hwloc_topology *topology = backend->topology;
   hwloc_obj_t tree = NULL;
   int root_fd = data->root_fd;
   DIR *dir;
@@ -8137,15 +8117,14 @@ hwloc_linuxfs_pci_look_pcidevices(struct hwloc_backend *backend)
 
   closedir(dir);
 
-  hwloc_pcidisc_tree_attach(backend->topology, tree);
+  hwloc_pcidisc_tree_attach(topology, tree);
   return 0;
 }
 
 static int
-hwloc_linuxfs_pci_look_pcislots(struct hwloc_backend *backend)
+hwloc_linuxfs_pci_look_pcislots(struct hwloc_topology *topology,
+                                struct hwloc_linux_backend_data_s *data)
 {
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   int root_fd = data->root_fd;
   DIR *dir;
   struct dirent *dirent;
@@ -8204,12 +8183,13 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
    */
 
   struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
 #ifdef HWLOC_HAVE_LINUXIO
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
 #endif /* HWLOC_HAVE_LINUXIO */
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
-    hwloc_linuxfs_look_cpu(backend, dstatus);
+    hwloc_linuxfs_look_cpu(topology, data, dstatus);
     return 0;
   }
 
@@ -8223,7 +8203,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       && (bfilter != HWLOC_TYPE_FILTER_KEEP_NONE
 	  || pfilter != HWLOC_TYPE_FILTER_KEEP_NONE)) {
 #ifdef HWLOC_HAVE_LINUXPCI
-    hwloc_linuxfs_pci_look_pcidevices(backend);
+    hwloc_linuxfs_pci_look_pcidevices(topology, data);
     /* no need to run another PCI phase */
     dstatus->excluded_phases |= HWLOC_DISC_PHASE_PCI;
 #endif /* HWLOC_HAVE_LINUXPCI */
@@ -8238,9 +8218,9 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
      * We should disable this phase when XML/synthetic is used but this is not enabled by default anyway.
      */
 #ifdef HWLOC_HAVE_LINUXPCI
-    hwloc_linuxfs_pci_look_pcislots(backend);
+    hwloc_linuxfs_pci_look_pcislots(topology, data);
 #endif /* HWLOC_HAVE_LINUXPCI */
-    hwloc_sysfscpukinds_annotate_packages(backend);
+    hwloc_sysfscpukinds_annotate_packages(topology, data);
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_IO
@@ -8251,23 +8231,23 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     if (ofilter == HWLOC_TYPE_FILTER_KEEP_ALL)
       osdev_flags |= HWLOC_LINUXFS_OSDEV_FLAG_FIND_USB;
 
-    hwloc_linuxfs_lookup_block_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_dax_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_net_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_infiniband_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_ve_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_bxi_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_cxi_class(backend, osdev_flags);
-    hwloc_linuxfs_lookup_cxlmem(backend, osdev_flags);
+    hwloc_linuxfs_lookup_block_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_dax_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_net_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_infiniband_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_ve_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_bxi_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_cxi_class(topology, data, osdev_flags);
+    hwloc_linuxfs_lookup_cxlmem(topology, data, osdev_flags);
     if (ofilter != HWLOC_TYPE_FILTER_KEEP_IMPORTANT) {
-      hwloc_linuxfs_lookup_drm_class(backend, osdev_flags);
-      hwloc_linuxfs_lookup_dma_class(backend, osdev_flags);
+      hwloc_linuxfs_lookup_drm_class(topology, data, osdev_flags);
+      hwloc_linuxfs_lookup_dma_class(topology, data, osdev_flags);
     }
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_MISC
       && mfilter != HWLOC_TYPE_FILTER_KEEP_NONE) {
-    hwloc__get_firmware_dmi_memory_info(topology, backend->private_data);
+    hwloc__get_firmware_dmi_memory_info(topology, data);
   }
 #endif /* HWLOC_HAVE_LINUXIO */
 
