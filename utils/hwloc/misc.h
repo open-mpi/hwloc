@@ -442,7 +442,7 @@ static __hwloc_inline void
 hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *matrix, int logical, int show_types)
 {
   unsigned i, j;
-#define MATRIX_ITEM_SIZE_MAX 17 /* 16 + ending \0 */
+#define MATRIX_ITEM_SIZE_MAX 24 /* uint64_t + space + ending \0 */
   char *headers;
   char *values;
   char *buf;
@@ -456,7 +456,7 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
     return;
   }
 
-  snprintf(headers, MATRIX_ITEM_SIZE_MAX, "           index" /* 16 */);
+  snprintf(headers, MATRIX_ITEM_SIZE_MAX, "                  index" /* 24 */);
   max = 5;
   /* prepare column headers */
   for(i=0, buf = headers + MATRIX_ITEM_SIZE_MAX;
