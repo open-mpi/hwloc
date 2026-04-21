@@ -3186,9 +3186,18 @@ enabled for the current topology.
   See \ref hwlocality_levelzero.
  </dd>
 
-<dt>AMD ROCm SMI Library (RSMI)</dt>
+<dt>AMD's new SMI Library</dt>
  <dd>
-  hwloc/rsmi.h enables interoperability with the AMD ROCm SMI interface.
+  hwloc/amdsmi.h enables interoperability with the new AMD SMI interface (<tt>amd_smi/amdsmi.h</tt>).
+  It may return the list of processors near an AMD GPU.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
+  See \ref hwlocality_amdsmi.
+ </dd>
+
+<dt>AMD's old ROCm SMI Library</dt>
+ <dd>
+  hwloc/rsmi.h enables interoperability with the old AMD ROCm SMI interface (<tt>rocm_smi/rocm_smi.h</tt>).
   It may return the list of processors near an AMD GPU.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
