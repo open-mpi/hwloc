@@ -410,10 +410,10 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
 {
   unsigned i, j;
 #define MATRIX_ITEM_SIZE_MAX 24 /* uint64_t + space + ending \0 */
-  char *headers;
-  char *values;
+  char *headers; /* row of headers, also used as headers for rows */
+  char *values; /* row of values */
   char *buf;
-  size_t len, max;
+  size_t len, max, maxrowheader;
 
   headers = malloc((nbobjs+1)*MATRIX_ITEM_SIZE_MAX);
   values = malloc(nbobjs*nbobjs*MATRIX_ITEM_SIZE_MAX);
@@ -423,9 +423,10 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
     return;
   }
 
+  /* prepare column headers */
   snprintf(headers, MATRIX_ITEM_SIZE_MAX, "                  index" /* 24 */);
   max = 5;
-  /* prepare column headers */
+  maxrowheader = 5;
   for(i=0, buf = headers + MATRIX_ITEM_SIZE_MAX;
       i<nbobjs;
       i++, buf += MATRIX_ITEM_SIZE_MAX) {
@@ -446,21 +447,21 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
       len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX,
                      "%d", (int) index);
     if (len >= max)
-      max = len;
+      max = maxrowheader = len; /* update for maxrowheader and max cell lens */
     /* store it at the end of the slot in headers */
     memcpy(buf + (MATRIX_ITEM_SIZE_MAX - len - 1), tmp, len+1);
     /* and pad with spaces at the begining */
     memset(buf, ' ', MATRIX_ITEM_SIZE_MAX - len - 1);
   }
-  /* prepare values */
+  /* prepare rows of values */
   for(i=0, buf = values;
       i<nbobjs;
       i++) {
     for(j=0; j<nbobjs; j++, buf += MATRIX_ITEM_SIZE_MAX) {
-     char tmp[MATRIX_ITEM_SIZE_MAX];
-     len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX, "%llu", (unsigned long long) matrix[i*nbobjs+j]);
+      char tmp[MATRIX_ITEM_SIZE_MAX];
+      len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX, "%llu", (unsigned long long) matrix[i*nbobjs+j]);
       if (len >= max)
-        max = len;
+        max = len; /* only update the max cell len */
       /* store it at the end of the slot in values */
       memcpy(buf + (MATRIX_ITEM_SIZE_MAX - len - 1), tmp, len+1);
       /* and pad with spaces at the begining */
@@ -469,11 +470,12 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
   }
 
   /* now display everything */
-  for(i=0; i<nbobjs + 1; i++)
-    fprintf(output, " %s", headers + i*MATRIX_ITEM_SIZE_MAX + MATRIX_ITEM_SIZE_MAX-max-1);
+  fprintf(output, " %s", headers + MATRIX_ITEM_SIZE_MAX-maxrowheader-1);
+  for(i=0; i<nbobjs; i++)
+    fprintf(output, " %s", headers + (i+1)*MATRIX_ITEM_SIZE_MAX + MATRIX_ITEM_SIZE_MAX-max-1);
   fprintf(output, "\n");
   for(i=0; i<nbobjs; i++) {
-    fprintf(output, " %s", headers + (i+1)*MATRIX_ITEM_SIZE_MAX + MATRIX_ITEM_SIZE_MAX-max-1);
+    fprintf(output, " %s", headers + (i+1)*MATRIX_ITEM_SIZE_MAX + MATRIX_ITEM_SIZE_MAX-maxrowheader-1);
     for(j=0; j<nbobjs; j++)
       fprintf(output, " %s", values + (i*nbobjs+j)*MATRIX_ITEM_SIZE_MAX + MATRIX_ITEM_SIZE_MAX-max-1);
     fprintf(output, "\n");
