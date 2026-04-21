@@ -20,9 +20,6 @@
 #include "hwloc.h"
 #include "hwloc/autogen/config.h"
 #include "hwloc/helper.h"
-#ifdef HWLOC_LINUX_SYS
-#include "hwloc/linux.h"
-#endif
 
 #include <cuda.h> /* for CUDA_VERSION */
 #include <cuda_runtime_api.h>

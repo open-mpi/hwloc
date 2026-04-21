@@ -18,9 +18,6 @@
 #include "hwloc.h"
 #include "hwloc/autogen/config.h"
 #include "hwloc/helper.h"
-#ifdef HWLOC_LINUX_SYS
-#include "hwloc/linux.h"
-#endif
 
 #ifdef __APPLE__
 #include <OpenCL/cl.h>

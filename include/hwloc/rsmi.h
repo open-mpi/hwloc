@@ -19,9 +19,6 @@
 #include "hwloc.h"
 #include "hwloc/autogen/config.h"
 #include "hwloc/helper.h"
-#ifdef HWLOC_LINUX_SYS
-#include "hwloc/linux.h"
-#endif
 
 #include <rocm_smi/rocm_smi.h>
 
