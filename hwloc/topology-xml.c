@@ -84,7 +84,6 @@ hwloc_xml_callbacks_reset(void)
  ********* XML import (common routines) *********
  ************************************************/
 
-#define _HWLOC_OBJ_CACHE_OLD (HWLOC_OBJ_TYPE_MAX+1) /* temporarily used when importing pre-v2.0 attribute-less cache types */
 #define _HWLOC_OBJ_FUTURE    (HWLOC_OBJ_TYPE_MAX+2) /* temporarily used when ignoring future types */
 
 static void
@@ -154,7 +153,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 
   else if (!strcmp(name, "cache_size")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
-    if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
+    if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
       obj->attr->cache.size = lvalue;
     else if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring cache_size attribute for non-cache object type\n",
@@ -163,7 +162,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 
   else if (!strcmp(name, "cache_linesize")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
-    if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
+    if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
       obj->attr->cache.linesize = lvalue;
     else if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring cache_linesize attribute for non-cache object type\n",
@@ -172,7 +171,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 
   else if (!strcmp(name, "cache_associativity")) {
     int lvalue = atoi(value);
-    if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
+    if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
       obj->attr->cache.associativity = lvalue;
     else if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring cache_associativity attribute for non-cache object type\n",
@@ -181,7 +180,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 
   else if (!strcmp(name, "cache_type")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
-    if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE) {
+    if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
       if (lvalue == HWLOC_OBJ_CACHE_UNIFIED
 	  || lvalue == HWLOC_OBJ_CACHE_DATA
 	  || lvalue == HWLOC_OBJ_CACHE_INSTRUCTION)
@@ -206,7 +205,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 
   else if (!strcmp(name, "depth")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
-     if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE) {
+     if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
 	obj->attr->cache.depth = lvalue;
      } else if (obj->type == HWLOC_OBJ_GROUP || obj->type == HWLOC_OBJ_BRIDGE) {
        /* will be overwritten by the core */
