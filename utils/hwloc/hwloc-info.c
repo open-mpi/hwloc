@@ -760,7 +760,7 @@ hwloc_info_show_topology_infos(hwloc_topology_t topology)
     else {
       char name[256];
       snprintf(name, sizeof(name), "info %s", infos->array[i].name);
-      if (!strcmp(only_attr_name, name))
+      if (!strcasecmp(only_attr_name, name))
         printf("%s\n", infos->array[i].value);
     }
 }
