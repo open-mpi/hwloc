@@ -194,6 +194,15 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	      state->global->msgprefix);
   }
 
+  else if (!strcmp(name, "cache_inclusive")) {
+    int lvalue = atoi(value);
+    if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
+      obj->attr->cache.inclusive = lvalue;
+    else if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring cache_inclusive attribute for non-cache object type\n",
+	      state->global->msgprefix);
+  }
+
   else if (!strcmp(name, "local_memory")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_NUMANODE)
@@ -466,6 +475,10 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
             hwloc__add_info(&topology->infos, infoname, infovalue);
             return 0;
           }
+        } else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
+          /* v2 inclusiveness is an infoattr */
+          if (!strcmp(infoname, "Inclusive"))
+            obj->attr->cache.inclusive = atoi(infovalue);
         } else if (obj->type == HWLOC_OBJ_OS_DEVICE) {
           /* if infoname contains Size (but is not SectorSize), add "KiB" suffix to infovalue if missing */
           if (strstr(infoname, "Size") && strcmp(infoname, "SectorSize") && !strstr(infovalue, "KiB")) {
@@ -2392,6 +2405,12 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     state->new_prop(state, "cache_associativity", tmp);
     sprintf(tmp, "%d", (int) obj->attr->cache.type);
     state->new_prop(state, "cache_type", tmp);
+    if (obj->attr->cache.inclusive) {
+      if (!v2export) {
+        sprintf(tmp, "%d", (int) obj->attr->cache.inclusive);
+        state->new_prop(state, "cache_inclusive", tmp);
+      }
+    }
     break;
   case HWLOC_OBJ_GROUP:
       sprintf(tmp, "%u", obj->attr->group.kind);
@@ -2467,6 +2486,12 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   if (v2export && !obj->parent)
     for(i=0; i<topology->infos.count; i++)
       hwloc__xml_export_info_attr(state, topology->infos.array[i].name, topology->infos.array[i].value);
+  if (v2export
+      && (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
+      && obj->attr->cache.inclusive) {
+    sprintf(tmp, "%d", (int) obj->attr->cache.inclusive);
+    hwloc__xml_export_info_attr(state, "Inclusive", tmp);
+  }
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
     /* v2 gpus had Backend inside the object itself */

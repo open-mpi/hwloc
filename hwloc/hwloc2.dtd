@@ -23,6 +23,7 @@
 <!ATTLIST object cache_linesize CDATA "0" >
 <!ATTLIST object cache_associativity CDATA "0" >
 <!ATTLIST object cache_type CDATA "0" >
+<!ATTLIST object cache_inclusive CDATA "0" >
 <!ATTLIST object cpuset CDATA "0" >
 <!ATTLIST object complete_cpuset CDATA "" >
 <!ATTLIST object allowed_cpuset CDATA "" >

@@ -705,6 +705,9 @@ union hwloc_obj_attr_u {
     unsigned linesize;                    /**< \brief Cache-line size in bytes. 0 if unknown */
     int associativity;                    /**< \brief Ways of associativity,
                                            *  -1 if fully associative, 0 if unknown */
+    int inclusive;                        /**< \brief 1 if inclusive, 0 if unknown.
+                                           * Other values may be used for exclusive caches in the future.
+                                           * Currently only set on x86. */
   } cache;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {

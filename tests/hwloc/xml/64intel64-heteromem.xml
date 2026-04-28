@@ -8,8 +8,7 @@
       <info name="CPUModelNumber" value="87"/>
       <info name="CPUModel" value="06/57"/>
       <info name="CPUStepping" value="0"/>
-      <object type="L3Cache" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000081" complete_nodeset="0x00000081" gp_index="10" id="obj10" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
-        <info name="Inclusive" value="1"/>
+      <object type="L3Cache" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000081" complete_nodeset="0x00000081" gp_index="10" id="obj10" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0" cache_inclusive="1">
         <object type="NUMANode" os_index="0" cpuset="0x000f000f,0x000f000f" complete_cpuset="0x000f000f,0x000f000f" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2" subtype="DRAM" local_memory="1073741824">
           <info name="MemoryTier" value="1"/>
         </object>
@@ -61,8 +60,7 @@
           </object>
         </object>
       </object>
-      <object type="L3Cache" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000012" complete_nodeset="0x00000012" gp_index="11" id="obj11" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
-        <info name="Inclusive" value="1"/>
+      <object type="L3Cache" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000012" complete_nodeset="0x00000012" gp_index="11" id="obj11" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0" cache_inclusive="1">
         <object type="NUMANode" os_index="1" cpuset="0x00f000f0,0x00f000f0" complete_cpuset="0x00f000f0,0x00f000f0" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="3" id="obj3" subtype="DRAM" local_memory="1073741824">
           <info name="MemoryTier" value="1"/>
         </object>
@@ -114,8 +112,7 @@
           </object>
         </object>
       </object>
-      <object type="L3Cache" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000024" complete_nodeset="0x00000024" gp_index="12" id="obj12" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
-        <info name="Inclusive" value="1"/>
+      <object type="L3Cache" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000024" complete_nodeset="0x00000024" gp_index="12" id="obj12" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0" cache_inclusive="1">
         <object type="NUMANode" os_index="2" cpuset="0x0f000f00,0x0f000f00" complete_cpuset="0x0f000f00,0x0f000f00" nodeset="0x00000004" complete_nodeset="0x00000004" gp_index="4" id="obj4" subtype="DRAM" local_memory="1073741824">
           <info name="MemoryTier" value="1"/>
         </object>
@@ -167,8 +164,7 @@
           </object>
         </object>
       </object>
-      <object type="L3Cache" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000048" complete_nodeset="0x00000048" gp_index="13" id="obj13" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0">
-        <info name="Inclusive" value="1"/>
+      <object type="L3Cache" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000048" complete_nodeset="0x00000048" gp_index="13" id="obj13" subtype="MemorySideCache" cache_size="2147483648" depth="3" cache_linesize="64" cache_associativity="1" cache_type="0" cache_inclusive="1">
         <object type="NUMANode" os_index="3" cpuset="0xf000f000,0xf000f000" complete_cpuset="0xf000f000,0xf000f000" nodeset="0x00000008" complete_nodeset="0x00000008" gp_index="5" id="obj5" subtype="DRAM" local_memory="1073741824">
           <info name="MemoryTier" value="1"/>
         </object>

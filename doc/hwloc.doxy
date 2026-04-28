@@ -2359,10 +2359,6 @@ for instance containing "hmem1" for specific-purpose memory or "ndbus0" for NVDI
 <dt>PCIBusID=0006:00:00.0 (GPUMemory NUMA Nodes)</dt>
 <dd>The PCI bus ID of the GPU whose memory is exposed in this NUMA node.
 </dd>
-<dt>Inclusive=1 (Caches)</dt>
-<dd>The inclusiveness of a cache (1 if inclusive, 0 otherwise).
-Currently only available on x86 processors.
-</dd>
 <dt>SolarisProcessorGroup=CPU_PM_Active_Power_Domain (Group)</dt>
 <dd>
 The Solaris kstat processor group name that was used to build this Group object.
@@ -5080,6 +5076,9 @@ removed since their non-strict variants are sufficient.
 
 
 \section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+
+The <dt>Inclusive</dt> cache info attribute is replaced by the
+<tt>inclusive</tt> field in the hwloc_obj_attr_u::hwloc_cache_attr_s structure.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete

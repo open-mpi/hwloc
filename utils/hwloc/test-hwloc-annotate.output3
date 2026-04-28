@@ -14,13 +14,9 @@
       <info name="CPUStepping" value="4"/>
       <object type="NUMANode" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="294" id="obj294" local_memory="810234351616"/>
       <object type="L3Cache" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="8" id="obj8" cache_size="34603008" depth="3" cache_linesize="64" cache_associativity="11" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="7" id="obj7" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="5" id="obj5" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
-            <info name="Inclusive" value="0"/>
             <object type="L1iCache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="6" id="obj6" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="2">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="2" id="obj2">
                 <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="4" id="obj4"/>
               </object>
@@ -28,11 +24,8 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="13" id="obj13" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1Cache" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="11" id="obj11" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
-            <info name="Inclusive" value="0"/>
             <object type="L1iCache" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="12" id="obj12" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="2">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="9" id="obj9">
                 <object type="PU" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" gp_index="10" id="obj10"/>
               </object>
@@ -187,13 +180,9 @@
       <info name="CPUStepping" value="4"/>
       <object type="NUMANode" os_index="1" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="295" id="obj295" local_memory="811737923584"/>
       <object type="L3Cache" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="130" id="obj130" cache_size="34603008" depth="3" cache_linesize="64" cache_associativity="11" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="129" id="obj129" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1Cache" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="127" id="obj127" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
-            <info name="Inclusive" value="0"/>
             <object type="L1iCache" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="128" id="obj128" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="2">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="0" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="124" id="obj124">
                 <object type="PU" os_index="24" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="126" id="obj126"/>
               </object>
@@ -201,11 +190,8 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="135" id="obj135" cache_size="1048576" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1Cache" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="133" id="obj133" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="1">
-            <info name="Inclusive" value="0"/>
             <object type="L1iCache" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="134" id="obj134" cache_size="32768" depth="1" cache_linesize="64" cache_associativity="8" cache_type="2">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="1" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="131" id="obj131">
                 <object type="PU" os_index="25" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000002" complete_nodeset="0x00000002" gp_index="132" id="obj132"/>
               </object>

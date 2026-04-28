@@ -362,7 +362,7 @@ static void read_amd_caches_topoext(struct procinfo *infos, struct cpuiddump *sr
 	cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
-      cache->inclusive = edx & 0x2;
+      cache->inclusive = !!(edx & 0x2);
 
       hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
 		  cachenum, cache->level,
@@ -439,7 +439,7 @@ static void read_intel_caches(struct hwloc_x86_backend_data_s *data, struct proc
         cache->ways = ways;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
-      cache->inclusive = edx & 0x2;
+      cache->inclusive = !!(edx & 0x2);
 
       hwloc_debug("cache %u L%u%c t%u linesize %lu linepart %lu ways %lu sets %lu, size %luKB\n",
 		  cachenum, cache->level,
@@ -1241,8 +1241,7 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
 	if (cache) {
 	  /* Found cache above that PU, annotate if no such attribute yet */
-	  if (!hwloc_obj_get_info_by_name(cache, "Inclusive"))
-	    hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
+          cache->attr->cache.inclusive = infos[i].cache[l].inclusive;
 	  hwloc_bitmap_andnot(remaining_cpuset, remaining_cpuset, cache->cpuset);
 	} else {
 	  /* Add the missing cache */
@@ -1285,8 +1284,8 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 	  cache->attr->cache.linesize = infos[i].cache[l].linesize;
 	  cache->attr->cache.associativity = infos[i].cache[l].ways;
 	  cache->attr->cache.type = infos[i].cache[l].type;
+          cache->attr->cache.inclusive = infos[i].cache[l].inclusive;
 	  cache->cpuset = cache_cpuset;
-	  hwloc_obj_add_info(cache, "Inclusive", infos[i].cache[l].inclusive ? "1" : "0");
 	  hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
 				   level, cacheid, cache_cpuset);
 	  hwloc__insert_object_by_cpuset(topology, NULL, cache, "x86:cache");

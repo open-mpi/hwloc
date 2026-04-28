@@ -10,19 +10,14 @@
       <info name="CPUModel" value="AMD Opteron(TM) Processor 6272                 "/>
       <info name="CPUStepping" value="2"/>
       <object type="L3Cache" cpuset="0x000000ff" complete_cpuset="0x000000ff" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000003" complete_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -30,17 +25,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x0000000c" complete_cpuset="0x0000000c" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x0000000c" complete_cpuset="0x0000000c" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000004" complete_cpuset="0x00000004" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="2" cpuset="0x00000004" complete_cpuset="0x00000004" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="2" cpuset="0x00000004" complete_cpuset="0x00000004" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000008" complete_cpuset="0x00000008" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="3" cpuset="0x00000008" complete_cpuset="0x00000008" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="3" cpuset="0x00000008" complete_cpuset="0x00000008" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -48,17 +39,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00000030" complete_cpuset="0x00000030" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000030" complete_cpuset="0x00000030" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000020" complete_cpuset="0x00000020" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="5" cpuset="0x00000020" complete_cpuset="0x00000020" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="5" cpuset="0x00000020" complete_cpuset="0x00000020" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -66,17 +53,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x000000c0" complete_cpuset="0x000000c0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x000000c0" complete_cpuset="0x000000c0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000080" complete_cpuset="0x00000080" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="7" cpuset="0x00000080" complete_cpuset="0x00000080" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="7" cpuset="0x00000080" complete_cpuset="0x00000080" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -85,19 +68,14 @@
         </object>
       </object>
       <object type="L3Cache" cpuset="0x0000ff00" complete_cpuset="0x0000ff00" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00000300" complete_cpuset="0x00000300" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000300" complete_cpuset="0x00000300" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000100" complete_cpuset="0x00000100" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="8" cpuset="0x00000100" complete_cpuset="0x00000100" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="8" cpuset="0x00000100" complete_cpuset="0x00000100" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000200" complete_cpuset="0x00000200" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="9" cpuset="0x00000200" complete_cpuset="0x00000200" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="9" cpuset="0x00000200" complete_cpuset="0x00000200" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -105,17 +83,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00000c00" complete_cpuset="0x00000c00" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000c00" complete_cpuset="0x00000c00" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000400" complete_cpuset="0x00000400" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="10" cpuset="0x00000400" complete_cpuset="0x00000400" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="10" cpuset="0x00000400" complete_cpuset="0x00000400" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000800" complete_cpuset="0x00000800" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="11" cpuset="0x00000800" complete_cpuset="0x00000800" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="11" cpuset="0x00000800" complete_cpuset="0x00000800" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -123,17 +97,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00003000" complete_cpuset="0x00003000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00003000" complete_cpuset="0x00003000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00002000" complete_cpuset="0x00002000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="13" cpuset="0x00002000" complete_cpuset="0x00002000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="13" cpuset="0x00002000" complete_cpuset="0x00002000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -141,17 +111,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x0000c000" complete_cpuset="0x0000c000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x0000c000" complete_cpuset="0x0000c000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00004000" complete_cpuset="0x00004000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="14" cpuset="0x00004000" complete_cpuset="0x00004000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="14" cpuset="0x00004000" complete_cpuset="0x00004000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00008000" complete_cpuset="0x00008000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="15" cpuset="0x00008000" complete_cpuset="0x00008000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="15" cpuset="0x00008000" complete_cpuset="0x00008000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -167,19 +133,14 @@
       <info name="CPUModel" value="AMD Opteron(TM) Processor 6272                 "/>
       <info name="CPUStepping" value="2"/>
       <object type="L3Cache" cpuset="0x00ff0000" complete_cpuset="0x00ff0000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00030000" complete_cpuset="0x00030000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00030000" complete_cpuset="0x00030000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00010000" complete_cpuset="0x00010000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="0" cpuset="0x00010000" complete_cpuset="0x00010000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="16" cpuset="0x00010000" complete_cpuset="0x00010000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00020000" complete_cpuset="0x00020000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="1" cpuset="0x00020000" complete_cpuset="0x00020000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="17" cpuset="0x00020000" complete_cpuset="0x00020000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -187,17 +148,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x000c0000" complete_cpuset="0x000c0000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x000c0000" complete_cpuset="0x000c0000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00040000" complete_cpuset="0x00040000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="2" cpuset="0x00040000" complete_cpuset="0x00040000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="18" cpuset="0x00040000" complete_cpuset="0x00040000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00080000" complete_cpuset="0x00080000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="3" cpuset="0x00080000" complete_cpuset="0x00080000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="19" cpuset="0x00080000" complete_cpuset="0x00080000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -205,17 +162,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00300000" complete_cpuset="0x00300000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00300000" complete_cpuset="0x00300000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00100000" complete_cpuset="0x00100000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="4" cpuset="0x00100000" complete_cpuset="0x00100000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="20" cpuset="0x00100000" complete_cpuset="0x00100000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00200000" complete_cpuset="0x00200000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="5" cpuset="0x00200000" complete_cpuset="0x00200000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="21" cpuset="0x00200000" complete_cpuset="0x00200000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -223,17 +176,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00c00000" complete_cpuset="0x00c00000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00c00000" complete_cpuset="0x00c00000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00400000" complete_cpuset="0x00400000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="6" cpuset="0x00400000" complete_cpuset="0x00400000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="22" cpuset="0x00400000" complete_cpuset="0x00400000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00800000" complete_cpuset="0x00800000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="7" cpuset="0x00800000" complete_cpuset="0x00800000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="23" cpuset="0x00800000" complete_cpuset="0x00800000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -242,19 +191,14 @@
         </object>
       </object>
       <object type="L3Cache" cpuset="0xff000000" complete_cpuset="0xff000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x03000000" complete_cpuset="0x03000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="8" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="24" cpuset="0x01000000" complete_cpuset="0x01000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="9" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="25" cpuset="0x02000000" complete_cpuset="0x02000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -262,17 +206,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x0c000000" complete_cpuset="0x0c000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x0c000000" complete_cpuset="0x0c000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x04000000" complete_cpuset="0x04000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="10" cpuset="0x04000000" complete_cpuset="0x04000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="26" cpuset="0x04000000" complete_cpuset="0x04000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x08000000" complete_cpuset="0x08000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="11" cpuset="0x08000000" complete_cpuset="0x08000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="27" cpuset="0x08000000" complete_cpuset="0x08000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -280,17 +220,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x30000000" complete_cpuset="0x30000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x30000000" complete_cpuset="0x30000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x10000000" complete_cpuset="0x10000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="12" cpuset="0x10000000" complete_cpuset="0x10000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="28" cpuset="0x10000000" complete_cpuset="0x10000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x20000000" complete_cpuset="0x20000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="13" cpuset="0x20000000" complete_cpuset="0x20000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="29" cpuset="0x20000000" complete_cpuset="0x20000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -298,17 +234,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0xc0000000" complete_cpuset="0xc0000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0xc0000000" complete_cpuset="0xc0000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x40000000" complete_cpuset="0x40000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="14" cpuset="0x40000000" complete_cpuset="0x40000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="30" cpuset="0x40000000" complete_cpuset="0x40000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x80000000" complete_cpuset="0x80000000" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="15" cpuset="0x80000000" complete_cpuset="0x80000000" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="31" cpuset="0x80000000" complete_cpuset="0x80000000" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -324,19 +256,14 @@
       <info name="CPUModel" value="AMD Opteron(TM) Processor 6272                 "/>
       <info name="CPUStepping" value="2"/>
       <object type="L3Cache" cpuset="0x000000ff,0x0" complete_cpuset="0x000000ff,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00000003,0x0" complete_cpuset="0x00000003,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000003,0x0" complete_cpuset="0x00000003,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000001,0x0" complete_cpuset="0x00000001,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="0" cpuset="0x00000001,0x0" complete_cpuset="0x00000001,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="32" cpuset="0x00000001,0x0" complete_cpuset="0x00000001,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000002,0x0" complete_cpuset="0x00000002,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="1" cpuset="0x00000002,0x0" complete_cpuset="0x00000002,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="33" cpuset="0x00000002,0x0" complete_cpuset="0x00000002,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -344,17 +271,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x0000000c,0x0" complete_cpuset="0x0000000c,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x0000000c,0x0" complete_cpuset="0x0000000c,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000004,0x0" complete_cpuset="0x00000004,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="2" cpuset="0x00000004,0x0" complete_cpuset="0x00000004,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="34" cpuset="0x00000004,0x0" complete_cpuset="0x00000004,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000008,0x0" complete_cpuset="0x00000008,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="3" cpuset="0x00000008,0x0" complete_cpuset="0x00000008,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="35" cpuset="0x00000008,0x0" complete_cpuset="0x00000008,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -362,17 +285,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00000030,0x0" complete_cpuset="0x00000030,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000030,0x0" complete_cpuset="0x00000030,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000010,0x0" complete_cpuset="0x00000010,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="4" cpuset="0x00000010,0x0" complete_cpuset="0x00000010,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="36" cpuset="0x00000010,0x0" complete_cpuset="0x00000010,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000020,0x0" complete_cpuset="0x00000020,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="5" cpuset="0x00000020,0x0" complete_cpuset="0x00000020,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="37" cpuset="0x00000020,0x0" complete_cpuset="0x00000020,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -380,17 +299,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x000000c0,0x0" complete_cpuset="0x000000c0,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x000000c0,0x0" complete_cpuset="0x000000c0,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000040,0x0" complete_cpuset="0x00000040,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="6" cpuset="0x00000040,0x0" complete_cpuset="0x00000040,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="38" cpuset="0x00000040,0x0" complete_cpuset="0x00000040,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000080,0x0" complete_cpuset="0x00000080,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="7" cpuset="0x00000080,0x0" complete_cpuset="0x00000080,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="39" cpuset="0x00000080,0x0" complete_cpuset="0x00000080,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -399,19 +314,14 @@
         </object>
       </object>
       <object type="L3Cache" cpuset="0x0000ff00,0x0" complete_cpuset="0x0000ff00,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00000300,0x0" complete_cpuset="0x00000300,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000300,0x0" complete_cpuset="0x00000300,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000100,0x0" complete_cpuset="0x00000100,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="8" cpuset="0x00000100,0x0" complete_cpuset="0x00000100,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="40" cpuset="0x00000100,0x0" complete_cpuset="0x00000100,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000200,0x0" complete_cpuset="0x00000200,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="9" cpuset="0x00000200,0x0" complete_cpuset="0x00000200,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="41" cpuset="0x00000200,0x0" complete_cpuset="0x00000200,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -419,17 +329,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00000c00,0x0" complete_cpuset="0x00000c00,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00000c00,0x0" complete_cpuset="0x00000c00,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00000400,0x0" complete_cpuset="0x00000400,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="10" cpuset="0x00000400,0x0" complete_cpuset="0x00000400,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="42" cpuset="0x00000400,0x0" complete_cpuset="0x00000400,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00000800,0x0" complete_cpuset="0x00000800,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="11" cpuset="0x00000800,0x0" complete_cpuset="0x00000800,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="43" cpuset="0x00000800,0x0" complete_cpuset="0x00000800,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -437,17 +343,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00003000,0x0" complete_cpuset="0x00003000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00003000,0x0" complete_cpuset="0x00003000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00001000,0x0" complete_cpuset="0x00001000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="12" cpuset="0x00001000,0x0" complete_cpuset="0x00001000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="44" cpuset="0x00001000,0x0" complete_cpuset="0x00001000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00002000,0x0" complete_cpuset="0x00002000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="13" cpuset="0x00002000,0x0" complete_cpuset="0x00002000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="45" cpuset="0x00002000,0x0" complete_cpuset="0x00002000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -455,17 +357,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x0000c000,0x0" complete_cpuset="0x0000c000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x0000c000,0x0" complete_cpuset="0x0000c000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00004000,0x0" complete_cpuset="0x00004000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="14" cpuset="0x00004000,0x0" complete_cpuset="0x00004000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="46" cpuset="0x00004000,0x0" complete_cpuset="0x00004000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00008000,0x0" complete_cpuset="0x00008000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="15" cpuset="0x00008000,0x0" complete_cpuset="0x00008000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="47" cpuset="0x00008000,0x0" complete_cpuset="0x00008000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -481,19 +379,14 @@
       <info name="CPUModel" value="AMD Opteron(TM) Processor 6272                 "/>
       <info name="CPUStepping" value="2"/>
       <object type="L3Cache" cpuset="0x00ff0000,0x0" complete_cpuset="0x00ff0000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x00030000,0x0" complete_cpuset="0x00030000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00030000,0x0" complete_cpuset="0x00030000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00010000,0x0" complete_cpuset="0x00010000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="0" cpuset="0x00010000,0x0" complete_cpuset="0x00010000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="48" cpuset="0x00010000,0x0" complete_cpuset="0x00010000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00020000,0x0" complete_cpuset="0x00020000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="1" cpuset="0x00020000,0x0" complete_cpuset="0x00020000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="49" cpuset="0x00020000,0x0" complete_cpuset="0x00020000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -501,17 +394,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x000c0000,0x0" complete_cpuset="0x000c0000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x000c0000,0x0" complete_cpuset="0x000c0000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00040000,0x0" complete_cpuset="0x00040000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="2" cpuset="0x00040000,0x0" complete_cpuset="0x00040000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="50" cpuset="0x00040000,0x0" complete_cpuset="0x00040000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00080000,0x0" complete_cpuset="0x00080000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="3" cpuset="0x00080000,0x0" complete_cpuset="0x00080000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="51" cpuset="0x00080000,0x0" complete_cpuset="0x00080000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -519,17 +408,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00300000,0x0" complete_cpuset="0x00300000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00300000,0x0" complete_cpuset="0x00300000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00100000,0x0" complete_cpuset="0x00100000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="4" cpuset="0x00100000,0x0" complete_cpuset="0x00100000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="52" cpuset="0x00100000,0x0" complete_cpuset="0x00100000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00200000,0x0" complete_cpuset="0x00200000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="5" cpuset="0x00200000,0x0" complete_cpuset="0x00200000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="53" cpuset="0x00200000,0x0" complete_cpuset="0x00200000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -537,17 +422,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x00c00000,0x0" complete_cpuset="0x00c00000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x00c00000,0x0" complete_cpuset="0x00c00000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x00400000,0x0" complete_cpuset="0x00400000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="6" cpuset="0x00400000,0x0" complete_cpuset="0x00400000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="54" cpuset="0x00400000,0x0" complete_cpuset="0x00400000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x00800000,0x0" complete_cpuset="0x00800000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="7" cpuset="0x00800000,0x0" complete_cpuset="0x00800000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="55" cpuset="0x00800000,0x0" complete_cpuset="0x00800000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -556,19 +437,14 @@
         </object>
       </object>
       <object type="L3Cache" cpuset="0xff000000,0x0" complete_cpuset="0xff000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="6291456" depth="3" cache_linesize="64" cache_associativity="48" cache_type="0">
-        <info name="Inclusive" value="0"/>
         <object type="L2Cache" cpuset="0x03000000,0x0" complete_cpuset="0x03000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x03000000,0x0" complete_cpuset="0x03000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x01000000,0x0" complete_cpuset="0x01000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="8" cpuset="0x01000000,0x0" complete_cpuset="0x01000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="56" cpuset="0x01000000,0x0" complete_cpuset="0x01000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x02000000,0x0" complete_cpuset="0x02000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="9" cpuset="0x02000000,0x0" complete_cpuset="0x02000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="57" cpuset="0x02000000,0x0" complete_cpuset="0x02000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -576,17 +452,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x0c000000,0x0" complete_cpuset="0x0c000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x0c000000,0x0" complete_cpuset="0x0c000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x04000000,0x0" complete_cpuset="0x04000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="10" cpuset="0x04000000,0x0" complete_cpuset="0x04000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="58" cpuset="0x04000000,0x0" complete_cpuset="0x04000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x08000000,0x0" complete_cpuset="0x08000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="11" cpuset="0x08000000,0x0" complete_cpuset="0x08000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="59" cpuset="0x08000000,0x0" complete_cpuset="0x08000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -594,17 +466,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0x30000000,0x0" complete_cpuset="0x30000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0x30000000,0x0" complete_cpuset="0x30000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x10000000,0x0" complete_cpuset="0x10000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="12" cpuset="0x10000000,0x0" complete_cpuset="0x10000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="60" cpuset="0x10000000,0x0" complete_cpuset="0x10000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x20000000,0x0" complete_cpuset="0x20000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="13" cpuset="0x20000000,0x0" complete_cpuset="0x20000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="61" cpuset="0x20000000,0x0" complete_cpuset="0x20000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
@@ -612,17 +480,13 @@
           </object>
         </object>
         <object type="L2Cache" cpuset="0xc0000000,0x0" complete_cpuset="0xc0000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="2097152" depth="2" cache_linesize="64" cache_associativity="16" cache_type="0">
-          <info name="Inclusive" value="0"/>
           <object type="L1iCache" cpuset="0xc0000000,0x0" complete_cpuset="0xc0000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="65536" depth="1" cache_linesize="64" cache_associativity="2" cache_type="2">
-            <info name="Inclusive" value="0"/>
             <object type="L1Cache" cpuset="0x40000000,0x0" complete_cpuset="0x40000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="14" cpuset="0x40000000,0x0" complete_cpuset="0x40000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="62" cpuset="0x40000000,0x0" complete_cpuset="0x40000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
             </object>
             <object type="L1Cache" cpuset="0x80000000,0x0" complete_cpuset="0x80000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001" cache_size="16384" depth="1" cache_linesize="64" cache_associativity="4" cache_type="1">
-              <info name="Inclusive" value="0"/>
               <object type="Core" os_index="15" cpuset="0x80000000,0x0" complete_cpuset="0x80000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001">
                 <object type="PU" os_index="63" cpuset="0x80000000,0x0" complete_cpuset="0x80000000,0x0" nodeset="0x00000001" complete_nodeset="0x00000001"/>
               </object>
