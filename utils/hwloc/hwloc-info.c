@@ -246,7 +246,9 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
       snprintf(value, sizeof(value), "%d", obj->attr->cache.associativity);
       hwloc_info_show_attr(prefix, "attr cache line ways", value);
     }
-    break;
+    snprintf(value, sizeof(value), "%d", obj->attr->cache.inclusive);
+    hwloc_info_show_attr(prefix, "attr cache inclusive", value);
+   break;
   case HWLOC_OBJ_GROUP:
     snprintf(value, sizeof(value), "%u", obj->attr->group.depth);
     hwloc_info_show_attr(prefix, "attr group depth", value);
@@ -882,6 +884,8 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	only_attr_name = argv[1];
+        if (!strcmp(only_attr_name, "info Inclusive")) /* backward compat with v2.x */
+          only_attr_name = "attr cache inclusive";
 	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))

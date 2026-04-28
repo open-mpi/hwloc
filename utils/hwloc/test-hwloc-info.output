@@ -351,6 +351,7 @@ L2Cache L#3 = parent of PU L#12
  attr cache type = Unified
  attr cache size = 4194304
  attr cache line size = 64
+ attr cache inclusive = 0
  symmetric subtree = 1
 
 # L1 ancestor of PU range
