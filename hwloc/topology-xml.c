@@ -196,6 +196,14 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
 	      state->global->msgprefix);
   }
 
+  else if (!strcmp(name, "cache_inclusive")) {
+    if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
+      hwloc_obj_add_info(obj, "Inclusive", value);
+    else if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring cache_inclusive attribute for non-cache object type\n",
+	      state->global->msgprefix);
+  }
+
   else if (!strcmp(name, "cache_type")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE) {
