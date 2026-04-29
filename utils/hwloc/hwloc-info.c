@@ -902,6 +902,8 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	only_attr_name = argv[1];
+        if (!strcmp(only_attr_name, "attr cache inclusive")) /* forward compat with v3.x */
+          only_attr_name = "info Inclusive";
 	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))
