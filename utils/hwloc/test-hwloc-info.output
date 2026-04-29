@@ -8,6 +8,10 @@ Special depth -3:  2 NUMANode (type #14)
 # topology infos
 info Backend = Synthetic
 info SyntheticDescription = node:2 core:3 pu:4
+depth = 4
+PUs = 24
+NUMANodes = 2
+CPU kinds = 0
 
 # topology infos --get-attr
 node:2 core:3 pu:4

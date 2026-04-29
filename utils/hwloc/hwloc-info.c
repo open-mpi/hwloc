@@ -765,10 +765,19 @@ hwloc__info_show_topology_info_one(const char *name, const char *value, int is_i
 static void
 hwloc_info_show_topology_infos(hwloc_topology_t topology)
 {
+  char value[12];
   struct hwloc_infos_s *infos = hwloc_topology_get_infos(topology);
   unsigned i;
   for(i=0; i<infos->count; i++)
     hwloc__info_show_topology_info_one(infos->array[i].name, infos->array[i].value, 1);
+  snprintf(value, sizeof(value), "%u", hwloc_topology_get_depth(topology));
+  hwloc__info_show_topology_info_one("depth", value, 0);
+  snprintf(value, sizeof(value), "%u", hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU));
+  hwloc__info_show_topology_info_one("PUs", value, 0);
+  snprintf(value, sizeof(value), "%u", hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE));
+  hwloc__info_show_topology_info_one("NUMANodes", value, 0);
+  snprintf(value, sizeof(value), "%u", hwloc_cpukinds_get_nr(topology, 0));
+  hwloc__info_show_topology_info_one("CPU kinds", value, 0);
 }
 
 static void
