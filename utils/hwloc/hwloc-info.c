@@ -751,6 +751,19 @@ hwloc_info_show_levels(FILE *output, hwloc_topology_t topology)
 }
 
 static void
+hwloc__info_show_topology_info_one(const char *name, const char *value, int is_info)
+{
+  if (!only_attr_name)
+    printf("%s%s = %s\n", is_info ? "info " : "", name, value);
+  else {
+    char fullname[256];
+    snprintf(fullname, sizeof(fullname), "%s%s", is_info ? "info " : "", name);
+    if (!strcasecmp(only_attr_name, fullname))
+      printf("%s\n", value);
+  }
+}
+
+static void
 hwloc_info_show_topology_infos(hwloc_topology_t topology)
 {
   hwloc_obj_t root = hwloc_get_root_obj(topology);
@@ -769,14 +782,7 @@ hwloc_info_show_topology_infos(hwloc_topology_t topology)
         || !strcmp(infoname, "Architecture")
         || !strcmp(infoname, "hwlocVersion")
         || !strcmp(infoname, "ProcessName")) {
-      if (!only_attr_name)
-        printf("info %s = %s\n", infoname, root->infos[i].value);
-      else {
-        char name[256];
-        snprintf(name, sizeof(name), "info %s", infoname);
-        if (!strcasecmp(only_attr_name, name))
-          printf("%s\n", root->infos[i].value);
-      }
+      hwloc__info_show_topology_info_one(infoname, root->infos[i].value, 1);
     }
   }
 }
