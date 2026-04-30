@@ -4912,6 +4912,14 @@ int my_hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
 \endverbatim
 
 
+\section upgrade_to_api_3x_obj_snprintf Printing object types and attributes
+
+The verbose attribute of hwloc_obj_type_snprintf() and hwloc_obj_attr_snprintf()
+is replaced by flags, where value 1 keeps the same meaning as in hwloc 2.x.
+
+hwloc_obj_attr_snprintf() now displays KiB/MiB/GiB/TiB units for sizes.
+
+
 \section upgrade_to_api_3x_infos_struct Info attribute structure
 
 A new structure hwloc_infos_s embeds the pointer and count

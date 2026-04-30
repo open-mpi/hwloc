@@ -15,6 +15,8 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 3.0.0
 -------------
+See the section "Upgrading to the hwloc 3.0 API" in the documentation
+for more details.
 * API
   + hwloc_get_type_depth_with_attr() generalizes hwloc_get_type_depth() by
     using object attributes to disambiguate multiple levels with same type.
