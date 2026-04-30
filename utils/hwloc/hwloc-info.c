@@ -384,7 +384,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
                   hwloc_bitmap_asprintf(&inits, initiators[j].location.cpuset);
                 } else if (initiators[j].type == HWLOC_LOCATION_TYPE_OBJECT) {
                   char types[64];
-                  hwloc_obj_type_snprintf(types, sizeof(types), initiators[j].location.object, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+                  hwloc_obj_type_snprintf(types, sizeof(types), initiators[j].location.object, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
                   if (initiators[j].location.object->os_index != (unsigned)-1)
                     snprintf(_inits, sizeof(_inits), "%s L#%u P#%u", types, initiators[j].location.object->logical_index, initiators[j].location.object->os_index);
                   else
@@ -415,7 +415,7 @@ hwloc_info_show_ancestor(hwloc_topology_t topology, hwloc_obj_t ancestor,
                          int level, const char *prefix, int verbose)
 {
   char ancestors[128];
-  hwloc_obj_type_snprintf(ancestors, sizeof(ancestors), ancestor, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  hwloc_obj_type_snprintf(ancestors, sizeof(ancestors), ancestor, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
   if (!only_attr_name) {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, ancestors, ancestor->logical_index);
@@ -438,7 +438,7 @@ hwloc_info_show_descendant(hwloc_topology_t topology, hwloc_obj_t descendant,
                            int number, const char *prefix, int verbose)
 {
   char descendants[128];
-  hwloc_obj_type_snprintf(descendants, sizeof(descendants), descendant, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  hwloc_obj_type_snprintf(descendants, sizeof(descendants), descendant, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
   if (!only_attr_name) {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, descendants, descendant->logical_index);
@@ -455,7 +455,7 @@ hwloc_info_show_child(hwloc_topology_t topology, hwloc_obj_t child,
                       int number, const char *prefix, int verbose)
 {
   char childs[128];
-  hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  hwloc_obj_type_snprintf(childs, sizeof(childs), child, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
   if (!only_attr_name) {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, childs, child->logical_index);
@@ -472,7 +472,7 @@ hwloc_info_show_local_memory(hwloc_topology_t topology, hwloc_obj_t node,
                              int number, const char *prefix, int verbose)
 {
   char nodes[128];
-  hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
   if (!only_attr_name) {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, nodes, node->logical_index);
@@ -489,7 +489,7 @@ hwloc_info_show_default_memory(hwloc_topology_t topology, hwloc_obj_t node,
                                int number, const char *prefix, int verbose)
 {
   char nodes[128];
-  hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  hwloc_obj_type_snprintf(nodes, sizeof(nodes), node, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
   if (!only_attr_name) {
     if (verbose < 0)
       printf("%s%s:%u\n", prefix, nodes, node->logical_index);
@@ -559,7 +559,7 @@ hwloc_calc_process_location_info_cb(struct hwloc_calc_location_context_s *lconte
   if (show_index_prefix)
     snprintf(prefix, sizeof(prefix), "%u: ", current_obj);
 
-  hwloc_obj_type_snprintf(objs, sizeof(objs), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  hwloc_obj_type_snprintf(objs, sizeof(objs), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
 
   if (show_ancestors) {
     unsigned level = 0;

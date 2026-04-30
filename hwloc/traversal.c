@@ -643,7 +643,9 @@ hwloc__osdev_type_snprintf_normal(char * __hwloc_restrict string, size_t size,
 }
 
 int
-hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, unsigned long flags)
+hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size,
+                        hwloc_obj_t obj, unsigned long flags,
+                        hwloc_topology_t topology)
 {
   int longnames = (flags & (HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE|HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES));
   int shortnames = (flags & HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
@@ -669,11 +671,16 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, "L%u%s%s", obj->attr->cache.depth,
 			  hwloc_obj_cache_type_letter(obj->attr->cache.type),
 			  longnames ? "Cache" : "");
-  case HWLOC_OBJ_GROUP:
-    if (obj->attr->group.depth != (unsigned) -1)
+  case HWLOC_OBJ_GROUP: {
+    int multiple = 1;
+    if (topology && topology->type_depth[HWLOC_OBJ_GROUP] != HWLOC_TYPE_DEPTH_MULTIPLE)
+      /* if there's a single group level, don't show the group depth */
+      multiple = 0;
+    if (obj->attr->group.depth != (unsigned) -1 && multiple)
       return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
     else
       return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
+  }
   case HWLOC_OBJ_BRIDGE:
     /* if downstream_type can ever be non-PCI, we'll have to make strings more precise,
      * or relax the hwloc_type_sscanf test */
@@ -694,7 +701,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 }
 
 int
-hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * separator, unsigned long flags)
+hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
+                        hwloc_obj_t obj, const char * separator, unsigned long flags,
+                        hwloc_topology_t topology __hwloc_attribute_unused)
 {
   int verbose = (flags & (HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE|HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS));
   const char *prefix = "";

@@ -1097,12 +1097,16 @@ HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwlo
  * Flags \p flags is a OR'ed set of ::hwloc_obj_snprintf_flag_e.
  * By default, short names are used.
  *
+ * If \p topology is not \c NULL, it will be used to find out if some attributes
+ * should not be shown because they are meaningless in this topology,
+ * for instance the Group depth when there is a single Group level.
+ *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \c \0).
  */
 HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj,
-					   unsigned long flags);
+					   unsigned long flags, hwloc_topology_t topology);
 
 /** \brief Stringify the attributes of a given topology object into a human-readable form.
  *
@@ -1116,6 +1120,9 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  * By default, only important attributes such as memory and cache sizes are shown.
  * Sizes are reported in units such as GiB or KiB.
  *
+ * If \p topology is not \c NULL, it will be used to find out if some attributes
+ * should not be shown because they are meaningless in this topology.
+ *
  * \return the number of characters that were actually written if not truncating,
  * or that would have been written (not including the ending \c \0).
  *
@@ -1124,7 +1131,7 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
  */
 HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
 					   hwloc_obj_t obj, const char * __hwloc_restrict separator,
-					   unsigned long flags);
+					   unsigned long flags, hwloc_topology_t topology);
 
 /** \brief Flags to be given to hwloc_obj_type_snprintf() and hwloc_obj_attr_snprintf(). */
 enum hwloc_obj_snprintf_flag_e {

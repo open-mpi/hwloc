@@ -98,7 +98,7 @@ int main(void)
       if (obj) {
         char *cpuset_string;
         char name[16];
-        hwloc_obj_type_snprintf(name, sizeof(name), obj, 0);
+        hwloc_obj_type_snprintf(name, sizeof(name), obj, 0, topology);
         hwloc_bitmap_asprintf(&cpuset_string, obj->cpuset);
         printf("Location: %s P#%u\n", name, obj->os_index);
         printf("Cpuset: %s\n", cpuset_string);

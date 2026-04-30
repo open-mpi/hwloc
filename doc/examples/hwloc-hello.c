@@ -25,11 +25,11 @@ static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
     char type[32], attr[1024];
     unsigned i;
 
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0, topology);
     printf("%*s%s", 2*depth, "", type);
     if (obj->os_index != (unsigned) -1)
       printf("#%u", obj->os_index);
-    hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 0);
+    hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, " ", 0, topology);
     if (*attr)
       printf("(%s)", attr);
     printf("\n");
@@ -78,7 +78,8 @@ int main(void)
         for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth);
              i++) {
             hwloc_obj_type_snprintf(string, sizeof(string),
-				    hwloc_get_obj_by_depth(topology, depth, i), 0);
+				    hwloc_get_obj_by_depth(topology, depth, i),
+                                    0, topology);
             printf("Index %u: %s\n", i, string);
         }
     }

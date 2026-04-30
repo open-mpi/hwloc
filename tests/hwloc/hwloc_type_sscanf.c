@@ -65,17 +65,17 @@ static void check(hwloc_topology_t topology, hwloc_obj_t obj)
   printf("    parsing hwloc_obj_type_string() output = %s\n", constname);
   _check(topology, obj, constname, 0, 0);
 
-  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, 0);
+  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, 0, topology);
   assert(err > 0);
   printf("    parsing hwloc_obj_type_snprintf() normal output = %s\n", buffer);
   _check(topology, obj, buffer, 1, 0);
 
-  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
   assert(err > 0);
   printf("    parsing hwloc_obj_type_snprintf() long output = %s\n", buffer);
   _check(topology, obj, buffer, 1, 0);
 
-  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
+  err = hwloc_obj_type_snprintf(buffer, sizeof(buffer), obj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES, topology);
   assert(err > 0);
   printf("    parsing hwloc_obj_type_snprintf() short output = %s\n", buffer);
   _check(topology, obj, buffer, 1, 1);
@@ -171,45 +171,45 @@ int main(void)
   sobj.attr = &attr;
   sobj.type = HWLOC_OBJ_OS_DEVICE;
   attr.osdev.types = 0;
-  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES, NULL);
   assert(!strcmp(tmp, "OS"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.types == 0);
-  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0, NULL);
   assert(!strcmp(tmp, "OS"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.types == 0);
-  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, NULL);
   assert(!strcmp(tmp, "OSDev"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.types == 0);
   attr.osdev.types = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
-  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_SHORT_NAMES, NULL);
   assert(!strcmp(tmp, "Net"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.types == HWLOC_OBJ_OSDEV_NETWORK);
   attr.osdev.types = HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU;
-  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, 0, NULL);
   assert(!strcmp(tmp, "OS[Net,CoProc,GPU]"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
-  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  err = hwloc_obj_type_snprintf(tmp, sizeof(tmp), &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, NULL);
   assert(!strcmp(tmp, "OSDev[Network,Co-Processor,GPU]"));
   err = hwloc_type_sscanf(tmp, &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
   assert(attr.osdev.types == (HWLOC_OBJ_OSDEV_COPROC|HWLOC_OBJ_OSDEV_NETWORK|HWLOC_OBJ_OSDEV_GPU));
-  err = hwloc_obj_type_snprintf(tmp, 20 /* truncate */, &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+  err = hwloc_obj_type_snprintf(tmp, 20 /* truncate */, &sobj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, NULL);
   assert(!strcmp(tmp, "OSDev[Network,Co-Pr"));
   /* don't try to parse the truncated output */
 

@@ -4917,6 +4917,9 @@ int my_hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
 The verbose attribute of hwloc_obj_type_snprintf() and hwloc_obj_attr_snprintf()
 is replaced by flags, where value 1 keeps the same meaning as in hwloc 2.x.
 
+They also take an optional topology argument to figure out whether some attributes
+should not be printed, for instance the Group depth when there is a single Group level.
+
 hwloc_obj_attr_snprintf() now displays KiB/MiB/GiB/TiB units for sizes.
 
 

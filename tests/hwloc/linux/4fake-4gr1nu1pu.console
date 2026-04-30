@@ -1,15 +1,15 @@
 Machine (P#0 total=2048MiB)
   Package L#0 (P#0 total=2048MiB)
-    Group0 L#0 (total=1024MiB)
+    Group L#0 (total=1024MiB)
       NUMANode L#0 (P#0 local=1024MiB total=1024MiB)
       PU L#0 (P#0)
-    Group0 L#1
+    Group L#1
       PU L#1 (P#1)
-    Group0 L#2 (total=1024MiB)
+    Group L#2 (total=1024MiB)
       NUMANode L#1 (P#2 local=1024MiB total=1024MiB)
 depth 0:           1 Machine (type #0)
  depth 1:          1 Package (type #1)
-  depth 2:         3 Group0 (type #13)
+  depth 2:         3 Group (type #13)
    depth 3:        2 PU (type #4)
 Special depth -3:  2 NUMANode (type #14)
 2 processors not represented in topology: 0x0000000c

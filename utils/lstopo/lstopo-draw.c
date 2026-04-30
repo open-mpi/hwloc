@@ -960,6 +960,7 @@ static int
 lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, hwloc_obj_t obj)
 {
   enum lstopo_index_type_e index_type = loutput->index_type;
+  hwloc_topology_t topology = loutput->topology;
   unsigned idx;
   const char *indexprefix;
   char typestr[32];
@@ -977,10 +978,10 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
   if (obj->type == HWLOC_OBJ_OS_DEVICE) {
     /* consider the name as an index and remove it if LSTOPO_INDEX_TYPE_NONE */
     if (index_type != LSTOPO_INDEX_TYPE_NONE) {
-      hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, loutput->obj_snprintf_flags);
+      hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, loutput->obj_snprintf_flags, topology);
       return snprintf(text, textlen, "%s %s", typestr, obj->name);
     } else {
-      return hwloc_obj_type_snprintf(text, textlen, obj, loutput->obj_snprintf_flags);
+      return hwloc_obj_type_snprintf(text, textlen, obj, loutput->obj_snprintf_flags, topology);
     }
   }
 
@@ -988,7 +989,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
   if (obj->subtype) {
     snprintf(typestr, sizeof(typestr), "%s", obj->subtype);
   } else {
-    hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, loutput->obj_snprintf_flags);
+    hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, loutput->obj_snprintf_flags, topology);
   }
 
   if (index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
@@ -1029,7 +1030,7 @@ lstopo_obj_snprintf(struct lstopo_output *loutput, char *text, size_t textlen, h
     snprintf(index2str, sizeof(index2str), "%s%u", loutput->os_index_prefix, obj->os_index);
 
   if (loutput->show_attrs_enabled && loutput->show_attrs[obj->type]) {
-    attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", loutput->obj_snprintf_flags);
+    attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", loutput->obj_snprintf_flags, topology);
     /* display the root total_memory (cannot be local_memory since root cannot be a NUMA node) */
     if (!obj->parent && obj->total_memory) {
       char totalmemsize[25];

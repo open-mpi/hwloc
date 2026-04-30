@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
     if (hwloc_obj_type_is_cache(obj->type)) {
       char type[64];
       char attr[64];
-      hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
-      hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, ", ", 0);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, 0, topology);
+      hwloc_obj_attr_snprintf(attr, sizeof(attr), obj, ", ", 0, topology);
       printf("Found object %s with attributes %s\n", type, attr);
     }
     /* next parent up in the tree */

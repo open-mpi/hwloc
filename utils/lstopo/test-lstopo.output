@@ -122,13 +122,13 @@ Machine (1024MiB total)
   PU L#3 (P#7)
 ** Restrict flag t$,memless...
 Machine (2048MiB total)
-  Group0 L#0
+  Group L#0
     NUMANode L#0 (P#0 1024MiB)
     PU L#0 (P#0)
     PU L#1 (P#1)
     PU L#2 (P#2)
     PU L#3 (P#3)
-  Group0 L#1
+  Group L#1
     NUMANode L#1 (P#1 1024MiB)
     PU L#4 (P#4)
     PU L#5 (P#5)
@@ -136,15 +136,15 @@ Machine (2048MiB total)
     PU L#7 (P#7)
 ** Restrict flag none...
 Machine (4096MiB total)
-  Group0 L#0
+  Group L#0
     NUMANode L#0 (P#0 1024MiB)
     PU L#0 (P#0)
     PU L#1 (P#1)
-  Group0 L#1
+  Group L#1
     NUMANode L#1 (P#3 1024MiB)
-  Group0 L#2
+  Group L#2
     NUMANode L#2 (P#2 1024MiB)
-  Group0 L#3
+  Group L#3
     NUMANode L#3 (P#1 1024MiB)
 ** Export synthetic flag extended,attrs...
 Group:4 [NUMANode] PU:4
@@ -192,32 +192,32 @@ Group:4 [NUMANode] PU:4
 ** Topology flag disallowed...
 assuming `node:4 pu:4' is a synthetic topology description
 Machine (P#0 total=4096MiB)
-  Group0 L#0 (total=1024MiB)
+  Group L#0 (total=1024MiB)
     NUMANode L#0 (P#0 local=1024MiB total=1024MiB)
     PU L#0 (P#0)
     PU L#1 (P#1)
     PU L#2 (P#2)
     PU L#3 (P#3)
-  Group0 L#1 (total=1024MiB)
+  Group L#1 (total=1024MiB)
     NUMANode L#1 (P#1 local=1024MiB total=1024MiB)
     PU L#4 (P#4) (disallowed)
     PU L#5 (P#5) (disallowed)
     PU L#6 (P#6) (disallowed)
     PU L#7 (P#7) (disallowed)
-  Group0 L#2 (total=1024MiB)
+  Group L#2 (total=1024MiB)
     NUMANode L#2 (P#2 local=1024MiB total=1024MiB)
     PU L#8 (P#8) (disallowed)
     PU L#9 (P#9) (disallowed)
     PU L#10 (P#10) (disallowed)
     PU L#11 (P#11) (disallowed)
-  Group0 L#3 (total=1024MiB)
+  Group L#3 (total=1024MiB)
     NUMANode L#3 (P#3 local=1024MiB total=1024MiB)
     PU L#12 (P#12) (disallowed)
     PU L#13 (P#13) (disallowed)
     PU L#14 (P#14) (disallowed)
     PU L#15 (P#15) (disallowed)
 depth 0:           1 Machine (type #0)
- depth 1:          4 Group0 (type #13)
+ depth 1:          4 Group (type #13)
   depth 2:         16 PU (type #4)
 Special depth -3:  4 NUMANode (type #14)
 12 processors represented but not allowed: 0x0000fff0

@@ -1,6 +1,6 @@
 # (default)
 depth 0:           1 Machine (type #0)
- depth 1:          2 Group0 (type #13)
+ depth 1:          2 Group (type #13)
   depth 2:         6 Core (type #3)
    depth 3:        24 PU (type #4)
 Special depth -3:  2 NUMANode (type #14)
@@ -18,7 +18,7 @@ node:2 core:3 pu:4
 
 # levels support
 depth 0:           1 Machine (type #0)
- depth 1:          2 Group0 (type #13)
+ depth 1:          2 Group (type #13)
   depth 2:         6 Core (type #3)
    depth 3:        24 PU (type #4)
 Special depth -3:  2 NUMANode (type #14)
@@ -155,9 +155,9 @@ Core L#4
 0.1:  complete nodeset = 0x00000001
 0.1:  allowed nodeset = 0x00000001
 0.1:  symmetric subtree = 1
-0.2: Group0 L#0 = parent #2 of PU L#10
+0.2: Group L#0 = parent #2 of PU L#10
 0.2:  type = Group
-0.2:  full type = Group0
+0.2:  full type = Group
 0.2:  logical index = 0
 0.2:  gp index = 18
 0.2:  depth = 1
@@ -233,9 +233,9 @@ Core L#4
 1.1:  complete nodeset = 0x00000001
 1.1:  allowed nodeset = 0x00000001
 1.1:  symmetric subtree = 1
-1.2: Group0 L#0 = parent #2 of PU L#11
+1.2: Group L#0 = parent #2 of PU L#11
 1.2:  type = Group
-1.2:  full type = Group0
+1.2:  full type = Group
 1.2:  logical index = 0
 1.2:  gp index = 18
 1.2:  depth = 1

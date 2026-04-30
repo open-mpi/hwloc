@@ -34,7 +34,7 @@ native_svg_box(struct lstopo_output *loutput, const struct lstopo_color *lcolor,
 
   if (obj) {
     char type[64];
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0, loutput->topology);
     snprintf(id, sizeof id, " id='%s_%u_rect%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   } else {
@@ -63,7 +63,7 @@ native_svg_line(struct lstopo_output *loutput, unsigned depth __hwloc_attribute_
 
   if (obj) {
     char type[64];
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0, loutput->topology);
     snprintf(id, sizeof id, " id='%s_%u_line%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   } else {
@@ -98,7 +98,7 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
 
   if (obj) {
     char type[64];
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, 0, loutput->topology);
     snprintf(id, sizeof id, " id='%s_%u_text%s'", type, obj->logical_index, complement);
     snprintf(class, sizeof class, " class='%s'", type);
   } else {

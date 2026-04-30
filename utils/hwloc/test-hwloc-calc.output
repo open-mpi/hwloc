@@ -113,10 +113,10 @@ Package:0.NUMANode:1 Package:0.NUMANode:7
 NUMANode:2,NUMANode:3
 
 # Hierarchical spec for a range of PUs
-Group0:0.PU:2 Group0:0.PU:3
+Group:0.PU:2 Group:0.PU:3
 
 # Hierarchical spec for a range of PUs, with different separator
-Group0:0.Core:0fooGroup0:0.Core:1
+Group:0.Core:0fooGroup:0.Core:1
 
 # Hierarchical spec for a range of PUs (again)
 Core:0.PU:3 Core:1.PU:0 Core:1.PU:1 Core:1.PU:2
@@ -125,16 +125,16 @@ Core:0.PU:3 Core:1.PU:0 Core:1.PU:1 Core:1.PU:2
 3,4,5,6
 
 # Hierarchical spec for a range of PUs (3 levels)
-Group0:0.Core:2.PU:3 Group0:0.Core:3.PU:0 Group0:0.Core:3.PU:1 Group0:0.Core:3.PU:2
+Group:0.Core:2.PU:3 Group:0.Core:3.PU:0 Group:0.Core:3.PU:1 Group:0.Core:3.PU:2
 
 # List of PUs from another invocation with hierarchical output (again)
 11,12,13,14
 
 # --largest
-Core:3 Group0:1 Core:8 PU:36 PU:37
+Core:3 Group:1 Core:8 PU:36 PU:37
 
 # --largest, with different separator
-PU:22_PU:23_Core:6_Core:7_Group0:2
+PU:22_PU:23_Core:6_Core:7_Group:2
 
 # Singlified output
 0x00400000

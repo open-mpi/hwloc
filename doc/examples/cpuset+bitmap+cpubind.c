@@ -78,7 +78,7 @@ int main(void)
   }
   /* print the smallest object covering the current process binding */
   obj = hwloc_get_obj_covering_cpuset(topology, set);
-  hwloc_obj_type_snprintf(type, sizeof(type), obj, 0);
+  hwloc_obj_type_snprintf(type, sizeof(type), obj, 0, topology);
   printf("process is bound within object %s logical index %u\n", type, obj->logical_index);
 
   /* retrieve the single PU where the current thread actually runs within this process binding */

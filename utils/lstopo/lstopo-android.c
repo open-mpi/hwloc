@@ -38,7 +38,7 @@ static void native_android_box(struct lstopo_output *loutput, const struct lstop
          * but it pretty much doesn't appear at all anyway because it's in the very small bow.
          */
         viewid = obj->gp_index * GP_INDEX_MULTIPLIER + box_id;
-        hwloc_obj_attr_snprintf(info, 1096, obj, sep, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES|HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS);
+        hwloc_obj_attr_snprintf(info, 1096, obj, sep, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES|HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS, loutput->topology);
     }
 
     if (cpukind_style)

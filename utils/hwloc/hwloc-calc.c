@@ -137,7 +137,7 @@ hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const 
      goto next;
     if (hwloc_calc_check_object_filtered(obj, &hierlevels[level]))
       goto next;
-    hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
     if (idx == (unsigned)-1)
       snprintf(string, sizeof(string), "%s%s%s:-1", prefix, level ? "." : "", type);
     else
@@ -226,7 +226,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
         fprintf(stderr, "No object included in this cpuset\n");
         return EXIT_FAILURE;
       }
-      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
         printf("%s%s", first ? (const char *) "" : sep, type);
@@ -295,7 +295,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
 	printf("%s", sep);
       if (objecto) {
         char types[64];
-        hwloc_obj_type_snprintf(types, sizeof(types), obj, 0);
+        hwloc_obj_type_snprintf(types, sizeof(types), obj, 0, topology);
         printf("%s:", types);
       }
       idx = logicalo ? obj->logical_index : obj->os_index;
@@ -338,7 +338,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
           unsigned idx;
           if (!hwloc_bitmap_isset(nodeset_filter, nodes[i]->os_index))
             continue;
-          hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES);
+          hwloc_obj_type_snprintf(type, sizeof(type), nodes[i], HWLOC_OBJ_SNPRINTF_FLAG_LONG_NAMES, topology);
           idx = logicalo ? nodes[i]->logical_index : nodes[i]->os_index;
           if (first)
             first = 0;
@@ -346,7 +346,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
             printf("%s", sep);
           if (objecto) {
             char types[64];
-            hwloc_obj_type_snprintf(types, sizeof(types), nodes[i], 0);
+            hwloc_obj_type_snprintf(types, sizeof(types), nodes[i], 0, topology);
             printf("%s:", types);
           }
           printf("%u", idx);

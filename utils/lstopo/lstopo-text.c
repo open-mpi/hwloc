@@ -34,6 +34,7 @@ static void
 output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
 {
   FILE *output = loutput->file;
+  hwloc_topology_t topology = loutput->topology;
   enum lstopo_index_type_e index_type = loutput->index_type;
   int verbose_mode = loutput->verbose_mode;
   char pidxstr[16];
@@ -53,7 +54,7 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
   if (loutput->show_cpuset < 2) {
     char type[64], *attr, phys[32] = "";
     int len;
-    hwloc_obj_type_snprintf (type, sizeof(type), l, loutput->obj_snprintf_flags);
+    hwloc_obj_type_snprintf (type, sizeof(type), l, loutput->obj_snprintf_flags, topology);
     if (l->subtype)
       fprintf(output, "%s(%s)", type, l->subtype);
     else
@@ -80,10 +81,10 @@ output_console_obj (struct lstopo_output *loutput, hwloc_obj_t l, int collapse)
       fprintf(output, " %s (%s)",
 	      busidstr, hwloc_pci_class_string(l->attr->pcidev.class_id));
     /* display attributes */
-    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", loutput->obj_snprintf_flags);
+    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", loutput->obj_snprintf_flags, topology);
     attr = malloc(len+1);
     *attr = '\0';
-    hwloc_obj_attr_snprintf (attr, len+1, l, " ", loutput->obj_snprintf_flags);
+    hwloc_obj_attr_snprintf (attr, len+1, l, " ", loutput->obj_snprintf_flags, topology);
     if (*phys || *attr) {
       fprintf(output, " (");
       if (*phys)
@@ -271,11 +272,12 @@ static void output_distances(struct lstopo_output *loutput)
 static void output_memattr_obj(struct lstopo_output *loutput,
                                hwloc_obj_t obj)
 {
+  hwloc_topology_t topology = loutput->topology;
   enum lstopo_index_type_e index_type = loutput->index_type;
   unsigned idx = (index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? obj->os_index : obj->logical_index);
   char objtype[16];
 
-  hwloc_obj_type_snprintf(objtype, sizeof(objtype), obj, 0);
+  hwloc_obj_type_snprintf(objtype, sizeof(objtype), obj, 0, topology);
   if (idx == (unsigned) -1)
     printf("%s %c#-1", objtype,
            index_type == LSTOPO_INDEX_TYPE_PHYSICAL ? 'P' : 'L');

@@ -647,13 +647,13 @@ static void hwloc__xml_import_report_outoforder(hwloc_topology_t topology, hwloc
 
   hwloc_bitmap_asprintf(&c1, new->cpuset);
   hwloc_bitmap_asprintf(&cc1, new->complete_cpuset);
-  hwloc_obj_type_snprintf(t1, sizeof(t1), new, 0);
+  hwloc_obj_type_snprintf(t1, sizeof(t1), new, 0, NULL);
 
   if (old->cpuset)
     hwloc_bitmap_asprintf(&c2, old->cpuset);
   if (old->complete_cpuset)
     hwloc_bitmap_asprintf(&cc2, old->complete_cpuset);
-  hwloc_obj_type_snprintf(t2, sizeof(t2), old, 0);
+  hwloc_obj_type_snprintf(t2, sizeof(t2), old, 0, NULL);
 
   fprintf(stderr, "****************************************************************************\n");
   fprintf(stderr, "* hwloc has encountered an out-of-order XML topology load.\n");
