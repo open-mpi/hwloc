@@ -4221,7 +4221,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     hwloc_topology_check(topology);
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
-    /* Rank cpukinds */
+    /* Rank cpukinds, and set core attr */
     hwloc_internal_cpukinds_rank(topology);
   }
 

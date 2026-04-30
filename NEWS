@@ -54,6 +54,8 @@ for more details.
   + Distances structure "MEANS" kinds are renamed to "VALUE", and the new
     "HOPS" kind is used for the XGMIHops matrix instead of "LATENCY.
   + Add hwloc_get_pci_busid_cpuset() in hwloc/helpers.h.
+  + Core objects now have a "cpukind" field in the hwloc_core_attr_s
+    structure to report the index of their CPU kind.
   + Cache objects now have a "inclusive" field in the hwloc_cache_attr_s
     structure, instead of an "Inclusive" info attribute.
 * Tools

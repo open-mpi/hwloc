@@ -172,6 +172,7 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	switch (obj1->type) {
 	default:
 		break;
+                /* no need to check core attrs, cpukind would be different if the cpukinds are different below */
 	case HWLOC_OBJ_NUMANODE:
 		if (obj1->attr->numanode.local_memory != obj2->attr->numanode.local_memory) {
 			err = hwloc_append_diff_obj_attr_uint64(obj1,

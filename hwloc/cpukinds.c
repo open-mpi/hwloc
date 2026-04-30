@@ -477,9 +477,17 @@ int
 hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
 {
   enum hwloc_cpukinds_ranking heuristics;
+  unsigned coredepth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
   char *env;
   unsigned i;
   int err;
+
+  /* reset core's cpukind attr */
+  if (((int)coredepth) >= 0) {
+    hwloc_obj_t core = NULL;
+    while ((core = hwloc_get_next_obj_by_depth(topology, coredepth, core)) != NULL)
+      core->attr->core.cpukind = 0;
+  }
 
   if (!topology->nr_cpukinds)
     return 0;
@@ -577,6 +585,21 @@ hwloc_internal_cpukinds_rank(struct hwloc_topology *topology)
   for(i=0; i<topology->nr_cpukinds; i++)
     hwloc_debug("cpukind #%u got ranking value %llu\n", i, (unsigned long long) topology->cpukinds[i].ranking_value);
   hwloc__cpukinds_finalize_ranking(topology);
+
+  /* set core's cpukind attr */
+  if (((int)coredepth) >= 0 && topology->nr_cpukinds > 1) {
+    hwloc_obj_t core = NULL;
+    while ((core = hwloc_get_next_obj_by_depth(topology, coredepth, core)) != NULL) {
+      int kind = -1; /* unknown or mixed */
+      for(i=0; i<topology->nr_cpukinds; i++)
+        if (hwloc_bitmap_isincluded(core->cpuset, topology->cpukinds[i].cpuset)) {
+          kind = i;
+          break;
+        }
+      core->attr->core.cpukind = kind;
+    }
+  }
+
 #ifdef HWLOC_DEBUG
   for(i=0; i<topology->nr_cpukinds; i++)
     assert(topology->cpukinds[i].efficiency == (int) i);

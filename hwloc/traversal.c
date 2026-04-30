@@ -703,7 +703,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size,
 int
 hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
                         hwloc_obj_t obj, const char * separator, unsigned long flags,
-                        hwloc_topology_t topology __hwloc_attribute_unused)
+                        hwloc_topology_t topology)
 {
   int verbose = (flags & (HWLOC_OBJ_SNPRINTF_FLAG_OLD_VERBOSE|HWLOC_OBJ_SNPRINTF_FLAG_MORE_ATTRS));
   const char *prefix = "";
@@ -748,6 +748,12 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
   /* printf type-specific attributes */
   res = 0;
   switch (obj->type) {
+  case HWLOC_OBJ_CORE:
+    if (verbose && (!topology || topology->nr_cpukinds > 1)) {
+      /* only show cpukind when there are multiple of them */
+      res = hwloc_snprintf(tmp, tmplen, "cpukind=%d", obj->attr->core.cpukind);
+    }
+    break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
   case HWLOC_OBJ_L3CACHE:

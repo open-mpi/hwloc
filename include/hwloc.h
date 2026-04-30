@@ -692,6 +692,14 @@ typedef struct hwloc_obj * hwloc_obj_t;
 
 /** \brief Object type-specific Attributes */
 union hwloc_obj_attr_u {
+  /** \brief Core-specific Object Attributes */
+  struct hwloc_core_attr_s {
+    int cpukind; /**< \brief The index of the CPU kind of this core.
+                  * 0 if all cores are identical.
+                  * -1 if a core ever exposes different kinds for its PUs.
+                  */
+  } core;
+
   /** \brief NUMA node-specific Object Attributes */
   struct hwloc_numanode_attr_s {
     hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */

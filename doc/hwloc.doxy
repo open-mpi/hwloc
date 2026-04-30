@@ -2617,6 +2617,9 @@ $ hwloc-calc -I cpukind package:0
 0,1
 \endverbatim
 
+Additionally, cores have their <tt>cpukind</tt> attribute in
+hwloc_obj_attr_u::hwloc_core_attr_s set to the index of their CPU kind.
+
 See \ref hwlocality_cpukinds for details.
 
 

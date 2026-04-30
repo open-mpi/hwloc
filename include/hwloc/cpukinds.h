@@ -68,6 +68,8 @@ extern "C" {
  * all kinds will have an unknown efficiency (\c -1),
  * and they are not indexed/ordered in any specific way.
  *
+ * Core objects have their cpukind index set in their
+ * hwloc_obj_attr_u::hwloc_core_attr_s attribute structure.
  * @{
  */
 

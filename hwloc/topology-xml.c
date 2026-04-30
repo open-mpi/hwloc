@@ -151,6 +151,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     obj->subtype = strdup(value);
   }
 
+  /* no need to import core_cpukind, we'll recompute it in hwloc_internal_cpukinds_rank() */
+
   else if (!strcmp(name, "cache_size")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (hwloc__obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE)
@@ -2352,6 +2354,8 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   }
 
   switch (obj->type) {
+    /* no need to export CORE cpukind, we'll recompute it in hwloc_internal_cpukinds_rank() */
+
   case HWLOC_OBJ_NUMANODE:
     if (obj->attr->numanode.local_memory) {
       sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.local_memory);
