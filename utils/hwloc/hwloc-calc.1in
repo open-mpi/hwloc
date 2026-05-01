@@ -53,13 +53,18 @@ which returns energy-efficient cores first, and high-performance
 power-hungry cores last.
 The full list of CPU kinds may be seen with \fIlstopo --cpukinds\fR.
 
-Note that this option is applied after searching locations.
+Note that \fIthis option is applied after searching locations\fR.
 Hence \fB\-\-cpukind 0 core:1\fR will return the second core of
 the machine if it is of kind 0, and nothing otherwise.
 To rather get the second core among those of kind 0, you should
 combine invocations:
 
   hwloc-calc --restrict $(hwloc-calc --cpukind 0 all) core:1
+
+When looking for Core objects, an easier solution consists in
+filtering Core objects by their CPU kind attribute:
+
+  hwloc-calc --restrict core\[cpukind=0\]:1
 
 .TP
 \fB\-\-default\-nodes\fR
@@ -487,6 +492,18 @@ To get the number of cpukinds inside a package:
 
     $ hwloc-calc -N cpukind package:0
     2
+
+Getting the second core in the second CPU kind:
+
+    $ hwloc-calc core\[cpukind=1\]:1
+
+Getting the first PU of every core of the first CPU kind:
+
+    $ hwloc-calc core\[cpukind=0\]:0
+
+Getting the part of the second socket that is in the first CPU kind:
+
+    $ hwlocècalc --cpukind 0 socket:1
 
 .
 .\" **************************

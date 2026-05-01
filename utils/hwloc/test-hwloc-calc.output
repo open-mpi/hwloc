@@ -198,6 +198,12 @@ NUMANode:0,NUMANode:1
 0%1
 
 
+# core by CPU kind
+0x00000c00
+
+# second PU of cores by CPU kind
+0x000000aa
+
 # CPU kind by index
 0x000000ff
 

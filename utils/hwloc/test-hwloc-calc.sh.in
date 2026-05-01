@@ -254,6 +254,12 @@ set -e
   echo
 
   echo
+  echo "# core by CPU kind"
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml core\[cpukind=2\]:1
+  echo
+  echo "# second PU of cores by CPU kind"
+  $calc --if xml --input $linuxdir/fakeheterocpunuma.xml core\[cpukind=1\]:all.pu:1
+  echo
   echo "# CPU kind by index"
   $calc --if xml --input $linuxdir/fakeheterocpunuma.xml --cpukind 1 all
   echo

@@ -56,6 +56,8 @@ for more details.
   + Add hwloc_get_pci_busid_cpuset() in hwloc/helpers.h.
   + Core objects now have a "cpukind" field in the hwloc_core_attr_s
     structure to report the index of their CPU kind.
+    - core[cpukind=1] may now be used to filter core objects on the
+      command-line.
   + Cache objects now have a "inclusive" field in the hwloc_cache_attr_s
     structure, instead of an "Inclusive" info attribute.
 * Tools
