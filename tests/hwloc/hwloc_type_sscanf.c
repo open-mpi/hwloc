@@ -26,7 +26,7 @@ static void _check(hwloc_topology_t topology, hwloc_obj_t obj, const char *buffe
       assert(attr.cache.type == obj->attr->cache.type);
       assert(attr.cache.depth == obj->attr->cache.depth);
     } else if (type == HWLOC_OBJ_GROUP) {
-      assert(attr.group.depth == obj->attr->group.depth);
+      assert(attr.group.depth == obj->attr->group.depth || attr.group.depth == (unsigned) -1 /* if sscanf on Group with hidden depth */);
     } else if (type == HWLOC_OBJ_BRIDGE) {
       assert(attr.bridge.upstream_type == obj->attr->bridge.upstream_type);
       assert(attr.bridge.downstream_type == obj->attr->bridge.downstream_type);
