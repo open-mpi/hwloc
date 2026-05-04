@@ -196,22 +196,20 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
 
   root_node = xmlDocGetRootElement((xmlDocPtr) bdata->data);
 
-  if (!strcmp((const char *) root_node->name, "root")) {
-    bdata->version_major = 0;
-    bdata->version_minor = 9;
-  } else if (!strcmp((const char *) root_node->name, "topology")) {
+  if (!strcmp((const char *) root_node->name, "topology")) {
     unsigned major, minor;
     xmlChar *version = xmlGetProp(root_node, (xmlChar*) "version");
-    if (version && sscanf((const char *)version, "%u.%u", &major, &minor) == 2) {
-      bdata->version_major = major;
-      bdata->version_minor = minor;
-    } else {
-      bdata->version_major = 1;
-      bdata->version_minor = 0;
+    if (!version || sscanf((const char *)version, "%u.%u", &major, &minor) != 2) {
+      if (state->global->show_errors)
+        fprintf(stderr, "%s: failed to parse topology version at the top the xml hierarchy\n",
+                state->global->msgprefix);
+      goto failed;
     }
+    bdata->version_major = major;
+    bdata->version_minor = minor;
     xmlFree(version);
   } else {
-    /* root node should be in "topology" class (or "root" if importing from < 1.0) */
+    /* root node should be in "topology" */
     if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring object of class `%s' not at the top the xml hierarchy\n",
 	      state->global->msgprefix, (const char *) root_node->name);

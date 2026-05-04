@@ -261,7 +261,6 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   unsigned major, minor;
   char *end;
   char *buffer = nbdata->buffer;
-  const char *tagname;
 
   HWLOC_BUILD_ASSERT(sizeof(*nstate) <= sizeof(state->data));
 
@@ -278,17 +277,6 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
     bdata->version_major = major;
     bdata->version_minor = minor;
     end = strchr(buffer, '>') + 1;
-    tagname = "topology";
-  } else if (!strncmp(buffer, "<topology>", 10)) {
-    bdata->version_major = 1;
-    bdata->version_minor = 0;
-    end = buffer + 10;
-    tagname = "topology";
-  } else if (!strncmp(buffer, "<root>", 6)) {
-    bdata->version_major = 0;
-    bdata->version_minor = 9;
-    end = buffer + 6;
-    tagname = "root";
   } else
     goto failed;
 
@@ -301,7 +289,7 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   state->parent = NULL;
   nstate->closed = 0;
   nstate->tagbuffer = end;
-  nstate->tagname = tagname;
+  nstate->tagname = "topology";
   nstate->attrbuffer = NULL;
   return 0; /* success */
 
