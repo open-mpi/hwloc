@@ -218,6 +218,15 @@ struct hwloc_topology {
     } *targets;
   } *memattrs;
 
+  /* memtiers */
+  unsigned nr_memtiers;
+  struct hwloc_internal_memtier_s {
+    hwloc_nodeset_t nodeset;
+    uint64_t local_bw_min, local_bw_max;
+    uint64_t local_lat_min, local_lat_max;
+    unsigned long kinds;
+  } * memtiers;
+
   /* hybridcpus */
   unsigned nr_cpukinds;
   unsigned nr_cpukinds_allocated;
@@ -449,7 +458,10 @@ extern void hwloc_internal_memattrs_need_refresh(hwloc_topology_t topology);
 extern void hwloc_internal_memattrs_refresh(hwloc_topology_t topology);
 extern int hwloc_internal_memattrs_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern int hwloc_internal_memattr_set_value(hwloc_topology_t topology, hwloc_memattr_id_t id, hwloc_obj_type_t target_type, hwloc_uint64_t target_gp_index, unsigned target_os_index, struct hwloc_internal_location_s *initiator, hwloc_uint64_t value);
-extern int hwloc_internal_memattrs_guess_memory_tiers(hwloc_topology_t topology, int force_subtype);
+
+extern void hwloc_internal_memtiers_init(hwloc_topology_t topology);
+extern int hwloc_internal_memtiers_build(hwloc_topology_t topology, int force_subtype);
+extern void hwloc_internal_memtiers_destroy(hwloc_topology_t topology);
 
 extern void hwloc_internal_cpukinds_init(hwloc_topology_t topology);
 extern int hwloc_internal_cpukinds_rank(hwloc_topology_t topology);

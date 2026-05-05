@@ -3812,6 +3812,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   /* always initialize since we don't know flags to disable those yet */
   hwloc_internal_distances_init(topology);
   hwloc_internal_memattrs_init(topology);
+  hwloc_internal_memtiers_init(topology);
   hwloc_internal_cpukinds_init(topology);
 
   topology->userdata_export_cb = NULL;
@@ -4079,6 +4080,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   hwloc_internal_cpukinds_destroy(topology);
   hwloc_internal_distances_destroy(topology);
   hwloc_internal_memattrs_destroy(topology);
+  hwloc_internal_memtiers_destroy(topology);
 
   hwloc_free_object_and_children(topology->levels[0][0]);
   hwloc_bitmap_free(topology->allowed_cpuset);
@@ -4244,7 +4246,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     hwloc_internal_memattrs_refresh(topology);
     /* update memtiers unless XML */
     if (force_memtiers || !topology->is_xml)
-      hwloc_internal_memattrs_guess_memory_tiers(topology, force_memtiers);
+      hwloc_internal_memtiers_build(topology, force_memtiers);
   }
 
   topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_LOADING;
@@ -4539,8 +4541,9 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
    * we need to update distances, etc */
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
     hwloc_internal_distances_invalidate_cached_objs(topology);
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
     hwloc_internal_memattrs_need_refresh(topology);
+  }
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
     hwloc_internal_cpukinds_restrict(topology);
   hwloc_pci_refresh(topology);
