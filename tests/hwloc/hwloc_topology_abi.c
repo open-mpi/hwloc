@@ -85,6 +85,12 @@ int main(void)
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
     assert(offset == 784);
 
+    offset = offsetof(struct hwloc_topology, backends);
+    assert(offset == 792);
+
+    offset = offsetof(struct hwloc_topology, tma);
+    assert(offset == 816);
+
     /* fields after this one aren't needed after discovery */
 
     /* check bitmap ABI too, but those fields are private to bitmap.c */
