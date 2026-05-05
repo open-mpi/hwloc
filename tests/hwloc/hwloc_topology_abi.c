@@ -90,6 +90,17 @@ int main(void)
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
     assert(offset == 816);
 
+    offset = offsetof(struct hwloc_topology, first_pci_locality);
+    assert(offset == 824);
+    size = sizeof(struct hwloc_pci_locality_s);
+    assert(size == 48);
+
+    offset = offsetof(struct hwloc_topology, backends);
+    assert(offset == 840);
+
+    offset = offsetof(struct hwloc_topology, tma);
+    assert(offset == 864);
+
     /* fields after this one aren't needed after discovery */
 
     /* check bitmap ABI too, but those fields are private to bitmap.c */
