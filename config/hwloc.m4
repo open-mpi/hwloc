@@ -1251,14 +1251,14 @@ char nvmlInit ();
       fi
       fi
       if test "x$rocm_dir" != x; then
-         if test -d "$rocm_dir/include/rocm_smi"; then
-           HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/include/"
-           HWLOC_RSMI_LDFLAGS="-L$rocm_dir/lib/"
-         else
-           # ROCm <5.2 only used its own rocm_smi/{include,lib} directories
-           HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/rocm_smi/include/"
-           HWLOC_RSMI_LDFLAGS="-L$rocm_dir/rocm_smi/lib/"
-	 fi
+        # AMD SMI always in main ROCm include path, but ROCm SMI include changed
+        HWLOC_RSMI_CPPFLAGS="-I$rocm_dir/include/"
+        HWLOC_RSMI_LDFLAGS="-L$rocm_dir/lib/"
+        if test -d "$rocm_dir/rcom_smi/include/rocm_smi"; then
+          # ROCm <5.2 only used its own rocm_smi/{include,lib} directories
+          HWLOC_RSMI_CPPFLAGS="$HWLOC_RSMI_CPPFLAGS -I$rocm_dir/rocm_smi/include/"
+          HWLOC_RSMI_LDFLAGS="$HWLOC_RSMI_LDFLAGS -L$rocm_dir/lib/ -L$rocm_dir/rocm_smi/lib/"
+	fi
       fi
 
       # ROCM 6.4+ requires at least headers from /opt/amdgpu
@@ -1274,18 +1274,20 @@ char nvmlInit ();
         HWLOC_RSMI_LDFLAGS="$HWLOC_RSMI_LDFLAGS -L$amdgpu_dir/lib/"
       fi
 
-      hwloc_rsmi_happy=yes
-      CPPFLAGS_save="$CPPFLAGS"
-      CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
-      AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
-        LDFLAGS_save="$LDFLAGS"
-        LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
-        LIBS_save="$LIBS"
-        AC_CHECK_LIB([rocm_smi64],
+      hwloc_rsmi_rocm_happy=no
+      if test "x$enable_rsmi_rocm" != "xno"; then
+        hwloc_rsmi_rocm_happy=yes
+        CPPFLAGS_save="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
+        AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
+          LDFLAGS_save="$LDFLAGS"
+          LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
+          LIBS_save="$LIBS"
+          AC_CHECK_LIB([rocm_smi64],
                      [rsmi_init],
                      [AC_MSG_CHECKING([whether a program linked with -lrocm_smi64 can run])
-                      HWLOC_RSMI_LIBS="-lrocm_smi64"
-                      LIBS="$LIBS $HWLOC_RSMI_LIBS"
+                      HWLOC_ROCM_SMI_LIBS="-lrocm_smi64"
+                      LIBS="$LIBS $HWLOC_ROCM_SMI_LIBS"
                       AC_RUN_IFELSE([
                         AC_LANG_PROGRAM([[
 #include <stdio.h>
@@ -1300,11 +1302,69 @@ return rsmi_init(0);
                          hwloc_rsmi_warning=yes],
                         [AC_MSG_RESULT([don't know (cross-compiling)])])
 		      AC_CHECK_DECLS([rsmi_dev_partition_id_get],,[:],[[#include <rocm_smi/rocm_smi.h>]])
-		     ], [hwloc_rsmi_happy=no])
-        LDFLAGS="$LDFLAGS_save"
-        LIBS="$LIBS_save"
-      ], [hwloc_rsmi_happy=no])
-      CPPFLAGS="$CPPFLAGS_save"
+		     ], [hwloc_rsmi_rocm_happy=no])
+          LDFLAGS="$LDFLAGS_save"
+          LIBS="$LIBS_save"
+        ], [hwloc_rsmi_rocm_happy=no])
+        CPPFLAGS="$CPPFLAGS_save"
+      fi
+
+      hwloc_rsmi_amd_happy=no
+      if test "x$enable_rsmi_amd" != "xno"; then
+        hwloc_rsmi_amd_happy=yes
+        CPPFLAGS_save="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
+        AC_CHECK_HEADERS([amd_smi/amdsmi.h], [
+          LDFLAGS_save="$LDFLAGS"
+          LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
+          LIBS_save="$LIBS"
+	  # amdsmi_get_gpu_enumeration_info is needed, added in ROCm 6.4.0
+          AC_CHECK_LIB([amd_smi],
+                     [amdsmi_get_gpu_enumeration_info],
+                     [AC_MSG_CHECKING([whether a program linked with -lamd_smi can run])
+                      HWLOC_AMD_SMI_LIBS="-lamd_smi"
+                      LIBS="$LIBS $HWLOC_AMD_SMI_LIBS"
+                      AC_RUN_IFELSE([
+                        AC_LANG_PROGRAM([[
+#include <stdio.h>
+char amdsmi_init(int);
+]], [[
+return amdsmi_init(0);
+]]
+                        )],
+                        [AC_MSG_RESULT([yes])
+                         hwloc_amdsmi_warning=no],
+                        [AC_MSG_RESULT([no])
+                         hwloc_amdsmi_warning=yes],
+                        [AC_MSG_RESULT([don't know (cross-compiling)])])
+		     ], [hwloc_rsmi_amd_happy=no])
+          LDFLAGS="$LDFLAGS_save"
+          LIBS="$LIBS_save"
+        ], [hwloc_rsmi_amd_happy=no])
+        CPPFLAGS="$CPPFLAGS_save"
+      fi
+
+      # merge the result of AMDSMI and ROCm SMI lib checks
+      if test "x$hwloc_rsmi_rocm_happy$hwloc_rsmi_amd_happy" = xyesyes; then
+        AC_DEFINE([HWLOC_RSMI_USE_ROCM_SMI], [1], [Define to 1 to enable ROCm SMI API in the rsmi backend])
+        AC_DEFINE([HWLOC_RSMI_USE_AMD_SMI], [1], [Define to 1 to enable AMD SMI API in the rsmi backend])
+	HWLOC_RSMI_LIBS="$HWLOC_ROCM_SMI_LIBS $HWLOC_AMD_SMI_LIBS"
+	AC_MSG_NOTICE([Using both AMD SMI and ROCm SMI for RSMI backend])
+	hwloc_rsmi_happy=yes
+      else if test "x$hwloc_rsmi_rocm_happy$hwloc_rsmi_amd_happy" = xyesno; then
+        AC_DEFINE([HWLOC_RSMI_USE_ROCM_SMI], [1], [Define to 1 to enable ROCm SMI API in the rsmi backend])
+	HWLOC_RSMI_LIBS="$HWLOC_ROCM_SMI_LIBS"
+	AC_MSG_NOTICE([Using only ROCm SMI for RSMI backend])
+	hwloc_rsmi_happy=yes
+      else if test "x$hwloc_rsmi_rocm_happy$hwloc_rsmi_amd_happy" = xnoyes; then
+        AC_DEFINE([HWLOC_RSMI_USE_AMD_SMI], [1], [Define to 1 to enable AMD SMI API in the rsmi backend])
+	HWLOC_RSMI_LIBS="$HWLOC_AMD_SMI_LIBS"
+	AC_MSG_NOTICE([Using only AMD SMI for RSMI backend])
+	hwloc_rsmi_happy=yes
+      else
+	AC_MSG_NOTICE([Neither AMD SMI nor ROCm SMI may be used for RSMI backend])
+	hwloc_rsmi_happy=no
+      fi fi fi
 
       echo "**** end of RSMI configuration"
     fi
