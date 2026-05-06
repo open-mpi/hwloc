@@ -136,8 +136,8 @@ static int check_amdsmi(hwloc_topology_t topology)
       assert(osdev);
 
       ret = amdsmi_get_gpu_enumeration_info(procs[j], &enum_info);
-      
-      osdev2 = hwloc_rsmi_get_device_osdev_by_index(topology, enum_info.hip_id);
+
+      osdev2 = hwloc_amdsmi_get_device_osdev_by_index(topology, enum_info.hip_id);
       assert(osdev2 == osdev);
 
       ancestor = hwloc_get_non_io_ancestor_obj(topology, osdev);
