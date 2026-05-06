@@ -474,6 +474,7 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
   hwloc_obj_t *osdevs = NULL, *osdevs2 = NULL;
   hwloc_uint64_t *xgmi_bws = NULL, *xgmi_hops = NULL;
   amdsmi_processor_handle *procs;
+  uint64_t min_xgmi_weight = UINT64_MAX;
   int added = 0;
 
   ret = amdsmi_init(AMDSMI_INIT_AMD_GPUS);
@@ -704,20 +705,22 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
           if (i == j)
             continue;
           if (AMDSMI_STATUS_SUCCESS == amdsmi_topo_get_link_type(procs[i], procs[j], &hops, &type) &&
-              type == HWLOC_AMDSMI_LINK_TYPE_XGMI) {
-            xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "%s ", osdevs[j]->name);
-            xgmi_hops[i*nr_procs+j] = hops;
-            /* FIXME: on Adastra/Frontier, hops is always 1 even for non-direct links (and bandwidth is 0 below).
-             * Change those hops to 2 ?
-             * See https://github.com/ROCm/rocm-systems/issues/5763
+              hops == 1 && type == HWLOC_AMDSMI_LINK_TYPE_XGMI) {
+            /* hops==1 doesn't mean direct XGMI link but rather XGMI-only path between GPUs
+             * (contrary to PCIe or inter-socket paths).
+             * The length of XGMI path is rather given as the weight, but it needs to normalized.
              */
-            xgmi_bws[i*nr_procs+j] = 0;
-            if (1 == hops) {
-              uint64_t min, max;
-              if (AMDSMI_STATUS_SUCCESS == amdsmi_get_minmax_bandwidth_between_processors(procs[i], procs[j], &min, &max)) {
-                xgmi_bws[i*nr_procs+j] = max; /* min is usually 50k while max is 50/100/200k */
-                got_xgmi_bws = 1;
-              }
+            uint64_t min, max, weight;
+            xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "%s ", osdevs[j]->name);
+            if (AMDSMI_STATUS_SUCCESS == amdsmi_get_minmax_bandwidth_between_processors(procs[i], procs[j], &min, &max)) {
+              xgmi_bws[i*nr_procs+j] = max; /* min is usually 50k while max is 50/100/200k */
+              got_xgmi_bws = 1;
+            }
+            if (AMDSMI_STATUS_SUCCESS == amdsmi_topo_get_link_weight(procs[i], procs[j], &weight)) {
+              xgmi_hops[i*nr_procs+j] = weight;
+              if (weight < min_xgmi_weight)
+                /* save the smallest weight to normalize them later */
+                min_xgmi_weight = weight;
             }
           }
         }
@@ -728,10 +731,17 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
     }
     if (got_xgmi_bws) {
       hwloc__rsmi_add_xgmi_bandwidth(topology, nr_procs, osdevs, xgmi_bws);
-      hwloc__rsmi_add_xgmi_hops(topology, nr_procs, osdevs2, xgmi_hops);
-      /* don't free arrays, they were given to the distance internals */
       osdevs = NULL;
       xgmi_bws = NULL;
+    }
+    if (min_xgmi_weight < UINT64_MAX) {
+      /* Normalize XGMI weights since the amdkfd kernel driver gives 15*hops.
+       * In case some values are ever between 16 and 29, round-up above so that they become 2 instead of 1.
+       */
+      for(i=0; i<nr_procs*nr_procs; i++)
+        xgmi_hops[i] = (xgmi_hops[i]+min_xgmi_weight-1)/min_xgmi_weight;
+      hwloc__rsmi_add_xgmi_hops(topology, nr_procs, osdevs2, xgmi_hops);
+      /* don't free arrays, they were given to the distance internals */
       osdevs2 = NULL;
       xgmi_hops = NULL;
     }

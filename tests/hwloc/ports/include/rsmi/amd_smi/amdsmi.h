@@ -79,4 +79,6 @@ extern amdsmi_status_t amdsmi_topo_get_link_type(amdsmi_processor_handle, amdsmi
 
 extern amdsmi_status_t amdsmi_get_minmax_bandwidth_between_processors(amdsmi_processor_handle, amdsmi_processor_handle, uint64_t* , uint64_t*);
 
+extern amdsmi_status_t amdsmi_topo_get_link_weight(amdsmi_processor_handle, amdsmi_processor_handle, uint64_t*);
+
 #endif /* HWLOC_PORT_RSMI_AMDSMI_H */
