@@ -24,6 +24,7 @@ Version 2.14.0
   --disable-rsmi-amd or HWLOC_RSMI_BACKEND=rocm may be used to switch
   back to ROCm.
   - Add hwloc/amdsmi.h for interoperability.
+  - Properly implement the XGMIHops distance matrix when using AMD SMI.
   Thanks to Edgar Leon for the help.
 * Add CXI OS devices for Cray Slingshot NICs, e.g. cxi0,
   thanks to Edgar Leon for the suggestion.
