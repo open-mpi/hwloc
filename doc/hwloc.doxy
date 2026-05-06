@@ -4536,9 +4536,9 @@ You should pass the following command-line option to Valgrind to use it:
 
 \section faq4 Platform-specific
 
-\subsection faq_rocm_build How do I enable ROCm SMI and select which version to use?
+\subsection faq_rocm_build How do I enable AMD/ROCm SMI and select which version to use?
 
-hwloc enables ROCm SMI as soon as it finds some development headers and libraries
+hwloc enables AMD/ROCm SMI as soon as it finds some development headers and libraries
 on the system.
 This detection consists in looking in <tt>/opt/rocm</tt> by default.
 If a ROCm version was specified with <tt>\--with-rocm-version=4.4.0</tt>
@@ -4549,8 +4549,8 @@ Finally, a specific installation path may be specified with <tt>\--with-rocm=/pa
 As usual, developer header and library paths may also be set through
 environment variables such as <tt>LIBRARY_PATH</tt> and <tt>C_INCLUDE_PATH</tt>.
 
-To find out whether ROCm SMI was detected and enabled, look in <i>Probe / display I/O devices</i>
-at the end of the configure script output.
+To find out whether AMD/ROCm SMI was detected and enabled, look for <tt>RSMI</tt>
+in <i>Probe / display I/O devices</i> at the end of the configure script output.
 Passing <tt>\--enable-rsmi</tt> will also cause configure to fail
 if RSMI could not be found and enabled in hwloc.
 
