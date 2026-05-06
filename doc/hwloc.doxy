@@ -482,9 +482,10 @@ The hwloc core may also benefit from the following development packages:
   It is also available within nvidia-settings from ftp://download.nvidia.com/XFree86/nvidia-settings/
   and https://github.com/NVIDIA/nvidia-settings/ .
 </li>
-<li>the AMD ROCm SMI library for RSMI device discovery.
-  The relevant development package is usually <tt>rocm-smi-lib64</tt>
-  or <tt>librocm-smi-dev</tt>.
+<li>the AMD SMI library for RSMI device discovery.
+  The relevant development package is usually <tt>amd-smi-lib</tt> or <tt>libamd-smi-dev</tt>.
+  If AMD SMI isn't available, the old ROCm SMI library may be used instead
+  (<tt>rocm-smi-lib</tt> or <tt>librocm-smi-dev</tt> package).
   See \ref faq_rocm_build.
 </li>
 <li>the oneAPI Level Zero library.
@@ -1323,6 +1324,13 @@ following environment variables.
   when HWLOC_PLUGINS_VERBOSE=1.
   </dd>
 
+<dt>HWLOC_RSMI_BACKEND=amd</dt>
+  <dd>Use the new AMD SMI library for querying RSMI OS devices.
+  If set to <tt>rocm</tt> instead, the old ROCm SMI library will
+  be used.
+  The default is AMD SMI is available, otherwise ROCm SMI.
+  </dd>
+
 </dl>
 
 
@@ -1703,7 +1711,7 @@ components when I/O discovery is enabled and supported.
   ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library),
   and <em>ze0.1</em> for its second subdevice (if any).</li>
  <li><em>rsmi0</em> for the first RSMI device
-  ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
+  ("RSMI" subtype, from the RSMI component, using the AMD/ROCm SMI library)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>nvml0</em> for the first NVML device
@@ -3177,9 +3185,18 @@ enabled for the current topology.
   See \ref hwlocality_levelzero.
  </dd>
 
-<dt>AMD ROCm SMI Library (RSMI)</dt>
+<dt>AMD's new SMI Library</dt>
  <dd>
-  hwloc/rsmi.h enables interoperability with the AMD ROCm SMI interface.
+  hwloc/amdsmi.h enables interoperability with the new AMD SMI interface (<tt>amd_smi/amdsmi.h</tt>).
+  It may return the list of processors near an AMD GPU.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
+  See \ref hwlocality_amdsmi.
+ </dd>
+
+<dt>AMD's old ROCm SMI Library</dt>
+ <dd>
+  hwloc/rsmi.h enables interoperability with the old AMD ROCm SMI interface (<tt>rocm_smi/rocm_smi.h</tt>).
   It may return the list of processors near an AMD GPU.
   It may also return the corresponding OS device hwloc object for further
   information (if I/O device discovery is enabled).
@@ -4521,7 +4538,7 @@ You should pass the following command-line option to Valgrind to use it:
 
 \subsection faq_rocm_build How do I enable ROCm SMI and select which version to use?
 
-hwloc enables ROCm SMI as soon as it finds its development headers and libraries
+hwloc enables ROCm SMI as soon as it finds some development headers and libraries
 on the system.
 This detection consists in looking in <tt>/opt/rocm</tt> by default.
 If a ROCm version was specified with <tt>\--with-rocm-version=4.4.0</tt>
@@ -4536,6 +4553,11 @@ To find out whether ROCm SMI was detected and enabled, look in <i>Probe / displa
 at the end of the configure script output.
 Passing <tt>\--enable-rsmi</tt> will also cause configure to fail
 if RSMI could not be found and enabled in hwloc.
+
+Both the new AMD SMI and the old ROCm SMI libraries may be used
+(the former is used by default unless <tt>HWLOC_RSMI_BACKEND=rocm</tt> is set in the environment).
+Both are compiled in unless <tt>\--disable-rsmi-amd</tt> or <tt>\--disable-rsmi-rocm</tt>
+is passed to configure.
 
 
 \subsection faq_cuda_build How do I enable CUDA and select which CUDA version to use?

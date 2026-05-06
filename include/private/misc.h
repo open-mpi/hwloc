@@ -587,6 +587,8 @@ hwloc__pci_link_speed(unsigned generation, unsigned lanes)
    * PCIe Gen6 = 64 GT/s signal-rate per lane x 242/256 =  8   GB/s data-rate per lane
    * PCIe Gen7 = 128GT/s signal-rate per lane x 242/256 = 16   GB/s data-rate per lane
    * PCIe Gen8 = 256GT/s signal-rate per lane x 242/256 = 32   GB/s date-rate per lane
+   *
+   * If future generations change encoding, topology-rsmi.c needs to be updated as well.
    */
 
   /* lanespeed in Gbit/s */
