@@ -1213,7 +1213,8 @@ return 0;
 #include <stdio.h>
 char nvmlInit ();
 ]], [[
- return nvmlInit ();
+nvmlInit ();
+return 0;
 ]]
                        )],
                        [AC_MSG_RESULT([yes])
@@ -1325,7 +1326,8 @@ char nvmlInit ();
 #include <stdio.h>
 char rsmi_init(int);
 ]], [[
-return rsmi_init(0);
+rsmi_init(0); /* may fail if driver fails to find some GPUs */
+return 0;
 ]]
                         )],
                         [AC_MSG_RESULT([yes])
@@ -1361,7 +1363,8 @@ return rsmi_init(0);
 #include <stdio.h>
 char amdsmi_init(int);
 ]], [[
-return amdsmi_init(0);
+amdsmi_init(0);
+return 0;
 ]]
                         )],
                         [AC_MSG_RESULT([yes])
