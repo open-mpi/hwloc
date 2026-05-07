@@ -746,12 +746,13 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
   }
 
   free(procs);
+
+ out:
   free(osdevs);
   free(xgmi_bws);
   free(osdevs2);
   free(xgmi_hops);
 
- out:
   amdsmi_shut_down();
   return 0;
 }
