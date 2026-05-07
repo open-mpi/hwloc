@@ -748,12 +748,13 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
   }
 
   free(procs);
+
+ out:
   free(osdevs);
   free(xgmi_bws);
   free(osdevs2);
   free(xgmi_hops);
 
- out:
   if (added)
     hwloc_modify_infos(hwloc_topology_get_infos(topology), HWLOC_MODIFY_INFOS_OP_ADD, "Backend", "RSMI");
   amdsmi_shut_down();
