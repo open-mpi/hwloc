@@ -8,7 +8,7 @@
   This is the DTD for hwloc v2.x XMLs.
  -->
 
-<!ELEMENT topology (object+,distances2*,distances2hetero*,support*,memattr*,cpukind*,info*,pci_locality*)>
+<!ELEMENT topology (object+,distances2*,distances2hetero*,support*,memattr*,cpukind*,info*,memtier*,pci_locality*)>
 <!ATTLIST topology version CDATA "">
 
 <!ELEMENT object (page_type*,info*,userdata*,object*)>
@@ -87,6 +87,10 @@
 <!ELEMENT cpukind (info*)>
 <!ATTLIST cpukind cpuset CDATA "0">
 <!ATTLIST cpukind forced_efficiency CDATA "-1">
+
+<!ELEMENT memtier EMPTY>
+<!ATTLIST memtier kinds CDATA "0">
+<!ATTLIST memtier nodeset CDATA "0">
 
 <!ELEMENT pci_locality EMPTY>
 <!ATTLIST pci_locality domain CDATA #REQUIRED>

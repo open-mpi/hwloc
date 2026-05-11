@@ -1937,7 +1937,12 @@ hwloc_internal_memtiers_build(hwloc_topology_t topology, int force)
   const char *env;
 
   hwloc__clear_memtiers_attrs(topology);
-  
+
+  /* remove XML imported tiers since we're rebuilding */
+  hwloc_internal_memtiers_destroy(topology);
+  topology->memtiers = NULL;
+  topology->nr_memtiers = 0;
+
   env = getenv("HWLOC_MEMTIERS");
   if (env) {
     if (!strcmp(env, "none"))
@@ -1999,6 +2004,30 @@ hwloc_internal_memtiers_init(struct hwloc_topology *topology)
 {
   topology->nr_memtiers = 0;
   topology->memtiers = NULL;
+}
+
+/* nodeset is either used or freed by the callee */
+int
+hwloc_internal_memtier_import(struct hwloc_topology *topology,
+                              unsigned long kinds,
+                              hwloc_bitmap_t nodeset)
+{
+  struct hwloc_internal_memtier_s *tmp;
+  unsigned nr = topology->nr_memtiers;
+
+  tmp = realloc(topology->memtiers, (nr+1)*sizeof(*tmp));
+  if (!tmp) {
+    free(nodeset);
+    return -1;
+  }
+
+  memset(&tmp[nr], 0, sizeof(*tmp)); /* initialize attributes even if they won't be used */
+  tmp[nr].kinds = kinds;
+  tmp[nr].nodeset = nodeset;
+
+  topology->memtiers = tmp;
+  topology->nr_memtiers = nr+1;
+  return 0;
 }
 
 int

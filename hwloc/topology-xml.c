@@ -1638,6 +1638,52 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_import_memtier(hwloc_topology_t topology,
+                          hwloc__xml_import_state_t state)
+{
+  hwloc_bitmap_t nodeset = NULL;
+  unsigned long kinds = 0;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "nodeset")) {
+      if (!nodeset)
+        nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(nodeset, attrvalue);
+    } else if (!strcmp(attrname, "kinds")) {
+      kinds = atoi(attrvalue);
+    } else {
+      if (state->global->show_errors)
+        fprintf(stderr, "%s: ignoring unknown memtier attribute %s\n",
+                state->global->msgprefix, attrname);
+      hwloc_bitmap_free(nodeset);
+      return -1;
+    }
+  }
+
+  if (!nodeset) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring memtier without nodeset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS) {
+    hwloc_bitmap_free(nodeset);
+  } else {
+    hwloc_internal_memtier_import(topology, kinds, nodeset);
+  }
+
+  return state->global->close_tag(state);
+
+ error:
+  hwloc_bitmap_free(nodeset);
+  return -1;
+}
+
+static int
 hwloc__xml_import_cpukind(hwloc_topology_t topology,
                           hwloc__xml_import_state_t state)
 {
@@ -2016,6 +2062,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	  goto failed;
       } else if (!strcmp(tag, "memattr")) {
         ret = hwloc__xml_import_memattr(topology, &childstate);
+        if (ret < 0)
+          goto failed;
+      } else if (!strcmp(tag, "memtier")) {
+        ret = hwloc__xml_import_memtier(topology, &childstate);
         if (ret < 0)
           goto failed;
       } else if (!strcmp(tag, "cpukind")) {
@@ -2819,6 +2869,26 @@ hwloc__xml_export_memattrs(hwloc__xml_export_state_t state, hwloc_topology_t top
 }
 
 static void
+hwloc__xml_export_memtiers(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  unsigned i;
+  for(i=0; i<topology->nr_memtiers; i++) {
+    struct hwloc_internal_memtier_s *tier = &topology->memtiers[i];
+    struct hwloc__xml_export_state_s cstate;
+    char *setstring;
+    char tmp[11];
+
+    state->new_child(state, &cstate, "memtier");
+    snprintf(tmp, sizeof(tmp), "%lu", tier->kinds);
+    cstate.new_prop(&cstate, "kinds", tmp);
+    hwloc_bitmap_asprintf(&setstring, tier->nodeset);
+    cstate.new_prop(&cstate, "nodeset", setstring);
+    free(setstring);
+    cstate.end_object(&cstate, "memtier");
+  }
+}
+
+static void
 hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t topology)
 {
   unsigned i;
@@ -2896,6 +2966,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
     hwloc__xml_export_cpukinds(state, topology);
     if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
       hwloc__xml_export_infos(state, topology);
+      hwloc__xml_export_memtiers(state, topology);
       hwloc__xml_export_pcilocalities(state, topology);
     }
 }
