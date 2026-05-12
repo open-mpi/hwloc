@@ -2033,6 +2033,29 @@ hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old)
   return -1;
 }
 
+int
+hwloc_internal_memtiers_restrict(struct hwloc_topology *topology)
+{
+  unsigned i;
+  int removed = 0;
+  for(i=0; i<topology->nr_memtiers; i++) {
+    struct hwloc_internal_memtier_s *tier = &topology->memtiers[i];
+    hwloc_bitmap_and(tier->nodeset, tier->nodeset, hwloc_get_root_obj(topology)->nodeset);
+    if (hwloc_bitmap_iszero(tier->nodeset)) {
+      hwloc_bitmap_free(tier->nodeset);
+      memmove(tier, tier+1, (topology->nr_memtiers - i - 1)*sizeof(*tier));
+      i--;
+      topology->nr_memtiers--;
+      removed = 1;
+    }
+  }
+  if (removed) {
+    hwloc__clear_memtiers_attrs(topology);
+    hwloc__apply_memtiers_attrs(topology, 0 /* no need to force update */);
+  }
+  return 0;
+}
+
 void
 hwloc_internal_memtiers_destroy(struct hwloc_topology *topology)
 {

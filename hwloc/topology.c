@@ -4547,6 +4547,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_bitmap_t se
     hwloc_internal_distances_invalidate_cached_objs(topology);
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
     hwloc_internal_memattrs_need_refresh(topology);
+    hwloc_internal_memtiers_restrict(topology);
   }
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
     hwloc_internal_cpukinds_restrict(topology);

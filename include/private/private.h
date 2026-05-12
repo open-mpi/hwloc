@@ -463,6 +463,7 @@ extern void hwloc_internal_memtiers_init(hwloc_topology_t topology);
 extern int hwloc_internal_memtiers_build(hwloc_topology_t topology, int force_subtype);
 extern void hwloc_internal_memtiers_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old);
+extern int hwloc_internal_memtiers_restrict(struct hwloc_topology *topology);
 
 extern void hwloc_internal_cpukinds_init(hwloc_topology_t topology);
 extern int hwloc_internal_cpukinds_rank(hwloc_topology_t topology);
