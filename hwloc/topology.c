@@ -1280,6 +1280,10 @@ hwloc__topology_dup(hwloc_topology_t *newp,
   if (err < 0)
     goto out_with_topology;
 
+  err = hwloc_internal_memtiers_dup(new, old);
+  if (err < 0)
+    goto out_with_topology;
+
   err = hwloc_internal_cpukinds_dup(new, old);
   if (err < 0)
     goto out_with_topology;

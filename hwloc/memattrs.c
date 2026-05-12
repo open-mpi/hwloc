@@ -2001,6 +2001,38 @@ hwloc_internal_memtiers_init(struct hwloc_topology *topology)
   topology->memtiers = NULL;
 }
 
+int
+hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old)
+{
+  struct hwloc_tma *tma = new->tma;
+  struct hwloc_internal_memtier_s *tiers;
+  unsigned i;
+
+  if (!old->nr_memtiers)
+    return 0;
+
+  tiers = hwloc_tma_malloc(tma, old->nr_memtiers * sizeof(*tiers));
+  if (!tiers)
+    return -1;
+  new->memtiers = tiers;
+  new->nr_memtiers = old->nr_memtiers;
+  memcpy(tiers, old->memtiers, old->nr_memtiers * sizeof(*tiers));
+
+  for(i=0; i<old->nr_memtiers; i++) {
+    tiers[i].nodeset = hwloc_bitmap_tma_dup(tma, old->memtiers[i].nodeset);
+    if (!tiers[i].nodeset) {
+      new->nr_memtiers = i;
+      goto failed;
+    }
+  }
+
+  return 0;
+
+ failed:
+  hwloc_internal_memtiers_destroy(new);
+  return -1;
+}
+
 void
 hwloc_internal_memtiers_destroy(struct hwloc_topology *topology)
 {
