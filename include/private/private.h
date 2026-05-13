@@ -225,6 +225,7 @@ struct hwloc_topology {
     uint64_t local_bw_min, local_bw_max;
     uint64_t local_lat_min, local_lat_max;
     unsigned long kinds;
+    struct hwloc_infos_s infos;
   } * memtiers;
 
   /* hybridcpus */
@@ -464,7 +465,7 @@ extern int hwloc_internal_memtiers_build(hwloc_topology_t topology);
 extern void hwloc_internal_memtiers_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern int hwloc_internal_memtiers_restrict(struct hwloc_topology *topology);
-extern int hwloc_internal_memtier_import(struct hwloc_topology *topology, unsigned long type, hwloc_bitmap_t nodeset);
+extern int hwloc_internal_memtier_import(struct hwloc_topology *topology, unsigned long kinds, hwloc_bitmap_t nodeset, struct hwloc_infos_s *infos);
 
 extern void hwloc_internal_cpukinds_init(hwloc_topology_t topology);
 extern int hwloc_internal_cpukinds_rank(hwloc_topology_t topology);

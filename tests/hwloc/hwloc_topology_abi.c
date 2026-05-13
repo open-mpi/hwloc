@@ -85,7 +85,7 @@ int main(void)
     offset = offsetof(struct hwloc_topology, memtiers);
     assert(offset == 776);
     size = sizeof(struct hwloc_internal_memtier_s);
-    assert(size == 48);
+    assert(size == 64);
 
     offset = offsetof(struct hwloc_topology, cpukinds);
     assert(offset == 792);

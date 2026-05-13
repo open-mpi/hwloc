@@ -570,6 +570,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --distances-transform <links|merge-switch-ports|transitive-closure>\n");
   fprintf (where, "                        Transform distances before displaying them\n");
   fprintf (where, "  --memattrs            Only show memory attributes\n");
+  fprintf (where, "  --memtiers            Only show memory tiers\n");
   fprintf (where, "  --cpukinds            Only show CPU kinds\n");
 #ifdef HWLOC_WIN_SYS
   fprintf (where, "  --windows-processor-groups    Only show Windows processor groups\n");
@@ -961,6 +962,7 @@ main (int argc, char *argv[])
 
   loutput.show_distances_only = 0;
   loutput.show_memattrs_only = 0;
+  loutput.show_memtiers_only = 0;
   loutput.show_cpukinds_only = 0;
   loutput.show_windows_processor_groups_only = 0;
   loutput.show_cpuset = 0;
@@ -1053,6 +1055,8 @@ main (int argc, char *argv[])
         opt = 1;
       } else if (!strcmp (argv[0], "--memattrs")) {
         loutput.show_memattrs_only = 1;
+      } else if (!strcmp (argv[0], "--memtiers")) {
+        loutput.show_memtiers_only = 1;
       } else if (!strcmp (argv[0], "--cpukinds")) {
         loutput.show_cpukinds_only = 1;
 #ifdef HWLOC_WIN_SYS
@@ -1636,6 +1640,7 @@ main (int argc, char *argv[])
         || show_only_string
 	|| loutput.show_distances_only
         || loutput.show_memattrs_only
+        || loutput.show_memtiers_only
         || loutput.show_cpukinds_only
         || loutput.show_windows_processor_groups_only
         || loutput.verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)

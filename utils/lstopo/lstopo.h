@@ -100,6 +100,7 @@ struct lstopo_output {
   /* text config */
   int show_distances_only;
   int show_memattrs_only;
+  int show_memtiers_only;
   int show_cpukinds_only;
   int show_windows_processor_groups_only;
   struct hwloc_calc_level show_only;

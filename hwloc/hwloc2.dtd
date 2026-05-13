@@ -88,7 +88,7 @@
 <!ATTLIST cpukind cpuset CDATA "0">
 <!ATTLIST cpukind forced_efficiency CDATA "-1">
 
-<!ELEMENT memtier EMPTY>
+<!ELEMENT memtier (info*)>
 <!ATTLIST memtier kinds CDATA "0">
 <!ATTLIST memtier nodeset CDATA "0">
 

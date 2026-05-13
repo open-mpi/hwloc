@@ -443,6 +443,9 @@ extern "C" {
 #define hwloc_memattr_get_targets HWLOC_NAME(memattr_get_targets)
 #define hwloc_memattr_get_initiators HWLOC_NAME(memattr_get_initiators)
 
+#define hwloc_memtiers_get_nr HWLOC_NAME(memtiers_get_nr)
+#define hwloc_memtiers_get_info HWLOC_NAME(memtiers_get_info)
+
 /* cpukinds.h */
 
 #define hwloc_cpukinds_get_nr HWLOC_NAME(cpukinds_get_nr)

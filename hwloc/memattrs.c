@@ -2031,20 +2031,23 @@ hwloc_internal_memtiers_init(struct hwloc_topology *topology)
 int
 hwloc_internal_memtier_import(struct hwloc_topology *topology,
                               unsigned long kinds,
-                              hwloc_bitmap_t nodeset)
+                              hwloc_bitmap_t nodeset,
+                              struct hwloc_infos_s *infosp /* given by the caller */)
 {
   struct hwloc_internal_memtier_s *tmp;
   unsigned nr = topology->nr_memtiers;
 
   tmp = realloc(topology->memtiers, (nr+1)*sizeof(*tmp));
   if (!tmp) {
-    free(nodeset);
+    hwloc_bitmap_free(nodeset);
+    hwloc__free_infos(infosp);
     return -1;
   }
 
   memset(&tmp[nr], 0, sizeof(*tmp)); /* initialize attributes even if they won't be used */
   tmp[nr].kinds = kinds;
   tmp[nr].nodeset = nodeset;
+  memcpy(&tmp[nr].infos, infosp, sizeof(*infosp));
 
   topology->memtiers = tmp;
   topology->nr_memtiers = nr+1;
@@ -2115,3 +2118,46 @@ hwloc_internal_memtiers_destroy(struct hwloc_topology *topology)
   free(topology->memtiers);
 }
 
+int hwloc_memtiers_get_nr(struct hwloc_topology *topology,
+                          unsigned long flags)
+{
+  if (flags) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  return topology->nr_memtiers;
+}
+
+int hwloc_memtiers_get_info(hwloc_topology_t topology,
+                            unsigned tier_index,
+                            hwloc_bitmap_t nodeset,
+                            unsigned long *kinds,
+                            struct hwloc_infos_s **infosp,
+                            unsigned long flags)
+{
+  struct hwloc_internal_memtier_s *tier;
+
+  if (flags) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (tier_index >= topology->nr_memtiers) {
+    errno = ENOENT;
+    return -1;
+  }
+  tier = &topology->memtiers[tier_index];
+
+  if (nodeset) {
+    hwloc_bitmap_copy(nodeset, tier->nodeset);
+  }
+  if (kinds) {
+    *kinds = tier->kinds;
+  }
+  if (infosp) {
+    *infosp = &tier->infos;
+  }
+
+  return 0;
+}

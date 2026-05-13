@@ -479,6 +479,34 @@ static void output_cpukinds(struct lstopo_output *loutput)
   hwloc_bitmap_free(cpuset);
 }
 
+static void output_memtier(struct lstopo_output *loutput)
+{
+  hwloc_topology_t topology = loutput->topology;
+  unsigned i, j, nr;
+  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+
+  nr = hwloc_memtiers_get_nr(topology, 0);
+
+  for(i=0; i<nr; i++) {
+    unsigned long kinds;
+    struct hwloc_infos_s *infosp;
+    int err;
+
+    err = hwloc_memtiers_get_info(topology, i, nodeset, &kinds, &infosp, 0);
+    if (!err) {
+      char *nodesets;
+      hwloc_bitmap_asprintf(&nodesets, nodeset);
+      printf("Memory tier #%u kinds %lu nodeset %s\n", i, kinds, nodesets);
+      free(nodesets);
+      if (infosp)
+        for(j=0; j<infosp->count; j++)
+          printf("  %s = %s\n", infosp->array[j].name, infosp->array[j].value);
+    }
+  }
+
+  hwloc_bitmap_free(nodeset);
+}
+
 int
 output_console(struct lstopo_output *loutput, const char *filename)
 {
@@ -499,6 +527,10 @@ output_console(struct lstopo_output *loutput, const char *filename)
   }
   if (loutput->show_memattrs_only) {
     output_memattrs(loutput);
+    return 0;
+  }
+  if (loutput->show_memtiers_only) {
+    output_memtier(loutput);
     return 0;
   }
   if (loutput->show_cpukinds_only) {
@@ -536,6 +568,7 @@ output_console(struct lstopo_output *loutput, const char *filename)
   if (verbose_mode > 1 && loutput->show_only.depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     output_distances(loutput);
     output_memattrs(loutput);
+    output_memtier(loutput);
     output_cpukinds(loutput);
     output_windows_processor_groups(loutput, verbose_mode > 2);
   }

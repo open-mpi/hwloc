@@ -1643,6 +1643,10 @@ hwloc__xml_import_memtier(hwloc_topology_t topology,
 {
   hwloc_bitmap_t nodeset = NULL;
   unsigned long kinds = 0;
+  struct hwloc_infos_s infos;
+  int ret;
+
+  hwloc__init_infos(&infos);
 
   while (1) {
     char *attrname, *attrvalue;
@@ -1663,6 +1667,33 @@ hwloc__xml_import_memtier(hwloc_topology_t topology,
     }
   }
 
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *tag;
+
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret <= 0)
+      break;
+
+    if (!strcmp(tag, "info")) {
+      char *infoname = NULL;
+      char *infovalue = NULL;
+      ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
+      if (!ret && infoname && infovalue)
+        hwloc__add_info(&infos, infoname, infovalue);
+    } else {
+      if (state->global->show_errors)
+        fprintf(stderr, "%s: memtier with unrecognized child %s\n",
+                state->global->msgprefix, tag);
+      ret = -1;
+    }
+
+    if (ret < 0)
+      goto error;
+
+    state->global->close_child(&childstate);
+  }
+
   if (!nodeset) {
     if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring memtier without nodeset\n",
@@ -1671,14 +1702,16 @@ hwloc__xml_import_memtier(hwloc_topology_t topology,
   }
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS) {
+    hwloc__free_infos(&infos);
     hwloc_bitmap_free(nodeset);
   } else {
-    hwloc_internal_memtier_import(topology, kinds, nodeset);
+    hwloc_internal_memtier_import(topology, kinds, nodeset, &infos);
   }
 
   return state->global->close_tag(state);
 
  error:
+  hwloc__free_infos(&infos);
   hwloc_bitmap_free(nodeset);
   return -1;
 }
@@ -2877,6 +2910,7 @@ hwloc__xml_export_memtiers(hwloc__xml_export_state_t state, hwloc_topology_t top
     struct hwloc__xml_export_state_s cstate;
     char *setstring;
     char tmp[11];
+    unsigned j;
 
     state->new_child(state, &cstate, "memtier");
     snprintf(tmp, sizeof(tmp), "%lu", tier->kinds);
@@ -2885,6 +2919,9 @@ hwloc__xml_export_memtiers(hwloc__xml_export_state_t state, hwloc_topology_t top
     cstate.new_prop(&cstate, "nodeset", setstring);
     free(setstring);
     cstate.end_object(&cstate, "memtier");
+
+    for(j=0; j<tier->infos.count; j++)
+      hwloc__xml_export_info_attr(&cstate, tier->infos.array[j].name, tier->infos.array[j].value);
   }
 }
 

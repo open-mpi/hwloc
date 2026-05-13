@@ -2042,6 +2042,7 @@ These info attributes are attached to the topology itself.
 <dl>
 <dt>MemoryTiersNr=2</dt>
 <dd>The number of different memory tiers in the topology, if any.
+This is also returned by hwloc_memtiers_get_nr().
 See \ref heteromem.
 </dd>
 <dt>Backend=Linux</dt>
@@ -2351,6 +2352,8 @@ These info attributes are attached to objects specified in parentheses.
 <dd>The rank of the memory tier of this node.
 Ranks start from 0 for highest bandwidth nodes.
 The attribute is only set if multiple tiers are found.
+This node will also be in the nodeset returned by hwloc_memtiers_get_info()
+for that tier.
 See \ref heteromem.
 </dd>
 <dt>CXLDevice=0003:02:01.0 (NUMA Nodes or DAX Memory OS devices)</dt>
@@ -2803,6 +2806,9 @@ now have the same locality (HBM and DRAM above) or overlapping localities
 <li>
 Checking NUMA node subtype or tier attributes is a good way to avoid
 this issue by ignoring nodes of different kinds.
+<br/>
+Memory tiers may be queried with hwloc_memtiers_get_nr() and
+hwloc_memtiers_get_info() (which provides a bitmap of NUMA nodes in a tier).
 </li>
 <li>
 Another solution consists in ignoring nodes whose CPU set overlap the

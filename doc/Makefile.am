@@ -714,7 +714,9 @@ man3_memattrs_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_register.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_set_value.3 \
         $(DOX_MAN_DIR)/man3/hwloc_memattr_get_targets.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_initiators.3
+        $(DOX_MAN_DIR)/man3/hwloc_memattr_get_initiators.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memtiers_get_nr.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_memtiers_get_info.3
 
 man3_cpukindsdir = $(man3dir)
 man3_cpukinds_DATA = \

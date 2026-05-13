@@ -406,6 +406,7 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
         }
       }
     }
+    /* FIXME show memtier */
   }
 }
 
@@ -776,6 +777,8 @@ hwloc_info_show_topology_infos(hwloc_topology_t topology)
   hwloc__info_show_topology_info_one("PUs", value, 0);
   snprintf(value, sizeof(value), "%u", hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE));
   hwloc__info_show_topology_info_one("NUMANodes", value, 0);
+  snprintf(value, sizeof(value), "%u", hwloc_memtiers_get_nr(topology, 0));
+  hwloc__info_show_topology_info_one("Memory tiers", value, 0);
   snprintf(value, sizeof(value), "%u", hwloc_cpukinds_get_nr(topology, 0));
   hwloc__info_show_topology_info_one("CPU kinds", value, 0);
 }

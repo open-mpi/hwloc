@@ -11,6 +11,7 @@ info SyntheticDescription = node:2 core:3 pu:4
 depth = 4
 PUs = 24
 NUMANodes = 2
+Memory tiers = 0
 CPU kinds = 0
 
 # topology infos --get-attr
