@@ -91,5 +91,5 @@ Memory attribute #5 name `WriteBandwidth' flags 5
 Memory tier #0 kinds 1 nodeset 0x00000014
 Memory tier #1 kinds 2 nodeset 0x00000003
 Memory tier #2 kinds 16 nodeset 0x00000340
-Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.18.0-rc4 OSVersion="#1 SMP PREEMPT_DYNAMIC Tue Apr 26 11:49:51 CEST 2022" HostName=efi Architecture=x86_64 PageSizeNr=2 PageSizes=4096,2097152 MemoryTiersNr=3
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.18.0-rc4 OSVersion="#1 SMP PREEMPT_DYNAMIC Tue Apr 26 11:49:51 CEST 2022" HostName=efi Architecture=x86_64 PageSizeNr=2 PageSizes=4096,2097152
 Topology not from this system

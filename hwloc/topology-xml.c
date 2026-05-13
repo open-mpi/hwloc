@@ -465,7 +465,6 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
           if (!strcmp(infoname, "Backend")
               || !strcmp(infoname, "SyntheticDescription")
               || !strcmp(infoname, "LinuxCgroup")
-              || !strcmp(infoname, "MemoryTiersNr")
               || !strcmp(infoname, "WindowsBuildEnvironment")
               || !strcmp(infoname, "OSName")
               || !strcmp(infoname, "OSRelease")
@@ -476,7 +475,9 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
               || !strcmp(infoname, "ProcessName")) {
             hwloc__add_info(&topology->infos, infoname, infovalue);
             return 0;
-          }
+          } else if (!strcmp(infoname, "MemoryTiersNr"))
+            /* this v2 info will be recomputed using node tiers */
+            return 0;
         } else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
           /* v2 inclusiveness is an infoattr */
           if (!strcmp(infoname, "Inclusive"))
@@ -2604,6 +2605,11 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
       && obj->attr->cache.inclusive) {
     sprintf(tmp, "%d", (int) obj->attr->cache.inclusive);
     hwloc__xml_export_info_attr(state, "Inclusive", tmp);
+  }
+
+  if (v2export && !obj->parent && topology->nr_memtiers > 1) {
+    sprintf(tmp, "%u", topology->nr_memtiers);
+    hwloc__xml_export_info_attr(state, "MemoryTiersNr", tmp);
   }
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {

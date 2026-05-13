@@ -2040,11 +2040,6 @@ placed.
 These info attributes are attached to the topology itself.
 
 <dl>
-<dt>MemoryTiersNr=2</dt>
-<dd>The number of different memory tiers in the topology, if any.
-This is also returned by hwloc_memtiers_get_nr().
-See \ref heteromem.
-</dd>
 <dt>Backend=Linux</dt>
 <dd>The name of a hwloc backend/component that added objects in the topology.
 If several components were combined, multiple Backend pairs may exist,
@@ -2755,7 +2750,7 @@ $ hwloc-calc -I memorytier numa:1
 The number of tiers may be retrieved by looking at topology attributes
 of by counting tiers inside the entire machine object:
 \verbatim
-$ hwloc-info --get-attr "info MemoryTiersNr" topology
+$ hwloc-info --get-attr "Memory tiers" topology
 2
 $ hwloc-calc --N memorytier all
 2
@@ -5014,6 +5009,12 @@ are renamed to ::HWLOC_DISTANCES_KIND_VALUE_LATENCY and ::HWLOC_DISTANCES_KIND_V
 
 The XGMIHops distance matrix is now of the new kind
 ::HWLOC_DISTANCES_KIND_VALUE_HOPS instead of latency.
+
+
+\section upgrade_to_api_3x_tiers Memory tiers
+
+The number of memory tiers is now available from hwloc_memtiers_get_nr()
+instead of the now-removed <tt>MemoryTiersNr</tt> root info attribute.
 
 
 \section upgrade_to_api_3x_xml XML changes

@@ -1912,11 +1912,6 @@ hwloc__apply_memtiers_attrs(hwloc_topology_t topology,
       }
     }
   }
-  if (nr_tiers > 1) {
-    char tmp[20];
-    snprintf(tmp, sizeof(tmp), "%u", nr_tiers);
-    hwloc__replace_infos(&topology->infos, "MemoryTiersNr", tmp);
-  }
 }
 
 static void
@@ -1926,7 +1921,6 @@ hwloc__clear_memtiers_attrs(hwloc_topology_t topology)
   while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
     hwloc__remove_infos(&node->infos, "MemoryTier", NULL);
   }
-  hwloc__remove_infos(&topology->infos, "MemoryTiersNr", NULL);
 }
 
 int

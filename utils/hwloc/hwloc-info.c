@@ -904,6 +904,8 @@ main (int argc, char *argv[])
 	only_attr_name = argv[1];
         if (!strcmp(only_attr_name, "info Inclusive")) /* backward compat with v2.x */
           only_attr_name = "attr cache inclusive";
+        else if (!strcmp(only_attr_name, "info MemoryTiersNr")) /* backward compat with v2.x */
+          only_attr_name = "Memory tiers";
 	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))
