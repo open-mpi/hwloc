@@ -316,7 +316,7 @@ EOF
 fi
 if test "x$hwloc_rsmi_status" != x; then
   cat <<EOF
-ROCm SMI status:             $hwloc_rsmi_status
+AMD/ROCm SMI status:         $hwloc_rsmi_status
 EOF
 fi
 cat <<EOF
