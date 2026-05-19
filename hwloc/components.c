@@ -873,7 +873,11 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   int tryall = 1;
   const char *_env;
   char *env; /* we'll to modify the env value, so duplicate it */
+  int enable_gl;
   unsigned i;
+
+  _env = getenv("HWLOC_GL");
+  enable_gl = _env ? atoi(_env) : 0;
 
   _env = getenv("HWLOC_COMPONENTS");
   env = _env ? strdup(_env) : NULL;
@@ -988,6 +992,14 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  fprintf(stderr, "hwloc: Excluding blacklisted discovery component `%s' phases 0x%x\n",
 		  comp->name, comp->phases);
 	goto nextcomp;
+      }
+
+      /* "gl" isn't enabled by default */
+      if (!enable_gl && !strcmp(comp->name, "gl")) {
+	if (hwloc_components_verbose)
+	  fprintf(stderr, "hwloc: Only enabling discovery component `%s' if requested explictly.\n",
+		  comp->name);
+        goto nextcomp;
       }
 
       hwloc_disc_component_try_enable(topology, comp, 0 /* defaults, not envvar forced */, blacklisted_phases);

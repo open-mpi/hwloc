@@ -34,6 +34,9 @@ extern "C" {
  * Only the NVIDIA display locality information is currently available,
  * using the NV-CONTROL X11 extension and the NVCtrl library.
  *
+ * This code may hang when trying to connect to the X server.
+ * Hence the GL component is disabled unless HWLOC_GL=1 in the environment.
+ *
  * @{
  */
 
@@ -47,6 +50,10 @@ extern "C" {
  * The topology \p topology does not necessarily have to match the current
  * machine. For instance the topology may be an XML import of a remote host.
  * I/O devices detection and the GL component must be enabled in the topology.
+ *
+ * \note The GL backend creating these OS devices is disabled by default since
+ * it may cause hwloc to hang when trying to connect to the X server.
+ * Set HWLOC_GL=1 in the environment to reenable it.
  *
  * \note The corresponding PCI device object can be obtained by looking
  * at the OS device parent object (unless PCI devices are filtered out).
@@ -79,6 +86,10 @@ hwloc_gl_get_display_osdev_by_port_device(hwloc_topology_t topology,
  * machine. For instance the topology may be an XML import of a remote host.
  * I/O devices detection and the GL component must be enabled in the topology.
  *
+ * \note The GL backend creating these OS devices is disabled by default since
+ * it may cause hwloc to hang when trying to connect to the X server.
+ * Set HWLOC_GL=1 in the environment to reenable it.
+ *
  * \note The corresponding PCI device object can be obtained by looking
  * at the OS device parent object (unless PCI devices are filtered out).
  */
@@ -109,7 +120,11 @@ hwloc_gl_get_display_osdev_by_name(hwloc_topology_t topology,
  * The topology \p topology does not necessarily have to match the current
  * machine. For instance the topology may be an XML import of a remote host.
  * I/O devices detection and the GL component must be enabled in the topology.
- */
+ *
+ * \note The GL backend creating these OS devices is disabled by default since
+ * it may cause hwloc to hang when trying to connect to the X server.
+ * Set HWLOC_GL=1 in the environment to reenable it.
+*/
 static __hwloc_inline int
 hwloc_gl_get_display_by_osdev(hwloc_topology_t topology __hwloc_attribute_unused,
 			      hwloc_obj_t osdev,
