@@ -15,6 +15,9 @@ bug fixes (and other actions) for each version of hwloc since version
 
 Version 2.14.0
 --------------
+* Disable the GL component (for graphics OS devices) since it hangs
+  on some platforms.
+  - Set HWLOC_GL=1 in the environment to reenable it.
 * Use ARM MIDR to identify different kinds of CPU core on Linux,
   instead of the frequency/capacity-based heuristics.
   Remove NVIDIA-specific forcing of homogeneous cores when their

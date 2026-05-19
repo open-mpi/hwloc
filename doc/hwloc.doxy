@@ -1355,6 +1355,16 @@ following environment variables.
   See \ref plugins_select for details.
   </dd>
 
+<dt>HWLOC_GL=0</dt>
+  <dd>The <tt>gl</tt> component is disabled by default since it may cause hwloc
+  to hang when trying to connect to the X server.
+  Setting this variable to 1 will let the component be enabled automatically
+  as any other component.
+  <br/>
+  Users are advised to verify that <tt>lstopo</tt> runs fine with the HWLOC_GL=1
+  on a platform before enabling the variable more globally on that specific platform.
+  </dd>
+
 <dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
   <dd>Change the default search directory for plugins.
   By default, <tt>$libdir/hwloc</tt> is used.
@@ -1734,7 +1744,8 @@ components when I/O discovery is enabled and supported.
  <li><em>nvml0</em> for the first NVML device
   ("NVML" subtype, from the NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
-  ("Display" subtype, from the GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
+  ("Display" subtype, from the GL component, using the NV-CONTROL X extension library, NVCtrl,
+  disabled unless HWLOC_GL=1 in the environment)</li>
  <li><em>card0</em> and <em>renderD128</em> for DRM device files
   (from the Linux component, filtered-out by default because considered non-important)</li>
  </ul>
@@ -3623,6 +3634,9 @@ environment variable (see \ref envvar_verbose).
  They are useful for graphical applications that need to place
  computation and/or data near a rendering GPU.
  <b>It may be built as a plugin</b>.
+ <br/>
+ However this code may hang when trying to connect to the X server.
+ Hence <b>this component is disabled unless HWLOC_GL=1 is set in the environment</b>.
 </dd>
 <dt>synthetic</dt>
 <dd>

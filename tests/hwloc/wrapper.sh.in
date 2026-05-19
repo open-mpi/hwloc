@@ -23,6 +23,12 @@ export HWLOC_DEBUG_CHECK
 HWLOC_LIBXML_CLEANUP=1
 export HWLOC_LIBXML_CLEANUP
 
+# enable the GL backend if not explicitly disabled
+if test x$HWLOC_GL = x; then
+    HWLOC_GL=1
+    export HWLOC_GL
+fi
+
 if test "`basename $1`" = "$xmlbuffer"; then
     "$@" 1 1
     "$@" 0 1
