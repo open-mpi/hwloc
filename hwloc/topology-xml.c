@@ -475,9 +475,31 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
               || !strcmp(infoname, "ProcessName")) {
             hwloc__add_info(&topology->infos, infoname, infovalue);
             return 0;
-          } else if (!strcmp(infoname, "MemoryTiersNr"))
-            /* this v2 info will be recomputed using node tiers */
+          } else if (!strcmp(infoname, "MemoryTiersNr")) {
+            /* preallocate tier structures */
+            unsigned nr = atoi(infovalue);
+            data->v2_memtiers = calloc(nr, sizeof(*data->v2_memtiers));
+            if (data->v2_memtiers)
+              data->v2_memtiers_nr = nr;
             return 0;
+          }
+        } else if (obj->type == HWLOC_OBJ_NUMANODE) {
+          if (!strcmp(infoname, "MemoryTier")) {
+            /* mark the node in preallocated tier structures */
+            unsigned i = atoi(infovalue);
+            if (i < data->v2_memtiers_nr) {
+              if (obj->subtype) {
+                if (!data->v2_memtiers[i].subtype)
+                  data->v2_memtiers[i].subtype = strdup(obj->subtype);
+                /* only keep the subtype of the first NUMANode, they should all be the same in a tier */
+              }
+              if (!data->v2_memtiers[i].nodeset)
+                data->v2_memtiers[i].nodeset = hwloc_bitmap_alloc();
+              if (data->v2_memtiers[i].nodeset)
+                hwloc_bitmap_set(data->v2_memtiers[i].nodeset, obj->os_index);
+            }
+            /* keep the attr */
+          }
         } else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
           /* v2 inclusiveness is an infoattr */
           if (!strcmp(infoname, "Inclusive"))
@@ -2023,6 +2045,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   char *tag;
   int gotignored = 0;
   hwloc_localeswitch_declare;
+  unsigned i;
   int ret;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_GLOBAL);
@@ -2042,6 +2065,8 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   data->v2_pagesizes = NULL;
   data->v2_pagesize_nr = 0;
   data->v2_pagesize_nr_alloc = 0;
+  data->v2_memtiers_nr = 0;
+  data->v2_memtiers = NULL;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -2168,7 +2193,6 @@ done:
   /* keep the "Backend" information intact, but we had missing ones from v3 */
   if (data->version_major <= 2) {
     struct hwloc_infos_s *infos = &topology->infos;
-    unsigned i;
     /* check if root already has some backend info */
     for(i=0; i<infos->count; i++)
       if (!strcmp(infos->array[i].name, "Backend")) {
@@ -2208,6 +2232,14 @@ done:
     data->v2_pagesizes = NULL;
   }
 
+  for(i=0; i<data->v2_memtiers_nr; i++) {
+    hwloc_internal_memtier_v2xml_import(topology, data->v2_memtiers[i].subtype, data->v2_memtiers[i].nodeset);
+    /* nodeset is given to the callee */
+    data->v2_memtiers[i].nodeset = NULL;
+    free(data->v2_memtiers[i].subtype);
+  }
+  free(data->v2_memtiers);
+
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
     topology->support.discovery->pu = 1;
     topology->support.discovery->disallowed_pu = 1;
@@ -2233,6 +2265,13 @@ done:
  err:
   free(data->v2_pagesizes);
   data->v2_pagesizes = NULL;
+
+  for(i=0; i<data->v2_memtiers_nr; i++) {
+    free(data->v2_memtiers[i].nodeset);
+    free(data->v2_memtiers[i].subtype);
+  }
+  free(data->v2_memtiers);
+  data->v2_memtiers = NULL;
 
   hwloc_free_object_siblings_and_children(root->first_child);
   root->first_child = NULL;

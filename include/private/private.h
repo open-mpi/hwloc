@@ -466,6 +466,7 @@ extern void hwloc_internal_memtiers_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern int hwloc_internal_memtiers_restrict(struct hwloc_topology *topology);
 extern int hwloc_internal_memtier_import(struct hwloc_topology *topology, unsigned long kinds, hwloc_bitmap_t nodeset, struct hwloc_infos_s *infos);
+extern int hwloc_internal_memtier_v2xml_import(struct hwloc_topology *topology, char *subtype, hwloc_bitmap_t nodeset);
 
 extern void hwloc_internal_cpukinds_init(hwloc_topology_t topology);
 extern int hwloc_internal_cpukinds_rank(hwloc_topology_t topology);
