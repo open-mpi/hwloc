@@ -751,7 +751,8 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
   case HWLOC_OBJ_CORE:
     if (verbose && (!topology || topology->nr_cpukinds > 1)) {
       /* only show cpukind when there are multiple of them */
-      res = hwloc_snprintf(tmp, tmplen, "cpukind=%d", obj->attr->core.cpukind);
+      res = hwloc_snprintf(tmp, tmplen, "%scpukind=%d",
+                           prefix, obj->attr->core.cpukind);
     }
     break;
   case HWLOC_OBJ_L1CACHE:
@@ -806,9 +807,11 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
       } else
         assert(0);
       if (*up)
-	res = hwloc_snprintf(tmp, tmplen, "%s%s%s", up, separator, down);
+	res = hwloc_snprintf(tmp, tmplen, "%s%s%s%s",
+                             prefix, up, separator, down);
       else
-	res = hwloc_snprintf(tmp, tmplen, "%s", down);
+	res = hwloc_snprintf(tmp, tmplen, "%s%s",
+                             prefix, down);
     }
     break;
   case HWLOC_OBJ_PCI_DEVICE:
@@ -816,8 +819,9 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
       char linkspeed[64]= "";
       if (obj->attr->pcidev.linkspeed)
         snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
-      res = hwloc_snprintf(tmp, tmplen, "busid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)%s",
-			   obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
+      res = hwloc_snprintf(tmp, tmplen, "%sbusid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)%s",
+			   prefix,
+                           obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
 			   obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id, separator,
 			   obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
     }
