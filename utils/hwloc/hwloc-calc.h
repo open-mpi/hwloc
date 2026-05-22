@@ -110,8 +110,7 @@ hwloc_calc_check_object_filtered(hwloc_obj_t obj, struct hwloc_calc_level *level
 
   } else if (level->type == HWLOC_OBJ_NUMANODE) {
     if (level->memory_tier >= 0) {
-      const char *tier = hwloc_obj_get_info_by_name(obj, "MemoryTier");
-      if (!tier || atoi(tier) != level->memory_tier)
+      if (obj->attr->numanode.memory_tier != level->memory_tier)
         return 1;
     }
 

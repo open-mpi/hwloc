@@ -2343,14 +2343,6 @@ and GID #1 of port #3.
 These info attributes are attached to objects specified in parentheses.
 
 <dl>
-<dt>MemoryTier=1 (NUMA Nodes)</dt>
-<dd>The rank of the memory tier of this node.
-Ranks start from 0 for highest bandwidth nodes.
-The attribute is only set if multiple tiers are found.
-This node will also be in the nodeset returned by hwloc_memtiers_get_info()
-for that tier.
-See \ref heteromem.
-</dd>
 <dt>CXLDevice=0003:02:01.0 (NUMA Nodes or DAX Memory OS devices)</dt>
 <dd>The PCI/CXL bus ID of a device whose CXL Type-3 memory is exposed here.
 If multiple devices are interleaved, their bus IDs are separated by commas,
@@ -2674,9 +2666,8 @@ NUMA nodes are then annotated accordingly:
 <li> Each node object has its <tt>subtype</tt> field set to <tt>HBM</tt>,
  <tt>DRAM</tt> or <tt>CXL-DRAM</tt>
  (see other possible values in \ref attributes_normal).
-<li> Each node also has a string info attribute with name
-<tt>MemoryTier</tt> and value <tt>0</tt> for the first tier,
-<tt>1</tt> for the second, etc.
+<li> Each node also has an attribute <tt>node->attr->numanode.memory_tier</tt>
+ containing the tier index.
 </ul>
 
 Tiers are built using two kinds of information:
@@ -2694,6 +2685,8 @@ Once nodes with similar or different characteristics are identified,
 they are placed in tiers.
 Tiers are then sorted by bandwidth so that the highest bandwidth
 is ranked first, etc.
+If no bandwidth information is available, hwloc assumes HBM has higher
+bandwidth than DRAM, etc.
 
 If hwloc fails to build tiers properly, see <tt>HWLOC_MEMTIERS</tt>
 and <tt>HWLOC_MEMTIERS_GUESS</tt> in \ref envvar_heuristics.
@@ -2741,7 +2734,7 @@ $ hwloc-calc -I 'numa[tier=0]' -p all
 To find the memory kind of a NUMA node, one may look at its info attribute
 or use hwloc-calc:
 \verbatim
-$ hwloc-info --get-attr "info MemoryTier" numa:1
+$ hwloc-info --get-attr "memory tier" numa:1
 1
 $ hwloc-calc -I memorytier numa:1
 1
@@ -5015,6 +5008,10 @@ The XGMIHops distance matrix is now of the new kind
 
 The number of memory tiers is now available from hwloc_memtiers_get_nr()
 instead of the now-removed <tt>MemoryTiersNr</tt> root info attribute.
+
+The index of the memory tier of a NUMA node is available in its attribute
+<tt>node->attr->numanode.memory_tier</tt> instead of the now-removed
+<tt>MemoryTier</tt> info attribute.
 
 
 \section upgrade_to_api_3x_xml XML changes

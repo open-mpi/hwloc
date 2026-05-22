@@ -28,11 +28,8 @@ add_daxtype(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_t node, co
 static int
 get_tier(hwloc_obj_t obj)
 {
-  const char *value = hwloc_obj_get_info_by_name(obj, "MemoryTier");
-  if (value)
-    return atoi(value);
-  else
-    return -1;
+  assert(obj->type == HWLOC_OBJ_NUMANODE);
+  return obj->attr->numanode.memory_tier;
 }
 
 static void
@@ -137,7 +134,7 @@ main(void)
   add_daxtype(topology, pack2n2, "SPM");
 
   printf("checking subtypes and tiers aren't set\n");
-  check_subtypes(topology, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1);
+  check_subtypes(topology, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
   nr = hwloc_memtiers_get_nr(topology, 0);
   assert(!nr);
 
@@ -319,7 +316,7 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1);
+  check_subtypes(new, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
   nr = hwloc_memtiers_get_nr(new, 0);
   assert(!nr);
   hwloc_topology_destroy(new);
@@ -456,7 +453,7 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1);
+  check_subtypes(new, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
   nr = hwloc_memtiers_get_nr(new, 0);
   assert(!nr);
   hwloc_topology_destroy(new);

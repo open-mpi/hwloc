@@ -498,7 +498,8 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
               if (data->v2_memtiers[i].nodeset)
                 hwloc_bitmap_set(data->v2_memtiers[i].nodeset, obj->os_index);
             }
-            /* keep the attr */
+            obj->attr->numanode.memory_tier = i;
+            return 0;
           }
         } else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
           /* v2 inclusiveness is an infoattr */
@@ -2538,6 +2539,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
         }
       }
     }
+    /* no need to export NUMANode memory_tier, we'll set it from hwloc_internal_memtiers_build() */
     break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
@@ -2646,9 +2648,15 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
     hwloc__xml_export_info_attr(state, "Inclusive", tmp);
   }
 
-  if (v2export && !obj->parent && topology->nr_memtiers > 1) {
-    sprintf(tmp, "%u", topology->nr_memtiers);
-    hwloc__xml_export_info_attr(state, "MemoryTiersNr", tmp);
+  if (v2export && topology->nr_memtiers > 1) {
+    if (!obj->parent) {
+      sprintf(tmp, "%u", topology->nr_memtiers);
+      hwloc__xml_export_info_attr(state, "MemoryTiersNr", tmp);
+    }
+    if (obj->type == HWLOC_OBJ_NUMANODE) {
+      sprintf(tmp, "%u", obj->attr->numanode.memory_tier);
+      hwloc__xml_export_info_attr(state, "MemoryTier", tmp);
+    }
   }
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {

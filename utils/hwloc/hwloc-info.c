@@ -406,7 +406,8 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
         }
       }
     }
-    /* FIXME show memtier */
+    snprintf(value, sizeof(value), "%d", obj->attr->numanode.memory_tier);
+    hwloc_info_show_attr(prefix, "memory tier", value);
   }
 }
 
@@ -906,6 +907,8 @@ main (int argc, char *argv[])
           only_attr_name = "attr cache inclusive";
         else if (!strcmp(only_attr_name, "info MemoryTiersNr")) /* backward compat with v2.x */
           only_attr_name = "Memory tiers";
+        else if (!strcmp(only_attr_name, "info MemoryTier"))
+          only_attr_name = "memory tier";
 	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))

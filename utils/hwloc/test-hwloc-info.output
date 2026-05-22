@@ -453,6 +453,7 @@ NUMANode L#1 = local memory #0 of PU L#8
  symmetric subtree = 0
  memory attribute Capacity = 1073741824
  memory attribute Locality = 8
+ memory tier = 0
 NUMANode L#2 = local memory #1 of PU L#8
  type = NUMANode
  full type = NUMANode
@@ -476,6 +477,7 @@ NUMANode L#2 = local memory #1 of PU L#8
  symmetric subtree = 0
  memory attribute Capacity = 1073741824
  memory attribute Locality = 16
+ memory tier = 0
 
 # 2 local-or-larger memories for one PU, silent
 NUMANode:1

@@ -1903,13 +1903,13 @@ hwloc__apply_memtiers_attrs(hwloc_topology_t topology,
         } else
           hwloc_debug("  node L#%u P#%u already marked as %s, not setting %s\n",
                       node->logical_index, node->os_index, node->subtype, subtype);
-        if (nr_tiers > 1) {
-          char tmp[20];
-          snprintf(tmp, sizeof(tmp), "%u", j);
-          hwloc__add_info(&node->infos, "MemoryTier", tmp);
-        }
+        node->attr->numanode.memory_tier = j;
         break; /* each node is in a single tier */
       }
+    }
+    if (j == nr_tiers) {
+      /* no tier for that node? */
+      node->attr->numanode.memory_tier = -1;
     }
   }
 }
@@ -1919,7 +1919,7 @@ hwloc__clear_memtiers_attrs(hwloc_topology_t topology)
 {
   hwloc_obj_t node = NULL;
   while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NUMANODE, node)) != NULL) {
-    hwloc__remove_infos(&node->infos, "MemoryTier", NULL);
+    node->attr->numanode.memory_tier = 0;
   }
 }
 
@@ -1959,9 +1959,11 @@ hwloc_internal_memtiers_build(hwloc_topology_t topology)
   }
 
   if (topology->is_xml) {
-    /* If loading from XML and REFRESH not requested, don't build new tiers */
-    if (!refresh)
+    /* If loading from XML and REFRESH not requested, don't build new tiers, just reannotate nodes */
+    if (!refresh) {
+      hwloc__apply_memtiers_attrs(topology, 0);
       return 0;
+    }
     /* don't clear OS backend subtypes, but clean XML ones since refresh was requested */
     hwloc__clear_memtiers_attrs(topology);
   }
