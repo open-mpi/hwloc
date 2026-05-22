@@ -2079,7 +2079,7 @@ hwloc__xml_import_diff(hwloc__xml_import_state_t state,
 
     ret = state->global->find_child(state, &childstate, &tag);
     if (ret < 0)
-      return -1;
+      goto out_with_diff;
     if (!ret)
       break;
 
@@ -2089,13 +2089,17 @@ hwloc__xml_import_diff(hwloc__xml_import_state_t state,
       ret = -1;
 
     if (ret < 0)
-      return ret;
+      goto out_with_diff;
 
     state->global->close_child(&childstate);
   }
 
   *firstdiffp = firstdiff;
   return 0;
+
+ out_with_diff:
+  hwloc_topology_diff_destroy(firstdiff);
+  return -1;
 }
 
 /***********************************
