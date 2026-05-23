@@ -493,6 +493,9 @@
 /* Define to 1 if you have the `OpenCL' library. */
 #cmakedefine HWLOC_HAVE_OPENCL @HWLOC_HAVE_OPENCL@
 
+/* Define to 1 if you have the `Vulkan' library. */
+#cmakedefine HWLOC_HAVE_VULKAN @HWLOC_HAVE_VULKAN@
+
 /* Define to 1 if the hwloc library should support dynamically-loaded plugins */
 #cmakedefine HWLOC_HAVE_PLUGINS @HWLOC_HAVE_PLUGINS@
 

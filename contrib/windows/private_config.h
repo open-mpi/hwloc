@@ -490,6 +490,9 @@
 /* Define to 1 if you have the `OpenCL' library. */
 /* #undef HWLOC_HAVE_OPENCL */
 
+/* Define to 1 if you have the `Vulkan' library. */
+/* #undef HWLOC_HAVE_VULKAN */
+
 /* Define to 1 if the hwloc library should support dynamically-loaded plugins
    */
 /* #undef HWLOC_HAVE_PLUGINS */

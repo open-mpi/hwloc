@@ -30,6 +30,7 @@ include_hwloc_HEADERS = \
         hwloc/rsmi.h \
         hwloc/amdsmi.h \
         hwloc/levelzero.h \
+        hwloc/vulkan.h \
         hwloc/plugins.h \
         hwloc/gl.h \
         hwloc/rename.h \
