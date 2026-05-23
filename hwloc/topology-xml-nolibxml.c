@@ -412,6 +412,12 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   bdata->data = nbdata;
 
   if (xmlbuffer) {
+    if (xmlbuflen < 1) {
+      if (HWLOC_SHOW_CRITICAL_ERRORS())
+        fprintf(stderr, "hwloc/nolibxml: Invalid input buffer length %d.\n", xmlbuflen);
+      errno = EINVAL;
+      goto out_with_nbdata;
+    }
     nbdata->buffer = malloc(xmlbuflen);
     if (!nbdata->buffer) {
       if (HWLOC_SHOW_CRITICAL_ERRORS())
@@ -457,6 +463,12 @@ hwloc_nolibxml_import_diff(struct hwloc__xml_import_state_s *state,
   HWLOC_BUILD_ASSERT(sizeof(*nstate) <= sizeof(state->data));
 
   if (xmlbuffer) {
+    if (xmlbuflen < 1) {
+      if (HWLOC_SHOW_CRITICAL_ERRORS())
+        fprintf(stderr, "hwloc/nolibxml: Invalid input diff buffer length %d.\n", xmlbuflen);
+      errno = EINVAL;
+      goto out;
+    }
     buffer = malloc(xmlbuflen);
     if (!buffer) {
       if (HWLOC_SHOW_CRITICAL_ERRORS())
