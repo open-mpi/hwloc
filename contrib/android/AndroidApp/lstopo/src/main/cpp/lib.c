@@ -23,6 +23,7 @@
 #include "../../../../../../../hwloc/shmem.c"
 #include "../../../../../../../hwloc/memattrs.c"
 #include "../../../../../../../hwloc/cpukinds.c"
+#include "../../../../../../../hwloc/diff.c"
 #include "../../../../../../../hwloc/topology-xml.c"
 #include "../../../../../../../hwloc/topology-xml-nolibxml.c"
 #include "../../../../../../../hwloc/base64.c"
