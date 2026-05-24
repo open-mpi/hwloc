@@ -77,6 +77,7 @@ struct hwloc_topology {
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
   enum hwloc_type_filter_e type_filter[HWLOC_OBJ_TYPE_MAX];
+  unsigned char is_xml;                                 /* shortcut to only component being XML */
   unsigned long state;                                  /* OR'ed enum hwloc_topology_state_e */
   unsigned long modified;                               /* >0 if objects were added/removed recently, which means a reconnect is needed,
                                                          * not inside "state" in case we want to store bits, numbers, etc.

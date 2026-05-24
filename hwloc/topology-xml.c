@@ -3301,6 +3301,7 @@ retry:
   if (err < 0)
     goto out_with_msgprefix;
 
+  topology->is_xml = 1;
   return backend;
 
  out_with_msgprefix:
