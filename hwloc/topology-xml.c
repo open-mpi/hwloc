@@ -1845,10 +1845,14 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 	break;
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
 	diff->obj_attr.diff.string.name = strdup(obj_attr_name_s);
-	/* FALLTHRU */
-      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
 	diff->obj_attr.diff.string.oldvalue = strdup(obj_attr_oldvalue_s);
 	diff->obj_attr.diff.string.newvalue = strdup(obj_attr_newvalue_s);
+	break;
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
+        /* libxml exports NULL strings as "", and an empty name would be meaningless anyway,
+         * hence import "" as NULL. */
+	diff->obj_attr.diff.string.oldvalue = *obj_attr_oldvalue_s ? strdup(obj_attr_oldvalue_s) : NULL;
+	diff->obj_attr.diff.string.newvalue = *obj_attr_newvalue_s ? strdup(obj_attr_newvalue_s) : NULL;
 	break;
       }
 
@@ -2909,13 +2913,17 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 	sprintf(tmp, "%llu", (unsigned long long) diff->obj_attr.diff.uint64.newvalue);
 	state.new_prop(&state, "obj_attr_newvalue", tmp);
 	break;
-      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
-	if (diff->obj_attr.diff.string.name)
-	  state.new_prop(&state, "obj_attr_name", diff->obj_attr.diff.string.name);
+        state.new_prop(&state, "obj_attr_name", diff->obj_attr.diff.string.name);
 	state.new_prop(&state, "obj_attr_oldvalue", diff->obj_attr.diff.string.oldvalue);
 	state.new_prop(&state, "obj_attr_newvalue", diff->obj_attr.diff.string.newvalue);
 	break;
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
+        /* obj->name may be NULL and libxml exports NULL string as "",
+         * hence always export NULL as "" */
+	state.new_prop(&state, "obj_attr_oldvalue", diff->obj_attr.diff.string.oldvalue ? diff->obj_attr.diff.string.oldvalue : "");
+	state.new_prop(&state, "obj_attr_newvalue", diff->obj_attr.diff.string.newvalue ? diff->obj_attr.diff.string.newvalue : "");
+        break;
       }
 
       break;
