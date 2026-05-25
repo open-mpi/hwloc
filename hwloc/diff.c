@@ -156,8 +156,12 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 
 	/* gp_index don't have to be strictly identical */
 
-	if ((!obj1->name) != (!obj2->name)
-	    || (obj1->name && strcmp(obj1->name, obj2->name))) {
+	if ((!obj1->name) != (!obj2->name))
+		/* the NAME diff requires both old and new values; name appearing
+		 * or disappearing cannot be represented and won't round-trip
+		 * through XML import/export or apply */
+		goto out_too_complex;
+	if (obj1->name && strcmp(obj1->name, obj2->name)) {
                 err = hwloc_append_diff_obj_attr_string(topo1, obj1,
 						       HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME,
 						       NULL,
