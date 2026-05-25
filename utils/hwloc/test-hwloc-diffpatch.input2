@@ -70,12 +70,12 @@
       <object type="Bridge" os_index="0" gp_index="25" bridge_type="0-1" depth="0" bridge_pci="0000:[00-05]">
         <object type="Bridge" os_index="80" gp_index="26" bridge_type="1-1" depth="1" bridge_pci="0000:[05-05]" pci_busid="0000:00:05.0" pci_type="0604 [8086:340c] [0000:0000] 13" pci_link_speed="0.000000">
           <object type="PCIDev" os_index="20480" gp_index="27" pci_busid="0000:05:00.0" pci_type="0200 [8086:10c9] [003c:003f] 01" pci_link_speed="0.000000">
-            <object type="OSDev" gp_index="28" name="eth0" osdev_type="2">
+            <object type="OSDev" gp_index="28" osdev_type="2">
               <info name="Address" value="18:a9:05:58:07:c6"/>
             </object>
           </object>
           <object type="PCIDev" os_index="20481" gp_index="29" pci_busid="0000:05:00.1" pci_type="0200 [8086:10c9] [003c:003f] 01" pci_link_speed="0.000000">
-            <object type="OSDev" gp_index="30" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="30" name="eth11" osdev_type="2">
               <info name="Address" value="18:a9:05:58:07:c7"/>
             </object>
           </object>
