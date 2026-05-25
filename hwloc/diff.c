@@ -482,10 +482,14 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 		case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME: {
 			const char *oldvalue = reverse ? obj_attr->diff.string.newvalue : obj_attr->diff.string.oldvalue;
 			const char *newvalue = reverse ? obj_attr->diff.string.oldvalue : obj_attr->diff.string.newvalue;
-			if (!obj->name || strcmp(obj->name, oldvalue))
-				return -1;
+                        if (!obj)
+                          return -1;
+                        if (!oldvalue != !obj->name)
+                          return -1;
+                        if (obj->name && strcmp(obj->name, oldvalue))
+                          return -1;
 			free(obj->name);
-			obj->name = strdup(newvalue);
+			obj->name = newvalue ? strdup(newvalue) : NULL;
 			break;
 		}
 		case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO: {
