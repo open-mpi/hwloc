@@ -1152,10 +1152,11 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     goto error_with_object;
   }
 
-  /* check special types vs cpuset */
-  if (!obj->cpuset && !hwloc__obj_type_is_special(obj->type)) {
+  /* check special types vs cpuset+nodeset */
+  if ((!obj->cpuset || !obj->complete_cpuset || !obj->nodeset || !obj->complete_nodeset)
+      && !hwloc__obj_type_is_special(obj->type)) {
     if (hwloc__xml_verbose())
-      fprintf(stderr, "%s: invalid normal object %s P#%u without cpuset\n",
+      fprintf(stderr, "%s: invalid normal or memory object %s P#%u without cpuset, complete_cpuset, nodeset and complete_nodeset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
