@@ -929,7 +929,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     tag = NULL;
     ret = state->global->find_child(state, &childstate, &tag);
     if (ret < 0)
-      goto error;
+      goto error_with_object;
     if (!ret)
       break;
 
@@ -963,7 +963,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
 
     if (ret < 0)
-      goto error;
+      goto error_with_object;
 
     state->global->close_child(&childstate);
   }
