@@ -1232,6 +1232,15 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
     goto out;
   }
 
+  /* the nbobjs*nbobjs values matrix is allocated and indexed using unsigned
+   * arithmetic below, reject nbobjs whose square would overflow. */
+  if (nbobjs > UINT_MAX / nbobjs) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: %s with too many objects (%u)\n",
+	      state->global->msgprefix, _TAG_NAME, nbobjs);
+    goto out;
+  }
+
   indexes = malloc(nbobjs*sizeof(*indexes));
   u64values = malloc(nbobjs*nbobjs*sizeof(*u64values));
   if (heterotypes)
