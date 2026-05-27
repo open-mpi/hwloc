@@ -637,6 +637,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       errno = EINVAL;
       goto error;
     }
+    if (item > ULONG_MAX / totalarity) {
+      if (verbose)
+	fprintf(stderr,"Synthetic string with total number of objects too large at '%s'\n", pos);
+      errno = EINVAL;
+      goto error;
+    }
 
     totalarity *= item;
     data->level[count].totalwidth = totalarity;
