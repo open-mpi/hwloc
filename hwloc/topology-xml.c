@@ -1426,7 +1426,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
   if (data->version_major < 3) {
     /* XGMIHops was latency in v2 */
-    if ((kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY) && !strcmp(name, "XGMIHops"))
+    if ((kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY) && name && !strcmp(name, "XGMIHops"))
       kind = (kind & ~HWLOC_DISTANCES_KIND_VALUE_LATENCY) | HWLOC_DISTANCES_KIND_VALUE_HOPS;
   }
 
