@@ -276,7 +276,10 @@ hwloc_nolibxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   if (sscanf(buffer, "<topology version=\"%u.%u\">", &major, &minor) == 2) {
     bdata->version_major = major;
     bdata->version_minor = minor;
-    end = strchr(buffer, '>') + 1;
+    end = strchr(buffer, '>');
+    if (!end)
+      goto failed;
+    end++;
   } else
     goto failed;
 
