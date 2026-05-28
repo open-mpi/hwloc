@@ -13,8 +13,6 @@
 
 /* all headers should be explicitly included */
 
-/* autoheaders definitions first, to avoid conflicts later */
-#include "private/autogen/config.h"
 #include "hwloc/autogen/config.h"
 
 #include "hwloc.h" /* hwloc/rename.h required before everything else */
@@ -62,13 +60,3 @@
 #endif
 #include "hwloc/gl.h"
 #include "hwloc/windows.h"
-
-#include "private/components.h"
-#include "private/cpuid-x86.h"
-#include "private/debug.h"
-#include "private/internal-components.h"
-#include "private/misc.h"
-#include "private/private.h"
-#include "private/solaris-chiptype.h"
-#include "private/windows.h"
-#include "private/xml.h"

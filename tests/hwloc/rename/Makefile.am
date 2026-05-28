@@ -44,19 +44,13 @@ TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_LEVELZERO=1 $(HWLOC_LEVELZERO_CFLAGS) $(HWL
 endif HWLOC_HAVE_LEVELZERO
 
 dirs:
-	mkdir -p include/hwloc/autogen include/private/autogen
+	mkdir -p include/hwloc/autogen
 
 include/hwloc/autogen/config.h: dirs $(HWLOC_top_builddir)/include/hwloc/autogen/config.h
 	sed	-e 's/^#define HWLOC_SYM_TRANSFORM 0/#define HWLOC_SYM_TRANSFORM 1/'                    \
 		-e 's/^#define HWLOC_SYM_PREFIX hwloc_/#define HWLOC_SYM_PREFIX foobar_/'               \
 		-e 's/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/#define HWLOC_SYM_PREFIX_CAPS FOOBAR_/'     \
 		$(HWLOC_top_builddir)/include/hwloc/autogen/config.h > include/hwloc/autogen/config.h
-
-include/private/autogen/config.h: dirs $(HWLOC_top_builddir)/include/private/autogen/config.h
-	sed	-e 's/^#define HWLOC_SYM_TRANSFORM 0/#define HWLOC_SYM_TRANSFORM 1/'                    \
-		-e 's/^#define HWLOC_SYM_PREFIX hwloc_/#define HWLOC_SYM_PREFIX foobar_/'               \
-		-e 's/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/#define HWLOC_SYM_PREFIX_CAPS FOOBAR_/'     \
-		$(HWLOC_top_builddir)/include/private/autogen/config.h > include/private/autogen/config.h
 
 useless:
 	@echo "# Finding useless renaming"
@@ -71,7 +65,7 @@ useless:
 	 | grep '' ; then false ; else true ; fi
 	@echo "# done"
 
-cpp.out: include/hwloc/autogen/config.h include/private/autogen/config.h
+cpp.out: include/hwloc/autogen/config.h
 	@echo "# Checking for warnings/errors during renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
 	@$(CPP) -Werror $(CPPFLAGS) $(TEST_CPPFLAGS) -Iinclude -I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include $(srcdir)/main.c >$@
