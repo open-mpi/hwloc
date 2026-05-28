@@ -1465,7 +1465,6 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
 
   for(i=0; i<n; i++) {
     hwloc_obj_t node;
-    const char *daxtype;
     struct hwloc_internal_location_s iloc;
     struct hwloc_internal_memattr_target_s *imtg;
 
@@ -1478,21 +1477,22 @@ hwloc__group_memory_tiers(hwloc_topology_t topology,
     nodeinfos[i].local_bw = 0;
     nodeinfos[i].local_lat = 0;
 
-    daxtype = hwloc_obj_get_info_by_name(node, "DAXType");
-    /* mark NVM, SPM and GPU nodes */
-    if (node->subtype && !strcmp(node->subtype, "GPUMemory"))
-      nodeinfos[i].type = HWLOC_MEMORY_TIER_GPU;
-    else if (daxtype && !strcmp(daxtype, "NVM"))
-      nodeinfos[i].type = HWLOC_MEMORY_TIER_NVM;
-    else if (daxtype && !strcmp(daxtype, "SPM"))
-      nodeinfos[i].type = HWLOC_MEMORY_TIER_SPM;
-    /* add CXL flag */
-    if (hwloc_obj_get_info_by_name(node, "CXLDevice") != NULL) {
-      /* CXL is always SPM for now. HBM and DRAM not possible here yet.
-       * Hence remove all but NVM first.
-       */
-      nodeinfos[i].type &= HWLOC_MEMORY_TIER_NVM;
-      nodeinfos[i].type |= HWLOC_MEMORY_TIER_CXL;
+    /* try to get the kinds from the subtype (at least GPUMemory) */
+    if (node->subtype)
+      nodeinfos[i].type = hwloc_memory_tier_type_sscanf(node->subtype);
+    if (!nodeinfos[i].type) {
+      /* otherwise use DAX info */
+      const char *daxtype = hwloc_obj_get_info_by_name(node, "DAXType");
+      if (daxtype)
+        nodeinfos[i].type = hwloc_memory_tier_type_sscanf(daxtype);
+      /* and add CXL flag */
+      if (hwloc_obj_get_info_by_name(node, "CXLDevice") != NULL) {
+        /* CXL is always SPM for now. HBM and DRAM not possible here yet.
+         * Hence remove all but NVM first.
+         */
+        nodeinfos[i].type &= HWLOC_MEMORY_TIER_NVM;
+        nodeinfos[i].type |= HWLOC_MEMORY_TIER_CXL;
+      }
     }
 
     /* get local bandwidth */
@@ -1691,7 +1691,7 @@ hwloc__guess_memory_tiers_types(hwloc_topology_t topology __hwloc_attribute_unus
 {
   unsigned long flags;
   const char *env;
-  unsigned nr_unknown, nr_spm;
+  unsigned nr_unknown, nr_spm, nr_dram, nr_hbm;
   struct hwloc_memory_tier_s *unknown_tier[2], *spm_tier;
   unsigned i;
 
@@ -1720,7 +1720,7 @@ hwloc__guess_memory_tiers_types(hwloc_topology_t topology __hwloc_attribute_unus
      */
     return 0;
 
-  nr_unknown = nr_spm = 0;
+  nr_unknown = nr_spm = nr_dram = nr_hbm = 0;
   unknown_tier[0] = unknown_tier[1] = spm_tier = NULL;
   for(i=0; i<nr_tiers; i++) {
     switch (tiers[i].type) {
@@ -1729,35 +1729,39 @@ hwloc__guess_memory_tiers_types(hwloc_topology_t topology __hwloc_attribute_unus
         unknown_tier[nr_unknown] = &tiers[i];
       nr_unknown++;
       break;
+    case HWLOC_MEMORY_TIER_DRAM:
+      nr_dram++;
+      break;
+    case HWLOC_MEMORY_TIER_HBM:
+      nr_hbm++;
+      break;
     case HWLOC_MEMORY_TIER_SPM:
       spm_tier = &tiers[i];
       nr_spm++;
       break;
-    case HWLOC_MEMORY_TIER_DRAM:
-    case HWLOC_MEMORY_TIER_HBM:
-      /* not possible */
-      abort();
     default:
-      /* ignore HBM, NVM, ... */
+      /* ignore HBM, DRAM, NVM, ... */
       break;
     }
   }
   hwloc_debug("Found %u unknown memory tiers and %u SPM\n",
               nr_unknown, nr_spm);
 
-  /* Try to guess DRAM + HBM common cases.
-   * Other things we'd like to detect:
-   * single unknown => DRAM or HBM? HBM won't be SPM on HBM-only CPUs
-   * unknown + CXL DRAM => DRAM or HBM?
-   */
-  if (nr_unknown == 2 && !nr_spm) {
-    /* 2 unknown, could be DRAM + non-SPM HBM */
-    hwloc_debug("  Trying to guess 2 unknown tiers using BW\n");
-    hwloc__guess_dram_hbm_tiers(unknown_tier[0], unknown_tier[1], flags);
-  } else if (nr_unknown == 1 && nr_spm == 1) {
-    /* 1 unknown + 1 SPM, could be DRAM + SPM HBM */
-    hwloc_debug("  Trying to guess 1 unknown + 1 SPM tiers using BW\n");
-    hwloc__guess_dram_hbm_tiers(unknown_tier[0], spm_tier, flags);
+  if (!nr_dram && !nr_hbm) {
+    /* Try to guess DRAM + HBM common cases.
+     * Other things we'd like to detect:
+     * single unknown => DRAM or HBM? HBM won't be SPM on HBM-only CPUs
+     * unknown + CXL DRAM => DRAM or HBM?
+     */
+    if (nr_unknown == 2 && !nr_spm) {
+      /* 2 unknown, could be DRAM + non-SPM HBM */
+      hwloc_debug("  Trying to guess 2 unknown tiers using BW\n");
+      hwloc__guess_dram_hbm_tiers(unknown_tier[0], unknown_tier[1], flags);
+    } else if (nr_unknown == 1 && nr_spm == 1) {
+      /* 1 unknown + 1 SPM, could be DRAM + SPM HBM */
+      hwloc_debug("  Trying to guess 1 unknown + 1 SPM tiers using BW\n");
+      hwloc__guess_dram_hbm_tiers(unknown_tier[0], spm_tier, flags);
+    }
   }
 
   if (flags & HWLOC_GUESS_MEMTIERS_FLAG_SPM_IS_HBM) {
