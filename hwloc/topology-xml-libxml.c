@@ -291,10 +291,10 @@ hwloc_libxml_import_diff(struct hwloc__xml_import_state_s *state, const char *xm
     if (state->global->show_errors)
       fprintf(stderr, "%s: Loading XML topologydiff without DTD\n",
 	      state->global->msgprefix);
-  } else if (strcmp((char *) dtd->SystemID, "hwloc2-diff.dtd")) {
+  } else if (!dtd->SystemID || strcmp((char *) dtd->SystemID, "hwloc2-diff.dtd")) {
     if (state->global->show_errors)
       fprintf(stderr, "%s: Loading XML topologydiff with wrong DTD SystemID (%s instead of %s)\n",
-	      state->global->msgprefix, (char *) dtd->SystemID, "hwloc2-diff.dtd");
+	      state->global->msgprefix, dtd->SystemID ? (char *) dtd->SystemID : "none", "hwloc2-diff.dtd");
   }
 
   root_node = xmlDocGetRootElement(doc);
