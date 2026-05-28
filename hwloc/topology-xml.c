@@ -1722,7 +1722,9 @@ hwloc__xml_import_pcilocality(hwloc_topology_t topology,
                               hwloc__xml_import_state_t state)
 {
   hwloc_bitmap_t cpuset = NULL;
-  unsigned domain, bus_min, bus_max;
+  unsigned domain = (unsigned) -1;
+  unsigned bus_min = (unsigned) -1;
+  unsigned bus_max = (unsigned) -1;
 
   while (1) {
     char *attrname, *attrvalue;
@@ -1750,6 +1752,12 @@ hwloc__xml_import_pcilocality(hwloc_topology_t topology,
   if (!cpuset) {
     if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring pci_locality without cpuset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+  if (domain == (unsigned) -1 || bus_min == (unsigned) -1 || bus_max == (unsigned) -1) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring pci_locality without domain/bus_min/bus_max\n",
               state->global->msgprefix);
     goto error;
   }
