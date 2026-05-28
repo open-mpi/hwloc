@@ -130,7 +130,7 @@ static int hwloc_internal_distances_dup_one(struct hwloc_topology *new, struct h
   struct hwloc_internal_distances_s *newdist;
   unsigned nbobjs = olddist->nbobjs;
 
-  newdist = hwloc_tma_malloc(tma, sizeof(*newdist));
+  newdist = hwloc_tma_calloc(tma, sizeof(*newdist));
   if (!newdist)
     return -1;
   if (olddist->name) {
