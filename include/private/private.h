@@ -460,7 +460,7 @@ extern int hwloc_internal_memattrs_dup(hwloc_topology_t new, hwloc_topology_t ol
 extern int hwloc_internal_memattr_set_value(hwloc_topology_t topology, hwloc_memattr_id_t id, hwloc_obj_type_t target_type, hwloc_uint64_t target_gp_index, unsigned target_os_index, struct hwloc_internal_location_s *initiator, hwloc_uint64_t value);
 
 extern void hwloc_internal_memtiers_init(hwloc_topology_t topology);
-extern int hwloc_internal_memtiers_build(hwloc_topology_t topology, int force_subtype);
+extern int hwloc_internal_memtiers_build(hwloc_topology_t topology);
 extern void hwloc_internal_memtiers_destroy(hwloc_topology_t topology);
 extern int hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old);
 extern int hwloc_internal_memtiers_restrict(struct hwloc_topology *topology);

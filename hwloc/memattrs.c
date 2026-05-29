@@ -1930,34 +1930,56 @@ hwloc__clear_memtiers_attrs(hwloc_topology_t topology)
 }
 
 int
-hwloc_internal_memtiers_build(hwloc_topology_t topology, int force)
+hwloc_internal_memtiers_build(hwloc_topology_t topology)
 {
   struct hwloc_internal_memtier_s *tiers;
   unsigned nr_tiers;
+  int refresh = 0;
+  int force_subtypes = 0;
   const char *env;
 
-  hwloc__clear_memtiers_attrs(topology);
+  env = getenv("HWLOC_MEMTIERS");
+  if (env) {
+    if (strcmp(env, "none")) {
+      /* if not "none", force the given list of tiers */
+      tiers = hwloc__force_memory_tiers(topology, &nr_tiers, env);
+      if (tiers) {
+        assert(nr_tiers > 0);
+        force_subtypes = 1; /* overwrite existing subtypes */
+        goto ready;
+      }
+    }
+    /* for "none" or failure above, just remove everything */
+    hwloc__clear_memtiers_attrs(topology);
+    hwloc_internal_memtiers_destroy(topology);
+    topology->memtiers = NULL;
+    topology->nr_memtiers = 0;
+    return 0;
+  }
 
-  /* remove XML imported tiers since we're rebuilding */
+  env = getenv("HWLOC_MEMTIERS_REFRESH");
+  if (env) {
+    refresh = atoi(env);
+    if (refresh)
+      force_subtypes = 1; /* overwrite existing subtypes */
+  }
+
+  if (topology->is_xml) {
+    /* If loading from XML and REFRESH not requested, don't build new tiers */
+    if (!refresh)
+      return 0;
+    /* don't clear OS backend subtypes, but clean XML ones since refresh was requested */
+    hwloc__clear_memtiers_attrs(topology);
+  }
+
+  /* we're building new tiers, destroy existing ones */
   hwloc_internal_memtiers_destroy(topology);
   topology->memtiers = NULL;
   topology->nr_memtiers = 0;
 
-  env = getenv("HWLOC_MEMTIERS");
-  if (env) {
-    if (!strcmp(env, "none"))
-      goto out;
-    tiers = hwloc__force_memory_tiers(topology, &nr_tiers, env);
-    if (tiers) {
-      assert(nr_tiers > 0);
-      force = 1;
-      goto ready;
-    }
-  }
-
   tiers = hwloc__group_memory_tiers(topology, &nr_tiers);
   if (!tiers)
-    goto out;
+    return 0;
 
   hwloc__guess_memory_tiers_kinds(topology, nr_tiers, tiers);
 
@@ -1993,9 +2015,8 @@ hwloc_internal_memtiers_build(hwloc_topology_t topology, int force)
 
   topology->nr_memtiers = nr_tiers;
   topology->memtiers = tiers;
-  hwloc__apply_memtiers_attrs(topology, force);
+  hwloc__apply_memtiers_attrs(topology, force_subtypes);
 
- out:
   return 0;
 }
 
@@ -2080,7 +2101,7 @@ hwloc_internal_memtiers_restrict(struct hwloc_topology *topology)
   }
   if (removed) {
     hwloc__clear_memtiers_attrs(topology);
-    hwloc__apply_memtiers_attrs(topology, 0 /* no need to force update */);
+    hwloc__apply_memtiers_attrs(topology, 0 /* don't update subtypes */);
   }
   return 0;
 }
