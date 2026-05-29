@@ -3424,6 +3424,13 @@ look_sysfsnode(struct hwloc_topology *topology,
   if (!indexes)
     return 0;
 
+  if (nbnodes > UINT_MAX / nbnodes) {
+    /* the distance matrix below is nbnodes*nbnodes uint64_t, computed in
+     * unsigned int; reject sizes whose square would wrap before reaching malloc */
+    free(indexes);
+    return 0;
+  }
+
   nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
   trees = calloc(nbnodes, sizeof(hwloc_obj_t));
   distances = malloc(nbnodes*nbnodes*sizeof(*distances));
