@@ -268,22 +268,26 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
-	bytes_read = fread(value, 1, sizeof(value), file);
+	bytes_read = fread(value, 1, sizeof(value)-1, file);
 	fclose(file);
-	if (bytes_read)
+	if (bytes_read) {
+	  value[bytes_read] = '\0';
 	  /* fixup the pciaccess struct so that pci_device_get_vendor_name() is correct later. */
           pcidev->vendor_id = strtoul(value, NULL, 16);
+	}
       }
 
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/device",
 	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
-	bytes_read = fread(value, 1, sizeof(value), file);
+	bytes_read = fread(value, 1, sizeof(value)-1, file);
 	fclose(file);
-	if (bytes_read)
+	if (bytes_read) {
+	  value[bytes_read] = '\0';
 	  /* fixup the pciaccess struct so that pci_device_get_device_name() is correct later. */
           pcidev->device_id = strtoul(value, NULL, 16);
+	}
       }
 #endif
     }
@@ -328,19 +332,23 @@ hwloc_look_pci(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
-	bytes_read = fread(value, 1, sizeof(value), file);
+	bytes_read = fread(value, 1, sizeof(value)-1, file);
 	fclose(file);
-	if (bytes_read)
+	if (bytes_read) {
+	  value[bytes_read] = '\0';
 	  speed = hwloc_linux_pci_link_speed_from_string(value);
+	}
       }
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/current_link_width",
 	       domain, bus, dev, func);
       file = fopen(path, "r");
       if (file) {
-	bytes_read = fread(value, 1, sizeof(value), file);
+	bytes_read = fread(value, 1, sizeof(value)-1, file);
 	fclose(file);
-	if (bytes_read)
+	if (bytes_read) {
+	  value[bytes_read] = '\0';
 	  width = atoi(value);
+	}
       }
       obj->attr->pcidev.linkspeed = speed*width/8;
 #endif
