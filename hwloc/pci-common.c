@@ -587,7 +587,7 @@ hwloc_pci_dup(hwloc_topology_t new, hwloc_topology_t old)
       goto error;
     memcpy(newcur, oldcur, sizeof(*newcur));
     newcur->cpuset = hwloc_bitmap_tma_dup(tma, oldcur->cpuset);
-    if (!newcur) {
+    if (!newcur->cpuset) {
       assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
       free(newcur);
       goto error;
