@@ -383,8 +383,9 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
 
   /* count how many substrings there are */
   count++;
-  while ((current = strchr(current+1, ',')) != NULL)
-    count++;
+  if (*current)
+    while ((current = strchr(current+1, ',')) != NULL)
+      count++;
 
   current = string;
   if (!strncmp("0xf...f", current, 7)) {
