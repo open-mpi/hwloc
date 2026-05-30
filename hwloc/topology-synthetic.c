@@ -843,6 +843,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     count++;
   }
 
+  /* the deepest level has no children, mark its arity sentinel before
+   * hwloc_synthetic_process_indexes() runs since the index interleaving
+   * loop scans data->level[] until it finds arity==0 (backend data is
+   * malloc'ed, not zeroed) */
+  data->level[count-1].arity = 0;
+
   /* set default attributes that depend on the depth/hierarchy of levels */
   for (i=0; i<count; i++) {
     struct hwloc_synthetic_attached_s *attached;
@@ -856,7 +862,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   hwloc_synthetic_process_indexes(data, &data->numa_attached_indexes, data->numa_attached_nr, verbose);
 
   data->string = strdup(description);
-  data->level[count-1].arity = 0;
   return 0;
 
  error:
