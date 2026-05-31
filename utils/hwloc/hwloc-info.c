@@ -93,6 +93,7 @@ static const char *only_attr_name = NULL;
 void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] [ object | root | levels | topology | support ... ]\n", name);
+  fprintf (where, "  root and all are the machine root only (not every object); use --descendants or lstopo(1) for subtrees.\n");
   fprintf (where, "\nOutput options:\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -q --quiet -s         Reduce the amount of details to show\n");
@@ -1215,6 +1216,14 @@ main (int argc, char *argv[])
         hwloc_info_show_support(topology);
       } else if (!strcmp(argv[0], "all") || !strcmp(argv[0], "root")) {
 	hwloc_calc_process_location_info_cb(&lcontext, NULL, hwloc_get_root_obj(topology));
+      } else if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
+	/* verbosity may appear after locations (e.g. copied from other tools); apply for any following locations */
+	verbose_mode++;
+	lcontext.verbose = verbose_mode;
+      } else if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")
+		 || !strcmp(argv[0], "-s") || !strcmp(argv[0], "--silent")) {
+	verbose_mode--;
+	lcontext.verbose = verbose_mode;
       } else if (*argv[0] == '-') {
         fprintf(stderr, "Cannot handle command-line option %s after some locations.\n", argv[0]);
         return EXIT_FAILURE;

@@ -423,6 +423,7 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 #define HWLOC_SHOWMSG_CORE       (1UL<<14) /* Issues in hwloc core */
 #define HWLOC_SHOWMSG_MISC       (1UL<<15) /* Misc messages that don't belong anywhere else */
 #define HWLOC_SHOWMSG_USER       (1UL<<16) /* Error caused by invalid user-given information (environment variables, etc) */
+#define HWLOC_SHOWMSG_TENSTORRENT (1UL<<17) /* Tenstorrent KMD */
 /* all messages */
 #define HWLOC_SHOWMSG_ALL        (~0UL)
 

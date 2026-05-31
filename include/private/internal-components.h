@@ -32,6 +32,7 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_rsmi_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_levelzero_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_opencl_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_pci_component;
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_tenstorrent_component;
 
 /* XML backend */
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_nolibxml_component;

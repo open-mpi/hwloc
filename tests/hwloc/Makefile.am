@@ -71,7 +71,12 @@ check_PROGRAMS = \
         memtiers \
         cpukinds \
         xmlbuffer \
-        gl
+        gl \
+        tenstorrent
+
+if HWLOC_TT_METAL_FREE_IOP
+check_PROGRAMS += tenstorrent-iop
+endif HWLOC_TT_METAL_FREE_IOP
 
 if HWLOC_HAVE_WINDOWS
 check_PROGRAMS += windows_processor_groups
@@ -121,6 +126,13 @@ endif HWLOC_HAVE_LEVELZERO
 
 TESTS = $(check_PROGRAMS)
 
+# Running "make check TESTS=tenstorrent" breaks recursive checks: TESTS is
+# exported in MAKEFLAGS, so SUBDIRS (e.g. xml/) try to run tenstorrent too.
+# Use "make check-tenstorrent" or "make check-TESTS TESTS=tenstorrent" here.
+.PHONY: check-tenstorrent
+check-tenstorrent: tenstorrent$(EXEEXT)
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS TESTS=tenstorrent
+
 # The library has a different name depending on whether we are
 # building in standalone or embedded mode.
 if HWLOC_BUILD_STANDALONE
@@ -155,6 +167,15 @@ rsmi_LDADD = $(LDADD) $(HWLOC_RSMI_LIBS) $(HWLOC_RSMI_LDFLAGS)
 levelzero_CFLAGS = $(AM_CFLAGS) $(HWLOC_LEVELZERO_CPPFLAGS) $(HWLOC_LEVELZERO_CFLAGS)
 levelzero_LDADD = $(LDADD) $(HWLOC_LEVELZERO_LIBS) $(HWLOC_LEVELZERO_LDFLAGS)
 
+tenstorrent_LDADD = $(LDADD)
+
+tenstorrent_iop_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/include $(HWLOC_TT_METAL_CPPFLAGS)
+tenstorrent_iop_LDADD = $(LDADD)
+
+if HWLOC_TT_METAL_IOP
+tenstorrent_iop_CPPFLAGS += -DHWLOC_TT_METAL_IOP_TEST=1
+endif HWLOC_TT_METAL_IOP
+
 hwloc_bind_LDADD = $(LDADD)
 if HWLOC_HAVE_PTHREAD
 hwloc_bind_LDADD += -lpthread
@@ -162,7 +183,8 @@ endif
 
 # ship the embedded test code but don't actually let automake ever
 # look at it because we have another configure stuff in there
-EXTRA_DIST =    embedded/autogen.sh \
+EXTRA_DIST =    tenstorrent-iop.c \
+                embedded/autogen.sh \
                 embedded/configure.ac \
                 embedded/Makefile.am \
                 embedded/do_test.c \

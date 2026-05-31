@@ -228,6 +228,7 @@ if test "x$hwloc_nvml_happy" = "xyes" ; then
 fi
 test "x$hwloc_rsmi_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list RSMI"
 test "x$hwloc_levelzero_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list LevelZero"
+test "x$hwloc_tenstorrent_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list Tenstorrent"
 test "x$hwloc_gl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list GL"
 # if nothing, say "no"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
@@ -329,6 +330,23 @@ hwloc_plugin_summary=$hwloc_have_plugins
 test "x$hwloc_plugin_components" != "x" && hwloc_plugin_summary="$hwloc_plugins_load ("`echo $hwloc_plugin_components`")" # echo removes the starting space
 cat <<EOF
 Plugin support:              $hwloc_plugin_summary
+EOF
+
+if test "x$hwloc_tt_metal_free_iop" = "xyes"; then
+  hwloc_tt_iop_line="yes (hwloc/tenstorrent.h"
+  test "x$hwloc_tt_metal_iop" = "xyes" && hwloc_tt_iop_line="$hwloc_tt_iop_line + tenstorrent_metal.h"
+  hwloc_tt_iop_line="$hwloc_tt_iop_line)"
+else
+  hwloc_tt_iop_line="no"
+fi
+if test "x$hwloc_tt_yaml" = "xyes"; then
+  hwloc_tt_yaml_line="yes (libyaml)"
+else
+  hwloc_tt_yaml_line="no"
+fi
+cat <<EOF
+Tenstorrent IOP headers:     $hwloc_tt_iop_line
+Tenstorrent YAML parsing:    $hwloc_tt_yaml_line
 EOF
 
 # End of generic support

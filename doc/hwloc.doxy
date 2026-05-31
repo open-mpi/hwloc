@@ -493,6 +493,12 @@ The hwloc core may also benefit from the following development packages:
   or <tt>level-zero-devel</tt>.
   The implementation must be recent enough to support <tt>zesDriverGetDeviceByUuidExp()</tt>
 </li>
+<li>the Tenstorrent kernel driver on Linux for Tenstorrent accelerator discovery
+  via <tt>/dev/tenstorrent/</tt> (no userspace library is required at build time;
+  the ioctl ABI matches the driver headers vendored in
+  <a href="https://github.com/tenstorrent/tt-kmd">tenstorrent/tt-kmd</a>
+  and in tt-metal under <tt>tt_metal/third_party/umd/device/pcie/ioctl.h</tt>).
+</li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import
     XML files that were exported by the same hwloc release).
@@ -1363,7 +1369,7 @@ following environment variables.
   <li><tt>core</tt> for issues in the library core, usually caused by discovery backends but not caught there.</li>
   <li><tt>os</tt> for operating system specific errors.</li>
   <li><tt>pci</tt> for PCI (and CXL) discovery.</li>
-  <li><tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt> and <tt>gl</tt> for IO-specific discovery.</li>
+  <li><tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt>, <tt>tenstorrent</tt> and <tt>gl</tt> for IO-specific discovery.</li>
   <li><tt>xml</tt> and <tt>synthetic</tt> for XML and synthetic topologies.</li>
   <li><tt>bind</tt> for CPU or memory binding.</li>
   <li><tt>misc</tt> for other error messages.</li>
@@ -1722,7 +1728,9 @@ components when I/O discovery is enabled and supported.
   ("LevelZero" subtype, from the levelzero component, using the oneAPI Level Zero library),
   and <em>ze0.1</em> for its second subdevice (if any).</li>
  <li><em>rsmi0</em> for the first RSMI device
-  ("RSMI" subtype, from the RSMI component, using the AMD/ROCm SMI library)</li>
+  ("RSMI" subtype, from the RSMI component, using the AMD ROCm SMI library)</li>
+ <li><em>tenstorrent0</em> for the first Tenstorrent device in PCI sort order
+  ("Tenstorrent" subtype, from the tenstorrent component, using the Linux KMD)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   ("CUDA" subtype, from the CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>nvml0</em> for the first NVML device
@@ -1955,7 +1963,8 @@ subtype <tt>Cluster</tt>, <tt>Module</tt>, <tt>Tile</tt>, <tt>Compute Unit</tt>,
 <li>OS devices (see also \ref iodevices_osdev):
 <ul>
 <li>subtype <tt>OpenCL</tt>, <tt>LevelZero</tt>, <tt>CUDA</tt>, <tt>VectorEngine</tt>,
-    <tt>RSMI</tt> (AMD GPU) or <tt>NVML</tt> (NVIDIA GPU) for GPU and/or CoProcessor OS devices.</li>
+    <tt>RSMI</tt> (AMD GPU), <tt>NVML</tt> (NVIDIA GPU) or <tt>Tenstorrent</tt> (Tenstorrent AI accelerator)
+    for GPU and/or CoProcessor OS devices.</li>
 <li>Network: subtype <tt>Slingshot</tt> (HPE Cray Slingshot Cassini HSN) or <tt>BXI</tt> (Bull/Atos BXI HCA).</li>
 <li>Storage: subtype <tt>Disk</tt>, <tt>Tape</tt>, or <tt>Removable Media Device</tt>.</li>
 <li>Memory: <tt>NVM</tt> (non-volatile memory), <tt>SPM</tt> (specific-purpose memory), <tt>CXLMem</tt> (CXL volatile ou persistent memory).</li>
@@ -2231,6 +2240,34 @@ These info attributes are attached to OS device objects specified in parentheses
 (as <tt>N*0xX</tt> where <tt>N</tt> is the number of queues in the group,
  and <tt>0xX</tt> is the hexadecimal bitmask of <tt>ze_command_queue_group_property_flag_t</tt>
  listing properties of those queues).
+</dd>
+<dt>TenstorrentDeviceIndex=0 (Tenstorrent OS devices)</dt>
+<dd>
+ The KMD character device index <tt>N</tt> for <tt>/dev/tenstorrent/N</tt>.
+ Logical object names <em>tenstorrent0</em>, <em>tenstorrent1</em>, etc. follow PCI sort order
+ and may differ from this index when multiple devices are present.
+</dd>
+<dt>PCIBusID=0000:04:00.0</dt>
+<dt>PCIVendor=0x1e52</dt>
+<dt>PCIDevice=0xfaca</dt>
+<dt>PCISubsystemVendor=0x1e52</dt>
+<dt>PCISubsystemDevice=0x0001 (Tenstorrent OS devices)</dt>
+<dd>
+ PCI location and identifying numbers for the accelerator, as reported by the KMD
+ <tt>TENSTORRENT_IOCTL_GET_DEVICE_INFO</tt> ioctl.
+</dd>
+<dt>GPUVendor=Tenstorrent</dt>
+<dt>GPUModel=Tenstorrent Wormhole B0 (Tenstorrent OS devices)</dt>
+<dd>
+ Vendor and product name for known PCI device IDs (aligned with Tenstorrent UMD
+ <tt>pci_ids.h</tt>).
+</dd>
+<dt>TenstorrentSocDescriptor=/path/tt-metal/tt_metal/soc_descriptors/wormhole_b0_80_arch.yaml</dt>
+<dt>TenstorrentCoreDescriptor=/path/tt-metal/tt_metal/core_descriptors/wormhole_b0_80_arch.yaml</dt>
+<dd>
+ Absolute paths to default tt-metal YAML descriptors for the detected silicon, added only when
+ <tt>TT_METAL_HOME</tt> is set to a tt-metal checkout and the expected files exist
+ (see <tt>tt_metal/soc_descriptors/</tt> and <tt>tt_metal/core_descriptors/</tt> in the tt-metal tree).
 </dd>
 <dt>AMDUUID=e36ac86da8af0f71</dt>
 <dt>AMDSerial=692224001590 (RSMI GPU OS devices)</dt>
@@ -3387,7 +3424,7 @@ The usual default is to enable the native operating system component,
 <tt>pci</tt> one.
 If available, an architecture-specific component (such as <tt>x86</tt>)
 may also improve the topology detection.
-Finally, some hardware-specific components (such as <tt>cuda</tt> or <tt>rsmi</tt>)
+Finally, some hardware-specific components (such as <tt>cuda</tt>, <tt>rsmi</tt> or <tt>tenstorrent</tt>)
 may add information about GPUs, accelerators, etc.
 
 If a XML topology is loaded, the <tt>xml</tt> discovery  component
@@ -3580,6 +3617,18 @@ environment variable (see \ref envvar_verbose).
  This component creates co-processor OS device objects such as
  <em>ze0</em> for describing oneAPI Level Zero devices.
  It may also create sub-OS-devices such as <em>ze0.0</em> inside those devices.
+ <b>It may be built as a plugin</b>.
+</dd>
+<dt>tenstorrent</dt>
+<dd>
+ On Linux, this component discovers Tenstorrent AI accelerators exposed as
+ <tt>/dev/tenstorrent/N</tt> by the Tenstorrent kernel driver.
+ It creates co-processor OS device objects named <em>tenstorrent0</em>, etc.,
+ ordered by PCI location, with a <tt>TenstorrentDeviceIndex</tt> info attribute
+ giving the KMD character device index <tt>N</tt>.
+ If <tt>TT_METAL_HOME</tt> points to a tt-metal source tree, matching
+ <tt>TenstorrentSocDescriptor</tt> and <tt>TenstorrentCoreDescriptor</tt> paths
+ may be attached when the default YAML files for the PCI device ID are present.
  <b>It may be built as a plugin</b>.
 </dd>
 <dt>cuda</dt>
@@ -4437,9 +4486,9 @@ variable may avoid this.
 Also remember that these hwloc components may be disabled.
 At build-time, one may pass configure flags such as <tt>\--disable-opencl</tt>,
 <tt>\--disable-cuda</tt>, <tt>\--disable-nvml</tt>, <tt>\--disable-rsmi</tt>,
-and <tt>\--disable-levelzero</tt>.
+<tt>\--disable-levelzero</tt> and <tt>\--disable-tenstorrent</tt>.
 At runtime, one may set the environment variable
-<tt>HWLOC_COMPONENTS=-opencl,-cuda,-nvml,-rsmi,-levelzero</tt>
+<tt>HWLOC_COMPONENTS=-opencl,-cuda,-nvml,-rsmi,-levelzero,-tenstorrent</tt>
 or call hwloc_topology_set_components().
 
 Remember that these backends are disabled by default, except in lstopo.

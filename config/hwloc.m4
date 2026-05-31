@@ -1518,6 +1518,121 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # Tenstorrent support (Linux /dev/tenstorrent + KMD ioctls; no userspace library)
+    hwloc_tenstorrent_happy=no
+    if test "x$enable_io" != xno && test "x$enable_tenstorrent" != "xno"; then
+      echo
+      echo "**** Tenstorrent configuration"
+
+      AC_MSG_CHECKING([whether to build the Tenstorrent discovery component])
+      case ${target} in
+      *-*-linux*)
+        hwloc_tenstorrent_happy=yes
+        AC_MSG_RESULT([yes (Linux target)])
+        AC_MSG_CHECKING([whether /dev/tenstorrent exists on the build system])
+        if test -d /dev/tenstorrent 2>/dev/null; then
+          AC_MSG_RESULT([yes])
+        else
+          AC_MSG_RESULT([no])
+          AC_MSG_NOTICE([The component will still be built; devices appear at runtime when the Tenstorrent KMD creates /dev/tenstorrent/.])
+        fi
+        AS_IF([test "$cross_compiling" = yes],
+          [AC_MSG_NOTICE([Cross-compiling: /dev/tenstorrent on the build host may differ from the target.])])
+        AC_MSG_NOTICE([No additional libraries or tt-metal are required to build or link; discovery uses KMD ioctls only.])
+        AC_MSG_NOTICE([Optional runtime: export TT_METAL_HOME=<tt-metal> to attach TenstorrentSocDescriptor / TenstorrentCoreDescriptor info when default YAML files exist.])
+        ;;
+      *)
+        AC_MSG_RESULT([no (Tenstorrent KMD discovery requires a Linux target, got ${target})])
+        ;;
+      esac
+
+      echo "**** end of Tenstorrent configuration"
+    elif test "x$enable_io" != xno && test "x$enable_tenstorrent" = "xno"; then
+      echo
+      echo "**** Tenstorrent configuration"
+      echo "Tenstorrent discovery disabled (--disable-tenstorrent)"
+      echo "**** end of Tenstorrent configuration"
+    fi
+    AS_IF([test "$enable_tenstorrent" = "yes" -a "$hwloc_tenstorrent_happy" = "no"],
+      [AC_MSG_WARN([Specified --enable-tenstorrent switch, but Tenstorrent discovery is only built on Linux.])
+      AC_MSG_ERROR([Cannot continue])])
+    if test "x$hwloc_tenstorrent_happy" = "xyes"; then
+      AC_DEFINE([HWLOC_HAVE_TENSTORRENT], [1], [Define to 1 if Tenstorrent KMD device discovery is enabled.])
+      AC_SUBST([HWLOC_HAVE_TENSTORRENT], [1])
+      hwloc_components="$hwloc_components tenstorrent"
+      hwloc_tenstorrent_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_TENSTORRENT], [0])
+    fi
+
+    dnl Tenstorrent optional IOP headers (hwloc/tenstorrent.h, hwloc/tenstorrent_metal.h)
+    hwloc_tt_metal_free_iop=no
+    hwloc_tt_metal_iop=no
+    HWLOC_TT_METAL_CPPFLAGS=
+    HWLOC_TT_METAL_PC_CFLAGS=
+    test "x${enable_tt_metal_free_iop}" = "x" && enable_tt_metal_free_iop=no
+    test "x${enable_tt_metal_iop}" = "x" && enable_tt_metal_iop=no
+    AS_IF([test "x$enable_tt_metal_iop" = "xyes"], [enable_tt_metal_free_iop=yes])
+    AS_IF([test "x$enable_tt_metal_free_iop" = "xyes"], [hwloc_tt_metal_free_iop=yes])
+    AS_IF([test "x$enable_tt_metal_iop" = "xyes"], [
+      hwloc_tt_metal_iop=yes
+      AS_IF([test "x$with_tt_metal_path" = "x"],
+            [AC_MSG_ERROR([--enable-tt-metal-iop requires --with-tt-metal-path=DIR (tt-metal root)])])
+      tt_metal_pci_ids="$with_tt_metal_path/tt_metal/third_party/umd/device/api/umd/device/pcie/pci_ids.h"
+      AS_IF([test ! -f "$tt_metal_pci_ids"],
+            [AC_MSG_ERROR([Tenstorrent tt-metal IOP: missing file $tt_metal_pci_ids])])
+      HWLOC_TT_METAL_CPPFLAGS="-I$with_tt_metal_path/tt_metal/third_party/umd/device/api"
+      HWLOC_TT_METAL_PC_CFLAGS=" $HWLOC_TT_METAL_CPPFLAGS"
+      dnl Verify the header compiles in C mode
+      saved_CPPFLAGS=$CPPFLAGS
+      CPPFLAGS="$CPPFLAGS $HWLOC_TT_METAL_CPPFLAGS"
+      AC_CHECK_HEADER([umd/device/pcie/pci_ids.h], [],
+                      [AC_MSG_ERROR([Tenstorrent tt-metal IOP: umd/device/pcie/pci_ids.h not usable with CPPFLAGS=$HWLOC_TT_METAL_CPPFLAGS])])
+      CPPFLAGS=$saved_CPPFLAGS
+      AC_DEFINE_UNQUOTED([HWLOC_TT_METAL_PATH], ["$with_tt_metal_path"], [tt-metal root passed to configure for IOP])
+    ])
+    AS_IF([test "$hwloc_tt_metal_free_iop" = "yes"],
+          [AC_DEFINE([HWLOC_HAVE_TT_METAL_FREE_IOP], [1], [Define to 1 if hwloc/tenstorrent.h is installed])])
+    AS_IF([test "$hwloc_tt_metal_iop" = "yes"],
+          [AC_DEFINE([HWLOC_HAVE_TT_METAL_IOP], [1], [Define to 1 if hwloc/tenstorrent_metal.h is installed])])
+    AC_SUBST([HWLOC_TT_METAL_CPPFLAGS])
+    AC_SUBST([HWLOC_TT_METAL_PC_CFLAGS])
+    if test "$hwloc_tt_metal_free_iop" = yes; then
+      echo
+      echo "**** Tenstorrent IOP headers"
+      echo "hwloc/tenstorrent.h will be installed (tt-metal-free interop)."
+      AS_IF([test "$hwloc_tt_metal_iop" = yes],
+            [echo "hwloc/tenstorrent_metal.h will be installed (tt-metal UMD pci_ids.h)."
+             echo "tt-metal path: $with_tt_metal_path"])
+      echo "**** end of Tenstorrent IOP headers"
+    fi
+
+    dnl Tenstorrent optional YAML descriptor parsing (libyaml).
+    dnl Off by default. When enabled, requires the Tenstorrent discovery
+    dnl component and a working yaml-0.1 pkg-config module.
+    hwloc_tt_yaml=no
+    HWLOC_LIBYAML_CFLAGS=
+    HWLOC_LIBYAML_LIBS=
+    HWLOC_LIBYAML_REQUIRES=
+    AS_IF([test "x$enable_tt_yaml" = "xyes"], [
+      AS_IF([test "x$hwloc_tenstorrent_happy" != "xyes"],
+            [AC_MSG_ERROR([--enable-tt-yaml requires the Tenstorrent discovery component (Linux + I/O enabled).])])
+      echo
+      echo "**** Tenstorrent YAML configuration"
+      HWLOC_PKG_CHECK_MODULES([LIBYAML], [yaml-0.1], [yaml_parser_initialize], [yaml.h],
+                              [hwloc_tt_yaml=yes],
+                              [hwloc_tt_yaml=no])
+      AS_IF([test "x$hwloc_tt_yaml" != "xyes"],
+            [AC_MSG_ERROR([--enable-tt-yaml specified, but libyaml (yaml-0.1) was not found. Install libyaml-dev/libyaml-devel or set PKG_CONFIG_PATH.])])
+      HWLOC_LIBYAML_REQUIRES="yaml-0.1"
+      AC_DEFINE([HWLOC_HAVE_TT_YAML], [1], [Define to 1 if Tenstorrent YAML descriptor parsing is enabled.])
+      echo "Tenstorrent SoC/core YAML descriptors will be parsed at discovery time."
+      echo "**** end of Tenstorrent YAML configuration"
+    ])
+    AC_SUBST([HWLOC_LIBYAML_CFLAGS])
+    AC_SUBST([HWLOC_LIBYAML_LIBS])
+    AC_SUBST([HWLOC_LIBYAML_REQUIRES])
+
     # GL Support
     hwloc_gl_happy=no
     if test "x$enable_io" != xno && test "x$enable_gl" != "xno"; then
@@ -1788,6 +1903,12 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LEVELZERO_CPPFLAGS $HWLOC_LEVELZERO_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_LEVELZERO_REQUIRES $HWLOC_REQUIRES"
            AC_DEFINE([HWLOC_LEVELZERO_COMPONENT_BUILTIN], 1, [Define if the LevelZero component is built statically inside libhwloc])])
+    AS_IF([test "$hwloc_tenstorrent_component" = "static"],
+          [AC_DEFINE([HWLOC_TENSTORRENT_COMPONENT_BUILTIN], 1, [Define if the Tenstorrent component is built statically inside libhwloc])
+           AS_IF([test "$hwloc_tt_yaml" = "yes"],
+                 [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBYAML_LIBS"
+                  HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBYAML_CFLAGS"
+                  HWLOC_REQUIRES="$HWLOC_LIBYAML_REQUIRES $HWLOC_REQUIRES"])])
     AS_IF([test "$hwloc_gl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_GL_LIBS"
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_GL_LDFLAGS"
@@ -1889,6 +2010,10 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_RSMI], [test "$hwloc_rsmi_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_LEVELZERO], [test "$hwloc_levelzero_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_TENSTORRENT], [test "$hwloc_tenstorrent_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_TT_METAL_FREE_IOP], [test "$hwloc_tt_metal_free_iop" = "yes"])
+        AM_CONDITIONAL([HWLOC_TT_METAL_IOP], [test "$hwloc_tt_metal_iop" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_TT_YAML], [test "$hwloc_tt_yaml" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
         AM_CONDITIONAL([HWLOC_HAVE_USER32], [test "x$hwloc_have_user32" = "xyes"])
 
@@ -1920,6 +2045,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_RSMI_BUILD_STATIC], [test "x$hwloc_rsmi_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_LEVELZERO_BUILD_STATIC], [test "x$hwloc_levelzero_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_TENSTORRENT_BUILD_STATIC], [test "x$hwloc_tenstorrent_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_GL_BUILD_STATIC], [test "x$hwloc_gl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
