@@ -3043,7 +3043,7 @@ space-separated attributes. For instance:
 </li>
 <li>
  <tt>PU:2(indexes=numa:core)</tt> specifies 2 PU children whose
- OS indexes are interleaved by NUMA node first and then by package.
+ OS indexes are interleaved by NUMA node first and then by core.
 </li>
 <li>
  Attributes in parentheses at the very beginning of the description
