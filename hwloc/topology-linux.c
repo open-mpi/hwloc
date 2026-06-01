@@ -5700,7 +5700,7 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_topology *topology, int root_fd,
   int foundpci;
   unsigned pcidomain = 0, pcibus = 0, pcidev = 0, pcifunc = 0;
   unsigned _pcidomain, _pcibus, _pcidev, _pcifunc;
-  const char *tmp;
+  const char *tmp, *next;
   hwloc_obj_t parent;
   int err;
 
@@ -5744,8 +5744,11 @@ hwloc_linuxfs_find_osdev_parent(struct hwloc_topology *topology, int root_fd,
     pcibus = _pcibus;
     pcidev = _pcidev;
     pcifunc = _pcifunc;
-    tmp = strchr(tmp+4, ':')+9; /* tmp points to at least 4 digits for domain, then a ':' */
-    goto nextpci;
+    next = strchr(tmp+4, ':'); /* tmp points to at least 4 digits for domain, then a ':' */
+    if (next) {
+      tmp = next+9;
+      goto nextpci;
+    }
   }
   if (sscanf(tmp, "%x:%x.%x", &_pcibus, &_pcidev, &_pcifunc) == 3) {
     foundpci = 1;
