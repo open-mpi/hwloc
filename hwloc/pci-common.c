@@ -587,7 +587,7 @@ hwloc_pci_dup(hwloc_topology_t new, hwloc_topology_t old)
       goto error;
     memcpy(newcur, oldcur, sizeof(*newcur));
     newcur->cpuset = hwloc_bitmap_tma_dup(tma, oldcur->cpuset);
-    if (!newcur) {
+    if (!newcur->cpuset) {
       assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
       free(newcur);
       goto error;
@@ -1217,9 +1217,12 @@ int
 hwloc_pcicommon_configspace_find_linkspeed(const unsigned char *config,
                                            unsigned offset, float *linkspeed)
 {
-  unsigned linksta, speed, width;
+  unsigned short linksta;
+  unsigned speed, width;
 
-  memcpy(&linksta, &config[offset + HWLOC_PCI_EXP_LNKSTA], 4);
+  /* the link status is a single 16-bit register, only read those two bytes
+   * so we don't run past the 256-byte config space when offset is near the end */
+  memcpy(&linksta, &config[offset + HWLOC_PCI_EXP_LNKSTA], 2);
   speed = linksta & HWLOC_PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
   width = (linksta & HWLOC_PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
 

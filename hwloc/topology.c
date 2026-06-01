@@ -3693,8 +3693,7 @@ hwloc_discover(struct hwloc_topology *topology,
   hwloc_set_group_depth(topology);
 
   /* add some identification attributes if not loading from XML */
-  if (topology->backends
-      && strcmp(topology->backends->component->name, "xml")
+  if (!topology->is_xml
       && !getenv("HWLOC_DONT_ADD_VERSION_INFO")) {
     char *value;
     /* add a hwlocVersion */
@@ -3787,6 +3786,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
 
   /* Setup topology context */
   topology->state = HWLOC_TOPOLOGY_STATE_IS_INIT | HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
+  topology->is_xml = 0;
   topology->flags = 0;
   topology->pid = 0;
   topology->userdata = NULL;
@@ -4243,7 +4243,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     hwloc_internal_memattrs_need_refresh(topology);
     hwloc_internal_memattrs_refresh(topology);
     /* update memtiers unless XML */
-    if (force_memtiers || strcmp(topology->backends->component->name, "xml"))
+    if (force_memtiers || !topology->is_xml)
       hwloc_internal_memattrs_guess_memory_tiers(topology, force_memtiers);
   }
 

@@ -754,7 +754,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     tag = NULL;
     ret = state->global->find_child(state, &childstate, &tag);
     if (ret < 0)
-      goto error;
+      goto error_with_object;
     if (!ret)
       break;
 
@@ -784,7 +784,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
 
     if (ret < 0)
-      goto error;
+      goto error_with_object;
 
     state->global->close_child(&childstate);
   }
@@ -866,9 +866,10 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
 
   /* check special types vs cpuset+nodeset */
-  if ((!obj->cpuset || !obj->nodeset) && !hwloc__obj_type_is_special(obj->type)) {
+  if ((!obj->cpuset || !obj->complete_cpuset || !obj->nodeset || !obj->complete_nodeset)
+      && !hwloc__obj_type_is_special(obj->type)) {
     if (state->global->show_errors)
-      fprintf(stderr, "%s: invalid normal or memory object %s P#%u without cpuset and nodeset\n",
+      fprintf(stderr, "%s: invalid normal or memory object %s P#%u without cpuset, complete_cpuset, nodeset and complete_nodeset\n",
 	      state->global->msgprefix, hwloc_obj_type_string(obj->type), obj->os_index);
     goto error_with_object;
   }
@@ -1232,6 +1233,15 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
     goto out;
   }
 
+  /* the nbobjs*nbobjs values matrix is allocated and indexed using unsigned
+   * arithmetic below, reject nbobjs whose square would overflow. */
+  if (nbobjs > UINT_MAX / nbobjs) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: %s with too many objects (%u)\n",
+	      state->global->msgprefix, _TAG_NAME, nbobjs);
+    goto out;
+  }
+
   indexes = malloc(nbobjs*sizeof(*indexes));
   u64values = malloc(nbobjs*nbobjs*sizeof(*u64values));
   if (heterotypes)
@@ -1416,7 +1426,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology,
 
   if (data->version_major < 3) {
     /* XGMIHops was latency in v2 */
-    if ((kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY) && !strcmp(name, "XGMIHops"))
+    if ((kind & HWLOC_DISTANCES_KIND_VALUE_LATENCY) && name && !strcmp(name, "XGMIHops"))
       kind = (kind & ~HWLOC_DISTANCES_KIND_VALUE_LATENCY) | HWLOC_DISTANCES_KIND_VALUE_HOPS;
   }
 
@@ -1712,7 +1722,9 @@ hwloc__xml_import_pcilocality(hwloc_topology_t topology,
                               hwloc__xml_import_state_t state)
 {
   hwloc_bitmap_t cpuset = NULL;
-  unsigned domain, bus_min, bus_max;
+  unsigned domain = (unsigned) -1;
+  unsigned bus_min = (unsigned) -1;
+  unsigned bus_max = (unsigned) -1;
 
   while (1) {
     char *attrname, *attrvalue;
@@ -1740,6 +1752,12 @@ hwloc__xml_import_pcilocality(hwloc_topology_t topology,
   if (!cpuset) {
     if (state->global->show_errors)
       fprintf(stderr, "%s: ignoring pci_locality without cpuset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+  if (domain == (unsigned) -1 || bus_min == (unsigned) -1 || bus_max == (unsigned) -1) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring pci_locality without domain/bus_min/bus_max\n",
               state->global->msgprefix);
     goto error;
   }
@@ -1845,10 +1863,14 @@ hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
 	break;
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
 	diff->obj_attr.diff.string.name = strdup(obj_attr_name_s);
-	/* FALLTHRU */
-      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
 	diff->obj_attr.diff.string.oldvalue = strdup(obj_attr_oldvalue_s);
 	diff->obj_attr.diff.string.newvalue = strdup(obj_attr_newvalue_s);
+	break;
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
+        /* libxml exports NULL strings as "", and an empty name would be meaningless anyway,
+         * hence import "" as NULL. */
+	diff->obj_attr.diff.string.oldvalue = *obj_attr_oldvalue_s ? strdup(obj_attr_oldvalue_s) : NULL;
+	diff->obj_attr.diff.string.newvalue = *obj_attr_newvalue_s ? strdup(obj_attr_newvalue_s) : NULL;
 	break;
       }
 
@@ -2909,13 +2931,17 @@ hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_dif
 	sprintf(tmp, "%llu", (unsigned long long) diff->obj_attr.diff.uint64.newvalue);
 	state.new_prop(&state, "obj_attr_newvalue", tmp);
 	break;
-      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
       case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
-	if (diff->obj_attr.diff.string.name)
-	  state.new_prop(&state, "obj_attr_name", diff->obj_attr.diff.string.name);
+        state.new_prop(&state, "obj_attr_name", diff->obj_attr.diff.string.name);
 	state.new_prop(&state, "obj_attr_oldvalue", diff->obj_attr.diff.string.oldvalue);
 	state.new_prop(&state, "obj_attr_newvalue", diff->obj_attr.diff.string.newvalue);
 	break;
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
+        /* obj->name may be NULL and libxml exports NULL string as "",
+         * hence always export NULL as "" */
+	state.new_prop(&state, "obj_attr_oldvalue", diff->obj_attr.diff.string.oldvalue ? diff->obj_attr.diff.string.oldvalue : "");
+	state.new_prop(&state, "obj_attr_newvalue", diff->obj_attr.diff.string.newvalue ? diff->obj_attr.diff.string.newvalue : "");
+        break;
       }
 
       break;
@@ -3301,6 +3327,7 @@ retry:
   if (err < 0)
     goto out_with_msgprefix;
 
+  topology->is_xml = 1;
   return backend;
 
  out_with_msgprefix:

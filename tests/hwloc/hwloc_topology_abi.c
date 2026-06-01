@@ -51,28 +51,28 @@ int main(void)
     assert(offset == 0);
 
     offset = offsetof(struct hwloc_topology, adopted_shmem_addr);
-    assert(offset == 240);
+    assert(offset == 248);
 
     offset = offsetof(struct hwloc_topology, binding_hooks);
-    assert(offset == 464);
+    assert(offset == 472);
     size = sizeof(struct hwloc_binding_hooks);
     assert(size == 192);
 
     offset = offsetof(struct hwloc_topology, support);
-    assert(offset == 656);
+    assert(offset == 664);
 
     offset = offsetof(struct hwloc_topology, infos);
-    assert(offset == 688);
+    assert(offset == 696);
     size = sizeof(struct hwloc_infos_s);
     assert(size == 16);
 
     offset = offsetof(struct hwloc_topology, first_dist);
-    assert(offset == 728);
+    assert(offset == 736);
     size = sizeof(struct hwloc_internal_distances_s);
     assert(size == 88);
 
     offset = offsetof(struct hwloc_topology, memattrs);
-    assert(offset == 752);
+    assert(offset == 760);
     size = sizeof(struct hwloc_internal_memattr_s);
     assert(size == 32);
     size = sizeof(struct hwloc_internal_memattr_target_s);
@@ -83,12 +83,12 @@ int main(void)
     assert(size == 32);
 
     offset = offsetof(struct hwloc_topology, cpukinds);
-    assert(offset == 768);
+    assert(offset == 776);
     size = sizeof(struct hwloc_internal_cpukind_s);
     assert(size == 40);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 808);
+    assert(offset == 816);
 
     /* fields after this one aren't needed after discovery */
 
