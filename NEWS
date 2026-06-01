@@ -31,8 +31,12 @@ Version 2.14.0
   Thanks to Edgar Leon for the help.
 * Add CXI OS devices for Cray Slingshot NICs, e.g. cxi0,
   thanks to Edgar Leon for the suggestion.
+* Add --with-opencl=<dir> configure option.
 * hwloc-info topology now reports the number of levels, PUs,
   NUMA nodes and CPU kinds.
+* Prevent some possible crashs in the levelzero backend due to
+  uninitialized structures.
+* Many small fixes by Javid Khan, thanks.
 
 
 Version 2.13
