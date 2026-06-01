@@ -76,27 +76,27 @@ int main(void)
 
   hwloc_topology_init(&topology);
   err = hwloc_topology_set_type_filter(topology, HWLOC_OBJ_L1ICACHE, HWLOC_TYPE_FILTER_KEEP_ALL);
-  err = hwloc_topology_set_synthetic(topology, "pack:2(indexes=3,5) numa:2(memory=256GiB indexes=pack) l3u:1(size=20mib) l2:2 l1i:1(size=16kiB) l1dcache:2 core:1 pu:2(indexes=l2)");
+  err = hwloc_topology_set_synthetic(topology, "pack:2(indexes=3,5) numa:2(memory=256GiB indexes=pack) l3u:1(size=20mib) l2:2 l1i:1(size=16kiB) l1dcache:2 core:1 pu:2(indexes=pack:l2)");
   assert(!err);
   hwloc_topology_load(topology);
 
   assert(hwloc_get_memory_parents_depth(topology) == 2);
 
   err = hwloc_topology_export_synthetic(topology, buffer, sizeof(buffer), 0);
-  assert(err == 181);
-  err = strcmp("Package:2 L3Cache:2(size=20971520) [NUMANode(memory=274877906944 indexes=2*2:1*2)] L2Cache:2(size=4194304) L1iCache:1(size=16384) L1dCache:2(size=32768) Core:1 PU:2(indexes=4*8:1*4)", buffer);
+  assert(err == 186);
+  err = strcmp("Package:2 L3Cache:2(size=20971520) [NUMANode(memory=274877906944 indexes=2*2:1*2)] L2Cache:2(size=4194304) L1iCache:1(size=16384) L1dCache:2(size=32768) Core:1 PU:2(indexes=16*2:4*4:1*4)", buffer);
   assert(!err);
 
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 1)->os_index == 5);
   assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1)->os_index == 2);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 12)->os_index == 3);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 13)->os_index == 11);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 14)->os_index == 19);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 15)->os_index == 27);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 16)->os_index == 4);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 17)->os_index == 12);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 18)->os_index == 20);
-  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 19)->os_index == 28);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 12)->os_index == 6);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 13)->os_index == 14);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 14)->os_index == 22);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 15)->os_index == 30);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 16)->os_index == 1);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 17)->os_index == 9);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 18)->os_index == 17);
+  assert(hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 19)->os_index == 25);
 
   hwloc_topology_destroy(topology);
 
