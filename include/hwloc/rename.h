@@ -796,6 +796,7 @@ extern "C" {
 #define hwloc_levelzero_component HWLOC_NAME(levelzero_component)
 #define hwloc_nvml_component HWLOC_NAME(nvml_component)
 #define hwloc_rsmi_component HWLOC_NAME(rsmi_component)
+#define hwloc_vulkan_component HWLOC_NAME(vulkan_component)
 #define hwloc_opencl_component HWLOC_NAME(opencl_component)
 #define hwloc_pci_component HWLOC_NAME(pci_component)
 
