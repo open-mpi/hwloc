@@ -976,7 +976,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   /* generate PCI localities from top level bridges or pcidevs if importing from v2 */
   if (data->version_major < 3
       && obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
-      && obj->parent->cpuset) {
+      && obj->parent && obj->parent->cpuset) {
     hwloc_pci_xml_import_locality(topology,
                                   obj->attr->bridge.downstream.pci.domain,
                                   obj->attr->bridge.downstream.pci.secondary_bus,
@@ -985,7 +985,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   }
   if (data->version_major < 3
       && obj->type == HWLOC_OBJ_PCI_DEVICE && obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
-      && obj->parent->cpuset) {
+      && obj->parent && obj->parent->cpuset) {
     hwloc_pci_xml_import_locality(topology,
                                   obj->attr->pcidev.domain,
                                   obj->attr->pcidev.bus,
