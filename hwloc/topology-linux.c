@@ -3987,10 +3987,11 @@ annotate_cxl_dax(hwloc_obj_t obj, unsigned region, int root_fd)
     if (!pcirootbus)
       break;
     slash = pcirootbus + 11; /* "/pciXXXX:YY/" */
-    if (*slash != '/')
+    if (slash > uportpath + err || *slash != '/') /* "/pci" may be near the end of the link target */
       break;
     pcibdf = NULL;
-    while (sscanf(slash, "/%x:%x:%x.%x/", &pcidomain, &pcibus, &pcidevice, &pcifunc) == 4) {
+    while (slash + 13 <= uportpath + err
+           && sscanf(slash, "/%x:%x:%x.%x/", &pcidomain, &pcibus, &pcidevice, &pcifunc) == 4) {
       pcibdf = slash+1;
       slash += 13;
     }
