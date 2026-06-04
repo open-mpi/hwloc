@@ -5,7 +5,7 @@
  */
 
 /** \file
- * \brief Memory node attributes.
+ * \brief Memory node attributes and tiers.
  */
 
 #ifndef HWLOC_MEMATTR_H
@@ -28,7 +28,7 @@ extern "C" {
  * These memory nodes are called "Targets" while the CPU accessing them
  * is called the "Initiator". Access performance depends on their
  * locality (NUMA platforms) as well as the intrinsic performance
- * of the targets (heterogeneous platforms).
+ * of the targets (heterogeneous platforms with HBM, DRAM, etc.).
  *
  * The following attributes describe the performance of memory accesses
  * from an Initiator to a memory Target, for instance their latency

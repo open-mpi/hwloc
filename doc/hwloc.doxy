@@ -2653,6 +2653,12 @@ second.
 Hence there is a need to explicit memory technologies and performance
 to help users decide where to allocate.
 
+hwloc offers a low-level API to query the characteristics of nodes as
+Memory Attributes (see \ref hwlocality_memattrs).
+It also builds a more user-friendly way to select nodes by placing
+nodes in different <i>Memory Tiers</i> depending on their characteristics
+as explained below.
+
 
 \section heteromem_memtiers Memory Tiers and Default nodes
 
@@ -2792,14 +2798,14 @@ now have the same locality (HBM and DRAM above) or overlapping localities
 (e.g. DRAM and CXL above).
 <ul>
 <li>
-Checking NUMA node subtype or tier attributes is a good way to avoid
+Checking NUMA node subtypes or tier attributes is a good way to avoid
 this issue by ignoring nodes of different kinds.
 <br/>
 Memory tiers may be queried with hwloc_memtiers_get_nr() and
 hwloc_memtiers_get_info() (which provides a bitmap of NUMA nodes in a tier).
 </li>
 <li>
-Another solution consists in ignoring nodes whose CPU set overlap the
+Another solution consists in ignoring nodes whose CPU sets overlap the
 previously selected ones.
 For instance, in the above example, one could first select DRAM L\#0
 but ignore HBM L\#1 (because it overlaps with DRAM L\#0),
