@@ -348,6 +348,8 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     /* FIXME display for non-NUMA too.
      * but that's rare so maybe detect in advance whether it's needed?
      */
+    struct hwloc_infos_s *infosp;
+    unsigned long kinds;
     unsigned id;
     for(id=0; ; id++) {
       const char *mname;
@@ -408,6 +410,15 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     }
     snprintf(value, sizeof(value), "%d", obj->attr->numanode.memory_tier);
     hwloc_info_show_attr(prefix, "memory tier", value);
+    if (!hwloc_memtiers_get_info(topology, obj->attr->numanode.memory_tier, NULL, &kinds, &infosp, 0)) {
+      unsigned j;
+      snprintf(value, sizeof(value), "%lu", kinds);
+      hwloc_info_show_attr(prefix, "memory tier kinds", value);
+      for(j=0; j<infosp->count; j++) {
+        snprintf(name, sizeof(name), "memory tier info %s", infosp->array[j].name);
+        hwloc_info_show_attr(prefix, name, infosp->array[j].value);
+      }
+    }
   }
 }
 
@@ -907,7 +918,7 @@ main (int argc, char *argv[])
           only_attr_name = "attr cache inclusive";
         else if (!strcmp(only_attr_name, "info MemoryTiersNr")) /* backward compat with v2.x */
           only_attr_name = "Memory tiers";
-        else if (!strcmp(only_attr_name, "info MemoryTier"))
+        else if (!strcmp(only_attr_name, "info MemoryTier")) /* backward compat with v2.x */
           only_attr_name = "memory tier";
 	opt = 1;
       }
