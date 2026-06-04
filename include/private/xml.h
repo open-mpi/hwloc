@@ -55,6 +55,7 @@ struct hwloc_xml_backend_data_s {
   unsigned version_major, version_minor;
   unsigned nbnumanodes;
   hwloc_obj_t first_numanode, last_numanode; /* temporary cousin-list for handling v1distances */
+  unsigned v3memtiers_nr;
   struct hwloc__xml_imported_v1distances_s *first_v1dist, *last_v1dist;
 };
 

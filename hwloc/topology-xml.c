@@ -1893,6 +1893,83 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_v3import_memtier(hwloc_topology_t topology,
+                            struct hwloc_xml_backend_data_s *data,
+                            hwloc__xml_import_state_t state)
+{
+  hwloc_bitmap_t nodeset = NULL;
+  int ret;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "nodeset")) {
+      if (!nodeset)
+        nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(nodeset, attrvalue);
+    } else if (strcmp(attrname, "kinds")) {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: ignoring unknown memtier attribute %s\n",
+                state->global->msgprefix, attrname);
+      hwloc_bitmap_free(nodeset);
+      return -1;
+    }
+  }
+
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *tag;
+
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret <= 0)
+      break;
+
+    if (!strcmp(tag, "info")) {
+      char *infoname = NULL;
+      char *infovalue = NULL;
+      ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
+    } else {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: memtier with unrecognized child %s\n",
+                state->global->msgprefix, tag);
+      ret = -1;
+    }
+
+    if (ret < 0)
+      goto error;
+
+    state->global->close_child(&childstate);
+  }
+
+  if (!nodeset) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "%s: ignoring memtier without nodeset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
+    char tmp[11];
+    snprintf(tmp, sizeof(tmp), "%u", data->v3memtiers_nr);
+    hwloc_obj_t node = data->first_numanode;
+    while (node) {
+      if (hwloc_bitmap_isset(nodeset, node->os_index))
+        hwloc_obj_add_info(node, "MemoryTier", tmp);
+      node = node->next_cousin;
+    }
+  }
+  data->v3memtiers_nr++;
+  hwloc_bitmap_free(nodeset);
+
+  return state->global->close_tag(state);
+
+ error:
+  hwloc_bitmap_free(nodeset);
+  return -1;
+}
+
+static int
 hwloc__xml_import_cpukind(hwloc_topology_t topology,
                           hwloc__xml_import_state_t state)
 {
@@ -2204,6 +2281,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   data->nbnumanodes = 0;
   data->first_numanode = data->last_numanode = NULL;
   data->first_v1dist = data->last_v1dist = NULL;
+  data->v3memtiers_nr = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -2269,6 +2347,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
       } else if (!strcmp(tag, "pci_locality")) {
         /* not used < v3 */
         goto done;
+      } else if (!strcmp(tag, "memtier")) {
+        ret = hwloc__xml_v3import_memtier(topology, data, &childstate);
+        if (ret < 0)
+          goto failed;
       } else {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "%s: ignoring unknown tag `%s' after root object.\n",
@@ -2378,6 +2460,14 @@ done:
       free(v1dist);
     }
     data->first_v1dist = data->last_v1dist = NULL;
+  }
+
+  if (data->version_major > 2 && data->v3memtiers_nr) {
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS)) {
+      char tmp[11];
+      snprintf(tmp, sizeof(tmp), "%u", data->v3memtiers_nr);
+      hwloc_obj_add_info(root, "MemoryTiersNr", tmp);
+    }
   }
 
   /* FIXME:
