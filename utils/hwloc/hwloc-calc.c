@@ -169,9 +169,7 @@ static hwloc_bitmap_t hwloc_calc_get_memtier_bitmap(hwloc_topology_t topology, h
 
   obj = NULL;
   while ((obj = hwloc_calc_get_next_obj_covering_set_by_depth(topology, NULL /* unneeded for NUMANODE */, nodeset, HWLOC_TYPE_DEPTH_NUMANODE, obj)) != NULL) {
-    const char *tier = hwloc_obj_get_info_by_name(obj, "MemoryTier");
-    if (tier)
-      hwloc_bitmap_set(mtset, atoi(tier));
+    hwloc_bitmap_set(mtset, obj->attr->numanode.memory_tier);
   }
 
   return mtset;
@@ -267,7 +265,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t cpu
     if (!sep)
       sep = ",";
     hwloc_bitmap_foreach_begin(i, mtset) {
-	printf("%s%s%u", first ? "" : sep, objecto ? "MemoryTier:" : "", i);
+	printf("%s%s%u", first ? "" : sep, objecto ? "memorytier:" : "", i);
         first = 0;
     } hwloc_bitmap_foreach_end();
     printf("\n");

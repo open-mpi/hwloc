@@ -50,6 +50,12 @@ struct hwloc_xml_backend_data_s {
   void *v2_pagesizes; /* actually a hwloc_pagesize_arrayelt_t* but we don't want/need to insert private/private.h which is not available in plugins */
   unsigned v2_pagesize_nr;
   unsigned v2_pagesize_nr_alloc;
+  /* v2 memtiers */
+  unsigned v2_memtiers_nr;
+  struct hwloc_v2xml_import_memtier_s {
+    hwloc_bitmap_t nodeset;
+    char *subtype;
+  } * v2_memtiers;
 };
 
 /**************

@@ -703,6 +703,11 @@ union hwloc_obj_attr_u {
   /** \brief NUMA node-specific Object Attributes */
   struct hwloc_numanode_attr_s {
     hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
+    int memory_tier;             /**< \brief Index of memory tier containing this node.
+                                  * Ranks start from 0 for highest bandwidth nodes.
+                                  * \c 0 if no multiple tiers could be found.
+                                  * \c -1 some tiers were identified but none for that node.
+                                  * See \ref heteromem */
   } numanode;
 
   /** \brief Cache-specific Object Attributes */

@@ -465,7 +465,6 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
           if (!strcmp(infoname, "Backend")
               || !strcmp(infoname, "SyntheticDescription")
               || !strcmp(infoname, "LinuxCgroup")
-              || !strcmp(infoname, "MemoryTiersNr")
               || !strcmp(infoname, "WindowsBuildEnvironment")
               || !strcmp(infoname, "OSName")
               || !strcmp(infoname, "OSRelease")
@@ -475,6 +474,31 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
               || !strcmp(infoname, "hwlocVersion")
               || !strcmp(infoname, "ProcessName")) {
             hwloc__add_info(&topology->infos, infoname, infovalue);
+            return 0;
+          } else if (!strcmp(infoname, "MemoryTiersNr")) {
+            /* preallocate tier structures */
+            unsigned nr = atoi(infovalue);
+            data->v2_memtiers = calloc(nr, sizeof(*data->v2_memtiers));
+            if (data->v2_memtiers)
+              data->v2_memtiers_nr = nr;
+            return 0;
+          }
+        } else if (obj->type == HWLOC_OBJ_NUMANODE) {
+          if (!strcmp(infoname, "MemoryTier")) {
+            /* mark the node in preallocated tier structures */
+            unsigned i = atoi(infovalue);
+            if (i < data->v2_memtiers_nr) {
+              if (obj->subtype) {
+                if (!data->v2_memtiers[i].subtype)
+                  data->v2_memtiers[i].subtype = strdup(obj->subtype);
+                /* only keep the subtype of the first NUMANode, they should all be the same in a tier */
+              }
+              if (!data->v2_memtiers[i].nodeset)
+                data->v2_memtiers[i].nodeset = hwloc_bitmap_alloc();
+              if (data->v2_memtiers[i].nodeset)
+                hwloc_bitmap_set(data->v2_memtiers[i].nodeset, obj->os_index);
+            }
+            obj->attr->numanode.memory_tier = i;
             return 0;
           }
         } else if (hwloc_obj_type_is_cache(obj->type) || obj->type == HWLOC_OBJ_MEMCACHE) {
@@ -1638,6 +1662,85 @@ hwloc__xml_import_memattr(hwloc_topology_t topology,
 }
 
 static int
+hwloc__xml_import_memtier(hwloc_topology_t topology,
+                          hwloc__xml_import_state_t state)
+{
+  hwloc_bitmap_t nodeset = NULL;
+  unsigned long kinds = 0;
+  struct hwloc_infos_s infos;
+  int ret;
+
+  hwloc__init_infos(&infos);
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->global->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "nodeset")) {
+      if (!nodeset)
+        nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(nodeset, attrvalue);
+    } else if (!strcmp(attrname, "kinds")) {
+      kinds = atoi(attrvalue);
+    } else {
+      if (state->global->show_errors)
+        fprintf(stderr, "%s: ignoring unknown memtier attribute %s\n",
+                state->global->msgprefix, attrname);
+      hwloc_bitmap_free(nodeset);
+      return -1;
+    }
+  }
+
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *tag;
+
+    ret = state->global->find_child(state, &childstate, &tag);
+    if (ret <= 0)
+      break;
+
+    if (!strcmp(tag, "info")) {
+      char *infoname = NULL;
+      char *infovalue = NULL;
+      ret = hwloc___xml_import_info(&infoname, &infovalue, &childstate);
+      if (!ret && infoname && infovalue)
+        hwloc__add_info(&infos, infoname, infovalue);
+    } else {
+      if (state->global->show_errors)
+        fprintf(stderr, "%s: memtier with unrecognized child %s\n",
+                state->global->msgprefix, tag);
+      ret = -1;
+    }
+
+    if (ret < 0)
+      goto error;
+
+    state->global->close_child(&childstate);
+  }
+
+  if (!nodeset) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring memtier without nodeset\n",
+              state->global->msgprefix);
+    goto error;
+  }
+
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS) {
+    hwloc__free_infos(&infos);
+    hwloc_bitmap_free(nodeset);
+  } else {
+    hwloc_internal_memtier_import(topology, kinds, nodeset, &infos);
+  }
+
+  return state->global->close_tag(state);
+
+ error:
+  hwloc__free_infos(&infos);
+  hwloc_bitmap_free(nodeset);
+  return -1;
+}
+
+static int
 hwloc__xml_import_cpukind(hwloc_topology_t topology,
                           hwloc__xml_import_state_t state)
 {
@@ -1943,6 +2046,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   char *tag;
   int gotignored = 0;
   hwloc_localeswitch_declare;
+  unsigned i;
   int ret;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_GLOBAL);
@@ -1962,6 +2066,8 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   data->v2_pagesizes = NULL;
   data->v2_pagesize_nr = 0;
   data->v2_pagesize_nr_alloc = 0;
+  data->v2_memtiers_nr = 0;
+  data->v2_memtiers = NULL;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -2016,6 +2122,10 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	  goto failed;
       } else if (!strcmp(tag, "memattr")) {
         ret = hwloc__xml_import_memattr(topology, &childstate);
+        if (ret < 0)
+          goto failed;
+      } else if (!strcmp(tag, "memtier")) {
+        ret = hwloc__xml_import_memtier(topology, &childstate);
         if (ret < 0)
           goto failed;
       } else if (!strcmp(tag, "cpukind")) {
@@ -2084,7 +2194,6 @@ done:
   /* keep the "Backend" information intact, but we had missing ones from v3 */
   if (data->version_major <= 2) {
     struct hwloc_infos_s *infos = &topology->infos;
-    unsigned i;
     /* check if root already has some backend info */
     for(i=0; i<infos->count; i++)
       if (!strcmp(infos->array[i].name, "Backend")) {
@@ -2124,6 +2233,14 @@ done:
     data->v2_pagesizes = NULL;
   }
 
+  for(i=0; i<data->v2_memtiers_nr; i++) {
+    hwloc_internal_memtier_v2xml_import(topology, data->v2_memtiers[i].subtype, data->v2_memtiers[i].nodeset);
+    /* nodeset is given to the callee */
+    data->v2_memtiers[i].nodeset = NULL;
+    free(data->v2_memtiers[i].subtype);
+  }
+  free(data->v2_memtiers);
+
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
     topology->support.discovery->pu = 1;
     topology->support.discovery->disallowed_pu = 1;
@@ -2149,6 +2266,13 @@ done:
  err:
   free(data->v2_pagesizes);
   data->v2_pagesizes = NULL;
+
+  for(i=0; i<data->v2_memtiers_nr; i++) {
+    free(data->v2_memtiers[i].nodeset);
+    free(data->v2_memtiers[i].subtype);
+  }
+  free(data->v2_memtiers);
+  data->v2_memtiers = NULL;
 
   hwloc_free_object_siblings_and_children(root->first_child);
   root->first_child = NULL;
@@ -2415,6 +2539,7 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
         }
       }
     }
+    /* no need to export NUMANode memory_tier, we'll set it from hwloc_internal_memtiers_build() */
     break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
@@ -2521,6 +2646,17 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
       && obj->attr->cache.inclusive) {
     sprintf(tmp, "%d", (int) obj->attr->cache.inclusive);
     hwloc__xml_export_info_attr(state, "Inclusive", tmp);
+  }
+
+  if (v2export && topology->nr_memtiers > 1) {
+    if (!obj->parent) {
+      sprintf(tmp, "%u", topology->nr_memtiers);
+      hwloc__xml_export_info_attr(state, "MemoryTiersNr", tmp);
+    }
+    if (obj->type == HWLOC_OBJ_NUMANODE) {
+      sprintf(tmp, "%u", obj->attr->numanode.memory_tier);
+      hwloc__xml_export_info_attr(state, "MemoryTier", tmp);
+    }
   }
 
   if (v2export && obj->type == HWLOC_OBJ_OS_DEVICE && obj->subtype && !hwloc_obj_get_info_by_name(obj, "Backend")) {
@@ -2819,6 +2955,30 @@ hwloc__xml_export_memattrs(hwloc__xml_export_state_t state, hwloc_topology_t top
 }
 
 static void
+hwloc__xml_export_memtiers(hwloc__xml_export_state_t state, hwloc_topology_t topology)
+{
+  unsigned i;
+  for(i=0; i<topology->nr_memtiers; i++) {
+    struct hwloc_internal_memtier_s *tier = &topology->memtiers[i];
+    struct hwloc__xml_export_state_s cstate;
+    char *setstring;
+    char tmp[11];
+    unsigned j;
+
+    state->new_child(state, &cstate, "memtier");
+    snprintf(tmp, sizeof(tmp), "%lu", tier->kinds);
+    cstate.new_prop(&cstate, "kinds", tmp);
+    hwloc_bitmap_asprintf(&setstring, tier->nodeset);
+    cstate.new_prop(&cstate, "nodeset", setstring);
+    free(setstring);
+    cstate.end_object(&cstate, "memtier");
+
+    for(j=0; j<tier->infos.count; j++)
+      hwloc__xml_export_info_attr(&cstate, tier->infos.array[j].name, tier->infos.array[j].value);
+  }
+}
+
+static void
 hwloc__xml_export_cpukinds(hwloc__xml_export_state_t state, hwloc_topology_t topology)
 {
   unsigned i;
@@ -2896,6 +3056,7 @@ hwloc__xml_export_topology(hwloc__xml_export_state_t state, hwloc_topology_t top
     hwloc__xml_export_cpukinds(state, topology);
     if (!(flags & HWLOC_TOPOLOGY_EXPORT_XML_FLAG_V2)) {
       hwloc__xml_export_infos(state, topology);
+      hwloc__xml_export_memtiers(state, topology);
       hwloc__xml_export_pcilocalities(state, topology);
     }
 }

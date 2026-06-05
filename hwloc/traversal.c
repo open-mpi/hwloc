@@ -755,6 +755,12 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
                            prefix, obj->attr->core.cpukind);
     }
     break;
+  case HWLOC_OBJ_NUMANODE:
+    if (verbose && (!topology || topology->nr_memtiers > 1)) {
+      /* only show memory tier when there are multiple of them */
+      res = hwloc_snprintf(tmp, tmplen, "%smemorytier=%d", separator, obj->attr->numanode.memory_tier);
+    }
+    break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
   case HWLOC_OBJ_L3CACHE:

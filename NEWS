@@ -27,6 +27,10 @@ for more details.
     - The verbose attribute is replaced with flags,
       where value 1 keeps the same meaning as in hwloc 2.x.
     - The new optional topology argument allows to hide meaningless attributes.
+  + Memory tiers are not defined with MemoryTiersNr and MemoryTier info
+    anymore. They have a dedicated API hwloc_memtiers_get_nr() and
+    hwloc_memtiers_get_info() in hwloc/memattrs.h
+    - NUMA nodes now have a memory_tier integer attribute.
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.

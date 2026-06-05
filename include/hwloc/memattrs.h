@@ -5,7 +5,7 @@
  */
 
 /** \file
- * \brief Memory node attributes.
+ * \brief Memory node attributes and tiers.
  */
 
 #ifndef HWLOC_MEMATTR_H
@@ -28,7 +28,7 @@ extern "C" {
  * These memory nodes are called "Targets" while the CPU accessing them
  * is called the "Initiator". Access performance depends on their
  * locality (NUMA platforms) as well as the intrinsic performance
- * of the targets (heterogeneous platforms).
+ * of the targets (heterogeneous platforms with HBM, DRAM, etc.).
  *
  * The following attributes describe the performance of memory accesses
  * from an Initiator to a memory Target, for instance their latency
@@ -58,6 +58,8 @@ extern "C" {
  * Memory attributes are also used internally to build Memory Tiers which provide
  * an easy way to distinguish NUMA nodes of different kinds, as explained
  * in \ref heteromem.
+ * Tiers may be queried with hwloc_memtiers_get_nr() and
+ * hwloc_memtiers_get_info() as explained below.
  *
  * Beside tiers, hwloc defines a set of "default" nodes where normal memory
  * allocations should be made from (see hwloc_topology_get_default_nodeset()).
@@ -661,6 +663,54 @@ hwloc_memattr_set_value(hwloc_topology_t topology,
                         struct hwloc_location *initiator,
                         unsigned long flags,
                         hwloc_uint64_t value);
+
+/** \brief Get the number of memory tiers in the topology.
+ *
+ * \p flags must be \c 0 for now.
+ *
+ * If all NUMA nodes were identified as being in the same tier,
+ * hwloc considers that there is no memory tier at all and returns \c 0.
+ *
+ * \return The number of memory tiers (positive integer, at least \c 2) on success.
+ * \return \c 0 if all nodes are in the same single tier,
+ * or if no information about different tiers could be found.
+ * \return \c -1 with \p errno set to \c EINVAL if \p flags is invalid.
+ */
+HWLOC_DECLSPEC int
+hwloc_memtiers_get_nr(hwloc_topology_t topology,
+                      unsigned long flags);
+
+/** \brief Get the node set and infos about a memory tier in the topology.
+ *
+ * \p tier_index identifies one tier of memory nodes between 0 and the number
+ * of tiers returned by hwloc_memtiers_get_nr() minus 1.
+ *
+ * If not \c NULL, the bitmap \p nodeset will be filled with
+ * the set of NUMA nodes of this tier.
+ *
+ * Tiers with higher bandwidth are reported first.
+ * If no bandwidth information is available, hwloc assumes HBM has higher
+ * bandwidth than DRAM, etc.
+ *
+ * If \p kinds is not \c NULL, it will receive a value describing
+ * the kinds of tier. These values are currently undocumented.
+ *
+ * If \p infosp is not \c NULL, it will receive a pointer to a structure
+ * containing the array of info attributes.
+ * This structure belongs to the hwloc library, it should not be freed or modified.
+ * Note that hwloc does not currently add any such attributes.
+ *
+ * \return \c 0 on success.
+ * \return \c -1 with \p errno set to \c ENOENT if \p tier_index does not match any memory tier.
+ * \return \c -1 with \p errno set to \c EINVAL if parameters are invalid.
+ */
+HWLOC_DECLSPEC int
+hwloc_memtiers_get_info(hwloc_topology_t topology,
+                        unsigned tier_index,
+                        hwloc_bitmap_t nodeset,
+                        unsigned long *kinds,
+                        struct hwloc_infos_s **infosp,
+                        unsigned long flags);
 
 /** @} */
 

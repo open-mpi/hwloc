@@ -62,14 +62,14 @@ export HWLOC_COMPONENTS=linux,stop
 export HWLOC_FSROOT=//
 
 # We cannot expect the exact same output unless --io is given (which would be slow).
-# Hence we ignore DAX* and MemoryTier* info attributes (DAX and CXL are needed),
+# Hence we ignore DAX* info attributes and memory tiers (DAX and CXL are needed),
 # as well as NUMANode subtypes.
 # Then we replace <object ..>\n</object> with <object ../> if there are no info attrs anymore.
 
 echo "Saving current system topology to XML..."
 if ! "$lstopo" --no-io --ignore misc -.xml \
      | grep -v DAX \
-     | grep -v MemoryTier \
+     | grep -v '<memtier' \
      | sed -r -e '/<object type="NUMANode"/s| subtype=\"[^\"]+\"||' \
      | tr '\n' ' ' \
      | sed -r -e 's|(<object [^>]+[^/])> *</object>|\1/>|g' \
@@ -98,7 +98,7 @@ rm -f "$tmpdir/save/proc/hwloc-nofile-info"
 echo "Saving tarball topology to XML..."
 if ! "$lstopo" --no-io --ignore misc -.xml \
      | grep -v DAX \
-     | grep -v MemoryTier \
+     | grep -v '<memtier' \
      | sed -r -e '/<object type="NUMANode"/s| subtype=\"[^\"]+\"||' \
      | tr '\n' ' ' \
      | sed -r -e 's|(<object [^>]+[^/])> *</object>|\1/>|g' \

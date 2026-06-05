@@ -82,24 +82,29 @@ int main(void)
     size = sizeof(struct hwloc_internal_location_s);
     assert(size == 32);
 
-    offset = offsetof(struct hwloc_topology, cpukinds);
+    offset = offsetof(struct hwloc_topology, memtiers);
     assert(offset == 776);
+    size = sizeof(struct hwloc_internal_memtier_s);
+    assert(size == 64);
+
+    offset = offsetof(struct hwloc_topology, cpukinds);
+    assert(offset == 792);
     size = sizeof(struct hwloc_internal_cpukind_s);
     assert(size == 40);
 
     offset = offsetof(struct hwloc_topology, grouping_next_subkind);
-    assert(offset == 816);
+    assert(offset == 832);
 
     offset = offsetof(struct hwloc_topology, first_pci_locality);
-    assert(offset == 824);
+    assert(offset == 840);
     size = sizeof(struct hwloc_pci_locality_s);
     assert(size == 48);
 
     offset = offsetof(struct hwloc_topology, backends);
-    assert(offset == 840);
+    assert(offset == 856);
 
     offset = offsetof(struct hwloc_topology, tma);
-    assert(offset == 864);
+    assert(offset == 880);
 
     /* fields after this one aren't needed after discovery */
 

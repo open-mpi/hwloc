@@ -348,6 +348,8 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
     /* FIXME display for non-NUMA too.
      * but that's rare so maybe detect in advance whether it's needed?
      */
+    struct hwloc_infos_s *infosp;
+    unsigned long kinds;
     unsigned id;
     for(id=0; ; id++) {
       const char *mname;
@@ -404,6 +406,17 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
           free(initiators);
           free(values);
         }
+      }
+    }
+    snprintf(value, sizeof(value), "%d", obj->attr->numanode.memory_tier);
+    hwloc_info_show_attr(prefix, "memory tier", value);
+    if (!hwloc_memtiers_get_info(topology, obj->attr->numanode.memory_tier, NULL, &kinds, &infosp, 0)) {
+      unsigned j;
+      snprintf(value, sizeof(value), "%lu", kinds);
+      hwloc_info_show_attr(prefix, "memory tier kinds", value);
+      for(j=0; j<infosp->count; j++) {
+        snprintf(name, sizeof(name), "memory tier info %s", infosp->array[j].name);
+        hwloc_info_show_attr(prefix, name, infosp->array[j].value);
       }
     }
   }
@@ -776,6 +789,8 @@ hwloc_info_show_topology_infos(hwloc_topology_t topology)
   hwloc__info_show_topology_info_one("PUs", value, 0);
   snprintf(value, sizeof(value), "%u", hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NUMANODE));
   hwloc__info_show_topology_info_one("NUMANodes", value, 0);
+  snprintf(value, sizeof(value), "%u", hwloc_memtiers_get_nr(topology, 0));
+  hwloc__info_show_topology_info_one("Memory tiers", value, 0);
   snprintf(value, sizeof(value), "%u", hwloc_cpukinds_get_nr(topology, 0));
   hwloc__info_show_topology_info_one("CPU kinds", value, 0);
 }
@@ -901,6 +916,10 @@ main (int argc, char *argv[])
 	only_attr_name = argv[1];
         if (!strcmp(only_attr_name, "info Inclusive")) /* backward compat with v2.x */
           only_attr_name = "attr cache inclusive";
+        else if (!strcmp(only_attr_name, "info MemoryTiersNr")) /* backward compat with v2.x */
+          only_attr_name = "Memory tiers";
+        else if (!strcmp(only_attr_name, "info MemoryTier")) /* backward compat with v2.x */
+          only_attr_name = "memory tier";
 	opt = 1;
       }
       else if (!strcmp (argv[0], "-n"))

@@ -2,8 +2,8 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
   Package L#0 (P#0 total=6090MiB CPUVendor=GenuineIntel CPUFamilyNumber=15 CPUModelNumber=107 CPUModel="QEMU Virtual CPU version 2.5+" CPUStepping=1)
     L3Cache L#0 (P#0 total=6090MiB size=16MiB linesize=64 ways=16)
       Group L#0 (total=3319MiB)
-        NUMANode(DRAM) L#0 (P#0 local=2935MiB total=2935MiB MemoryTier=1)
-        NUMANode(NVM) L#1 (P#8 local=384MiB total=384MiB DAXDevice=dax7.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region7/dax7.1 MemoryTier=2)
+        NUMANode(DRAM) L#0 (P#0 local=2935MiB total=2935MiB memorytier=1)
+        NUMANode(NVM) L#1 (P#8 local=384MiB total=384MiB memorytier=2 DAXDevice=dax7.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region7/dax7.1)
         L2Cache L#0 (P#0 size=4096KiB linesize=64 ways=16)
           L1dCache L#0 (P#0 size=32KiB linesize=64 ways=8)
             L1iCache L#0 (P#0 size=32KiB linesize=64 ways=8)
@@ -16,9 +16,9 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
                 PU L#1 (P#1)
         OSDev[Memory](SPM) L#0 (DAXType=SPM DAXParent=hmem.0 Size=524288KiB LinuxDeviceID=253:0) "dax0.0"
       Group L#1 (total=1875MiB)
-        NUMANode(DRAM) L#2 (P#1 local=979MiB total=979MiB MemoryTier=1)
-        NUMANode(HBM) L#3 (P#4 local=512MiB total=512MiB DAXDevice=dax1.0 DAXType=SPM DAXParent=hmem.1 MemoryTier=0)
-        NUMANode(NVM) L#4 (P#6 local=384MiB total=384MiB DAXDevice=dax5.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region5/dax5.1 MemoryTier=2)
+        NUMANode(DRAM) L#2 (P#1 local=979MiB total=979MiB memorytier=1)
+        NUMANode(HBM) L#3 (P#4 local=512MiB total=512MiB memorytier=0 DAXDevice=dax1.0 DAXType=SPM DAXParent=hmem.1)
+        NUMANode(NVM) L#4 (P#6 local=384MiB total=384MiB memorytier=2 DAXDevice=dax5.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region5/dax5.1)
         L2Cache L#2 (P#2 size=4096KiB linesize=64 ways=16)
           L1dCache L#2 (P#2 size=32KiB linesize=64 ways=8)
             L1iCache L#2 (P#2 size=32KiB linesize=64 ways=8)
@@ -31,8 +31,8 @@ Machine (P#0 total=6090MiB DMIProductName="Standard PC (i440FX + PIIX, 1996)" DM
                 PU L#3 (P#3)
         OSDev[Memory](SPM) L#1 (DAXType=SPM DAXParent=hmem.2 Size=524288KiB LinuxDeviceID=253:2) "dax2.0"
       Group L#2 (total=896MiB)
-        NUMANode(HBM) L#5 (P#2 local=512MiB total=512MiB DAXDevice=dax3.0 DAXType=SPM DAXParent=hmem.3 MemoryTier=0)
-        NUMANode(NVM) L#6 (P#9 local=384MiB total=384MiB DAXDevice=dax8.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region8/dax8.1 MemoryTier=2)
+        NUMANode(HBM) L#5 (P#2 local=512MiB total=512MiB memorytier=0 DAXDevice=dax3.0 DAXType=SPM DAXParent=hmem.3)
+        NUMANode(NVM) L#6 (P#9 local=384MiB total=384MiB memorytier=2 DAXDevice=dax8.0 DAXType=NVM DAXParent=LNXSYSTM:00/LNXSYBUS:00/ACPI0012:00/ndbus0/region8/dax8.1)
         L2Cache L#4 (P#4 size=4096KiB linesize=64 ways=16)
           L1dCache L#4 (P#4 size=32KiB linesize=64 ways=8)
             L1iCache L#4 (P#4 size=32KiB linesize=64 ways=8)
@@ -88,5 +88,8 @@ Memory attribute #5 name `WriteBandwidth' flags 5
   NUMANode L#4 = 100 from cpuset 0x0000000c (Group L#1)
   NUMANode L#1 = 100 from cpuset 0x00000003 (Group L#0)
   NUMANode L#6 = 100 from cpuset 0x00000030 (Group L#2)
-Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.18.0-rc4 OSVersion="#1 SMP PREEMPT_DYNAMIC Tue Apr 26 11:49:51 CEST 2022" HostName=efi Architecture=x86_64 PageSizeNr=2 PageSizes=4096,2097152 MemoryTiersNr=3
+Memory tier #0 kinds 1 nodeset 0x00000014
+Memory tier #1 kinds 2 nodeset 0x00000003
+Memory tier #2 kinds 16 nodeset 0x00000340
+Topology infos: LinuxCgroup=/ Backend=Linux OSName=Linux OSRelease=5.18.0-rc4 OSVersion="#1 SMP PREEMPT_DYNAMIC Tue Apr 26 11:49:51 CEST 2022" HostName=efi Architecture=x86_64 PageSizeNr=2 PageSizes=4096,2097152
 Topology not from this system

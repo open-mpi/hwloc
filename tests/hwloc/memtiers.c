@@ -28,11 +28,8 @@ add_daxtype(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_t node, co
 static int
 get_tier(hwloc_obj_t obj)
 {
-  const char *value = hwloc_obj_get_info_by_name(obj, "MemoryTier");
-  if (value)
-    return atoi(value);
-  else
-    return -1;
+  assert(obj->type == HWLOC_OBJ_NUMANODE);
+  return obj->attr->numanode.memory_tier;
 }
 
 static void
@@ -110,9 +107,12 @@ main(void)
 {
   hwloc_topology_t topology, new;
   hwloc_obj_t root, rootn, pack1n1, pack1n2, pack2n1, pack2n2;
+  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  unsigned long kinds;
   char *xmlbuffer;
   int buflen;
   int err;
+  int nr;
 
   printf("creating topology...\n");
   err = hwloc_topology_init(&topology);
@@ -134,7 +134,9 @@ main(void)
   add_daxtype(topology, pack2n2, "SPM");
 
   printf("checking subtypes and tiers aren't set\n");
-  check_subtypes(topology, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1);
+  check_subtypes(topology, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
+  nr = hwloc_memtiers_get_nr(topology, 0);
+  assert(!nr);
 
   hwloc_topology_export_xmlbuffer(topology, &xmlbuffer, &buflen, 0);
 
@@ -149,6 +151,25 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "NVM", 2, NULL, 0, "SPM", 1, NULL, 0, "SPM", 1);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 3);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking HBM subtypes are set on XML reload if HWLOC_MEMTIERS_GUESS=spm_is_hbm\n");
@@ -161,6 +182,25 @@ main(void)
   assert(!err);
   check_subtypes(new, "NVM", 2, NULL, 0, "HBM", 1, NULL, 0, "HBM", 1);
   printf("UNKNOWN should be before HBM and NVM in tiers since we have no BW\n");
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 3);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking HBM subtypes are set on XML reload if HWLOC_MEMTIERS_GUESS=node0_is_dram,spm_is_hbm\n");
@@ -172,9 +212,27 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "NVM", 2, "DRAM", 1, "HBM", 0, "DRAM", 1, "HBM", 0);
-  printf("DRAM should be before SPM and NVM in tiers since we have no BW\n");
+  printf("HBM should be before DRAM and NVM in tiers even without BW\n");
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 3);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 2);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
-
   free(xmlbuffer);
 
   printf("adding correct BW values\n");
@@ -196,6 +254,25 @@ main(void)
   assert(!err);
   check_subtypes(new, "NVM", 2, "DRAM", 1, "HBM", 0, "DRAM", 1, "HBM", 0);
   printf("HBM should be before DRAM and NVM in tiers since we have BW\n");
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 3);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 2);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking DRAM and HBM subtypes aren't set anymore on XML reload if HWLOC_MEMTIERS_GUESS=none\n");
@@ -208,6 +285,25 @@ main(void)
   assert(!err);
   check_subtypes(new, "NVM", 2, NULL, 1, "SPM", 0, NULL, 1, "SPM", 0);
   printf("SPM should be before UNKNOWN and NVM in tiers since we have BW\n");
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 3);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking that no subtypes and tiers are back on XML reload if disabling memory attributes (which disables tiers too)\n");
@@ -220,7 +316,9 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1);
+  check_subtypes(new, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(!nr);
   hwloc_topology_destroy(new);
 
   printf("breaking BW values\n");
@@ -240,6 +338,33 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "NVM", 4, NULL, 2, "SPM", 1, NULL, 0, "SPM", 3);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 5);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  err = hwloc_memtiers_get_info(new, 3, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 4, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking broken BW can be ignored if HWLOC_MEMTIERS_GUESS=spm_is_hbm\n");
@@ -252,6 +377,33 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "NVM", 4, NULL, 2, "HBM", 1, NULL, 0, "HBM", 3);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 5);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  err = hwloc_memtiers_get_info(new, 3, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 4, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking guessing can be disabled if HWLOC_MEMTIERS_GUESS=none\n");
@@ -264,6 +416,33 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "NVM", 4, NULL, 2, "SPM", 1, NULL, 0, "SPM", 3);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 5);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  err = hwloc_memtiers_get_info(new, 3, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 3));
+  err = hwloc_memtiers_get_info(new, 4, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 16);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 4));
   hwloc_topology_destroy(new);
 
   printf("checking all tier stuff can be disabled if HWLOC_MEMTIERS=none\n");
@@ -274,7 +453,9 @@ main(void)
   assert(!err);
   err = hwloc_topology_load(new);
   assert(!err);
-  check_subtypes(new, NULL, -1, NULL, -1, NULL, -1, NULL, -1, NULL, -1);
+  check_subtypes(new, NULL, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(!nr);
   hwloc_topology_destroy(new);
 
   printf("checking everything can be overwritten with HWLOC_MEMTIERS\n");
@@ -286,6 +467,25 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, "SPM", 1, "HBM", 0, "SPM", 1, "HBM", 0, "DRAM", 2);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 3);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 8);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 4));
+  err = hwloc_memtiers_get_info(new, 2, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 2);
+  assert(hwloc_bitmap_weight(nodeset) == 1);
+  assert(hwloc_bitmap_isset(nodeset, 3));
   hwloc_topology_destroy(new);
 
   printf("checking everything can be overwritten with HWLOC_MEMTIERS with invalid types\n");
@@ -297,11 +497,27 @@ main(void)
   err = hwloc_topology_load(new);
   assert(!err);
   check_subtypes(new, NULL, 0, "HBM", 1, "HBM", 1, NULL, 0, "HBM", 1);
+  nr = hwloc_memtiers_get_nr(new, 0);
+  assert(nr == 2);
+  err = hwloc_memtiers_get_info(new, 0, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 0);
+  assert(hwloc_bitmap_weight(nodeset) == 2);
+  assert(hwloc_bitmap_isset(nodeset, 2));
+  assert(hwloc_bitmap_isset(nodeset, 4));
+  err = hwloc_memtiers_get_info(new, 1, nodeset, &kinds, NULL, 0);
+  assert(!err);
+  assert(kinds == 1);
+  assert(hwloc_bitmap_weight(nodeset) == 3);
+  assert(hwloc_bitmap_isset(nodeset, 0));
+  assert(hwloc_bitmap_isset(nodeset, 1));
+  assert(hwloc_bitmap_isset(nodeset, 3));
   hwloc_topology_destroy(new);
 
   free(xmlbuffer);
 
   hwloc_topology_destroy(topology);
+  hwloc_bitmap_free(nodeset);
   return 0;
 }
 
