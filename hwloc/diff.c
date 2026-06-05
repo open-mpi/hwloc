@@ -436,6 +436,28 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
           }
         }
 
+	if (!err) {
+          /* memtiers */
+          if (topo1->nr_memtiers != topo2->nr_memtiers)
+            goto roottoocomplex;
+          for(i=0; i<topo1->nr_memtiers; i++) {
+            struct hwloc_internal_memtier_s *im1 = &topo1->memtiers[i];
+            struct hwloc_internal_memtier_s *im2 = &topo2->memtiers[i];
+            unsigned j;
+            if (!hwloc_bitmap_isequal(im1->nodeset, im2->nodeset)
+                || im1->kinds != im2->kinds
+                || im1->infos.count != im2->infos.count)
+              goto roottoocomplex;
+            for(j=0; j<im1->infos.count; j++) {
+              struct hwloc_info_s *info1 = &im1->infos.array[j], *info2 = &im2->infos.array[j];
+              if (strcmp(info1->name, info2->name)
+                  || strcmp(info1->value, info2->value)) {
+                goto roottoocomplex;
+              }
+            }
+          }
+        }
+
         if (!err) {
           /* cpukinds */
           if (topo1->nr_cpukinds != topo2->nr_cpukinds)
