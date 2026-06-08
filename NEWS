@@ -97,6 +97,32 @@ for more details.
   + The tool hwloc-dump-hwdata is removed.
 
 
+Version 2.14.0
+--------------
+* Disable the GL component (for graphics OS devices) since it hangs
+  on some platforms.
+  - Set HWLOC_GL=1 in the environment to reenable it.
+* Use ARM MIDR to identify different kinds of CPU core on Linux,
+  instead of the frequency/capacity-based heuristics.
+  Remove NVIDIA-specific forcing of homogeneous cores when their
+  frequency varies slightly.
+  Thanks to Michael Kuron for the help.
+* Use AMD SMI when available, instead of ROCm SMI, in the RSMI backend.
+  --disable-rsmi-amd or HWLOC_RSMI_BACKEND=rocm may be used to switch
+  back to ROCm.
+  - Add hwloc/amdsmi.h for interoperability.
+  - Properly implement the XGMIHops distance matrix when using AMD SMI.
+  Thanks to Edgar Leon for the help.
+* Add CXI OS devices for Cray Slingshot NICs, e.g. cxi0,
+  thanks to Edgar Leon for the suggestion.
+* Add --with-opencl=<dir> configure option.
+* hwloc-info topology now reports the number of levels, PUs,
+  NUMA nodes and CPU kinds.
+* Prevent some possible crashs in the levelzero backend due to
+  uninitialized structures.
+* Many small fixes by Javid Khan, thanks.
+
+
 Version 2.13
 ------------
 * CPU kind improvements
