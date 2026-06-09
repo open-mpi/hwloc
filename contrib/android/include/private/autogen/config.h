@@ -622,7 +622,7 @@
 /* #undef HWLOC_WIN_SYS */
 
 /* Define to 1 on x86_32 */
-/* #undef HWLOC_X86_32_ARCH */
+#define HWLOC_X86_32_ARCH 1
 
 /* Define to 1 on x86_64 */
 #define HWLOC_X86_64_ARCH 1
