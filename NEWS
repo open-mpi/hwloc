@@ -13,6 +13,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.14.1
+--------------
+* Fix missing architecture-specific Linux features on Android platforms,
+  e.g. ARM MIDR-based CPU kind detection.
+
+
 Version 2.14.0
 --------------
 * Disable the GL component (for graphics OS devices) since it hangs

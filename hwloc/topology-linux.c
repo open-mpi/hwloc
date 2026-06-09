@@ -6257,10 +6257,6 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
   }
 
   /* detect arch for quirks, using configure #defines if possible, or uname */
-#if (defined HWLOC_X86_32_ARCH) || (defined HWLOC_X86_64_ARCH) /* does not cover KNC */
-  if (topology->is_thissystem)
-    data->arch = HWLOC_LINUX_ARCH_X86;
-#endif
   if (data->arch == HWLOC_LINUX_ARCH_UNKNOWN && *data->utsname.machine) {
     if (!strcmp(data->utsname.machine, "x86_64")
 	|| (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"))
