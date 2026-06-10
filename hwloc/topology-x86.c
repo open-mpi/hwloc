@@ -1981,35 +1981,12 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   return -1;
 }
 
-static void
-hwloc_x86_backend_disable(struct hwloc_backend *backend)
+static int
+hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  hwloc_bitmap_free(data->apicid_set);
-  free(data->src_cpuiddump_path);
-}
-
-static struct hwloc_backend *
-hwloc_x86_component_instantiate(struct hwloc_topology *topology,
-				struct hwloc_disc_component *component,
-				unsigned excluded_phases __hwloc_attribute_unused,
-				const void *_data1 __hwloc_attribute_unused,
-				const void *_data2 __hwloc_attribute_unused,
-				const void *_data3 __hwloc_attribute_unused)
-{
-  struct hwloc_backend *backend;
-  struct hwloc_x86_backend_data_s *data;
   const char *src_cpuiddump_path;
 
-  backend = hwloc_backend_alloc(topology, component, sizeof(*data));
-  if (!backend)
-    goto out;
-
-  backend->discover = hwloc_x86_discover;
-  backend->disable = hwloc_x86_backend_disable;
-
   /* default values */
-  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   data->vendor = HWLOC_X86_VENDOR_UNKNOWN;
   data->highest_cpuid = 0;
   data->highest_ext_cpuid = 0;
@@ -2018,7 +1995,7 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   data->is_hybrid = 0;
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set)
-    goto out_with_backend;
+    return -1;
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
   data->found_die_ids = 0;
@@ -2031,9 +2008,6 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   if (src_cpuiddump_path) {
     hwloc_bitmap_t set = hwloc_bitmap_alloc();
     if (set && !hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
-
-      HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
-
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
@@ -2042,6 +2016,48 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
     }
     hwloc_bitmap_free(set);
   }
+
+  return 0;
+}
+
+static void
+hwloc_x86_exit(struct hwloc_x86_backend_data_s *data)
+{
+  hwloc_bitmap_free(data->apicid_set);
+  free(data->src_cpuiddump_path);
+}
+
+static void
+hwloc_x86_backend_disable(struct hwloc_backend *backend)
+{
+  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
+  hwloc_x86_exit(data);
+}
+
+static struct hwloc_backend *
+hwloc_x86_component_instantiate(struct hwloc_topology *topology,
+				struct hwloc_disc_component *component,
+				unsigned excluded_phases __hwloc_attribute_unused,
+				const void *_data1 __hwloc_attribute_unused,
+				const void *_data2 __hwloc_attribute_unused,
+				const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  struct hwloc_x86_backend_data_s *data;
+
+  backend = hwloc_backend_alloc(topology, component, sizeof(*data));
+  if (!backend)
+    goto out;
+
+  backend->discover = hwloc_x86_discover;
+  backend->disable = hwloc_x86_backend_disable;
+
+  /* default values */
+  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
+  if (hwloc_x86_setup(data) < 0)
+    goto out_with_backend;
+  if (data->src_cpuiddump_path)
+    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
 
   return backend;
 
