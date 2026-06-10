@@ -35,7 +35,7 @@
 #endif
 
 struct hwloc_x86_backend_data_s {
-  unsigned nbprocs;
+  unsigned nbprocs; /* set during init if src_cpuiddump_path, otherwise during discover */
   hwloc_bitmap_t apicid_set;
   int apicid_unique;
   char *src_cpuiddump_path;
