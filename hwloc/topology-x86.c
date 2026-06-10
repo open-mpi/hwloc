@@ -1842,13 +1842,15 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
     goto out_with_path;
   }
   if (!fgets(line, sizeof(line), file)) {
-    fprintf(stderr, "hwloc/x86: Found read dumped cpuid summary in %s\n", path);
+    fprintf(stderr, "hwloc/x86: Failed to read dumped cpuid summary in %s\n", path);
     fclose(file);
+    errno = EINVAL;
     goto out_with_path;
   }
   fclose(file);
   if (strncmp(line, "Architecture: x86", 17)) {
     fprintf(stderr, "hwloc/x86: Found non-x86 dumped cpuid summary in %s: %s\n", path, line);
+    errno = EINVAL;
     goto out_with_path;
   }
   free(path);
@@ -1869,11 +1871,13 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   if (hwloc_bitmap_iszero(set)) {
     fprintf(stderr, "hwloc/x86: Did not find any valid pu%%u entry in dumped cpuid directory `%s'\n",
 	    src_cpuiddump_path);
+    errno = EINVAL;
     return -1;
   } else if (hwloc_bitmap_last(set) != hwloc_bitmap_weight(set) - 1) {
     /* The x86 backends enforces contigous set of PUs starting at 0 so far */
     fprintf(stderr, "hwloc/x86: Found non-contigous pu%%u range in dumped cpuid directory `%s'\n",
 	    src_cpuiddump_path);
+    errno = EINVAL;
     return -1;
   }
 
@@ -1883,6 +1887,8 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   free(path);
  out_with_dir:
   closedir(dir);
+#else /* HWLOC_WIN_SYS & !__MINGW32__ needs a lot of work */
+  errno = ENOTSUP;
 #endif /* HWLOC_WIN_SYS & !__MINGW32__ needs a lot of work */
   return -1;
 }
@@ -1926,6 +1932,8 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   data->is_knl = 0;
   data->is_hybrid = 0;
   data->apicid_set = hwloc_bitmap_alloc();
+  if (!data->apicid_set)
+    goto out_with_backend;
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
   data->found_die_ids = 0;
@@ -1937,13 +1945,13 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   src_cpuiddump_path = getenv("HWLOC_CPUID_PATH");
   if (src_cpuiddump_path) {
     hwloc_bitmap_t set = hwloc_bitmap_alloc();
-    if (!hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
+    if (!set || !hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
       backend->is_thissystem = 0;
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
     } else {
-      fprintf(stderr, "hwloc/x86: Ignoring dumped cpuid directory.\n");
+      fprintf(stderr, "hwloc/x86: Ignoring dumped cpuid directory (%s).\n", strerror(errno));
     }
     hwloc_bitmap_free(set);
   }
