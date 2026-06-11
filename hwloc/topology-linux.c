@@ -7346,7 +7346,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
     if (root < 0)
       goto out_with_data;
 
-    backend->is_thissystem = 0;
+    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
+
     data->is_real_fsroot = 0;
     data->root_path = strdup(fsroot_path);
 
