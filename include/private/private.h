@@ -277,6 +277,18 @@ struct hwloc_topology {
    * temporary variables during discovery
    */
 
+  /* according to backends, should we disable the THISSYSTEM flag?
+   * will be merged with set_flags() and envvar later to set the final state.
+   * 1 means that we should disable THISSYSTEM (may be cleared by set_flags() or envvar).
+   * 3 means should and was forced by envvar (only cleared by envvar).
+   */
+  int should_disable_thissystem;
+#define HWLOC_SHOULD_DISABLE_THISSYSTEM 1
+#define HWLOC_SHOULD_DISABLE_THISSYSTEM_ENVVAR 3
+#define HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(_topology, _envvar) do { \
+    (_topology)->should_disable_thissystem |= ((_envvar) ? HWLOC_SHOULD_DISABLE_THISSYSTEM_ENVVAR : HWLOC_SHOULD_DISABLE_THISSYSTEM); \
+} while (0)
+
   /* set to 1 at the beginning of load() if the filter of any cpu cache type (L1 to L3i) is not NONE,
    * may be checked by backends before querying caches
    * (when they don't know the level of caches they are querying).

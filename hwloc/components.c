@@ -1075,7 +1075,6 @@ hwloc_backend_alloc(struct hwloc_topology *topology,
   backend->discover = NULL;
   backend->get_pci_busid_cpuset = NULL;
   backend->disable = NULL;
-  backend->is_thissystem = -1;
   backend->next = NULL;
   backend->envvar_forced = 0;
   return backend;
@@ -1131,57 +1130,6 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   topology->backend_phases |= backend->component->phases;
   topology->backend_excluded_phases |= backend->component->excluded_phases;
   return 0;
-}
-
-void
-hwloc_backends_is_thissystem(struct hwloc_topology *topology)
-{
-  struct hwloc_backend *backend;
-  const char *local_env;
-  int is_thissystem;
-
-  /*
-   * If the application changed the backend with set_foo(),
-   * it may use set_flags() update the is_thissystem flag here.
-   * If it changes the backend with environment variables below,
-   * it may use HWLOC_THISSYSTEM envvar below as well.
-   */
-
-  is_thissystem = 1;
-
-  /* apply thissystem from normally-given backends (envvar_forced=0, either set_foo() or defaults) */
-  backend = topology->backends;
-  while (backend != NULL) {
-    if (backend->envvar_forced == 0 && backend->is_thissystem != -1) {
-      assert(backend->is_thissystem == 0);
-      is_thissystem = 0;
-    }
-    backend = backend->next;
-  }
-
-  /* override set_foo() with flags */
-  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
-    is_thissystem = 1;
-
-  /* now apply envvar-forced backend (envvar_forced=1) */
-  backend = topology->backends;
-  while (backend != NULL) {
-    if (backend->envvar_forced == 1 && backend->is_thissystem != -1) {
-      assert(backend->is_thissystem == 0);
-      is_thissystem = 0;
-    }
-    backend = backend->next;
-  }
-
-  /* override with envvar-given flag */
-  local_env = getenv("HWLOC_THISSYSTEM");
-  if (local_env)
-    is_thissystem = atoi(local_env);
-
-  if (is_thissystem)
-    topology->state |= HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
-  else
-    topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
 }
 
 void

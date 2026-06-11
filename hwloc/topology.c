@@ -3847,6 +3847,8 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->userdata_import_cb = NULL;
   topology->userdata_not_decoded = 0;
 
+  topology->should_disable_thissystem = 0;
+
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
 
@@ -4146,6 +4148,33 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   free(topology);
 }
 
+static void
+hwloc_decide_is_thissystem(struct hwloc_topology *topology)
+{
+  const char *local_env;
+
+  /*
+   * If the application changed the backend with set_foo(),
+   * it may use set_flags() update the is_thissystem flag here.
+   * If it changes the backend with environment variables below,
+   * it may use HWLOC_THISSYSTEM envvar below as well.
+   */
+
+  /* override set_foo() with flags */
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+    topology->should_disable_thissystem &= ~HWLOC_SHOULD_DISABLE_THISSYSTEM;
+
+  /* override with envvar-given flag */
+  local_env = getenv("HWLOC_THISSYSTEM");
+  if (local_env && atoi(local_env))
+    topology->should_disable_thissystem &= ~HWLOC_SHOULD_DISABLE_THISSYSTEM_ENVVAR;
+
+  if (topology->should_disable_thissystem)
+    topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
+  else
+    topology->state |= HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
+}
+
 int
 hwloc_topology_load (struct hwloc_topology *topology)
 {
@@ -4232,7 +4261,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* instantiate all possible other backends now */
   hwloc_disc_components_enable_others(topology);
   /* now that backends are enabled, update the thissystem flag and some callbacks */
-  hwloc_backends_is_thissystem(topology);
+  hwloc_decide_is_thissystem(topology);
   hwloc_backends_find_callbacks(topology);
   /*
    * Now set binding hooks according to HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM in topology->state
