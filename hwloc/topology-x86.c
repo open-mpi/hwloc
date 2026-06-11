@@ -2031,7 +2031,9 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   if (src_cpuiddump_path) {
     hwloc_bitmap_t set = hwloc_bitmap_alloc();
     if (set && !hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
-      backend->is_thissystem = 0;
+
+      HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
+
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
