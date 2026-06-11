@@ -966,7 +966,7 @@ hwloc_distrib(hwloc_topology_t topology,
 {
   unsigned i;
   unsigned tot_weight;
-  unsigned given, givenweight;
+  unsigned given __hwloc_attribute_unused, givenweight;
   hwloc_cpuset_t *cpusetp = set;
 
   if (!n || (flags & ~HWLOC_DISTRIB_FLAG_REVERSE)) {
