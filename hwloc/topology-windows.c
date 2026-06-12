@@ -988,13 +988,14 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   int has_efficiencyclass = 0;
   struct hwloc_win_efficiency_classes eclasses;
   char *env = getenv("HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS");
+  int already_cpus = 0;
   int keep_pgroup_objs = (env && atoi(env));
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->levels[0][0]->cpuset)
-    /* somebody discovered things */
-    return -1;
+    /* somebody discovered things, only detect NUMA nodes and Windows-specific things */
+    already_cpus = 1;
 
   ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
@@ -1129,12 +1130,16 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	       */
 	      hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, set);
 
-	      /* save the set of PUs so that we can create them at the end */
-	      if (!groups_pu_set)
-		groups_pu_set = hwloc_bitmap_alloc();
-	      hwloc_bitmap_or(groups_pu_set, groups_pu_set, set);
+              if (!already_cpus) {
+                /* save the set of PUs so that we can create them at the end */
+                if (!groups_pu_set)
+                  groups_pu_set = hwloc_bitmap_alloc();
+                hwloc_bitmap_or(groups_pu_set, groups_pu_set, set);
+              }
 
-              /* Ignore processor groups unless requested and filtered-in */
+              /* Ignore processor groups unless requested and filtered-in.
+               * Don't ignore them if already_cpus since it's a Windows-specific group.
+               */
               if (keep_pgroup_objs && hwloc_filter_check_keep_object_type(topology, HWLOC_OBJ_GROUP)) {
 		obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_GROUP, id);
 		obj->cpuset = set;
@@ -1150,7 +1155,13 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	    continue;
 	}
 
-	if (!hwloc_filter_check_keep_object_type(topology, type))
+        /* only keep non CPU objects.
+         * processor Groups were added above.
+         */
+	if (hwloc_obj_type_is_normal(type) && already_cpus)
+          continue;
+
+        if (!hwloc_filter_check_keep_object_type(topology, type))
 	  continue;
 
 	obj = hwloc_alloc_setup_object(topology, type, id);
