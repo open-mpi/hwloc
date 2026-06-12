@@ -1231,13 +1231,14 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
           case HWLOC_OBJ_GROUP:
             switch (procInfo->Relationship) {
             case RelationGroup:
-              obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_PROCESSOR_GROUP;
+              assert(0); /* handled above */
               break;
             case RelationProcessorModule:
               obj->attr->group.kind = HWLOC_GROUP_KIND_INTEL_MODULE;
               obj->subtype = strdup("Module");
               break;
             default:
+              /* not supposed to occur right now */
               obj->attr->group.kind = HWLOC_GROUP_KIND_WINDOWS_RELATIONSHIP_UNKNOWN;
             }
             break;
