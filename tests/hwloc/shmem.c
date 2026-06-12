@@ -80,7 +80,11 @@ static int adopt(int fd, unsigned long fileoffset, unsigned long mmap_address, u
   err = hwloc_topology_export_xmlbuffer(adopted, &xmlbuf, &xmlbuflen, 0);
   assert(!err);
   printf(" XML export %d bytes\n", xmlbuflen);
-  assert((unsigned long) xmlbuflen < fileoffset);
+  /* xmlbuflen includes the ending \0. that \0 is not in the exported file
+   * but it gets added when ftruncate pads the file before exporting the shmem
+   */
+  assert((unsigned long) xmlbuflen < fileoffset); /* '<' instead of '<=' because we page-aligned st_size+2 in the caller.
+                                                   * xmlbuflen is st_size+1, hence fileoffset is one byte or even pages larger */
   assert(!memcmp(origxmlbuf, xmlbuf, xmlbuflen));
   hwloc_free_xmlbuffer(adopted, xmlbuf);
   printf(" XML export is identical to original\n");
@@ -156,7 +160,13 @@ static int test(hwloc_topology_t orig, const char *callname) {
   err = stat(tmpname, &st);
   assert(!err);
   printf("exported %lu bytes\n", (unsigned long) st.st_size);
-  fileoffset = st.st_size+1; /* skip a couple bytes to make sure the XML is don" */
+  fileoffset = st.st_size+2; /* skip a couple bytes to make sure we don't overlap with the XML.
+                              * +1 would actually be enough (see #802), we'd have at least one \0 byte
+                              * of padding from ftruncate before the shmem export.
+                              * this \0 is necessary because it is in the export xml buffer,
+                              * and memcmp goes up to that \0 below.
+                              * use +2 so we're sure that xml-ending \0 and the shmem export don't even touch each other.
+                              */
   fileoffset = (fileoffset + hwloc_getpagesize() - 1) &~(hwloc_getpagesize() - 1);
   printf("will mmap at file offset %lu\n", fileoffset);
 
