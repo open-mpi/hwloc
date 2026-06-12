@@ -376,7 +376,7 @@ hwloc_calc_parse_range(const char *_string,
   memcpy(string, _string, len);
   string[len] = '\0';
 
-  if (!isdigit(*string)) {
+  if (!isdigit((unsigned char)*string)) {
     if (!strncmp(string, "all", 3)) {
       *firstp = 0;
       *amountp = -1;

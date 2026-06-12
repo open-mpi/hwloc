@@ -712,7 +712,7 @@ hwloc_utils_parse_flags(char * str, struct hwloc_utils_parsing_flag possible_fla
     return ul_flag;
 
   for(j=0; str[j]; j++)
-    str[j] = toupper(str[j]);
+    str[j] = toupper((unsigned char)str[j]);
 
   if(strcmp(str, "NONE") == 0)
     return 0;
