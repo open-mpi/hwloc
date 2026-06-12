@@ -375,16 +375,23 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
 
   /* 0x20 = Processor History Reset on Intel ; Reserved on AMD */
   if (highest_cpuid >= 0x20) {
+    unsigned max;
     regs[0] = 0x20; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
-    /* eax is number of subleaves but subleaves aren't documented?! */
+    max = regs[0];
+    for(i=1; i<max; i++) {
+      regs[0] = 0x20; regs[2] = i;
+      dump_one_cpuid(output, regs, 0x5);
+    }
   }
 
-  /* 0x21 = Reserved */
+  /* 0x21 = Unimplemented on Intel (Allocated for use by TDX modules) ; Reserved on AMD */
+#if 0
   if (highest_cpuid >= 0x21) {
     regs[0] = 0x21; regs[2] = 0;
     dump_one_cpuid(output, regs, 0x5);
   }
+#endif
 
   /* 0x22 = Reserved */
   if (highest_cpuid >= 0x22) {
@@ -417,7 +424,37 @@ static int dump_one_proc(hwloc_topology_t topo, hwloc_obj_t pu, const char *path
     }
   }
 
-  if (highest_cpuid > 0x25) {
+  /* 0x25 = Not documented */
+
+  /* 0x26 = Not documented */
+
+  /* 0x27 = Resource Director Technology Asymmetric Monitoring on Intel ; Reserved on AMD */
+  if (highest_cpuid >= 0x27) {
+    unsigned subleafmask;
+    regs[0] = 0x27; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+    subleafmask = regs[3];
+    for(i=1; i<32; i++)
+      if ((1U<<i) & subleafmask) {
+        regs[0] = 0x27; regs[2] = i;
+        dump_one_cpuid(output, regs, 0x5);
+      }
+  }
+
+  /* 0x28 = Resource Director Technology Asymmetric Allocation on Intel ; Reserved on AMD */
+  if (highest_cpuid >= 0x28) {
+    unsigned subleafmask;
+    regs[0] = 0x28; regs[2] = 0;
+    dump_one_cpuid(output, regs, 0x5);
+    subleafmask = regs[1];
+    for(i=1; i<32; i++)
+      if ((1U<<i) & subleafmask) {
+        regs[0] = 0x28; regs[2] = i;
+        dump_one_cpuid(output, regs, 0x5);
+      }
+  }
+
+  if (highest_cpuid > 0x28) {
     static int reported = 0;
     if (!reported)
       fprintf(stderr, "WARNING: Processor supports new CPUID leaves upto 0x%x\n", highest_cpuid);
