@@ -371,7 +371,7 @@ static __hwloc_inline int hwloc_strncasecmp(const char *s1, const char *s2, size
   return strncasecmp(s1, s2, n);
 #else
   while (n) {
-    char c1 = tolower(*s1), c2 = tolower(*s2);
+    char c1 = tolower((unsigned char)*s1), c2 = tolower((unsigned char)*s2);
     if (!c1 || !c2 || c1 != c2)
       return c1-c2;
     n--; s1++; s2++;
