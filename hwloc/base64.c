@@ -195,13 +195,14 @@ int
 hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 {
 	unsigned int tarindex, state;
+	u_char nextbyte;
 	int ch;
 	char *pos;
 
 	state = 0;
 	tarindex = 0;
 
-	while ((ch = *src++) != '\0') {
+	while ((ch = (unsigned char)*src++) != '\0') {
 		if (isspace(ch))	/* Skip whitespace anywhere. */
 			continue;
 
@@ -223,22 +224,28 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 			break;
 		case 1:
 			if (target) {
-				if (tarindex + 1 >= targsize)
+				if (tarindex >= targsize)
 					return (-1);
 				target[tarindex]   |=  (pos - Base64) >> 4;
-				target[tarindex+1]  = ((pos - Base64) & 0x0f)
-							<< 4 ;
+				nextbyte = ((pos - Base64) & 0x0f) << 4;
+				if (tarindex + 1 < targsize)
+					target[tarindex+1] = nextbyte;
+				else if (nextbyte)
+					return (-1);
 			}
 			tarindex++;
 			state = 2;
 			break;
 		case 2:
 			if (target) {
-				if (tarindex + 1 >= targsize)
+				if (tarindex >= targsize)
 					return (-1);
 				target[tarindex]   |=  (pos - Base64) >> 2;
-				target[tarindex+1]  = ((pos - Base64) & 0x03)
-							<< 6;
+				nextbyte = ((pos - Base64) & 0x03) << 6;
+				if (tarindex + 1 < targsize)
+					target[tarindex+1] = nextbyte;
+				else if (nextbyte)
+					return (-1);
 			}
 			tarindex++;
 			state = 3;
@@ -260,8 +267,8 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 	 * on a byte boundary, and/or with erroneous trailing characters.
 	 */
 
-	if (ch == Pad64) {		/* We got a pad char. */
-		ch = *src++;		/* Skip it, get next. */
+	if (ch == Pad64) {			/* We got a pad char. */
+		ch = (unsigned char)*src++;	/* Skip it, get next. */
 		switch (state) {
 		case 0:		/* Invalid = in first position */
 		case 1:		/* Invalid = in second position */
@@ -269,13 +276,13 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 
 		case 2:		/* Valid, means one byte of info */
 			/* Skip any number of spaces. */
-			for (; ch != '\0'; ch = *src++)
+			for (; ch != '\0'; ch = (unsigned char)*src++)
 				if (!isspace(ch))
 					break;
 			/* Make sure there is another trailing = sign. */
 			if (ch != Pad64)
 				return (-1);
-			ch = *src++;		/* Skip the = */
+			ch = (unsigned char)*src++;		/* Skip the = */
 			/* Fall through to "single trailing =" case. */
 			/* FALLTHROUGH */
 
@@ -284,7 +291,7 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 			 * We know this char is an =.  Is there anything but
 			 * whitespace after it?
 			 */
-			for (; ch != '\0'; ch = *src++)
+			for (; ch != '\0'; ch = (unsigned char)*src++)
 				if (!isspace(ch))
 					return (-1);
 
@@ -294,7 +301,8 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 			 * zeros.  If we don't check them, they become a
 			 * subliminal channel.
 			 */
-			if (target && target[tarindex] != 0)
+			if (target && tarindex < targsize &&
+			    target[tarindex] != 0)
 				return (-1);
 		}
 	} else {
