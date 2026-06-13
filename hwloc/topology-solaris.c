@@ -995,16 +995,15 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
-    return -1;
-
-  hwloc_alloc_root_sets(topology->levels[0][0]);
-
-#ifdef HAVE_LIBLGRP
-  hwloc_look_lgrp(topology, dstatus);
-#endif /* HAVE_LIBLGRP */
-#ifdef HAVE_LIBKSTAT
-  if (hwloc_look_kstat(topology) > 0)
     alreadypus = 1;
+  else
+    hwloc_alloc_root_sets(topology->levels[0][0]);
+
+#ifdef HAVE_LIBKSTAT
+  if (!alreadypus)
+    /* look_kstat() could still add Solaris-specific groups but it's not easy to implement */
+    if (hwloc_look_kstat(topology) > 0)
+      alreadypus = 1;
 #endif /* HAVE_LIBKSTAT */
 
   if (!alreadypus) {
@@ -1015,6 +1014,10 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       nbprocs = 1;
     hwloc_setup_pu_level(topology, nbprocs);
   }
+
+#ifdef HAVE_LIBLGRP
+  hwloc_look_lgrp(topology, dstatus);
+#endif /* HAVE_LIBLGRP */
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Solaris");
   hwloc_add_uname_info(topology, NULL);
