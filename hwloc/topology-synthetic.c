@@ -826,13 +826,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     /* insert a NUMA level below the automatic machine root */
     if (show_errors)
       fprintf(stderr, "hwloc/synthetic: Inserting a NUMA level with a single object at depth 1\n");
-    /* move existing levels by one.
-     * Only levels [1..count-1] need shifting to [2..count] (the level[0] machine
-     * root stays in place), i.e. count-1 elements. Using "count" here copied one
-     * extra (uninitialized) element and, when count reached its maximum of
-     * HWLOC_SYNTHETIC_MAX_DEPTH-1, wrote one struct past the end of the fixed-size
-     * data->level[] array (a heap buffer overflow reachable from an untrusted
-     * HWLOC_SYNTHETIC string / hwloc_topology_set_synthetic() input). */
+    /* move existing levels by one (count includes the root level which we are not memmov'ing) */
     memmove(&data->level[2], &data->level[1], (count-1)*sizeof(struct hwloc_synthetic_level_data_s));
     data->level[1].attr.type = HWLOC_OBJ_NUMANODE;
     data->level[1].indexes.string = NULL;
