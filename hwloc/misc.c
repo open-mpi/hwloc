@@ -139,6 +139,7 @@ void hwloc_fallback_add_pagesize_info(struct hwloc_topology *topology __hwloc_at
   }
   if (err < 0)
     return;
+  /* no need to replace, we checked above if "PageSizes" exists */
   hwloc__add_info(&topology->infos, "PageSizeNr", nrs);
   hwloc__add_info(&topology->infos, "PageSizes", buffer);
 #endif /* hwloc_getpagesize */
@@ -181,8 +182,8 @@ int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology,
 
   if (current != buffer) {
     snprintf(nrs, sizeof(nrs), "%u", nr);
-    hwloc__add_info(&topology->infos, "PageSizeNr", nrs);
-    hwloc__add_info(&topology->infos, "PageSizes", buffer);
+    hwloc__replace_infos(&topology->infos, "PageSizeNr", nrs);
+    hwloc__replace_infos(&topology->infos, "PageSizes", buffer);
   }
 
   free(buffer);
