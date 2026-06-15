@@ -1033,7 +1033,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	if (GetLogicalProcessorInformationExProc(RelationAll, procInfoTotal, &length))
 	  break;
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-	  return -1;
+          goto out;
         tmpprocInfoTotal = realloc(procInfoTotal, length);
 	if (!tmpprocInfoTotal) {
 	  free(procInfoTotal);
