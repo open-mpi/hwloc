@@ -3591,12 +3591,24 @@ hwloc_discover(struct hwloc_topology *topology,
     memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
   }
 
-  hwloc_debug("%s", "\nFixup root sets\n");
+  hwloc_debug("%s", "\nCurrent root sets\n");
+  hwloc_debug_bitmap("           cpuset = %s\n", topology->levels[0][0]->cpuset);
+  hwloc_debug_bitmap("  complete cpuset = %s\n", topology->levels[0][0]->complete_cpuset);
+  hwloc_debug_bitmap("   allowed cpuset = %s\n", topology->allowed_cpuset);
+  hwloc_debug_bitmap("           nodeset = %s\n", topology->levels[0][0]->nodeset);
+  hwloc_debug_bitmap("  complete nodeset = %s\n", topology->levels[0][0]->complete_nodeset);
+  hwloc_debug_bitmap("   allowed nodeset = %s\n", topology->allowed_nodeset);
+  hwloc_debug("%s", "After fixup\n");
   hwloc_bitmap_and(topology->levels[0][0]->cpuset, topology->levels[0][0]->cpuset, topology->levels[0][0]->complete_cpuset);
   hwloc_bitmap_and(topology->levels[0][0]->nodeset, topology->levels[0][0]->nodeset, topology->levels[0][0]->complete_nodeset);
-
   hwloc_bitmap_and(topology->allowed_cpuset, topology->allowed_cpuset, topology->levels[0][0]->cpuset);
   hwloc_bitmap_and(topology->allowed_nodeset, topology->allowed_nodeset, topology->levels[0][0]->nodeset);
+  hwloc_debug_bitmap("           cpuset = %s\n", topology->levels[0][0]->cpuset);
+  hwloc_debug_bitmap("  complete cpuset = %s\n", topology->levels[0][0]->complete_cpuset);
+  hwloc_debug_bitmap("   allowed cpuset = %s\n", topology->allowed_cpuset);
+  hwloc_debug_bitmap("           nodeset = %s\n", topology->levels[0][0]->nodeset);
+  hwloc_debug_bitmap("  complete nodeset = %s\n", topology->levels[0][0]->complete_nodeset);
+  hwloc_debug_bitmap("   allowed nodeset = %s\n", topology->allowed_nodeset);
 
   hwloc_debug("%s", "\nPropagate sets\n");
   /* cpuset are already there thanks to the _by_cpuset insertion,
@@ -3612,6 +3624,18 @@ hwloc_discover(struct hwloc_topology *topology,
     hwloc_debug("%s", "\nRemoving unauthorized sets from all sets\n");
     remove_unused_sets(topology, topology->levels[0][0]);
     hwloc_debug_print_objects(0, topology->levels[0][0]);
+    if (hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE)) {
+        fprintf(stderr, "hwloc: Topology has no allowed PU, aborting!\n");
+      }
+      return -1;
+    }
+    if (hwloc_bitmap_iszero(topology->levels[0][0]->nodeset)) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_CORE)) {
+        fprintf(stderr, "hwloc: Topology has no allowed NUMA node, aborting!\n");
+      }
+      return -1;
+    }
   }
 
   /*
