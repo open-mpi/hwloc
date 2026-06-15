@@ -473,7 +473,7 @@ lgrp_build_numanodes(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstatus)
+hwloc_look_lgrp(struct hwloc_topology *topology)
 {
   lgrp_cookie_t cookie;
   unsigned curlgrp = 0;
@@ -481,11 +481,6 @@ hwloc_look_lgrp(struct hwloc_topology *topology, struct hwloc_disc_status *dstat
   lgrp_id_t root;
   const char *env = getenv("HWLOC_USE_NUMA_DISTANCES");
   int need_distances = env && atoi(env);
-
-  if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
-    lgrp_list_allowed(topology);
-    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
-  }
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES)
     need_distances = 0;
@@ -1038,7 +1033,14 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
 #ifdef HAVE_LIBLGRP
-  hwloc_look_lgrp(topology, dstatus);
+  hwloc_look_lgrp(topology);
+#endif /* HAVE_LIBLGRP */
+
+#ifdef HAVE_LIBLGRP
+  if (!(dstatus->flags & HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES)) {
+    lgrp_list_allowed(topology);
+    dstatus->flags |= HWLOC_DISC_STATUS_FLAG_GOT_ALLOWED_RESOURCES;
+  }
 #endif /* HAVE_LIBLGRP */
 
   hwloc__add_info(&topology->infos, "Backend", "Solaris");
