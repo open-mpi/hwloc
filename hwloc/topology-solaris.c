@@ -996,15 +996,15 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     alreadypus = 1;
-  else
-    hwloc_alloc_root_sets(topology->levels[0][0]);
 
+  if (!alreadypus) {
+    hwloc_alloc_root_sets(topology->levels[0][0]);
 #ifdef HAVE_LIBKSTAT
-  if (!alreadypus)
     /* look_kstat() could still add Solaris-specific groups but it's not easy to implement */
     if (hwloc_look_kstat(topology) > 0)
       alreadypus = 1;
 #endif /* HAVE_LIBKSTAT */
+  }
 
   if (!alreadypus) {
     int nbprocs = hwloc_fallback_nbprocessors(0);
