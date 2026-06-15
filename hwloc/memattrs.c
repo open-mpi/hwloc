@@ -2098,6 +2098,12 @@ hwloc_internal_memtiers_dup(hwloc_topology_t new, hwloc_topology_t old)
       new->nr_memtiers = i;
       goto failed;
     }
+    if (hwloc__tma_dup_infos(tma, &tiers[i].infos, &old->memtiers[i].infos) < 0) {
+      assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
+      hwloc_bitmap_free(tiers[i].nodeset);
+      new->nr_memtiers = i;
+      goto failed;
+    }
   }
 
   return 0;
@@ -2117,6 +2123,7 @@ hwloc_internal_memtiers_restrict(struct hwloc_topology *topology)
     hwloc_bitmap_and(tier->nodeset, tier->nodeset, hwloc_get_root_obj(topology)->nodeset);
     if (hwloc_bitmap_iszero(tier->nodeset)) {
       hwloc_bitmap_free(tier->nodeset);
+      hwloc__free_infos(&tier->infos);
       memmove(tier, tier+1, (topology->nr_memtiers - i - 1)*sizeof(*tier));
       i--;
       topology->nr_memtiers--;
@@ -2134,8 +2141,10 @@ void
 hwloc_internal_memtiers_destroy(struct hwloc_topology *topology)
 {
   unsigned i;
-  for(i=0; i<topology->nr_memtiers; i++)
+  for(i=0; i<topology->nr_memtiers; i++) {
     hwloc_bitmap_free(topology->memtiers[i].nodeset);
+    hwloc__free_infos(&topology->memtiers[i].infos);
+  }
   free(topology->memtiers);
 }
 
