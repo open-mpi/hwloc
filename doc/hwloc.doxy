@@ -3390,7 +3390,7 @@ may also improve the topology detection.
 Finally, some hardware-specific components (such as <tt>cuda</tt> or <tt>rsmi</tt>)
 may add information about GPUs, accelerators, etc.
 
-If a XML topology is loaded, the <tt>xml</tt> discovery  component
+If a XML topology is loaded, the <tt>xml</tt> discovery component
 will be used instead of all other components.
 
 
@@ -3401,23 +3401,24 @@ Each one is enabled as long as it does not conflict with the
 previously enabled ones.
 This includes native operating system components,
 architecture-specific ones, and if available, I/O components
-such as <tt>pci</tt>.
+such as <tt>pci</tt> or <tt>cuda</tt>.
 
 Usually the native operating system component
 (when it exists, e.g. <tt>linux</tt> or <tt>aix</tt>)
 is enabled first.
 Then hwloc looks for an architecture specific component
 (e.g. <tt>x86</tt>).
-Finally there also exist a basic component (<tt>no_os</tt>)
+As a fallback, there is also a basic component (<tt>no_os</tt>)
 that just tries to discover the number of PUs in the system.
+It is used for operating systems that do not
+provide topology query APIs (e.g. NetBSD).
 
 Each component discovers as much topology information as possible.
-Most of them, including most native OS components, do nothing
-unless the topology is still empty.
-Some others, such as <tt>x86</tt> and <tt>pci</tt>,
-can complete and annotate what other backends found earlier.
+If the topology already contains objects (discovered by previous components),
+it will either disable itself, try to add missing objects,
+or annotate existing ones with missing information.
 Discovery is performed by phases: CPUs are first discovered,
-then memory is attached, then PCI, etc.
+PCI and I/O devices are added later, etc.
 
 Default priorities ensure that clever components are invoked first.
 Native operating system components have higher priorities,
@@ -3461,7 +3462,7 @@ If the variable is set and empty (or set to a single comma separating nothing,
 since some operating systems do not accept empty variables),
 the normal component priority order is used.
 
-If the variable is set to <tt>x86</tt> in this variable will cause
+If the variable is set to <tt>x86</tt>, it will cause
 the <tt>x86</tt> component to take precedence over any other component,
 including the native operating system component.
 It is therefore loaded first, before hwloc tries to load all remaining
@@ -3479,6 +3480,8 @@ A single component phase may also be blacklisted, for instance with <tt>-linux:i
 It is possible to prevent all remaining components from being loaded
 by placing <tt>stop</tt> in the environment variable.
 Only the components listed before this keyword will be enabled.
+For instance setting to <tt>linux,stop</tt> would prevent load the Linux
+component and no other one.
 
 hwloc_topology_set_components() may also be used inside the program
 to prevent the loading of a specific component (or phases) for the target topology.
