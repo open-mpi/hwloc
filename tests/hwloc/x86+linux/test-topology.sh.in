@@ -78,7 +78,8 @@ else
 fi
 
 # set HWLOC_COMPONENTS here so that tests may change the order in the .env below
-export HWLOC_COMPONENTS=x86,linux,stop
+export HWLOC_COMPONENTS=linux,stop
+export HWLOC_USE_X86=first
 
 . "$dir/env"
 

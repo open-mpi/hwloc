@@ -1677,15 +1677,11 @@ out:
 }
 
 static int
-hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_x86_discover(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  struct hwloc_topology *topology = backend->topology;
   unsigned long flags = 0;
   int alreadypus = 0;
   int ret;
-
-  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING) {
     /* TODO: Things would work if there's a single PU, no need to rebind */
@@ -1874,60 +1870,38 @@ hwloc_x86_exit(struct hwloc_x86_backend_data_s *data)
   free(data->src_cpuiddump_path);
 }
 
-static void
-hwloc_x86_backend_disable(struct hwloc_backend *backend)
+int
+hwloc_x86_discover_all(hwloc_topology_t topology)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  hwloc_x86_exit(data);
-}
-
-static struct hwloc_backend *
-hwloc_x86_component_instantiate(struct hwloc_topology *topology,
-				struct hwloc_disc_component *component,
-				unsigned excluded_phases __hwloc_attribute_unused,
-				const void *_data1 __hwloc_attribute_unused,
-				const void *_data2 __hwloc_attribute_unused,
-				const void *_data3 __hwloc_attribute_unused)
-{
-  struct hwloc_backend *backend;
   struct hwloc_x86_backend_data_s *data;
 
-  backend = hwloc_backend_alloc(topology, component, sizeof(*data));
-  if (!backend)
-    goto out;
+  assert(topology->use_x86_mode != HWLOC_USE_X86_NONE);
+  assert(topology->use_x86_mode != HWLOC_USE_X86_DONE);
 
-  backend->discover = hwloc_x86_discover;
-  backend->disable = hwloc_x86_backend_disable;
+  data = malloc(sizeof(*data));
+  if (!data)
+    return -1;
+
+  if (hwloc_x86_init(data) < 0) {
+    free(data);
+    return -1;
+  }
 
   /* default values */
-  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   if (hwloc_x86_init(data) < 0)
-    goto out_with_backend;
+    goto out_with_data;
   if (data->src_cpuiddump_path)
-    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
+    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, 1 /* forced cpuid is always by envvar */);
 
-  return backend;
+  hwloc_x86_discover(topology, data);
 
- out_with_backend:
-  free(backend);
- out:
-  return NULL;
+  hwloc_x86_exit(data);
+  free(data);
+
+  topology->use_x86_mode = HWLOC_USE_X86_DONE;
+  return 0;
+
+ out_with_data:
+  free(data);
+  return -1;
 }
-
-static struct hwloc_disc_component hwloc_x86_disc_component = {
-  "x86",
-  HWLOC_DISC_PHASE_CPU,
-  HWLOC_DISC_PHASE_GLOBAL,
-  hwloc_x86_component_instantiate,
-  45, /* between native and no_os */
-  1,
-  NULL
-};
-
-const struct hwloc_component hwloc_x86_component = {
-  HWLOC_COMPONENT_ABI,
-  NULL, NULL,
-  HWLOC_COMPONENT_TYPE_DISC,
-  0,
-  &hwloc_x86_disc_component
-};

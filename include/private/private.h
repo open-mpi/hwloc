@@ -54,6 +54,16 @@ struct hwloc_internal_location_s {
   } location;
 };
 
+enum hwloc_use_x86_mode_e {
+  HWLOC_USE_X86_DEFAULT = 0, /* default set during init */
+  HWLOC_USE_X86_NONE = 1, /* disabled entirely */
+  HWLOC_USE_X86_FIRST = 2, /* run first in the backend */
+  HWLOC_USE_X86_ONLY = 3, /* run first and stops */
+  HWLOC_USE_X86_LAST = 4, /* run last */
+  HWLOC_USE_X86_CUSTOM = 5, /* specific to the backend */
+  HWLOC_USE_X86_DONE = 6, /* already performed */
+};
+
 /*****************************************************
  * WARNING:
  * changes below in this structure (and its children)
@@ -295,6 +305,10 @@ struct hwloc_topology {
    */
   int want_some_cpu_caches;
 
+  /* how to use the x86 cpuid code in OS backends */
+  enum hwloc_use_x86_mode_e use_x86_mode;
+  const char *use_x86_env;
+
   /* machine-wide memory.
    * temporarily stored there by OSes that only provide this without NUMA information,
    * and actually used later by the core.
@@ -362,6 +376,13 @@ static __hwloc_inline void hwloc__init_infos_static(struct hwloc_infos_s *infos,
   infos->count = count;
   infos->allocated = 0; /* means we won't free */
 }
+
+/* x86 usage in OS backends */
+#ifdef HWLOC_HAVE_X86_CPUID
+extern int hwloc_x86_discover_all(hwloc_topology_t topology);
+#else
+static __hwloc_inline int hwloc_x86_discover_all(hwloc_topology_t topology __hwloc_attribute_unused) { return 0; }
+#endif
 
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);

@@ -2228,6 +2228,9 @@ enum hwloc_topology_components_flag_e {
  * For instance, CUDA-specific discovery may be expensive and unneeded
  * while generic I/O discovery could still be useful.
  *
+ * The x86 CPUID-based discovery (used in some operating system component)
+ * may also be disabled by passing "x86" to this function.
+ *
  * \return 0 on success.
  * \return -1 on error, for instance if flags are invalid.
  */
@@ -2349,7 +2352,7 @@ enum hwloc_topology_flags_e {
    * would generate, but this flag also prevents hwloc from ever touching other
    * resources during the discovery.
    *
-   * This flag especially tells the x86 backend to never temporarily
+   * This flag especially tells the x86 CPUID detection to never temporarily
    * rebind a thread on any excluded core. This is useful on Windows
    * because such temporary rebinding can change the process binding.
    * Another use-case is to avoid cores that would not be able to

@@ -7257,7 +7257,17 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
-    hwloc_linuxfs_look_cpu(topology, data, dstatus);
+    enum hwloc_use_x86_mode_e x86_mode = topology->use_x86_mode;
+    if (x86_mode == HWLOC_USE_X86_DEFAULT)
+      x86_mode = HWLOC_USE_X86_LAST;
+    if (x86_mode == HWLOC_USE_X86_FIRST || x86_mode == HWLOC_USE_X86_ONLY)
+      hwloc_x86_discover_all(topology);
+
+    if (x86_mode != HWLOC_USE_X86_ONLY)
+      hwloc_linuxfs_look_cpu(topology, data, dstatus);
+
+    if (x86_mode == HWLOC_USE_X86_LAST)
+      hwloc_x86_discover_all(topology);
   }
 
 #ifdef HWLOC_HAVE_LINUXIO
