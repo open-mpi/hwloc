@@ -4889,6 +4889,18 @@ All users are strong encouraged to stop using hwloc 1.x.
 See \ref faq5 for detecting the hwloc version that you are compiling
 and/or running against.
 
+\section upgrade_to_api_3x_object_attrs Object attribute changes
+
+The <dt>Inclusive</dt> cache info attribute is replaced by the
+<tt>inclusive</tt> field in the hwloc_obj_attr_u::hwloc_cache_attr_s structure.
+
+The page type array in NUMA node was removed because it was either
+not filled with actual number of pages, or meaningless because
+those numbers could vary dynamically.
+It is replaced with the <tt>PageSizes</tt> and <tt>PageSizeNr</tt> topology info which
+just list the supported page sizes.
+
+
 \section upgrade_to_api_3x_type_order Object types are reordered
 
 Die and MemCache object types are now near their neighbors in the type enum
@@ -5069,16 +5081,6 @@ else /* 3.x exporter with 3.x importer */
 Note that hwloc v3.x can neither import from nor export to hwloc 1.x.
 
 
-\section upgrade_to_api_3x_pagetypes Removal of page types
-
-The page type array in NUMA node was removed because it was either
-not filled with actual number of pages, or meaningless because
-those numbers could vary dynamically.
-
-It is replaced with the <tt>PageSizes</tt> and <tt>PageSizeNr</tt> topology info which
-just list the supported page sizes.
-
-
 \section upgrade_to_api_3x_deprecations API Deprecations
 
 <ul>
@@ -5139,9 +5141,6 @@ removed since their non-strict variants are sufficient.
 
 
 \section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
-
-The <dt>Inclusive</dt> cache info attribute is replaced by the
-<tt>inclusive</tt> field in the hwloc_obj_attr_u::hwloc_cache_attr_s structure.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete
