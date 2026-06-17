@@ -429,8 +429,8 @@
 /* Define to 1 if you have the `clzl' function. */
 /* #undef HWLOC_HAVE_CLZL */
 
-/* Define to 1 if you have cpuid */
-/* #undef HWLOC_HAVE_CPUID */
+/* Define to 1 if you have x86 cpuid */
+#define HWLOC_HAVE_X86_CPUID 1
 
 /* Define to 1 if the CPU_SET macro works */
 /* #undef HWLOC_HAVE_CPU_SET */
