@@ -5040,7 +5040,8 @@ The index of the memory tier of a NUMA node is available in its attribute
 hwloc 3.x can load XML topology files exported by hwloc 2.x.
 hwloc 3.x may also export 2.x-compatible topology files (see below).
 
-Moreover hwloc 2.10 is also able to import 3.0 exports.
+Moreover hwloc 2.x releases increasingly receive support for importing
+3.0 exports.
 However this convenient transitional feature may break in the future
 if new features are added in 3.x.
 Hence developers should not rely on it and rather assume that
