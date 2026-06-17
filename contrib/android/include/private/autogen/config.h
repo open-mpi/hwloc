@@ -580,7 +580,7 @@
 #define HWLOC_HAVE_X11_KEYSYM 1
 
 /* Define to 1 if you have x86 cpuid */
-#define HWLOC_HAVE_X86_CPUID 1
+/* #undef HWLOC_HAVE_X86_CPUID */
 
 /* Define to 1 on HP-UX */
 /* #undef HWLOC_HPUX_SYS */
