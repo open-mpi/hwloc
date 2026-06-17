@@ -993,6 +993,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
    */
 
   struct hwloc_topology *topology = backend->topology;
+  enum hwloc_use_x86_mode_e x86_mode = topology->use_x86_mode;
   hwloc_bitmap_t groups_pu_set = NULL;
   DWORD length;
   int gotnuma = 0;
@@ -1016,6 +1017,13 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things, only detect NUMA nodes and Windows-specific things */
     already_cpus = 1;
+
+  if (x86_mode == HWLOC_USE_X86_DEFAULT)
+    x86_mode = HWLOC_USE_X86_LAST;
+  if (x86_mode == HWLOC_USE_X86_FIRST || x86_mode == HWLOC_USE_X86_ONLY)
+    hwloc_x86_discover_all(topology);
+  if (x86_mode == HWLOC_USE_X86_ONLY)
+    return 0;
 
   ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
@@ -1303,6 +1311,9 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
  out:
   if (has_efficiencyclass)
     hwloc_win_efficiency_classes_destroy(&eclasses);
+
+  if (x86_mode == HWLOC_USE_X86_LAST)
+    hwloc_x86_discover_all(topology);
 
   /* emulate uname instead of calling hwloc_add_uname_info() */
   hwloc__add_info(&topology->infos, "Backend", "Windows");

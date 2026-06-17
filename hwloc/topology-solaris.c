@@ -1006,6 +1006,7 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
    */
 
   struct hwloc_topology *topology = backend->topology;
+  enum hwloc_use_x86_mode_e x86_mode = topology->use_x86_mode;
   int alreadypus = 0;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
@@ -1013,6 +1014,13 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     alreadypus = 1;
+
+  if (x86_mode == HWLOC_USE_X86_DEFAULT)
+    x86_mode = HWLOC_USE_X86_LAST;
+  if (x86_mode == HWLOC_USE_X86_FIRST || x86_mode == HWLOC_USE_X86_ONLY)
+    hwloc_x86_discover_all(topology);
+  if (x86_mode == HWLOC_USE_X86_ONLY)
+    return 0;
 
   if (!alreadypus) {
     hwloc_alloc_root_sets(topology->levels[0][0]);
@@ -1022,6 +1030,9 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       alreadypus = 1;
 #endif /* HAVE_LIBKSTAT */
   }
+
+  if (x86_mode == HWLOC_USE_X86_LAST)
+    hwloc_x86_discover_all(topology);
 
   if (!alreadypus) {
     int nbprocs = hwloc_fallback_nbprocessors(0);

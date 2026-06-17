@@ -215,13 +215,8 @@ int main(void)
   assert(!err);
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "xml");
   assert(!err);
-  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "x86");
-#ifdef HWLOC_HAVE_X86_CPUID
+  err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "x86"); /* still the only way to disable it in the API */
   assert(!err);
-#else
-  assert(err == -1);
-  assert(errno == EINVAL);
-#endif
 #ifdef HWLOC_LINUX_SYS
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "linux:0xf");
   assert(!err);
@@ -252,6 +247,7 @@ int main(void)
   err = hwloc_topology_set_components(topology1, HWLOC_TOPOLOGY_COMPONENTS_FLAG_BLACKLIST, "netbsd");
   assert(!err);
 #endif
+
   hwloc_topology_load(topology1);
   backend_name = get_backend_name(topology1);
   assert(backend_name);

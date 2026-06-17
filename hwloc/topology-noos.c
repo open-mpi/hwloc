@@ -22,8 +22,16 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
 
   struct hwloc_topology *topology = backend->topology;
   int64_t memsize;
+  enum hwloc_use_x86_mode_e x86_mode = topology->use_x86_mode;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
+
+  if (x86_mode == HWLOC_USE_X86_DEFAULT)
+    x86_mode = HWLOC_USE_X86_FIRST;
+  if (x86_mode == HWLOC_USE_X86_FIRST || x86_mode == HWLOC_USE_X86_ONLY)
+    hwloc_x86_discover_all(topology);
+  if (x86_mode == HWLOC_USE_X86_ONLY)
+    return 0;
 
   if (!topology->levels[0][0]->cpuset) {
     int nbprocs;
@@ -45,6 +53,10 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
 
   hwloc_add_uname_info(topology, NULL);
   hwloc_fallback_add_pagesize_info(topology);
+
+  if (x86_mode == HWLOC_USE_X86_LAST)
+    hwloc_x86_discover_all(topology);
+
   return 0;
 }
 

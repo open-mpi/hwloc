@@ -1638,9 +1638,6 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
          AC_SUBST(HWLOC_HAVE_X86_CPUID, 1)
 	 hwloc_have_x86_cpuid=yes],
 	[AC_MSG_RESULT([no])])
-	if test "x$hwloc_have_x86_cpuid" = xyes; then
-	    hwloc_components="$hwloc_components x86"
-	fi
 	CPPFLAGS="$old_CPPFLAGS"
 
       echo "**** end of x86 CPUID configuration"

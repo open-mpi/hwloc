@@ -35,7 +35,7 @@
 #endif
 
 struct hwloc_x86_backend_data_s {
-  unsigned nbprocs;
+  unsigned nbprocs; /* set during init if src_cpuiddump_path, otherwise during discover */
   hwloc_bitmap_t apicid_set;
   int apicid_unique;
   char *src_cpuiddump_path;
@@ -628,9 +628,8 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
  * infos for summarize to analyze them globally */
-static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
+static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   unsigned eax, ebx, ecx = 0, edx;
   unsigned cachenum;
   struct cacheinfo *cache;
@@ -788,7 +787,7 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
     read_extended_topo(data, infos, 0x0b, cpuid_type, src_cpuiddump);
   }
 
- if (backend->topology->want_some_cpu_caches) {
+ if (topology->want_some_cpu_caches) {
   /**************************************
    * Get caches from CPU-specific leaves
    */
@@ -963,10 +962,8 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
-static void summarize(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags)
+static void summarize(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags)
 {
-  struct hwloc_topology *topology = backend->topology;
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
   unsigned i, j, l, level;
@@ -1302,14 +1299,13 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 }
 
 static int
-look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long flags,
+look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data,
+           struct procinfo *infos, unsigned long flags,
 	   unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type,
 	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
 	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags),
            hwloc_bitmap_t restrict_set)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  struct hwloc_topology *topology = backend->topology;
   unsigned nbprocs = data->nbprocs;
   hwloc_bitmap_t orig_cpuset = NULL;
   hwloc_bitmap_t set = NULL;
@@ -1345,7 +1341,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
       }
     }
 
-    look_proc(backend, &infos[i], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    look_proc(topology, data, &infos[i], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
 
     if (data->src_cpuiddump_path) {
       cpuiddump_free(src_cpuiddump);
@@ -1359,7 +1355,7 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
   }
 
   if (data->apicid_unique) {
-    summarize(backend, infos, flags);
+    summarize(topology, data, infos, flags);
 
     if (data->is_hybrid
         && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
@@ -1499,10 +1495,8 @@ static int fake_set_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 }
 
 static
-int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
+int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data, unsigned long flags)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  struct hwloc_topology *topology = backend->topology;
   unsigned nbprocs = data->nbprocs;
   unsigned eax, ebx, ecx = 0, edx;
   unsigned i;
@@ -1649,7 +1643,7 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 
   hwloc_x86_os_state_save(&os_state, src_cpuiddump);
 
-  ret = look_procs(backend, infos, flags,
+  ret = look_procs(topology, data, infos, flags,
 		   highest_cpuid, highest_ext_cpuid, features, cpuid_type,
 		   get_cpubind, set_cpubind, restrict_set);
   if (!ret)
@@ -1658,8 +1652,8 @@ int hwloc_look_x86(struct hwloc_backend *backend, unsigned long flags)
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
-    look_proc(backend, &infos[0], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
-    summarize(backend, infos, flags);
+    look_proc(topology, data, &infos[0], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    summarize(topology, data, infos, flags);
     ret = 0;
   }
 
@@ -1683,15 +1677,11 @@ out:
 }
 
 static int
-hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_x86_discover(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  struct hwloc_topology *topology = backend->topology;
   unsigned long flags = 0;
   int alreadypus = 0;
   int ret;
-
-  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING) {
     /* TODO: Things would work if there's a single PU, no need to rebind */
@@ -1729,7 +1719,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     }
 
     /* several object types were added, we can't easily complete, just do partial discovery */
-    ret = hwloc_look_x86(backend, flags);
+    ret = hwloc_look_x86(topology, data, flags);
     if (ret)
       hwloc__add_info(&topology->infos, "Backend", "x86");
     return 0;
@@ -1739,7 +1729,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
 fulldiscovery:
-  if (hwloc_look_x86(backend, flags | HWLOC_X86_DISC_FLAG_FULL) < 0) {
+  if (hwloc_look_x86(topology, data, flags | HWLOC_X86_DISC_FLAG_FULL) < 0) {
     /* if failed, create PUs */
     if (!alreadypus)
       hwloc_setup_pu_level(topology, data->nbprocs);
@@ -1839,40 +1829,16 @@ hwloc_x86_check_cpuiddump_input(const char *src_cpuiddump_path, hwloc_bitmap_t s
   return -1;
 }
 
-static void
-hwloc_x86_backend_disable(struct hwloc_backend *backend)
+static int
+hwloc_x86_init(struct hwloc_x86_backend_data_s *data)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  hwloc_bitmap_free(data->apicid_set);
-  free(data->src_cpuiddump_path);
-}
-
-static struct hwloc_backend *
-hwloc_x86_component_instantiate(struct hwloc_topology *topology,
-				struct hwloc_disc_component *component,
-				unsigned excluded_phases __hwloc_attribute_unused,
-				const void *_data1 __hwloc_attribute_unused,
-				const void *_data2 __hwloc_attribute_unused,
-				const void *_data3 __hwloc_attribute_unused)
-{
-  struct hwloc_backend *backend;
-  struct hwloc_x86_backend_data_s *data;
   const char *src_cpuiddump_path;
 
-  backend = hwloc_backend_alloc(topology, component, sizeof(*data));
-  if (!backend)
-    goto out;
-
-  backend->discover = hwloc_x86_discover;
-  backend->disable = hwloc_x86_backend_disable;
-
-  /* default values */
-  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   data->is_knl = 0;
   data->is_hybrid = 0;
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set)
-    goto out_with_backend;
+    return -1;
   data->apicid_unique = 1;
   data->src_cpuiddump_path = NULL;
   data->found_die_ids = 0;
@@ -1885,7 +1851,6 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   if (src_cpuiddump_path) {
     hwloc_bitmap_t set = hwloc_bitmap_alloc();
     if (!set || !hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
-      backend->is_thissystem = 0;
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
@@ -1895,28 +1860,48 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
     hwloc_bitmap_free(set);
   }
 
-  return backend;
-
- out_with_backend:
-  free(backend);
- out:
-  return NULL;
+  return 0;
 }
 
-static struct hwloc_disc_component hwloc_x86_disc_component = {
-  "x86",
-  HWLOC_DISC_PHASE_CPU,
-  HWLOC_DISC_PHASE_GLOBAL,
-  hwloc_x86_component_instantiate,
-  45, /* between native and no_os */
-  1,
-  NULL
-};
+static void
+hwloc_x86_exit(struct hwloc_x86_backend_data_s *data)
+{
+  hwloc_bitmap_free(data->apicid_set);
+  free(data->src_cpuiddump_path);
+}
 
-const struct hwloc_component hwloc_x86_component = {
-  HWLOC_COMPONENT_ABI,
-  NULL, NULL,
-  HWLOC_COMPONENT_TYPE_DISC,
-  0,
-  &hwloc_x86_disc_component
-};
+int
+hwloc_x86_discover_all(hwloc_topology_t topology)
+{
+  struct hwloc_x86_backend_data_s *data;
+
+  assert(topology->use_x86_mode != HWLOC_USE_X86_NONE);
+  assert(topology->use_x86_mode != HWLOC_USE_X86_DONE);
+
+  data = malloc(sizeof(*data));
+  if (!data)
+    return -1;
+
+  if (hwloc_x86_init(data) < 0) {
+    free(data);
+    return -1;
+  }
+
+  /* default values */
+  if (hwloc_x86_init(data) < 0)
+    goto out_with_data;
+  if (data->src_cpuiddump_path)
+    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, 1 /* forced cpuid is always by envvar */);
+
+  hwloc_x86_discover(topology, data);
+
+  hwloc_x86_exit(data);
+  free(data);
+
+  topology->use_x86_mode = HWLOC_USE_X86_DONE;
+  return 0;
+
+ out_with_data:
+  free(data);
+  return -1;
+}
