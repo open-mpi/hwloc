@@ -305,7 +305,6 @@ hwloc_rocm_smi_discover(struct hwloc_topology *topology)
     uint64_t bdfid = 0;
     hwloc_obj_t osdev, parent;
     char buffer[64];
-    char *xgmi_peers, *xgmi_peers_ptr;
 
     osdev = hwloc_alloc_setup_object(topology, HWLOC_OBJ_OS_DEVICE, HWLOC_UNKNOWN_INDEX);
     snprintf(buffer, sizeof(buffer), "rsmi%u", i);
@@ -353,10 +352,6 @@ hwloc_rocm_smi_discover(struct hwloc_topology *topology)
     }
     /* there's also rsmi_dev_memory_usage_get() to get what's currently used in these memories */
 
-    xgmi_peers = malloc(nb*15+1);  /* "rsmi" + unsigned int + space = 15 chars max, + ending \0 */
-    if (xgmi_peers) {
-      xgmi_peers[0] = '\0';
-      xgmi_peers_ptr = xgmi_peers;
       for (j=0; j<nb; j++) {
         RSMI_IO_LINK_TYPE type;
         uint64_t hops;
@@ -364,16 +359,11 @@ hwloc_rocm_smi_discover(struct hwloc_topology *topology)
           continue;
         if ((get_device_io_link_type(i, j, &type, &hops) == 0) &&
             (type == RSMI_IOLINK_TYPE_XGMI)) {
-          xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "rsmi%u ", j);
           xgmi_bws[i*nb+j] = 100000; /* TODO: verify the XGMI version before putting 100GB/s here? */
           xgmi_hops[i*nb+j] = hops;
           got_xgmi_bws = 1;
         }
       }
-      if (xgmi_peers[0] != '\0')
-        hwloc_obj_add_info(osdev, "XGMIPeers", xgmi_peers);
-      free(xgmi_peers);
-    }
 
     parent = NULL;
     if (get_device_pci_info(i, &bdfid) == 0) {
@@ -672,7 +662,6 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
     int got_xgmi_bws = 0;
     for(i=0; i<nr_procs; i++) {
       amdsmi_vram_info_t meminfo;
-      char *xgmi_peers, *xgmi_peers_ptr;
 
       /* use memory bandwidth for local bandwidth */
       if (AMDSMI_STATUS_SUCCESS == amdsmi_get_gpu_vram_info(procs[i], &meminfo)
@@ -685,10 +674,6 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
         xgmi_bws[i*nr_procs+i] = 1000000;
 
       /* now look at actual other peers */
-      xgmi_peers = malloc(nr_procs*15+1);  /* "rsmi" + unsigned int + space = 15 chars max, + ending \0 */
-      if (xgmi_peers) {
-        xgmi_peers[0] = '\0';
-        xgmi_peers_ptr = xgmi_peers;
         for (j=0; j<nr_procs; j++) {
 #if AMDSMI_LIB_VERSION_MAJOR >= 26
           /* ROCm 7 switched from io_link to link type. But now have XGMI = 2
@@ -711,7 +696,6 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
              * The length of XGMI path is rather given as the weight, but it needs to normalized.
              */
             uint64_t min, max, weight;
-            xgmi_peers_ptr += sprintf(xgmi_peers_ptr, "%s ", osdevs[j]->name);
             if (AMDSMI_STATUS_SUCCESS == amdsmi_get_minmax_bandwidth_between_processors(procs[i], procs[j], &min, &max)) {
               xgmi_bws[i*nr_procs+j] = max; /* min is usually 50k while max is 50/100/200k */
               got_xgmi_bws = 1;
@@ -723,10 +707,6 @@ hwloc_amd_smi_discover(struct hwloc_topology *topology)
                 min_xgmi_weight = weight;
             }
           }
-        }
-        if (xgmi_peers[0] != '\0')
-          hwloc_obj_add_info(osdevs[i], "XGMIPeers", xgmi_peers);
-        free(xgmi_peers);
       }
     }
     if (got_xgmi_bws) {
