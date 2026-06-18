@@ -1138,11 +1138,21 @@ static void summarize(struct hwloc_backend *backend, struct procinfo *infos, uns
 
 	    hwloc_bitmap_copy(remaining_cpuset, complete_cpuset);
 	    while ((i = hwloc_bitmap_first(remaining_cpuset)) != (unsigned) -1) {
-	      unsigned unknownid = infos[i].otherids[level];
+	      unsigned unknownid;
+
+	      /* this PU may report fewer extended topology levels than "one"
+	       * (heterogeneous CPUs, or a partial cpuid dump), or none at all,
+	       * in which case it has no otherids[] entry at this level */
+	      if (!infos[i].otherids || level >= infos[i].levels) {
+		hwloc_bitmap_clr(remaining_cpuset, i);
+		continue;
+	      }
+	      unknownid = infos[i].otherids[level];
 
 	      unknown_cpuset = hwloc_bitmap_alloc();
 	      for (j = i; j < nbprocs; j++) {
-		if (infos[j].otherids[level] == unknownid) {
+		if (infos[j].otherids && level < infos[j].levels
+		    && infos[j].otherids[level] == unknownid) {
 		  hwloc_bitmap_set(unknown_cpuset, j);
 		  hwloc_bitmap_clr(remaining_cpuset, j);
 		}
