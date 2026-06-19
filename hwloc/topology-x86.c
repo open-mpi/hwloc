@@ -528,7 +528,7 @@ static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct
 /* Intel core/thread or even die/module/tile from CPUID 0x0b or 0x1f leaves (v1 and v2 extended topology enumeration)
  * or AMD core/thread or even complex/ccd from CPUID 0x0b or 0x80000026 (extended CPU topology)
  */
-static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, enum cpuid_type cpuid_type __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump)
+static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned leaf, struct cpuiddump *src_cpuiddump)
 {
   unsigned level, apic_nextshift, apic_type, apic_id = 0, apic_shift = 0, id;
   unsigned threadid __hwloc_attribute_unused = 0; /* shut-up compiler */
@@ -795,20 +795,20 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     /* Get socket/die/complex/core/thread information from cpuid 0x80000026
      * (AMD Extended CPU Topology)
      */
-    read_extended_topo(data, infos, 0x80000026, cpuid_type, src_cpuiddump);
+    read_extended_topo(data, infos, 0x80000026, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
-    read_extended_topo(data, infos, 0x1f, cpuid_type, src_cpuiddump);
+    read_extended_topo(data, infos, 0x1f, src_cpuiddump);
 
   } else if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == zhaoxin)
 	     && highest_cpuid >= 0x0b && has_x2apic(features)) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
-    read_extended_topo(data, infos, 0x0b, cpuid_type, src_cpuiddump);
+    read_extended_topo(data, infos, 0x0b, src_cpuiddump);
   }
 
  if (topology->want_some_cpu_caches) {
