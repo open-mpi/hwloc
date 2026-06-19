@@ -2244,12 +2244,6 @@ These info attributes are attached to OS device objects specified in parentheses
 <dt>XGMIHiveID=bac53b896800dc20 (RSMI GPU OS devices)</dt>
 <dd>The ID of the group of GPUs (Hive) interconnected by XGMI links
 </dd>
-<dt>XGMIPeers="rsmi0 rsmi1" (RSMI GPU OS devices)</dt>
-<dd>The list of RSMI OS devices that are directly connected
-  to the current device through XGMI links.
-  They are given as a space-separated list of object names,
-  for instance <em>rsmi2 rsmi3</em>.
-</dd>
 <dt>NVIDIAUUID=GPU-06162e6e-80e9-16e9-357e-ac30a929731c</dt>
 <dt>NVIDIASerial=0322716102756 (NVML GPU OS devices)</dt>
 <dd>The UUID and serial number of NVIDIA GPUs.
@@ -5142,6 +5136,9 @@ removed since their non-strict variants are sufficient.
 
 
 \section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+
+The <tt>XGMIPeers</tt> info attribute was removed from the RSMI OS devices.
+The XGMIHops (or bandwidth) should rather be used to query the list of AMD GPU peers.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete

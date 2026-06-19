@@ -71,6 +71,7 @@ for more details.
     favor of passing levels, topology and support as targets.
 * Removed features
   + page_type NUMA node attributes, replaced with PageSizes topology info.
+  + The XGMIPeers info attribute in AMD/ROCm SMI GPU OS devices.
   + Importing and exporting from/to hwloc 1.x XML.
   + Intel Knights Landing Xeon Phi specific NUMA support in the Linux backend.
   + BlueGene/Q and HP-UX support.
