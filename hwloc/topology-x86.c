@@ -190,9 +190,22 @@ enum hwloc_x86_disc_flags {
   HWLOC_X86_DISC_FLAG_TOPOEXT_NUMANODES = (1<<1) /* use AMD topoext numanode information */
 };
 
-#define has_topoext(features) ((features)[6] & (1 << 22))
-#define has_x2apic(features) ((features)[4] & (1 << 21))
-#define has_hybrid(features) ((features)[18] & (1 << 15))
+enum cpuid_type {
+  intel,
+  amd,
+  zhaoxin,
+  hygon,
+  unknown
+};
+
+#define on_intel() (cpuid_type == intel)
+#define on_amd() (cpuid_type == amd)
+#define on_zhaoxin() (cpuid_type == zhaoxin)
+#define on_hygon() (cpuid_type == hygon)
+
+#define has_topoext() (features[6] & (1 << 22))
+#define has_x2apic() (features[4] & (1 << 21))
+#define has_hybrid() (features[18] & (1 << 15))
 
 struct cacheinfo {
   hwloc_obj_cache_type_t type;
@@ -234,14 +247,6 @@ struct procinfo {
   unsigned hybridcoretype;
   unsigned hybridnativemodel;
   unsigned power_efficiency_ranking;
-};
-
-enum cpuid_type {
-  intel,
-  amd,
-  zhaoxin,
-  hygon,
-  unknown
 };
 
 /* AMD legacy cache information from specific CPUID 0x80000005-6 leaves */
@@ -699,21 +704,21 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
   _extendedmodel  = (eax>>16) & 0xf;
   _family         = (eax>>8) & 0xf;
   _extendedfamily = (eax>>20) & 0xff;
-  if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == hygon) && _family == 0xf) {
+  if ((on_intel() || on_amd() || on_hygon()) && _family == 0xf) {
     infos->cpufamilynumber = _family + _extendedfamily;
   } else {
     infos->cpufamilynumber = _family;
   }
-  if ((cpuid_type == intel && (_family == 0x6 || _family == 0xf))
-      || ((cpuid_type == amd || cpuid_type == hygon) && _family == 0xf)
-      || (cpuid_type == zhaoxin && (_family == 0x6 || _family == 0x7))) {
+  if ((on_intel() && (_family == 0x6 || _family == 0xf))
+      || ((on_amd() || on_hygon()) && _family == 0xf)
+      || (on_zhaoxin() && (_family == 0x6 || _family == 0x7))) {
     infos->cpumodelnumber = _model + (_extendedmodel << 4);
   } else {
     infos->cpumodelnumber = _model;
   }
   infos->cpustepping = eax & 0xf;
 
-  if (cpuid_type == intel && infos->cpufamilynumber == 0x6 &&
+  if (on_intel() && infos->cpufamilynumber == 0x6 &&
       (infos->cpumodelnumber == 0x57 || infos->cpumodelnumber == 0x85))
     data->is_knl = 1; /* KNM is the same as KNL */
 
@@ -739,7 +744,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     /* infos was calloc'ed, already ends with \0 */
   }
 
-  if ((cpuid_type != amd && cpuid_type != hygon) && highest_cpuid >= 0x04) {
+  if ((!on_amd() && !on_hygon()) && highest_cpuid >= 0x04) {
     /* Get core/thread information from first cache reported by cpuid 0x04
      * (not supported on AMD)
      */
@@ -771,7 +776,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     }
   }
 
-  if (highest_cpuid >= 0x1a && has_hybrid(features)) {
+  if (highest_cpuid >= 0x1a && has_hybrid()) {
     /* Get hybrid cpu information from cpuid 0x1a on Intel */
     eax = 0x1a;
     ecx = 0;
@@ -785,7 +790,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
    * Get the hierarchy of thread, core, die, package, etc. from CPU-specific leaves
    */
 
-  if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000008 && !has_x2apic(features)) {
+  if (!on_intel() && !on_zhaoxin() && highest_ext_cpuid >= 0x80000008 && !has_x2apic()) {
     /* Get core/thread information from cpuid 0x80000008
      * (not supported on Intel)
      * We could ignore this codepath when x2apic is supported, but we may need
@@ -794,7 +799,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     read_amd_cores_legacy(infos, src_cpuiddump);
   }
 
-  if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
+  if (!on_intel() && !on_zhaoxin() && has_topoext()) {
     /* Get apicid, nodeid, unitid/coreid from cpuid 0x8000001e (AMD topology extension).
      * Requires read_amd_cores_legacy() for coreid on family 0x15-16.
      *
@@ -803,20 +808,20 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     read_amd_cores_topoext(data, infos, src_cpuiddump);
   }
 
-  if ((cpuid_type == amd) && highest_ext_cpuid >= 0x80000026) {
+  if (on_amd() && highest_ext_cpuid >= 0x80000026) {
     /* Get socket/die/complex/core/thread information from cpuid 0x80000026
      * (AMD Extended CPU Topology)
      */
     read_extended_topo(data, infos, 0x80000026, src_cpuiddump);
 
-  } else if ((cpuid_type == intel || cpuid_type == zhaoxin) && highest_cpuid >= 0x1f) {
+  } else if ((on_intel() || on_zhaoxin()) && highest_cpuid >= 0x1f) {
     /* Get package/die/module/tile/core/thread information from cpuid 0x1f
      * (Intel v2 Extended Topology Enumeration)
      */
     read_extended_topo(data, infos, 0x1f, src_cpuiddump);
 
-  } else if ((cpuid_type == intel || cpuid_type == amd || cpuid_type == zhaoxin)
-	     && highest_cpuid >= 0x0b && has_x2apic(features)) {
+  } else if ((on_intel() || on_amd() || on_zhaoxin())
+	     && highest_cpuid >= 0x0b && has_x2apic()) {
     /* Get package/core/thread information from cpuid 0x0b
      * (Intel v1 Extended Topology Enumeration)
      */
@@ -831,11 +836,11 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
   infos->numcaches = 0;
   infos->cache = NULL;
 
-  if (cpuid_type != intel && cpuid_type != zhaoxin && has_topoext(features)) {
+  if (!on_intel() && !on_zhaoxin() && has_topoext()) {
     /* Get cache information from cpuid 0x8000001d (AMD topology extension) */
     read_amd_caches_topoext(infos, src_cpuiddump);
 
-  } else if (cpuid_type != intel && cpuid_type != zhaoxin && highest_ext_cpuid >= 0x80000006) {
+  } else if (!on_intel() && !on_zhaoxin() && highest_ext_cpuid >= 0x80000006) {
     /* If there's no topoext,
      * get cache information from cpuid 0x80000005 and 0x80000006.
      * (not supported on Intel)
@@ -844,7 +849,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     read_amd_caches_legacy(infos, src_cpuiddump, legacy_max_log_proc);
   }
 
-  if ((cpuid_type != amd && cpuid_type != hygon) && highest_cpuid >= 0x04) {
+  if ((!on_amd() && !on_hygon()) && highest_cpuid >= 0x04) {
     /* Get cache information from cpuid 0x04
      * (not supported on AMD)
      */
@@ -858,13 +863,13 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
     /* default cacheid value */
     cache->cacheid = infos->apicid / cache->nbthreads_sharing;
 
-    if (cpuid_type == intel) {
+    if (on_intel()) {
       /* round nbthreads_sharing to nearest power of two to build a mask (for clearing lower bits) */
       unsigned bits = hwloc_flsl(cache->nbthreads_sharing-1);
       unsigned mask = ~((1U<<bits) - 1);
       cache->cacheid = infos->apicid & mask;
 
-    } else if (cpuid_type == amd) {
+    } else if (on_amd()) {
       /* AMD quirks */
       if (infos->cpufamilynumber >= 0x17 && cache->level == 3) {
 	/* AMD family 0x19 always shares L3 between 16 APIC ids (8 HT cores).
@@ -910,7 +915,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
 	cache->cacheid = (infos->apicid % legacy_max_log_proc) / cache->nbthreads_sharing /* cacheid within the package */
 	  + 2 * (infos->apicid / legacy_max_log_proc); /* add 2 cache per previous package */
       }
-    } else if (cpuid_type == hygon) {
+    } else if (on_hygon()) {
       if (infos->cpufamilynumber == 0x18
 	  && cache->level == 3 && cache->nbthreads_sharing == 6) {
         /* Hygon family 0x18 always shares L3 between 8 APIC ids,
@@ -1578,9 +1583,9 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
     if (data->is_hybrid
         && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
       /* use hybrid info for cpukinds */
-      if (cpuid_type == intel)
+      if (on_intel())
         look_cpukinds_intel(topology, nbprocs, infos);
-      else if (cpuid_type == amd)
+      else if (on_amd())
         look_cpukinds_amd(topology, nbprocs, infos);
     }
   } else {
