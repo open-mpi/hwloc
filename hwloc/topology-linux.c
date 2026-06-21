@@ -2834,6 +2834,9 @@ hwloc_parse_nodes_distances(unsigned nbnodes, unsigned *indexes, uint64_t *dista
       found++;
       if (found == nbnodes)
 	break;
+      if (!*next)
+	/* truncated file, no separator after the last value */
+	break;
       tmp = next+1;
     }
     if (found != nbnodes)
