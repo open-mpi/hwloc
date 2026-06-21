@@ -11,8 +11,9 @@
 #include <sys/processor.h>
 
 struct thrdsinfo {
-	unsigned long ti_tid;
-	unsigned long ti_cpuid;
+	/* don't use unsigned long to avoid 32/64 signedness warnings */
+	tid_t ti_tid;
+	cpu_t ti_cpuid;
 };
 
 struct thrdentry64 {
