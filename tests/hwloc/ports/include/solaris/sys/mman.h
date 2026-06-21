@@ -14,6 +14,7 @@
 
 extern int madvise(caddr_t addr, size_t len, int advice);
 
-extern int getpagesizes(size_t pagesize[], int nelem);
+/* use uint64_t for pagesize since this port test runs on Linux */
+extern int getpagesizes(uint64_t pagesize[], int nelem);
 
 #endif /* HWLOC_PORT_SOLARIS_SYS_MMAN_H */
