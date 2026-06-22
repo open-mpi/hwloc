@@ -17,6 +17,7 @@ Version 2.15.0
 --------------
 * The Windows backend now adds NUMA nodes when CPU discovery was
   performed by the x86 backend.
+* Detect AMD Efficiency and Performance cores in the x86 backend.
 
 
 Version 2.14.0
