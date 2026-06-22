@@ -343,16 +343,17 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
         break;
       }
     }
-    closedir(dir);
 
     if (!subdir) {
       perror("No subdirectory in archivemount directory");
+      closedir(dir);
       close(sub_input_format.oldworkdir);
       return EXIT_FAILURE;
     }
 
     /* call ourself recursively on subdir, it should be either a fsroot or a cpuid directory */
     err = hwloc_utils_enable_input_format(topology, flags, subdir, &sub_input_format, verbose, callname);
+    closedir(dir);
     if (!err)
       *input_formatp = sub_input_format;
     else {
