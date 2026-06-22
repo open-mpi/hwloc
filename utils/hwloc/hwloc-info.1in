@@ -325,6 +325,12 @@ However hexadecimal bitmasks are not accepted since they may correspond
 to multiple objects.
 .
 .PP
+The special locations \fBroot\fR and \fBall\fR refer to the topology root only (the machine object), not to every object in the tree.
+To list many objects (for example all I/O devices), combine a starting location with \fB\-\-descendants\fR, e.g.
+\fBhwloc\-info \-\-whole\-io \-\-descendants io all\fR,
+or use \fBlstopo\fR(1) for a full graphical or textual tree.
+.
+.PP
 .B NOTE:
 It is highly recommended that you read the hwloc(7) overview page
 before reading this man page.  Most of the concepts described in

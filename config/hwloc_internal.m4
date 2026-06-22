@@ -78,7 +78,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # I/O?
     AC_ARG_ENABLE([io],
                   AS_HELP_STRING([--disable-io],
-                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, RSMI, LevelZero, GL) instead of only disabling it at runtime by default]))
+                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, RSMI, LevelZero, Tenstorrent, GL) instead of only disabling it at runtime by default]))
 
     # PCI?
     AC_ARG_ENABLE([pci],
@@ -164,6 +164,31 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([levelzero],
                   AS_HELP_STRING([--disable-levelzero],
                                  [Disable the oneAPI Level Zero device discovery]))
+
+    # Tenstorrent (Linux KMD /dev/tenstorrent)
+    AC_ARG_ENABLE([tenstorrent],
+                  AS_HELP_STRING([--disable-tenstorrent],
+                                 [Disable the Tenstorrent accelerator device discovery (Linux only)]))
+
+    # Tenstorrent optional interoperability headers (see doc and README.tt)
+    AC_ARG_ENABLE([tt-metal-free-iop],
+                  AS_HELP_STRING([--enable-tt-metal-free-iop],
+                                 [Install hwloc/tenstorrent.h (Tenstorrent helpers without tt-metal headers)]))
+    AC_ARG_ENABLE([tt-metal-iop],
+                  AS_HELP_STRING([--enable-tt-metal-iop],
+                                 [Also install hwloc/tenstorrent_metal.h including tt-metal UMD pci_ids.h; implies --enable-tt-metal-free-iop; requires --with-tt-metal-path]))
+    AC_ARG_WITH([tt-metal-path],
+                AS_HELP_STRING([--with-tt-metal-path=DIR],
+                               [Path to tt-metal checkout or install root; required with --enable-tt-metal-iop. Expected file: DIR/tt_metal/third_party/umd/device/api/umd/device/pcie/pci_ids.h]),
+                [AS_IF([test "x$withval" = "xyes" -o "x$withval" = "xno"],
+                       [AC_MSG_ERROR([--with-tt-metal-path requires a directory])])
+                 with_tt_metal_path="$withval"],
+                [with_tt_metal_path=])
+
+    # Tenstorrent optional YAML descriptor parsing (requires libyaml)
+    AC_ARG_ENABLE([tt-yaml],
+                  AS_HELP_STRING([--enable-tt-yaml],
+                                 [Parse Tenstorrent SoC/core descriptor YAML files at discovery time using libyaml (yaml-0.1). Requires the Tenstorrent discovery component.]))
 
     # GL/Display
     AC_ARG_ENABLE([gl],

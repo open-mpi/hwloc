@@ -34,6 +34,18 @@ include_hwloc_HEADERS = \
         hwloc/gl.h \
         hwloc/rename.h \
         hwloc/deprecated.h
+
+if HWLOC_TT_METAL_IOP
+include_hwloc_HEADERS += \
+        hwloc/tenstorrent.h \
+        hwloc/tenstorrent_metal.h
+else
+if HWLOC_TT_METAL_FREE_IOP
+include_hwloc_HEADERS += \
+        hwloc/tenstorrent.h
+endif
+endif
+
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
 nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h
 
@@ -68,3 +80,6 @@ include_hwloc_HEADERS += \
 endif HWLOC_HAVE_WINDOWS
 
 endif HWLOC_BUILD_STANDALONE
+
+# Always ship Tenstorrent IOP headers in the source tarball (install is optional).
+EXTRA_DIST = hwloc/tenstorrent.h hwloc/tenstorrent_metal.h

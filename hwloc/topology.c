@@ -120,6 +120,8 @@ unsigned long hwloc_show_errors_mask(void)
           HWLOC_SHOWMSG_TOGGLE(L0);
         else if (!hwloc_strncasecmp(tmp, "opencl", 6))
           HWLOC_SHOWMSG_TOGGLE(OPENCL);
+        else if (!hwloc_strncasecmp(tmp, "tenstorrent", 11))
+          HWLOC_SHOWMSG_TOGGLE(TENSTORRENT);
         else if (!hwloc_strncasecmp(tmp, "gl", 2))
           HWLOC_SHOWMSG_TOGGLE(GL);
         else if (!hwloc_strncasecmp(tmp, "os", 2))

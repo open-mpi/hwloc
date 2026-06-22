@@ -128,6 +128,21 @@ hwloc_levelzero_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LEVELZERO_LIBS)
 endif
 endif HWLOC_HAVE_LEVELZERO
 
+if HWLOC_HAVE_TENSTORRENT
+if HWLOC_TENSTORRENT_BUILD_STATIC
+sources += topology-tenstorrent.c
+if HWLOC_HAVE_TT_YAML
+# Optional YAML descriptor parsing pulled into the static library build.
+AM_CPPFLAGS += $(HWLOC_LIBYAML_CFLAGS)
+endif
+else
+plugins_LTLIBRARIES += hwloc_tenstorrent.la
+hwloc_tenstorrent_la_SOURCES = topology-tenstorrent.c
+hwloc_tenstorrent_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_LIBYAML_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_tenstorrent_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LIBYAML_LIBS)
+endif
+endif HWLOC_HAVE_TENSTORRENT
+
 if HWLOC_HAVE_GL
 if HWLOC_GL_BUILD_STATIC
 sources += topology-gl.c

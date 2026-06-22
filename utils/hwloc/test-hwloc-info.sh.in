@@ -152,3 +152,4 @@ set -e
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-hwloc-info.output "$file"
 rm -rf "$tmp"
+echo "test-hwloc-info: PASS (output matches test-hwloc-info.output)"

@@ -7,6 +7,6 @@ Name: hwloc
 Description: Hardware locality detection and management library
 Version: @HWLOC_VERSION@
 Requires.private: @HWLOC_REQUIRES@
-Cflags: -I${includedir}
+Cflags: -I${includedir}@HWLOC_TT_METAL_PC_CFLAGS@
 Libs: -L${libdir} -lhwloc
 Libs.private: @HWLOC_LIBS@ @HWLOC_DL_LIBS@ @HWLOC_LTDL_LIBS@ @HWLOC_LIBS_PRIVATE@

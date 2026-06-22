@@ -81,7 +81,10 @@ endif HWLOC_BUILD_STANDALONE
 # Build the documenation and top-level README file
 #
 if HWLOC_BUILD_STANDALONE
-.PHONY: doc readme
+.PHONY: doc readme check-tenstorrent
 doc readme:
 	$(MAKE) -C doc
+# Delegate to tests/hwloc (do not use "make check TESTS=tenstorrent" at top level).
+check-tenstorrent:
+	$(MAKE) $(AM_MAKEFLAGS) -C tests/hwloc check-tenstorrent
 endif HWLOC_BUILD_STANDALONE
