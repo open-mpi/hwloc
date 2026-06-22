@@ -2596,7 +2596,8 @@ Others remain in Package objects, see \ref attributes_info_cpu.
 <dt>CoreType (x86)</dt>
 <dd>A string describing the kind of core,
 currently <tt>IntelAtom</tt>, <tt>IntelCore</tt> or <tt>IntelLowPower</tt>,
-as reported by the x86 CPUID instruction and Linux PMU on some Intel processors.
+as reported by the x86 CPUID instruction and Linux PMU on some Intel processors,
+or <tt>AMDEfficiency</tt> or <tt>AMDPerformance</tt> from x86 CPUID.
 </dd>
 <dt>LinuxCapacity=1024 (Linux)</dt>
 <dd>The Linux-specific CPU capacity found in sysfs,
