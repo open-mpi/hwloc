@@ -232,6 +232,8 @@ struct procinfo {
 
   unsigned hybridcoretype;
   unsigned hybridnativemodel;
+  unsigned basefreq;
+  unsigned maxfreq;
 };
 
 enum cpuid_type {
@@ -741,13 +743,20 @@ static void look_proc(struct hwloc_backend *backend, struct procinfo *infos, uns
   }
 
   if (highest_cpuid >= 0x1a && has_hybrid(features)) {
+    data->is_hybrid = 1;
     /* Get hybrid cpu information from cpuid 0x1a on Intel */
     eax = 0x1a;
     ecx = 0;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     infos->hybridcoretype = eax >> 24;
     infos->hybridnativemodel = eax & 0xffffff;
-    data->is_hybrid = 1;
+    /* Get base and max freq from cpuid 0x16 on Intel */
+    eax = 0x16;
+    ecx = 0;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+    infos->basefreq = eax & 0xffff;
+    infos->maxfreq = ebx & 0xffff;
+printf("base %u max %u\n", infos->basefreq, infos->maxfreq);
   }
 
   /*********************************************************************************
