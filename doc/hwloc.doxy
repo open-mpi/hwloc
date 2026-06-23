@@ -1362,6 +1362,7 @@ following environment variables.
   <li><tt>components</tt> and <tt>plugins</tt> for internal component and backends, and when they are dynamically loaded as plugins.</li>
   <li><tt>core</tt> for issues in the library core, usually caused by discovery backends but not caught there.</li>
   <li><tt>os</tt> for operating system specific errors.</li>
+  <li><tt>x86</tt> for x86 CPUID discovery.</li>
   <li><tt>pci</tt> for PCI (and CXL) discovery.</li>
   <li><tt>rsmi</tt>, <tt>cuda</tt>, <tt>nvml</tt>, <tt>l0</tt>, <tt>opencl</tt> and <tt>gl</tt> for IO-specific discovery.</li>
   <li><tt>xml</tt> and <tt>synthetic</tt> for XML and synthetic topologies.</li>

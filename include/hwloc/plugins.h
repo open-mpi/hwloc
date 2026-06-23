@@ -420,9 +420,10 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 #define HWLOC_SHOWMSG_GL         (1UL<<11) /* GL */
 #define HWLOC_SHOWMSG_OS         (1UL<<12) /* Operating system */
 #define HWLOC_SHOWMSG_PCI        (1UL<<13) /* PCI */
-#define HWLOC_SHOWMSG_CORE       (1UL<<14) /* Issues in hwloc core */
-#define HWLOC_SHOWMSG_MISC       (1UL<<15) /* Misc messages that don't belong anywhere else */
-#define HWLOC_SHOWMSG_USER       (1UL<<16) /* Error caused by invalid user-given information (environment variables, etc) */
+#define HWLOC_SHOWMSG_X86        (1UL<<14) /* x86 */
+#define HWLOC_SHOWMSG_CORE       (1UL<<15) /* Issues in hwloc core */
+#define HWLOC_SHOWMSG_MISC       (1UL<<16) /* Misc messages that don't belong anywhere else */
+#define HWLOC_SHOWMSG_USER       (1UL<<17) /* Error caused by invalid user-given information (environment variables, etc) */
 /* all messages */
 #define HWLOC_SHOWMSG_ALL        (~0UL)
 
