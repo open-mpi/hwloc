@@ -1852,7 +1852,7 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
-  if (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING) {
+  if (!data->src_cpuiddump_path && (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
     /* TODO: Things would work if there's a single PU, no need to rebind */
     return 0;
   }
