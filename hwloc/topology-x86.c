@@ -1384,14 +1384,20 @@ look_cpukinds_intel(struct hwloc_topology *topology,
   }
 
   for(i=0; i<nbprocs; i++) {
-    if (infos[i].hybridcoretype == 0x20) {
+    switch (infos[i].hybridcoretype) {
+    case 0x20: /* Atom */
       /* On Family 6 hybrids, Atom cores without an L3 cache are low-power cores */
       if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels)
         hwloc_bitmap_set(lpset, i);
       else
         hwloc_bitmap_set(atomset, i);
-    } else if (infos[i].hybridcoretype == 0x40) {
+      break;
+    case 0x40: /* Core */
       hwloc_bitmap_set(coreset, i);
+      break;
+    default:
+      if (HWLOC_SHOW_CRITICAL_ERRORS())
+        fprintf(stderr, "hwloc/x86: Unexpected Intel core type %x\n", infos[i].hybridcoretype);
     }
   }
 
