@@ -37,7 +37,8 @@
 struct hwloc_x86_backend_data_s {
   char *src_cpuiddump_path;
 
-  unsigned nbprocs; /* set during init if src_cpuiddump_path, otherwise during discover */
+  char pu_support;
+  unsigned nbprocs;
 
   unsigned highest_cpuid;
   unsigned highest_ext_cpuid;
@@ -1808,9 +1809,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     }
   }
 
-  if (!src_cpuiddump && !hwloc_have_x86_cpuid())
-    goto out;
-
   infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
     goto out;
@@ -1876,27 +1874,6 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     return 0;
   }
 
-#if HAVE_DECL_RUNNING_ON_VALGRIND
-  if (RUNNING_ON_VALGRIND && !data->src_cpuiddump_path) {
-    fprintf(stderr, "hwloc x86 backend cannot work under Valgrind, disabling.\n"
-	    "May be reenabled by dumping CPUIDs with hwloc-gather-cpuid\n"
-	    "and reloading them under Valgrind with HWLOC_CPUID_PATH.\n");
-    return 0;
-  }
-#endif
-
-  if (data->src_cpuiddump_path) {
-    assert(data->nbprocs > 0); /* enforced by hwloc_x86_component_instantiate() */
-    topology->support.discovery->pu = 1;
-  } else {
-    int nbprocs = hwloc_fallback_nbprocessors(HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE);
-    if (nbprocs >= 1)
-      topology->support.discovery->pu = 1;
-    else
-      nbprocs = 1;
-    data->nbprocs = (unsigned) nbprocs;
-  }
-
   if (topology->levels[0][0]->cpuset) {
     /* somebody else discovered things, reconnect levels so that we can look at them */
     hwloc__reconnect(topology, 0);
@@ -1937,6 +1914,8 @@ fulldiscovery:
 #endif
 #endif
   }
+  if (data->pu_support)
+    topology->support.discovery->pu = 1;
 
   return 1;
 }
@@ -2069,14 +2048,40 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
       data->src_cpuiddump_path = strdup(src_cpuiddump_path);
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
       data->nbprocs = hwloc_bitmap_weight(set);
+      data->pu_support = 1;
     } else {
       fprintf(stderr, "hwloc/x86: Ignoring dumped cpuid directory (%s).\n", strerror(errno));
     }
     hwloc_bitmap_free(set);
   }
 
+  if (!data->src_cpuiddump_path) {
+    int nbprocs;
+
+    if (!hwloc_have_x86_cpuid())
+      goto out_with_apicid_set;
+
+#if HAVE_DECL_RUNNING_ON_VALGRIND
+    if (RUNNING_ON_VALGRIND) {
+      fprintf(stderr, "hwloc x86 backend cannot work under Valgrind, disabling.\n"
+              "May be reenabled by dumping CPUIDs with hwloc-gather-cpuid\n"
+              "and reloading them under Valgrind with HWLOC_CPUID_PATH.\n");
+      goto out_with_apicid_set;
+    }
+#endif
+
+    nbprocs = hwloc_fallback_nbprocessors(HWLOC_FALLBACK_NBPROCESSORS_INCLUDE_OFFLINE);
+    if (nbprocs >= 1)
+      data->pu_support = 1;
+    else
+      nbprocs = 1;
+    data->nbprocs = (unsigned) nbprocs;
+  }
+
   return backend;
 
+ out_with_apicid_set:
+  hwloc_bitmap_free(data->apicid_set);
  out_with_backend:
   free(backend);
  out:
