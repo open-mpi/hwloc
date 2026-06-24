@@ -490,7 +490,7 @@ static void read_amd_cores_legacy(struct procinfo *infos, struct cpuiddump *src_
 }
 
 /* AMD unit/node from CPUID 0x8000001e leaf (topoext) */
-static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump)
+static void read_amd_cores_topoext(struct hwloc_x86_backend_data_s *data, struct procinfo *infos, struct cpuiddump *src_cpuiddump)
 {
   unsigned apic_id, nodes_per_proc = 0;
   unsigned eax, ebx, ecx, edx;
@@ -660,7 +660,7 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
  * infos for summarize to analyze them globally */
-static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
+static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type, struct cpuiddump *src_cpuiddump)
 {
   unsigned eax, ebx, ecx = 0, edx;
   unsigned cachenum;
@@ -800,7 +800,7 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
      *
      * Only needed when x2apic supported if NUMA nodes are needed.
      */
-    read_amd_cores_topoext(data, infos, flags, src_cpuiddump);
+    read_amd_cores_topoext(data, infos, src_cpuiddump);
   }
 
   if ((cpuid_type == amd) && highest_ext_cpuid >= 0x80000026) {
@@ -1559,7 +1559,7 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
       }
     }
 
-    look_proc(topology, data, &infos[i], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    look_proc(topology, data, &infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
 
     if (data->src_cpuiddump_path) {
       cpuiddump_free(src_cpuiddump);
@@ -1811,7 +1811,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
-    look_proc(topology, data, &infos[0], flags, highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
+    look_proc(topology, data, &infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type, src_cpuiddump);
     summarize(topology, data, infos, flags);
     ret = 0;
   }
