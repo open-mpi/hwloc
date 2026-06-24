@@ -163,11 +163,9 @@ libhwloc_port_nvml_la_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_rsmi_la_SOURCES = topology-rsmi.c
 libhwloc_port_rsmi_la_SOURCES = \
-        include/rsmi/amd_smi/amdsmi.h \
-        include/rsmi/rocm_smi/rocm_smi.h
+        include/rsmi/amd_smi/amdsmi.h
 libhwloc_port_rsmi_la_CPPFLAGS = $(common_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/rsmi \
-        -DHWLOC_RSMI_USE_AMD_SMI -DHWLOC_RSMI_USE_ROCM_SMI
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/rsmi
 
 nodist_libhwloc_port_levelzero_la_SOURCES = topology-levelzero.c
 libhwloc_port_levelzero_la_SOURCES = \

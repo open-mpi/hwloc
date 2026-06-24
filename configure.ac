@@ -266,7 +266,7 @@ be removed from hwloc by passing --disable-cuda to configure.
 EOF
 fi
 
-if test "x$hwloc_rsmi_amd_happy" = xyes -a "x$hwloc_amdsmi_warning" = xyes; then
+if test "x$hwloc_rsmi_happy" = xyes -a "x$hwloc_amdsmi_warning" = xyes; then
     hwloc_rsmi_status="yes, but not in LD_LIBRARY_PATH or ld.so.conf (see warning above)"
     cat <<EOF
 
@@ -277,21 +277,6 @@ but programs linked against it cannot run.
 This often indicates that the AMD SMI lib path is missing in
 ld.so.conf and LD_LIBRARY_PATH. If unneeded, this dependency may
 be removed from hwloc by passing --disable-rsmi-amd to configure.
-************************************************************************
-EOF
-fi
-
-if test "x$hwloc_rsmi_rocm_happy" = xyes -a "x$hwloc_rsmi_warning" = xyes; then
-    hwloc_rsmi_status="yes, but not in LD_LIBRARY_PATH or ld.so.conf (see warning above)"
-    cat <<EOF
-
-************************************************************************
-WARNING: The AMD ROCm SMI library was detected with link options
-$HWLOC_ROCM_SMI_LIBS $HWLOC_RSMI_LDFLAGS
-but programs linked against it cannot run.
-This often indicates that the ROCm SMI lib path is missing in
-ld.so.conf and LD_LIBRARY_PATH. If unneeded, this dependency may
-be removed from hwloc by passing --disable-rsmi-rocm to configure.
 ************************************************************************
 EOF
 fi
