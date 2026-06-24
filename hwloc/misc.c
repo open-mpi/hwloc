@@ -216,7 +216,7 @@ hwloc_progname(struct hwloc_topology *topology __hwloc_attribute_unused)
 #elif defined HAVE___PROGNAME
   name = __progname; /* fallback for most unix, used for OpenBSD */
 #else
-  /* TODO: _NSGetExecutablePath(path, &size) on Darwin */
+  /* NOTE: _NSGetExecutablePath doesn't seem necessary given that other alternatives are supported on Darwin. */
   /* TODO: AIX */
   name = NULL;
 #endif
