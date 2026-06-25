@@ -35,8 +35,6 @@
 #endif
 
 struct hwloc_x86_backend_data_s {
-  char *src_cpuiddump_path;
-
   char pu_support;
   unsigned nbprocs;
 
@@ -71,39 +69,30 @@ struct hwloc_x86_backend_data_s {
   int found_unit_ids;
   int found_module_ids;
   int found_tile_ids;
+
+  struct cpuiddump {
+    unsigned nr;
+    struct cpuiddump_entry {
+      unsigned inmask; /* which of ine[abcd]x are set on input */
+      unsigned ineax;
+      unsigned inebx;
+      unsigned inecx;
+      unsigned inedx;
+      unsigned outeax;
+      unsigned outebx;
+      unsigned outecx;
+      unsigned outedx;
+    } *entries;
+  } *cpuiddumps;
 };
 
 /************************************
  * Management of cpuid dump as input
  */
 
-struct cpuiddump {
-  unsigned nr;
-  struct cpuiddump_entry {
-    unsigned inmask; /* which of ine[abcd]x are set on input */
-    unsigned ineax;
-    unsigned inebx;
-    unsigned inecx;
-    unsigned inedx;
-    unsigned outeax;
-    unsigned outebx;
-    unsigned outecx;
-    unsigned outedx;
-  } *entries;
-};
-
-static void
-cpuiddump_free(struct cpuiddump *cpuiddump)
+static int
+cpuiddump_read(struct cpuiddump *cpuiddump, const char *dirpath, unsigned idx)
 {
-  if (cpuiddump->nr)
-    free(cpuiddump->entries);
-  free(cpuiddump);
-}
-
-static struct cpuiddump *
-cpuiddump_read(const char *dirpath, unsigned idx)
-{
-  struct cpuiddump *cpuiddump;
   struct cpuiddump_entry *cur;
   size_t filenamelen;
   char *filename;
@@ -111,16 +100,10 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   char line[128];
   unsigned nr;
 
-  cpuiddump = malloc(sizeof(*cpuiddump));
-  if (!cpuiddump) {
-    fprintf(stderr, "hwloc/x86: Failed to allocate cpuiddump for PU #%u, ignoring cpuiddump.\n", idx);
-    goto out;
-  }
-
   filenamelen = strlen(dirpath) + 15;
   filename = malloc(filenamelen);
   if (!filename)
-    goto out_with_dump;
+    goto out;
   snprintf(filename, filenamelen, "%s/pu%u", dirpath, idx);
   file = fopen(filename, "r");
   if (!file) {
@@ -157,16 +140,14 @@ cpuiddump_read(const char *dirpath, unsigned idx)
   cpuiddump->nr = nr;
   fclose(file);
   free(filename);
-  return cpuiddump;
+  return 0;
 
  out_with_file:
   fclose(file);
  out_with_filename:
   free(filename);
- out_with_dump:
-  free(cpuiddump);
  out:
-  return NULL;
+  return -1;
 }
 
 static void
@@ -1574,7 +1555,7 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
   hwloc_bitmap_t set = NULL;
   unsigned i;
 
-  if (!data->src_cpuiddump_path) {
+  if (!data->cpuiddumps) {
     hwloc_x86_os_state_save(&os_state);
 
     orig_cpuset = hwloc_bitmap_alloc();
@@ -1587,18 +1568,12 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
   }
 
   for (i = 0; i < nbprocs; i++) {
-    struct cpuiddump *src_cpuiddump = NULL;
-
     if (restrict_set && !hwloc_bitmap_isset(restrict_set, i)) {
       /* skip this CPU outside of the binding mask */
       continue;
     }
 
-    if (data->src_cpuiddump_path) {
-      src_cpuiddump = cpuiddump_read(data->src_cpuiddump_path, i);
-      if (!src_cpuiddump)
-	continue;
-    } else {
+    if (!data->cpuiddumps) {
       hwloc_bitmap_only(set, i);
       hwloc_debug("binding to CPU%u\n", i);
       if (set_cpubind(topology, set, HWLOC_CPUBIND_STRICT)) {
@@ -1607,14 +1582,10 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
       }
     }
 
-    look_proc(topology, data, &infos[i], src_cpuiddump);
-
-    if (data->src_cpuiddump_path) {
-      cpuiddump_free(src_cpuiddump);
-    }
+    look_proc(topology, data, &infos[i], data->cpuiddumps ? &data->cpuiddumps[i] : NULL);
   }
 
-  if (!data->src_cpuiddump_path) {
+  if (!data->cpuiddumps) {
     set_cpubind(topology, orig_cpuset, 0);
     hwloc_bitmap_free(set);
     hwloc_bitmap_free(orig_cpuset);
@@ -1750,7 +1721,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags) = NULL;
   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags) = NULL;
   hwloc_bitmap_t restrict_set = NULL;
-  struct cpuiddump *src_cpuiddump = NULL;
   int ret = -1;
 
   /* check if binding works */
@@ -1760,17 +1730,11 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
    * but the current overhead is negligible, so just always reget them.
    */
   hwloc_set_native_binding_hooks(&hooks, &support);
-  /* in theory, those are only needed if !data->src_cpuiddump_path || HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_BINDING
+  /* in theory, those are only needed if !data->cpuiddumps || HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_BINDING
    * but that's the vast majority of cases anyway, and the overhead is very small.
    */
 
-  if (data->src_cpuiddump_path) {
-    /* Just read cpuid from the dump (implies !topology->is_thissystem by default) */
-    src_cpuiddump = cpuiddump_read(data->src_cpuiddump_path, 0);
-    if (!src_cpuiddump)
-      goto out;
-
-  } else {
+  if (!data->cpuiddumps) {
     /* Using real hardware.
      * However we don't enforce topology->is_thissystem so that
      * we may still force use this backend when debugging with !thissystem.
@@ -1822,7 +1786,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     infos[i].ids[DIE] = (unsigned) -1;
   }
 
-  if (hwloc_x86_get_features(data, src_cpuiddump)  < 0)
+  if (hwloc_x86_get_features(data, data->cpuiddumps ? &data->cpuiddumps[0] : NULL)  < 0)
     goto out_with_infos;
 
   ret = look_procs(topology, data, infos, flags,
@@ -1833,7 +1797,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
-    look_proc(topology, data, &infos[0], src_cpuiddump);
+    look_proc(topology, data, &infos[0], data->cpuiddumps ? &data->cpuiddumps[0] : NULL);
     summarize(topology, data, infos, flags);
     ret = 0;
   }
@@ -1849,8 +1813,6 @@ out_with_infos:
 
 out:
   hwloc_bitmap_free(restrict_set);
-  if (src_cpuiddump)
-    cpuiddump_free(src_cpuiddump);
   return ret;
 }
 
@@ -1864,7 +1826,7 @@ hwloc_x86_discover(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   /* the caller must have allocated root sets */
   assert(topology->levels[0][0]->cpuset);
 
-  if (data->nbprocs > 1 && !data->src_cpuiddump_path && (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
+  if (data->nbprocs > 1 && !data->cpuiddumps && (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
     return 0;
   }
 
@@ -1893,7 +1855,7 @@ fulldiscovery:
 
   hwloc__add_info(&topology->infos, "Backend", "x86");
 
-  if (!data->src_cpuiddump_path) { /* CPUID dump works for both x86 and x86_64 */
+  if (!data->cpuiddumps) { /* CPUID dump works for both x86 and x86_64 */
 #ifdef HAVE_UNAME
     hwloc_add_uname_info(topology, NULL); /* we already know is_thissystem() is true */
 #else
@@ -2010,17 +1972,25 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
   if (src_cpuiddump_path) {
     hwloc_bitmap_t set = hwloc_bitmap_alloc();
     if (set && !hwloc_x86_check_cpuiddump_input(src_cpuiddump_path, set)) {
-      data->src_cpuiddump_path = strdup(src_cpuiddump_path);
+      unsigned nbprocs = hwloc_bitmap_weight(set);
       assert(!hwloc_bitmap_iszero(set)); /* enforced by hwloc_x86_check_cpuiddump_input() */
-      data->nbprocs = hwloc_bitmap_weight(set);
-      data->pu_support = 1;
-    } else {
-      fprintf(stderr, "hwloc/x86: Ignoring dumped cpuid directory (%s).\n", strerror(errno));
+      data->cpuiddumps = malloc(nbprocs * sizeof(struct cpuiddump));
+      if (NULL != data->cpuiddumps) {
+        unsigned i;
+        for(i=0; i<nbprocs; i++) {
+          data->cpuiddumps[i].nr = 0;
+          cpuiddump_read(&data->cpuiddumps[i], src_cpuiddump_path, i);
+        }
+        data->nbprocs = nbprocs;
+        data->pu_support = 1;
+      }
     }
+    if (!data->cpuiddumps && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_X86|HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
+      fprintf(stderr, "hwloc/x86: Ignoring dumped cpuid directory (%s).\n", strerror(errno));
     hwloc_bitmap_free(set);
   }
 
-  if (!data->src_cpuiddump_path) {
+  if (!data->cpuiddumps) {
     int nbprocs;
 
     if (!hwloc_have_x86_cpuid())
@@ -2081,7 +2051,7 @@ hwloc_x86_prepare(struct hwloc_topology *topology)
     goto out_with_data;
   topology->x86_data = data;
 
-  if (data->src_cpuiddump_path)
+  if (data->cpuiddumps)
     HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, 1 /* forced cpuid is always by envvar */);
 
   return;
@@ -2115,8 +2085,14 @@ hwloc_x86_exit(hwloc_topology_t topology)
 {
   struct hwloc_x86_backend_data_s *data = topology->x86_data;
   if (data) {
+    if (NULL != data->cpuiddumps) {
+      unsigned i;
+      for (i = 0; i < data->nbprocs; i++)
+        if (data->cpuiddumps[i].nr)
+          free(data->cpuiddumps[i].entries);
+      free(data->cpuiddumps);
+    }
     hwloc_bitmap_free(data->apicid_set);
-    free(data->src_cpuiddump_path);
     free(data);
   }
   hwloc_x86_init(topology);
