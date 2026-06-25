@@ -251,7 +251,10 @@ struct procinfo {
 #define HWLOC_X86_PROCINFO_ID_NR 8
   unsigned ids[HWLOC_X86_PROCINFO_ID_NR];
   unsigned *otherids;
-  unsigned levels;
+  unsigned levels; /* total number of levels.
+                    * IDs are either stored in otherids[level]
+                    * or in ids[type] with otherids[level] = UINT_MAX
+                    */
   unsigned numcaches;
   struct cacheinfo *cache;
   char cpuvendor[13];
