@@ -71,6 +71,51 @@ struct hwloc_x86_backend_data_s {
   int found_unit_ids;
   int found_module_ids;
   int found_tile_ids;
+
+  struct procinfo {
+    unsigned present;
+    unsigned apicid;
+#define PKG 0
+#define CORE 1
+#define NODE 2 /* not used for building NUMA nodes, but still used to identify objects (e.g. same core ids in different NUMA nodes on Hygon Dhyana) */
+#define UNIT 3
+#define TILE 4
+#define MODULE 5
+#define DIE 6
+#define COMPLEX 7
+#define HWLOC_X86_PROCINFO_ID_NR 8
+    unsigned ids[HWLOC_X86_PROCINFO_ID_NR];
+    unsigned *otherids;
+    unsigned levels; /* total number of levels.
+                      * IDs are either stored in otherids[level]
+                      * or in ids[type] with otherids[level] = UINT_MAX
+                      */
+
+    char cpuvendor[13];
+    char cpumodel[3*4*4+1];
+    unsigned cpustepping;
+    unsigned cpumodelnumber;
+    unsigned cpufamilynumber;
+
+    unsigned hybridcoretype;
+    unsigned hybridnativemodel;
+    unsigned power_efficiency_ranking;
+
+    unsigned numcaches;
+    struct cacheinfo {
+      hwloc_obj_cache_type_t type;
+      unsigned level;
+      unsigned nbthreads_sharing;
+      unsigned cacheid;
+
+      unsigned linesize;
+      unsigned linepart;
+      int inclusive;
+      int ways;
+      unsigned sets;
+      unsigned long size;
+    } *cache;
+  } *procinfos;
 };
 
 /************************************
@@ -222,51 +267,6 @@ enum hwloc_x86_disc_flags {
 #define has_topoext() (features[6] & (1 << 22))
 #define has_x2apic() (features[4] & (1 << 21))
 #define has_hybrid() (features[18] & (1 << 15))
-
-struct cacheinfo {
-  hwloc_obj_cache_type_t type;
-  unsigned level;
-  unsigned nbthreads_sharing;
-  unsigned cacheid;
-
-  unsigned linesize;
-  unsigned linepart;
-  int inclusive;
-  int ways;
-  unsigned sets;
-  unsigned long size;
-};
-
-struct procinfo {
-  unsigned present;
-  unsigned apicid;
-#define PKG 0
-#define CORE 1
-#define NODE 2 /* not used for building NUMA nodes, but still used to identify objects (e.g. same core ids in different NUMA nodes on Hygon Dhyana) */
-#define UNIT 3
-#define TILE 4
-#define MODULE 5
-#define DIE 6
-#define COMPLEX 7
-#define HWLOC_X86_PROCINFO_ID_NR 8
-  unsigned ids[HWLOC_X86_PROCINFO_ID_NR];
-  unsigned *otherids;
-  unsigned levels; /* total number of levels.
-                    * IDs are either stored in otherids[level]
-                    * or in ids[type] with otherids[level] = UINT_MAX
-                    */
-  unsigned numcaches;
-  struct cacheinfo *cache;
-  char cpuvendor[13];
-  char cpumodel[3*4*4+1];
-  unsigned cpustepping;
-  unsigned cpumodelnumber;
-  unsigned cpufamilynumber;
-
-  unsigned hybridcoretype;
-  unsigned hybridnativemodel;
-  unsigned power_efficiency_ranking;
-};
 
 /* AMD legacy cache information from specific CPUID 0x80000005-6 leaves */
 static void setup__amd_cache_legacy(struct procinfo *infos, unsigned level, hwloc_obj_cache_type_t type, unsigned nbthreads_sharing, unsigned cpuid)
@@ -1020,9 +1020,10 @@ hwloc_x86_add_groups(hwloc_topology_t topology,
 }
 
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
-static void summarize(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data, struct procinfo *infos, unsigned long flags)
+static void summarize(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data, unsigned long flags)
 {
   unsigned nbprocs = data->nbprocs;
+  struct procinfo *infos = data->procinfos;
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
   unsigned i, j, l, level;
   int one = -1;
@@ -1506,12 +1507,13 @@ look_cpukinds_amd(struct hwloc_topology *topology,
 
 static int
 look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data,
-           struct procinfo *infos, unsigned long flags,
+           unsigned long flags,
 	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
 	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags),
            hwloc_bitmap_t restrict_set)
 {
   unsigned nbprocs = data->nbprocs;
+  struct procinfo *infos = data->procinfos;
   hwloc_bitmap_t orig_cpuset = NULL;
   hwloc_bitmap_t set = NULL;
   unsigned i;
@@ -1560,7 +1562,7 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
   }
 
   if (data->apicid_unique) {
-    summarize(topology, data, infos, flags);
+    summarize(topology, data, flags);
 
     if (data->is_hybrid
         && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
@@ -1776,7 +1778,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   if (!src_cpuiddump && !hwloc_have_x86_cpuid())
     goto out;
 
-  infos = calloc(nbprocs, sizeof(struct procinfo));
+  data->procinfos = infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
     goto out;
   for (i = 0; i < nbprocs; i++) {
@@ -1790,11 +1792,11 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   }
 
   if (hwloc_x86_get_features(data, src_cpuiddump)  < 0)
-    goto out_with_infos;
+    goto out;
 
   hwloc_x86_os_state_save(&os_state, src_cpuiddump);
 
-  ret = look_procs(topology, data, infos, flags,
+  ret = look_procs(topology, data, flags,
 		   get_cpubind, set_cpubind, restrict_set);
   if (!ret)
     /* success, we're done */
@@ -1803,21 +1805,12 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
     look_proc(topology, data, &infos[0], src_cpuiddump);
-    summarize(topology, data, infos, flags);
+    summarize(topology, data, flags);
     ret = 0;
   }
 
 out_with_os_state:
   hwloc_x86_os_state_restore(&os_state, src_cpuiddump);
-
-out_with_infos:
-  if (NULL != infos) {
-    for (i = 0; i < nbprocs; i++) {
-      free(infos[i].cache);
-      free(infos[i].otherids);
-    }
-    free(infos);
-  }
 
 out:
   hwloc_bitmap_free(restrict_set);
@@ -2003,6 +1996,7 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
       fprintf(stderr, "hwloc x86 backend cannot work under Valgrind, disabling.\n"
               "May be reenabled by dumping CPUIDs with hwloc-gather-cpuid\n"
               "and reloading them under Valgrind with HWLOC_CPUID_PATH.\n");
+      hwloc_bitmap_free(data->apicid_set);
       return -1;
     }
 #endif
@@ -2075,6 +2069,14 @@ hwloc_x86_exit(hwloc_topology_t topology)
 {
   struct hwloc_x86_backend_data_s *data = topology->x86_data;
   if (data) {
+    if (NULL != data->procinfos) {
+      unsigned i;
+      for (i = 0; i < data->nbprocs; i++) {
+        free(data->procinfos[i].cache);
+        free(data->procinfos[i].otherids);
+      }
+      free(data->procinfos);
+    }
     hwloc_bitmap_free(data->apicid_set);
     free(data->src_cpuiddump_path);
     free(data);
