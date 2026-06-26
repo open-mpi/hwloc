@@ -1511,7 +1511,6 @@ static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state __hwloc_attri
 
 static int
 look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data,
-           unsigned long flags,
 	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
 	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags),
            hwloc_bitmap_t restrict_set)
@@ -1557,23 +1556,6 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
     set_cpubind(topology, orig_cpuset, 0);
     hwloc_bitmap_free(set);
     hwloc_bitmap_free(orig_cpuset);
-  }
-
-  if (data->apicid_unique) {
-    summarize(topology, data, flags);
-
-    if (data->is_hybrid
-        && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
-      /* use hybrid info for cpukinds */
-      enum hwloc_x86_vendor vendor = data->vendor;
-      if (on_intel())
-        look_cpukinds_intel(topology, nbprocs, infos);
-      else if (on_amd())
-        look_cpukinds_amd(topology, nbprocs, infos);
-    }
-  } else {
-    hwloc_debug("x86 APIC IDs aren't unique, x86 discovery ignored.\n");
-    /* do nothing and return success, so that the caller does nothing either */
   }
 
   if (data->cpuiddumps)
@@ -1762,20 +1744,36 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     infos[i].ids[DIE] = (unsigned) -1;
   }
 
-  ret = look_procs(topology, data, flags,
+  ret = look_procs(topology, data,
 		   get_cpubind, set_cpubind, restrict_set);
-  if (!ret)
-    /* success, we're done */
-    goto out;
+  if (!ret) {
+    /* success */
+    if (data->apicid_unique) {
+      summarize(topology, data, flags);
 
-  if (nbprocs == 1) {
-    /* only one processor, no need to bind */
+      if (data->is_hybrid
+          && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
+        /* use hybrid info for cpukinds */
+        enum hwloc_x86_vendor vendor = data->vendor;
+        if (on_intel())
+          look_cpukinds_intel(topology, nbprocs, infos);
+        else if (on_amd())
+          look_cpukinds_amd(topology, nbprocs, infos);
+      }
+    } else {
+      hwloc_debug("x86 APIC IDs aren't unique, x86 discovery ignored.\n");
+      /* do nothing and return success, so that the caller does nothing either */
+    }
+
+  }
+  else if (nbprocs == 1) {
+    /* look_procs() fails but there's only one processor, try without binding */
     look_proc(topology, data, &infos[0], data->cpuiddumps ? &data->cpuiddumps[0] : NULL);
     summarize(topology, data, flags);
     ret = 0;
   }
 
-out:
+ out:
   hwloc_bitmap_free(restrict_set);
   return ret;
 }
