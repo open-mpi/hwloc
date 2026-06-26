@@ -1578,8 +1578,9 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
 #define SH_ECX ('a' | ('i'<<8) | (' '<<16) | (' '<<24))
 
 static int
-hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data, struct cpuiddump *src_cpuiddump)
+hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data)
 {
+  struct cpuiddump *src_cpuiddump = data->cpuiddumps ? &data->cpuiddumps[0] : NULL;
   unsigned eax, ebx, ecx = 0, edx;
   unsigned highest_cpuid;
   unsigned highest_ext_cpuid;
@@ -1758,9 +1759,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     infos[i].ids[MODULE] = (unsigned) -1;
     infos[i].ids[DIE] = (unsigned) -1;
   }
-
-  if (hwloc_x86_get_features(data, src_cpuiddump)  < 0)
-    goto out;
 
   hwloc_x86_os_state_save(&os_state, src_cpuiddump);
 
@@ -2086,6 +2084,10 @@ hwloc_x86_discover_all(hwloc_topology_t topology)
   assert(data);
   assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
   assert(topology->x86_mode != HWLOC_X86_MODE_DONE);
+
+  /* query features from current CPU (or CPU#0 dump) */
+  if (hwloc_x86_get_features(data) < 0)
+    return -1;
 
   hwloc_x86_discover(topology, data);
 
