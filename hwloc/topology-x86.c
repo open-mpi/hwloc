@@ -1540,6 +1540,27 @@ look_cpukinds_amd(struct hwloc_topology *topology,
   }
 }
 
+#if defined HWLOC_FREEBSD_SYS && defined HAVE_CPUSET_SETID
+#include <sys/param.h>
+#include <sys/cpuset.h>
+typedef cpusetid_t hwloc_x86_os_state_t;
+static void hwloc_x86_os_state_save(hwloc_x86_os_state_t *state)
+{
+  /* temporary make all cpus available during discovery */
+  cpuset_getid(CPU_LEVEL_CPUSET, CPU_WHICH_PID, -1, state);
+  cpuset_setid(CPU_WHICH_PID, -1, 0);
+}
+static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state)
+{
+  /* restore initial cpuset */
+  cpuset_setid(CPU_WHICH_PID, -1, *state);
+}
+#else /* !defined HWLOC_FREEBSD_SYS || !defined HAVE_CPUSET_SETID */
+typedef void * hwloc_x86_os_state_t;
+static void hwloc_x86_os_state_save(hwloc_x86_os_state_t *state __hwloc_attribute_unused) { }
+static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state __hwloc_attribute_unused) { }
+#endif /* !defined HWLOC_FREEBSD_SYS || !defined HAVE_CPUSET_SETID */
+
 static int
 look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data,
            struct procinfo *infos, unsigned long flags,
@@ -1548,14 +1569,18 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
            hwloc_bitmap_t restrict_set)
 {
   unsigned nbprocs = data->nbprocs;
+  hwloc_x86_os_state_t os_state;
   hwloc_bitmap_t orig_cpuset = NULL;
   hwloc_bitmap_t set = NULL;
   unsigned i;
 
   if (!data->src_cpuiddump_path) {
+    hwloc_x86_os_state_save(&os_state);
+
     orig_cpuset = hwloc_bitmap_alloc();
     if (get_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_bitmap_free(orig_cpuset);
+      hwloc_x86_os_state_restore(&os_state);
       return -1;
     }
     set = hwloc_bitmap_alloc();
@@ -1593,6 +1618,7 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
     set_cpubind(topology, orig_cpuset, 0);
     hwloc_bitmap_free(set);
     hwloc_bitmap_free(orig_cpuset);
+    hwloc_x86_os_state_restore(&os_state);
   }
 
   if (data->apicid_unique) {
@@ -1698,31 +1724,6 @@ hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data, struct cpuiddump *
   return 0;
 }
 
-#if defined HWLOC_FREEBSD_SYS && defined HAVE_CPUSET_SETID
-#include <sys/param.h>
-#include <sys/cpuset.h>
-typedef cpusetid_t hwloc_x86_os_state_t;
-static void hwloc_x86_os_state_save(hwloc_x86_os_state_t *state, struct cpuiddump *src_cpuiddump)
-{
-  if (!src_cpuiddump) {
-    /* temporary make all cpus available during discovery */
-    cpuset_getid(CPU_LEVEL_CPUSET, CPU_WHICH_PID, -1, state);
-    cpuset_setid(CPU_WHICH_PID, -1, 0);
-  }
-}
-static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state, struct cpuiddump *src_cpuiddump)
-{
-  if (!src_cpuiddump) {
-    /* restore initial cpuset */
-    cpuset_setid(CPU_WHICH_PID, -1, *state);
-  }
-}
-#else /* !defined HWLOC_FREEBSD_SYS || !defined HAVE_CPUSET_SETID */
-typedef void * hwloc_x86_os_state_t;
-static void hwloc_x86_os_state_save(hwloc_x86_os_state_t *state __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump __hwloc_attribute_unused) { }
-static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state __hwloc_attribute_unused, struct cpuiddump *src_cpuiddump __hwloc_attribute_unused) { }
-#endif /* !defined HWLOC_FREEBSD_SYS || !defined HAVE_CPUSET_SETID */
-
 /* fake cpubind for when nbprocs=1 and no binding support */
 static int fake_get_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 			    hwloc_cpuset_t set __hwloc_attribute_unused,
@@ -1743,7 +1744,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   unsigned nbprocs = data->nbprocs;
   unsigned i;
   struct procinfo *infos = NULL;
-  hwloc_x86_os_state_t os_state;
   struct hwloc_binding_hooks hooks;
   struct hwloc_topology_support support;
   struct hwloc_topology_membind_support memsupport __hwloc_attribute_unused;
@@ -1825,13 +1825,11 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   if (hwloc_x86_get_features(data, src_cpuiddump)  < 0)
     goto out_with_infos;
 
-  hwloc_x86_os_state_save(&os_state, src_cpuiddump);
-
   ret = look_procs(topology, data, infos, flags,
 		   get_cpubind, set_cpubind, restrict_set);
   if (!ret)
     /* success, we're done */
-    goto out_with_os_state;
+    goto out;
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
@@ -1839,9 +1837,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     summarize(topology, data, infos, flags);
     ret = 0;
   }
-
-out_with_os_state:
-  hwloc_x86_os_state_restore(&os_state, src_cpuiddump);
 
 out_with_infos:
   if (NULL != infos) {
