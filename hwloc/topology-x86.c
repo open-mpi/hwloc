@@ -589,7 +589,16 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
 	apic_nextshift = eax & 0x1f;
 	apic_type = (ecx & 0xff00) >> 8;
 	apic_id = edx;
-	id = (apic_id >> apic_shift) & ((1 << (apic_packageshift - apic_shift)) - 1);
+	/* apic_packageshift and apic_shift both come from cpuid (eax & 0x1f) and may
+	 * be arbitrary when replaying a dumped cpuid (HWLOC_CPUID_PATH): a package
+	 * shift of 31 would make 1<<31 overflow a signed int, and a shift larger
+	 * than the package shift would make the subtraction wrap into a huge shift
+	 * count. Only extract the id bits when the window is non-empty, otherwise
+	 * there are no bits to keep. */
+	if (apic_packageshift > (int) apic_shift)
+	  id = (apic_id >> apic_shift) & ((1U << (apic_packageshift - apic_shift)) - 1);
+	else
+	  id = 0;
 	hwloc_debug("x2APIC %08x %u: nextshift %u nextnumber %2u type %u id %2u\n",
                     apic_id,
                     level,
