@@ -1746,9 +1746,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     }
   }
 
-  if (!src_cpuiddump && !hwloc_have_x86_cpuid())
-    goto out;
-
   data->procinfos = infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
     goto out;
@@ -1948,7 +1945,7 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
 
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set)
-    return -1;
+    goto out;
 
   src_cpuiddump_path = getenv("HWLOC_CPUID_PATH");
   if (src_cpuiddump_path) {
@@ -1975,13 +1972,15 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
   if (!data->cpuiddumps) {
     int nbprocs;
 
+    if (!hwloc_have_x86_cpuid())
+      goto out_with_apicid_set;
+
 #if HAVE_DECL_RUNNING_ON_VALGRIND
     if (RUNNING_ON_VALGRIND) {
       fprintf(stderr, "hwloc x86 backend cannot work under Valgrind, disabling.\n"
               "May be reenabled by dumping CPUIDs with hwloc-gather-cpuid\n"
               "and reloading them under Valgrind with HWLOC_CPUID_PATH.\n");
-      hwloc_bitmap_free(data->apicid_set);
-      return -1;
+      goto out_with_apicid_set;
     }
 #endif
 
@@ -1994,6 +1993,11 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
   }
 
   return 0;
+
+ out_with_apicid_set:
+  hwloc_bitmap_free(data->apicid_set);
+ out:
+  return -1;
 }
 
 void
