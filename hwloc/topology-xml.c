@@ -2234,6 +2234,12 @@ done:
   }
 
   for(i=0; i<data->v2_memtiers_nr; i++) {
+    if (!data->v2_memtiers[i].nodeset) {
+      /* tier slot was preallocated by MemoryTiersNr but no NUMANode referenced it,
+       * importing it would push a tier with a NULL nodeset and crash later */
+      free(data->v2_memtiers[i].subtype);
+      continue;
+    }
     hwloc_internal_memtier_v2xml_import(topology, data->v2_memtiers[i].subtype, data->v2_memtiers[i].nodeset);
     /* nodeset is given to the callee */
     data->v2_memtiers[i].nodeset = NULL;
