@@ -2639,10 +2639,11 @@ static void hwloc_linux_add_pagesize_info(struct hwloc_topology *topology,
     struct stat sb;
 
     /* take the number of links as a good estimate for the number of sizes */
-    if (hwloc_stat("/sys/kernel/mm/hugepages", &sb, data->root_fd) == 0)
+    if (hwloc_stat("/sys/kernel/mm/hugepages", &sb, data->root_fd) == 0 && sb.st_nlink > 2)
       nr_sizes = sb.st_nlink - 2 + 1; /* . and .. ignored, normal size added */
     else
-      nr_sizes = 3; /* 1 normal + 3 huge sizes should be enough is most cases */
+      nr_sizes = 3; /* 1 normal + 3 huge sizes should be enough is most cases;
+                     * also used when st_nlink doesn't count subdirs (e.g. btrfs reports 1) */
 
     sizes = malloc(nr_sizes * sizeof(*sizes));
     if (!sizes) {
