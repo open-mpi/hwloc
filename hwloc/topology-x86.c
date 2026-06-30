@@ -35,6 +35,15 @@
 #endif
 
 struct hwloc_x86_backend_data_s {
+#define HWLOC_X86_STATE_INIT (1UL<<0) /* only init done */
+#define HWLOC_X86_STATE_FEATURES (1UL<<1) /* queried features from the current CPU */
+#define HWLOC_X86_STATE_FEATURES_FAILED (1UL<<2) /* failed to get features */
+#define HWLOC_X86_STATE_QUERIED (1UL<<3) /* queried everything from all CPUs */
+#define HWLOC_X86_STATE_QUERY_FAILED (1UL<<4) /* query failed */
+#define HWLOC_X86_STATE_OBJECTS (1UL<<5) /* built/inserted objects */
+#define HWLOC_X86_STATE_CPUKINDS (1UL<<6) /* built cpukinds */
+  unsigned long state;
+
   char pu_support;
   unsigned nbprocs;
 
@@ -1350,6 +1359,59 @@ static void summarize(struct hwloc_topology *topology, struct hwloc_x86_backend_
   hwloc_bitmap_free(complete_cpuset);
 }
 
+static int
+hwloc_x86_build_objects(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
+{
+  if (data->pu_support)
+    topology->support.discovery->pu = 1;
+
+  if (data->state & HWLOC_X86_STATE_QUERY_FAILED) {
+    /* we failed to query, just add PUs if none */
+    if (!topology->levels[0][0]->cpuset) {
+      hwloc_alloc_root_sets(topology->levels[0][0]);
+      hwloc_setup_pu_level(topology, data->nbprocs);
+    }
+    data->state |= HWLOC_X86_STATE_OBJECTS;
+    return 0;
+  }
+  assert(data->state & HWLOC_X86_STATE_QUERIED);
+
+  if (topology->levels[0][0]->cpuset) {
+    /* somebody else discovered things, reconnect levels so that we can look at them */
+    hwloc__reconnect(topology, 0);
+    if (topology->nb_levels != 2 || topology->level_nbobjects[1] != data->nbprocs) {
+      /* either more than a PU level was discovered, or the number of PUs doesn't match,
+       * just annotate the existing objects */
+      summarize(topology, data, 0);
+      hwloc__add_info(&topology->infos, "Backend", "x86");
+      data->state |= HWLOC_X86_STATE_OBJECTS;
+      return 0;
+    }
+  } else {
+    /* topology is empty, initialize it */
+    hwloc_alloc_root_sets(topology->levels[0][0]);
+  }
+
+  summarize(topology, data, HWLOC_X86_DISC_FLAG_FULL);
+  hwloc__add_info(&topology->infos, "Backend", "x86");
+
+  if (!data->cpuiddumps) { /* CPUID dump works for both x86 and x86_64 */
+#ifdef HAVE_UNAME
+    hwloc_add_uname_info(topology, NULL); /* we already know is_thissystem() is true */
+#else
+    /* uname isn't available, manually setup the "Architecture" info */
+#ifdef HWLOC_X86_64_ARCH
+    hwloc_obj_add_info(topology->levels[0][0], "Architecture", "x86_64");
+#else
+    hwloc_obj_add_info(topology->levels[0][0], "Architecture", "x86");
+#endif
+#endif
+  }
+
+  data->state |= HWLOC_X86_STATE_OBJECTS;
+  return 0;
+}
+
 static void
 look_cpukinds_intel(struct hwloc_topology *topology,
                     unsigned nbprocs, struct procinfo *infos)
@@ -1488,6 +1550,31 @@ look_cpukinds_amd(struct hwloc_topology *topology,
   }
 }
 
+static int
+hwloc_x86_build_cpukinds(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
+{
+  if (data->state & HWLOC_X86_STATE_QUERY_FAILED) {
+    data->state |= HWLOC_X86_STATE_CPUKINDS;
+    return 0;
+  }
+
+  if (!data->is_hybrid || data->nbprocs == 1
+      || (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
+    data->state |= HWLOC_X86_STATE_CPUKINDS;
+    return 0;
+  }
+
+  /* use hybrid info for cpukinds */
+  enum hwloc_x86_vendor vendor = data->vendor;
+  if (on_intel())
+    look_cpukinds_intel(topology, data->nbprocs, data->procinfos);
+  else if (on_amd())
+    look_cpukinds_amd(topology, data->nbprocs, data->procinfos);
+
+  data->state |= HWLOC_X86_STATE_CPUKINDS;
+  return 0;
+}
+
 #if defined HWLOC_FREEBSD_SYS && defined HAVE_CPUSET_SETID
 #include <sys/param.h>
 #include <sys/cpuset.h>
@@ -1601,6 +1688,8 @@ hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data)
   unsigned highest_ext_cpuid;
   enum hwloc_x86_vendor vendor;
 
+  assert(data->state == HWLOC_X86_STATE_INIT);
+
   eax = 0x00;
   cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
   highest_cpuid = eax;
@@ -1618,7 +1707,7 @@ hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data)
 
   hwloc_debug("highest cpuid %x, vendor %u\n", highest_cpuid, vendor);
   if (highest_cpuid < 0x01)
-    return -1;
+    goto error;
 
   data->highest_cpuid = highest_cpuid;
   data->vendor = vendor;
@@ -1650,7 +1739,12 @@ hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data)
     data->features[6] = ecx;
   }
 
+  data->state |= HWLOC_X86_STATE_FEATURES;
   return 0;
+
+ error:
+  data->state |= HWLOC_X86_STATE_FEATURES_FAILED;
+  return -1;
 }
 
 /* fake cpubind for when nbprocs=1 and no binding support */
@@ -1668,7 +1762,7 @@ static int fake_set_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 }
 
 static
-int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data, unsigned long flags)
+int hwloc_x86_query_all(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
 {
   unsigned nbprocs = data->nbprocs;
   unsigned i;
@@ -1680,6 +1774,13 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags) = NULL;
   hwloc_bitmap_t restrict_set = NULL;
   int ret = -1;
+
+  if (data->state & HWLOC_X86_STATE_FEATURES_FAILED)
+    goto error;
+  assert(data->state & HWLOC_X86_STATE_FEATURES);
+
+  if (data->nbprocs > 1 && !data->cpuiddumps && (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING))
+    goto error;
 
   /* check if binding works */
   memset(&hooks, 0, sizeof(hooks));
@@ -1711,7 +1812,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
     } else {
       /* we need binding support if there are multiple PUs */
       if (nbprocs > 1)
-	goto out;
+	goto error;
       get_cpubind = fake_get_cpubind;
       set_cpubind = fake_set_cpubind;
     }
@@ -1720,7 +1821,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_CPUBINDING) {
     restrict_set = hwloc_bitmap_alloc();
     if (!restrict_set)
-      goto out;
+      goto error;
     if (hooks.get_thisproc_cpubind)
       hooks.get_thisproc_cpubind(topology, restrict_set, 0);
     else if (hooks.get_thisthread_cpubind)
@@ -1733,7 +1834,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
 
   data->procinfos = infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
-    goto out;
+    goto error;
   for (i = 0; i < nbprocs; i++) {
     infos[i].ids[PKG] = (unsigned) -1;
     infos[i].ids[CORE] = (unsigned) -1;
@@ -1748,91 +1849,29 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
 		   get_cpubind, set_cpubind, restrict_set);
   if (!ret) {
     /* success */
-    if (data->apicid_unique) {
-      summarize(topology, data, flags);
-
-      if (data->is_hybrid
-          && !(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
-        /* use hybrid info for cpukinds */
-        enum hwloc_x86_vendor vendor = data->vendor;
-        if (on_intel())
-          look_cpukinds_intel(topology, nbprocs, infos);
-        else if (on_amd())
-          look_cpukinds_amd(topology, nbprocs, infos);
-      }
-    } else {
+    if (!data->apicid_unique) {
       hwloc_debug("x86 APIC IDs aren't unique, x86 discovery ignored.\n");
-      /* do nothing and return success, so that the caller does nothing either */
+      goto error;
     }
 
   }
   else if (nbprocs == 1) {
     /* look_procs() fails but there's only one processor, try without binding */
     look_proc(topology, data, &infos[0], data->cpuiddumps ? &data->cpuiddumps[0] : NULL);
-    summarize(topology, data, flags);
     ret = 0;
-  }
-
- out:
-  hwloc_bitmap_free(restrict_set);
-  return ret;
-}
-
-static int
-hwloc_x86_discover(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
-{
-  unsigned long flags = 0;
-  int alreadypus = 0;
-  int ret;
-
-  if (data->nbprocs > 1 && !data->cpuiddumps && (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
-    return 0;
-  }
-
-  if (topology->levels[0][0]->cpuset) {
-    /* somebody else discovered things, reconnect levels so that we can look at them */
-    hwloc__reconnect(topology, 0);
-    if (topology->nb_levels == 2 && topology->level_nbobjects[1] == data->nbprocs) {
-      /* only PUs were discovered, as much as we would, complete the topology with everything else */
-      alreadypus = 1;
-      goto fulldiscovery;
-    }
-
-    /* several object types were added, we can't easily complete, just do partial discovery */
-    ret = hwloc_look_x86(topology, data, flags);
-    if (!ret)
-      hwloc__add_info(&topology->infos, "Backend", "x86");
-    return 0;
   } else {
-    /* topology is empty, initialize it */
-    hwloc_alloc_root_sets(topology->levels[0][0]);
+    /* couldn't query all CPUs */
+    goto error;
   }
 
-fulldiscovery:
-  if (hwloc_look_x86(topology, data, flags | HWLOC_X86_DISC_FLAG_FULL) < 0) {
-    /* if failed, create PUs */
-    if (!alreadypus)
-      hwloc_setup_pu_level(topology, data->nbprocs);
-  }
+  hwloc_bitmap_free(restrict_set);
+  data->state |= HWLOC_X86_STATE_QUERIED;
+  return ret;
 
-  hwloc__add_info(&topology->infos, "Backend", "x86");
-
-  if (!data->cpuiddumps) { /* CPUID dump works for both x86 and x86_64 */
-#ifdef HAVE_UNAME
-    hwloc_add_uname_info(topology, NULL); /* we already know is_thissystem() is true */
-#else
-    /* uname isn't available, manually setup the "Architecture" info */
-#ifdef HWLOC_X86_64_ARCH
-    hwloc_obj_add_info(topology->levels[0][0], "Architecture", "x86_64");
-#else
-    hwloc_obj_add_info(topology->levels[0][0], "Architecture", "x86");
-#endif
-#endif
-  }
-  if (data->pu_support)
-    topology->support.discovery->pu = 1;
-
-  return 1;
+ error:
+  hwloc_bitmap_free(restrict_set);
+  data->state |= HWLOC_X86_STATE_QUERY_FAILED;
+  return -1;
 }
 
 static int
@@ -1985,11 +2024,13 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
     data->nbprocs = (unsigned) nbprocs;
   }
 
+  data->state = HWLOC_X86_STATE_INIT;
   return 0;
 
  out_with_apicid_set:
   hwloc_bitmap_free(data->apicid_set);
  out:
+  data->state = 0;
   return -1;
 }
 
@@ -2081,10 +2122,12 @@ hwloc_x86_discover_all(hwloc_topology_t topology)
   assert(topology->x86_mode != HWLOC_X86_MODE_DONE);
 
   /* query features from current CPU (or CPU#0 dump) */
-  if (hwloc_x86_get_features(data) < 0)
-    return -1;
+  hwloc_x86_get_features(data);
 
-  hwloc_x86_discover(topology, data);
+  hwloc_x86_query_all(topology, data);
+
+  hwloc_x86_build_objects(topology, data);
+  hwloc_x86_build_cpukinds(topology, data);
 
   topology->x86_mode = HWLOC_X86_MODE_DONE;
   return 0;
