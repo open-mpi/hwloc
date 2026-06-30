@@ -99,7 +99,7 @@ char const * win_dlerror(void)
                               GetLastError(), MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
                               error_buffer, (DWORD) sizeof( error_buffer ), NULL );
   /* skip the newline at the end, since we always add one in the log ouput */
-  if (error_buffer[len-1] = '\n')
+  if (len > 0 && error_buffer[len-1] == '\n')
     error_buffer[len-1] = '\0';
   return error_buffer;
 }
