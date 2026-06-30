@@ -635,7 +635,7 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
                 infos->power_efficiency_ranking = (ebx >> 16) & 0xff;
               /* if rankings aren't available, keep everything to 0 and only use hybridcoretype */
             }
-            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E */
+            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E, 2 = LP */
             infos->hybridnativemodel = (ebx >> 24) & 0xf; /* always 0 for Zen4 or Zen5 hybrid so far */
           }
           break;
@@ -1500,15 +1500,19 @@ static void
 look_cpukinds_amd(struct hwloc_topology *topology,
                   unsigned nbprocs, struct procinfo *infos)
 {
+  hwloc_bitmap_t lpset = hwloc_bitmap_alloc();
   hwloc_bitmap_t eset = hwloc_bitmap_alloc();
   hwloc_bitmap_t pset = hwloc_bitmap_alloc();
-  int has_e = 0, has_p = 0;
-  unsigned eeff = 0, peff = 0;
+  int has_lp = 0, has_e = 0, has_p = 0;
+  unsigned lpeff = 0, eeff = 0, peff = 0;
   unsigned i;
 
-  /* TODO Build a bitmap of efficiency rankings for each kind.
+  /* TODO: Build a bitmap of efficiency rankings for each kind.
    * They should not intersect.
-   * If there's more than one ranking per kind, split them below (like IntelLowPower).
+   * If there's more than one ranking per kind, split them below.
+   *
+   * However most models seem to just report 0 for all kinds
+   * (e.g. StrixPoint, and some newer ones)
    */
 
   for(i=0; i<nbprocs; i++) {
@@ -1523,21 +1527,38 @@ look_cpukinds_amd(struct hwloc_topology *topology,
       hwloc_bitmap_set(eset, i);
       eeff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
       break;
+    case 2: /* LP-core */
+      has_lp = 1;
+      hwloc_bitmap_set(lpset, i);
+      lpeff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
+      break;
     default:
       if (HWLOC_SHOW_CRITICAL_ERRORS())
         fprintf(stderr, "hwloc/x86: Unexpected AMD core type %x\n", infos[i].hybridcoretype);
     }
   }
 
-  if (!eeff && !peff) {
-    /* either not available, and report 0 for both kinds (e.g. StrixPoint) */
+  if (!lpeff && !eeff && !peff) {
+    /* either not available, or report 0 for all kinds */
     unsigned next = 0;
+    if (has_lp)
+      lpeff = next++;
     if (has_e)
       eeff = next++;
     if (has_p)
       peff = next++;
   }
 
+  /* register AMD LowPower set if any */
+  if (has_lp) {
+    struct hwloc_info_s infoattr;
+    infoattr.name = (char *) "CoreType";
+    infoattr.value = (char *) "AMDLowPower";
+    hwloc_internal_cpukinds_register(topology, lpset, lpeff, &infoattr, 1, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    /* the cpuset is given to the callee */
+  } else {
+    hwloc_bitmap_free(lpset);
+  }
   /* register AMD E-Core set if any */
   if (has_e) {
     struct hwloc_info_s infoattr;
