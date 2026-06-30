@@ -1697,7 +1697,6 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags) = NULL;
   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags) = NULL;
   hwloc_bitmap_t restrict_set = NULL;
-  struct cpuiddump *src_cpuiddump = NULL;
   int ret = -1;
 
   /* check if binding works */
@@ -1711,11 +1710,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
    * but that's the vast majority of cases anyway, and the overhead is very small.
    */
 
-  if (data->cpuiddumps) {
-    /* Just use cpuid from the dump (implies !topology->is_thissystem by default) */
-    src_cpuiddump = &data->cpuiddumps[0];
-
-  } else {
+  if (!data->cpuiddumps) {
     /* Using real hardware.
      * However we don't enforce topology->is_thissystem so that
      * we may still force use this backend when debugging with !thissystem.
@@ -1775,7 +1770,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
-    look_proc(topology, data, &infos[0], src_cpuiddump);
+    look_proc(topology, data, &infos[0], data->cpuiddumps ? &data->cpuiddumps[0] : NULL);
     summarize(topology, data, flags);
     ret = 0;
   }
