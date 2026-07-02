@@ -447,6 +447,9 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
     else
       len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX,
                      "%d", (int) index);
+    if (len >= MATRIX_ITEM_SIZE_MAX)
+      /* snprintf() returns the untruncated length, cap it to what actually fits */
+      len = MATRIX_ITEM_SIZE_MAX - 1;
     if (len >= max)
       max = maxrowheader = len; /* update for maxrowheader and max cell lens */
     /* store it at the end of the slot in headers */
@@ -461,6 +464,8 @@ hwloc_utils_print_distance_matrix(FILE *output, unsigned nbobjs, hwloc_obj_t *ob
     for(j=0; j<nbobjs; j++, buf += MATRIX_ITEM_SIZE_MAX) {
       char tmp[MATRIX_ITEM_SIZE_MAX];
       len = snprintf(tmp, MATRIX_ITEM_SIZE_MAX, "%llu", (unsigned long long) matrix[i*nbobjs+j]);
+      if (len >= MATRIX_ITEM_SIZE_MAX)
+        len = MATRIX_ITEM_SIZE_MAX - 1;
       if (len >= max)
         max = len; /* only update the max cell len */
       /* store it at the end of the slot in values */
