@@ -1048,7 +1048,9 @@ hwloc_utils_parse_cpuset_format(const char *string)
  *   "ay 0x0001 0x03"
  * */
 #define HWLOC_SYSTEMD_DBUS_API_PREFIX_FORMAT "ay 0x%04x"
-#define HWLOC_SYSTEMD_DBUS_API_PREFIX_SIZE 9
+/* "ay 0x" is 5 chars and %04x prints at least 4 hex digits but up to 8 for a
+ * large (32bit) byte count, so budget for the widest prefix */
+#define HWLOC_SYSTEMD_DBUS_API_PREFIX_SIZE 13
 #define HWLOC_SYSTEMD_DBUS_API_BYTES_FORMAT " 0x%02x"
 #define HWLOC_SYSTEMD_DBUS_API_BYTES_SIZE 5
 static __hwloc_inline int hwloc_utils_systemd_asprintf(char ** strp, const struct hwloc_bitmap_s * __hwloc_restrict set)
