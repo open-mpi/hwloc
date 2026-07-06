@@ -663,13 +663,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	  }
         }
 
-      if (cpuid >= Pproc_alloc) {
+      while (cpuid >= Pproc_alloc) {
+	unsigned oldalloc = Pproc_alloc;
 	struct hwloc_solaris_Pproc *tmp = realloc(Pproc, 2*Pproc_alloc * sizeof(*Pproc));
 	if (!tmp)
 	  goto err;
 	Pproc = tmp;
 	Pproc_alloc *= 2;
-	for(i = Pproc_alloc/2; i < Pproc_alloc; i++) {
+	for(i = oldalloc; i < Pproc_alloc; i++) {
 	  Pproc[i].Lproc = -1;
 	  Pproc[i].Lpkg = -1;
 	  Pproc[i].Ppkg = -1;
