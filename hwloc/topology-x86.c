@@ -71,7 +71,7 @@ struct hwloc_x86_backend_data_s {
   int apicid_unique;
 
   int is_knl;
-  int is_hybrid;
+  int is_hybrid; /* -1 if unknown */
 
   int found_die_ids;
   int found_complex_ids;
@@ -1558,7 +1558,8 @@ hwloc_x86_build_cpukinds(struct hwloc_topology *topology, struct hwloc_x86_backe
     return 0;
   }
 
-  if (!data->is_hybrid || data->nbprocs == 1
+  if (data->is_hybrid < 1 /* either not hybrid, or we don't know and have no way to build cpukinds */
+      || data->nbprocs == 1
       || (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS)) {
     data->state |= HWLOC_X86_STATE_CPUKINDS;
     return 0;
@@ -1738,6 +1739,11 @@ hwloc_x86_get_features(struct hwloc_x86_backend_data_s *data)
     data->features[1] = edx;
     data->features[6] = ecx;
   }
+
+  if (on_intel() || on_amd())
+    /* AMD and Intel aren't "unknown", we'll get "hybrid" during query */
+    data->is_hybrid = 0;
+  /* other vendors don't have hybrid CPU yet, and we don't know where to check, keep "unknown" */
 
   data->state |= HWLOC_X86_STATE_FEATURES;
   return 0;
@@ -1974,6 +1980,7 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
   /* non-zero default values (data was calloc'ed) */
   data->vendor = HWLOC_X86_VENDOR_UNKNOWN;
   data->apicid_unique = 1;
+  data->is_hybrid = -1; /* unknown */
 
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set)
@@ -2159,4 +2166,20 @@ hwloc_x86_discover_all(hwloc_topology_t topology)
 
   topology->x86_mode = HWLOC_X86_MODE_DONE;
   return 0;
+}
+
+int
+hwloc_x86_maybe_hybrid(hwloc_topology_t topology)
+{
+  struct hwloc_x86_backend_data_s *data = topology->x86_data;
+
+  if (!data)
+    /* we won't know */
+    return -1;
+  assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
+
+  if (topology->x86_mode != HWLOC_X86_MODE_DONE)
+    hwloc__x86_do_until(topology, data, HWLOC_X86_STATE_FEATURES|HWLOC_X86_STATE_QUERIED);
+
+  return data->is_hybrid;
 }

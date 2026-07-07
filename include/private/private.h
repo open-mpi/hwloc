@@ -384,11 +384,13 @@ static __hwloc_inline void hwloc__init_infos_static(struct hwloc_infos_s *infos,
 #ifdef HWLOC_HAVE_X86_CPUID
 extern void hwloc_x86_init(struct hwloc_topology *);
 extern void hwloc_x86_prepare(struct hwloc_topology *);
+extern int hwloc_x86_maybe_hybrid(struct hwloc_topology *); /* 1 if hybrid, 0 if not, -1 if unknown (or x86 not supported/disabled) */
 extern int hwloc_x86_discover_all(hwloc_topology_t topology);
 extern void hwloc_x86_exit(struct hwloc_topology *);
 #else
 static __hwloc_inline void hwloc_x86_init(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
 static __hwloc_inline void hwloc_x86_prepare(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+static __hwloc_inline int hwloc_x86_maybe_hybrid(hwloc_topology_t topology __hwloc_attribute_unused) { return -1; /* unknown */ }
 static __hwloc_inline int hwloc_x86_discover_all(hwloc_topology_t topology __hwloc_attribute_unused) { return 0; }
 static __hwloc_inline void hwloc_x86_exit(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
 #endif
