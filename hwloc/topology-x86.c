@@ -2112,6 +2112,40 @@ hwloc_x86_exit(hwloc_topology_t topology)
   hwloc_x86_init(topology);
 }
 
+static void
+hwloc__x86_do_until(hwloc_topology_t topology,
+                    struct hwloc_x86_backend_data_s *data,
+                    unsigned long until_state)
+{
+  assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
+  assert(data);
+  assert(data->state & HWLOC_X86_STATE_INIT);
+
+  if ((until_state & HWLOC_X86_STATE_FEATURES)
+      && !(data->state & (HWLOC_X86_STATE_FEATURES|HWLOC_X86_STATE_FEATURES_FAILED))) {
+    /* query features from current CPU (or CPU#0 dump) */
+    hwloc_x86_get_features(data);
+  }
+
+  if ((until_state & HWLOC_X86_STATE_QUERIED)
+      && !(data->state & (HWLOC_X86_STATE_QUERIED|HWLOC_X86_STATE_QUERY_FAILED))) {
+    /* query all CPUs, requires features */
+    hwloc_x86_query_all(topology, data);
+  }
+
+  if ((until_state & HWLOC_X86_STATE_OBJECTS)
+      && !(data->state & HWLOC_X86_STATE_OBJECTS)) {
+    /* build/insert objects, requires query */
+    hwloc_x86_build_objects(topology, data);
+  }
+
+  if ((until_state & HWLOC_X86_STATE_CPUKINDS)
+      && !(data->state & HWLOC_X86_STATE_CPUKINDS)) {
+    /* build cpukinds, require query*/
+    hwloc_x86_build_cpukinds(topology, data);
+  }
+}
+
 int
 hwloc_x86_discover_all(hwloc_topology_t topology)
 {
@@ -2121,13 +2155,7 @@ hwloc_x86_discover_all(hwloc_topology_t topology)
   assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
   assert(topology->x86_mode != HWLOC_X86_MODE_DONE);
 
-  /* query features from current CPU (or CPU#0 dump) */
-  hwloc_x86_get_features(data);
-
-  hwloc_x86_query_all(topology, data);
-
-  hwloc_x86_build_objects(topology, data);
-  hwloc_x86_build_cpukinds(topology, data);
+  hwloc__x86_do_until(topology, data, HWLOC_X86_STATE_FEATURES|HWLOC_X86_STATE_QUERIED|HWLOC_X86_STATE_OBJECTS|HWLOC_X86_STATE_CPUKINDS);
 
   topology->x86_mode = HWLOC_X86_MODE_DONE;
   return 0;
