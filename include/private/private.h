@@ -391,6 +391,7 @@ static __hwloc_inline void hwloc_x86_init(struct hwloc_topology *topology)
 #ifdef HWLOC_HAVE_X86_CPUID
 extern void hwloc_x86_prepare(struct hwloc_topology *topology);
 extern enum hwloc_x86_mode_e hwloc_x86_fixup_mode(struct hwloc_topology *, enum hwloc_x86_mode_e dflt, int maybecustom, const char *osname);
+extern int hwloc_x86_maybe_hybrid(struct hwloc_topology *); /* 1 if hybrid, 0 if not, -1 if unknown (or x86 not supported/disabled) */
 extern int hwloc_x86_discover_all(hwloc_topology_t topology);
 extern void hwloc_x86_exit(struct hwloc_topology *);
 #else
@@ -400,6 +401,7 @@ static __hwloc_inline void hwloc_x86_prepare(hwloc_topology_t topology)
   assert(!topology->x86_data);
 }
 static __hwloc_inline enum hwloc_x86_mode_e hwloc_x86_fixup_mode(struct hwloc_topology * topology  __hwloc_attribute_unused, enum hwloc_x86_mode_e dflt __hwloc_attribute_unused int maybecustom  __hwloc_attribute_unused, const char *osname __hwloc_attribute_unused) { return HWLOC_X86_MODE_NONE; }
+static __hwloc_inline int hwloc_x86_maybe_hybrid(hwloc_topology_t topology __hwloc_attribute_unused) { return -1; /* unknown */ }
 static __hwloc_inline int hwloc_x86_discover_all(hwloc_topology_t topology __hwloc_attribute_unused) { return -1; }
 static __hwloc_inline void hwloc_x86_exit(hwloc_topology_t topology) {
   hwloc_x86_init(topology);
