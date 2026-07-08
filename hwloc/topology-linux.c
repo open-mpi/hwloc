@@ -62,6 +62,8 @@ struct hwloc_linux_backend_data_s {
   char cpukinds_enabled;
   char cpukinds_use_midr;
   char cpukinds_use_cppc;
+  char cpukinds_maxfreq_enabled;
+  int cpukinds_maxfreq_adjust;
   char use_numa_distances;
   char use_numa_distances_for_cpuless;
   char use_numa_initiators;
@@ -4022,24 +4024,14 @@ look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
   struct hwloc_linux_cpukinds_arrays arrays;
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
   char *env;
-  int maxfreq_enabled = -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
-  unsigned adjust_max = 10;
+  int maxfreq_enabled = data->cpukinds_maxfreq_enabled;
+  unsigned adjust_max = data->cpukinds_maxfreq_adjust;
   int force_homogeneous = 0;
   int i;
 
   arrays.use_cppc_nominal_freq = data->cpukinds_use_cppc;
   arrays.max_without_basefreq = 0;
 
-  env = getenv("HWLOC_CPUKINDS_MAXFREQ");
-  if (env) {
-    if (!strcmp(env, "0")) {
-      maxfreq_enabled = 0;
-    } else if (!strcmp(env, "1")) {
-      maxfreq_enabled = 1;
-    } else if (!strncmp(env, "adjust=", 7)) {
-      adjust_max = atoi(env+7);
-    }
-  }
   if (maxfreq_enabled == 1)
     hwloc_debug("linux/cpufreq: max frequency values are enforced even if it makes CPUs unexpectedly hybrid\n");
   else if (maxfreq_enabled == 0)
@@ -7260,6 +7252,18 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
         }
       }
     }
+    if (data->cpukinds_enabled) {
+      env = getenv("HWLOC_CPUKINDS_MAXFREQ");
+      if (env) {
+        if (!strcmp(env, "0")) {
+          data->cpukinds_maxfreq_enabled = 0;
+        } else if (!strcmp(env, "1")) {
+          data->cpukinds_maxfreq_enabled = 1;
+        } else if (!strncmp(env, "adjust=", 7)) {
+          data->cpukinds_maxfreq_adjust = atoi(env+7);
+        }
+      }
+    }
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
@@ -7387,6 +7391,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->cpukinds_enabled = -1; /* not decided yet */
   data->cpukinds_use_midr = 0; /* disabled until files are found */
   data->cpukinds_use_cppc = -1; /* -1 means try, 0 no, 1 yes */
+  data->cpukinds_maxfreq_enabled =  -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
+  data->cpukinds_maxfreq_adjust = 10;
   data->is_amd_with_CU = 0;
   data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
