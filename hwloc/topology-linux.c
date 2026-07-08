@@ -44,7 +44,7 @@
 struct hwloc_linux_backend_data_s {
   char *root_path; /* NULL if unused */
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-  int is_real_fsroot; /* Boolean saying whether root_fd points to the real filesystem root of the system */
+  char is_real_fsroot; /* Boolean saying whether root_fd points to the real filesystem root of the system */
 #ifdef HWLOC_HAVE_LIBUDEV
   struct udev *udev; /* Global udev context */
 #endif
@@ -57,17 +57,17 @@ struct hwloc_linux_backend_data_s {
     HWLOC_LINUX_ARCH_LOONGARCH,
     HWLOC_LINUX_ARCH_UNKNOWN
   } arch;
-  int is_amd_with_CU;
-  int is_amd_homogeneous;
+  char is_amd_with_CU;
+  char is_amd_homogeneous;
+  char has_sysfs_midr_regs;
+  char use_numa_distances;
+  char use_numa_distances_for_cpuless;
+  char use_numa_initiators;
   int is_fake_numa_uniform; /* 0 if not fake, -1 if fake non-uniform, N if fake=<N>U */
-  int has_sysfs_midr_regs;
-  int use_numa_distances;
-  int use_numa_distances_for_cpuless;
-  int use_numa_initiators;
   struct utsname utsname; /* fields contain \0 when unknown */
   int fallback_nbprocessors; /* only used in hwloc_linux_fallback_pu_level(), maybe be <= 0 (error) earlier */
   unsigned pagesize;
-  int need_global_infos;
+  char need_global_infos;
   struct hwloc_infos_s global_infos;
   struct hwloc_infos_s cpukinds_pkg_infos;
 };
