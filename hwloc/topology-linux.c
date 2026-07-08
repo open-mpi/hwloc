@@ -59,7 +59,6 @@ struct hwloc_linux_backend_data_s {
   } arch;
   char is_amd_with_CU;
   char is_amd_homogeneous;
-  char has_sysfs_midr_regs;
   char cpukinds_enabled;
   char cpukinds_use_midr;
   char cpukinds_use_cppc;
@@ -4330,9 +4329,6 @@ look_sysfscpukinds(struct hwloc_topology *topology,
   if (!data->cpukinds_enabled)
     return 0;
 
-  if (data->cpukinds_use_midr == -1)
-    data->cpukinds_use_midr = data->has_sysfs_midr_regs;
-
   if (data->cpukinds_use_midr)
     return look_sysfscpukinds_by_midr_regs(topology, data);
 
@@ -5084,8 +5080,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
     break;
   case HWLOC_LINUX_ARCH_ARM:
-    if (data->has_sysfs_midr_regs)
-      /* TODO: if cpukinds disabled or not using MIDR, use the no-midr one */
+    if (data->cpukinds_use_midr)
       parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm_midr;
     else
       parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
@@ -5326,12 +5321,6 @@ hwloc_gather_system_info(struct hwloc_topology *topology,
       data->arch = HWLOC_LINUX_ARCH_LOONGARCH;
     else if (!strcmp(data->utsname.machine, "ia64"))
       data->arch = HWLOC_LINUX_ARCH_IA64;
-  }
-
-  if (data->arch == HWLOC_LINUX_ARCH_ARM) {
-    /* only check cpu0 even if offline since these files contain midr values read during boot */
-    if (!hwloc_access("/sys/devices/system/cpu/cpu0/regs/identification/midr_el1", R_OK, data->root_fd))
-      data->has_sysfs_midr_regs = 1;
   }
 }
 
@@ -7251,6 +7240,12 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
       data->cpukinds_enabled = 0;
     } else {
+      data->cpukinds_use_midr = 0;
+      if (data->arch == HWLOC_LINUX_ARCH_ARM /* was set in hwloc_gather_system_info() */) {
+        /* only check cpu0 even if offline since these files contain midr values read during boot */
+        if (!hwloc_access("/sys/devices/system/cpu/cpu0/regs/identification/midr_el1", R_OK, data->root_fd))
+          data->cpukinds_use_midr = 1;
+      }
       env = getenv("HWLOC_LINUX_CPUKINDS");
       if (env) {
         if (!strcmp(env, "none") || !strcmp(env, "0")) {
@@ -7389,9 +7384,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
 
   /* default values */
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
-  data->has_sysfs_midr_regs = 0;
   data->cpukinds_enabled = -1; /* not decided yet */
-  data->cpukinds_use_midr = -1; /* unknown yet, will depend on has_sysfs_midr_regs */
+  data->cpukinds_use_midr = 0; /* disabled until files are found */
   data->cpukinds_use_cppc = -1; /* -1 means try, 0 no, 1 yes */
   data->is_amd_with_CU = 0;
   data->is_amd_homogeneous = 0;
