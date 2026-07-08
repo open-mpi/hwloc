@@ -60,6 +60,9 @@ struct hwloc_linux_backend_data_s {
   char is_amd_with_CU;
   char is_amd_homogeneous;
   char has_sysfs_midr_regs;
+  char cpukinds_enabled;
+  char cpukinds_use_midr;
+  char cpukinds_use_cppc;
   char use_numa_distances;
   char use_numa_distances_for_cpuless;
   char use_numa_initiators;
@@ -4013,8 +4016,7 @@ hwloc_linux_cpukinds_force_homogeneous(struct hwloc_topology *topology,
 /* use frequencies and capacities for finding cpukinds */
 static int
 look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
-                           struct hwloc_linux_backend_data_s *data,
-                           int use_cppc_nominal_freq)
+                           struct hwloc_linux_backend_data_s *data)
 {
   int nr_pus;
   struct hwloc_linux_cpukinds_by_pu *by_pu;
@@ -4026,7 +4028,7 @@ look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
   int force_homogeneous = 0;
   int i;
 
-  arrays.use_cppc_nominal_freq = use_cppc_nominal_freq;
+  arrays.use_cppc_nominal_freq = data->cpukinds_use_cppc;
   arrays.max_without_basefreq = 0;
 
   env = getenv("HWLOC_CPUKINDS_MAXFREQ");
@@ -4318,38 +4320,23 @@ static int
 look_sysfscpukinds(struct hwloc_topology *topology,
                    struct hwloc_linux_backend_data_s *data)
 {
-  char *env;
-  int enabled = -1; /* not decided yet */
-  int use_midr = data->has_sysfs_midr_regs;
-  int use_cppc_nominal_freq = -1; /* -1 means try, 0 no, 1 yes */
-
-  env = getenv("HWLOC_LINUX_CPUKINDS");
-  if (env) {
-    if (!strcmp(env, "none") || !strcmp(env, "0")) {
-      enabled = 0;
-    } else {
-      /* if variable is given, assume anything else means enabled */
-      enabled = 1;
-      if (!strncmp(env, "cppc=", 5))
-        use_cppc_nominal_freq = atoi(env+5);
-      else if (!strncmp(env, "midr=", 5))
-        use_midr = atoi(env+5);
-    }
-  }
-  if (enabled == -1 && data->is_amd_homogeneous) {
+  if (data->cpukinds_enabled == -1 && data->is_amd_homogeneous) {
     /* If not disabled but on pre-Zen5 AMD, disable since useless.
      * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
      */
     hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
-    enabled = 0;
+    data->cpukinds_enabled = 0;
   }
-  if (!enabled)
+  if (!data->cpukinds_enabled)
     return 0;
 
-  if (use_midr)
+  if (data->cpukinds_use_midr == -1)
+    data->cpukinds_use_midr = data->has_sysfs_midr_regs;
+
+  if (data->cpukinds_use_midr)
     return look_sysfscpukinds_by_midr_regs(topology, data);
 
-  look_sysfscpukinds_by_freq(topology, data, use_cppc_nominal_freq);
+  look_sysfscpukinds_by_freq(topology, data);
 
   if (data->arch == HWLOC_LINUX_ARCH_X86)
     look_sysfscpukinds_by_pmu_sets(topology, data);
@@ -5597,7 +5584,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_topology *topology,
     hwloc_linux_fallback_pu_level(topology, data);
 
  cpudone:
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
+  if (data->cpukinds_enabled)
     look_sysfscpukinds(topology, data);
 
   /*********************
@@ -7251,13 +7238,33 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 #ifdef HWLOC_HAVE_LINUXIO
   enum hwloc_type_filter_e pfilter, bfilter, ofilter, mfilter;
 #endif /* HWLOC_HAVE_LINUXIO */
-
   if (data->need_global_infos) {
+    char *env;
+
     /* gather some info in data without actually adding them to the topology yet */
     hwloc_gather_system_info(topology, data);
     hwloc_linuxfs_check_kernel_cmdline(data);
     /* soc info needed for cpukinds quirks in hwloc_linuxfs_look_cpu() */
     hwloc__get_soc_info(data);
+
+    /* initialize cpukinds config */
+    if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
+      data->cpukinds_enabled = 0;
+    } else {
+      env = getenv("HWLOC_LINUX_CPUKINDS");
+      if (env) {
+        if (!strcmp(env, "none") || !strcmp(env, "0")) {
+          data->cpukinds_enabled = 0;
+        } else {
+          /* if variable is given, assume anything else means enabled */
+          data->cpukinds_enabled = 1;
+          if (!strncmp(env, "cppc=", 5))
+            data->cpukinds_use_cppc = atoi(env+5);
+          else if (!strncmp(env, "midr=", 5))
+            data->cpukinds_use_midr = atoi(env+5);
+        }
+      }
+    }
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
@@ -7289,7 +7296,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 #ifdef HWLOC_HAVE_LINUXPCI
     hwloc_linuxfs_pci_look_pcislots(topology, data);
 #endif /* HWLOC_HAVE_LINUXPCI */
-    hwloc_sysfscpukinds_annotate_packages(topology, data);
+    if (data->cpukinds_enabled)
+      hwloc_sysfscpukinds_annotate_packages(topology, data);
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_IO
@@ -7382,6 +7390,9 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   /* default values */
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->has_sysfs_midr_regs = 0;
+  data->cpukinds_enabled = -1; /* not decided yet */
+  data->cpukinds_use_midr = -1; /* unknown yet, will depend on has_sysfs_midr_regs */
+  data->cpukinds_use_cppc = -1; /* -1 means try, 0 no, 1 yes */
   data->is_amd_with_CU = 0;
   data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
