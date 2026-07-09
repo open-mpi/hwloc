@@ -7177,16 +7177,16 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
             data->cpukinds_use_midr = atoi(env+5);
         }
       }
-    }
-    if (data->cpukinds_enabled) {
-      env = getenv("HWLOC_CPUKINDS_MAXFREQ");
-      if (env) {
-        if (!strcmp(env, "0")) {
-          data->cpukinds_maxfreq_enabled = 0;
-        } else if (!strcmp(env, "1")) {
-          data->cpukinds_maxfreq_enabled = 1;
-        } else if (!strncmp(env, "adjust=", 7)) {
-          data->cpukinds_maxfreq_adjust = atoi(env+7);
+      if (data->cpukinds_enabled) {
+        env = getenv("HWLOC_CPUKINDS_MAXFREQ");
+        if (env) {
+          if (!strcmp(env, "0")) {
+            data->cpukinds_maxfreq_enabled = 0;
+          } else if (!strcmp(env, "1")) {
+            data->cpukinds_maxfreq_enabled = 1;
+          } else if (!strncmp(env, "adjust=", 7)) {
+            data->cpukinds_maxfreq_adjust = atoi(env+7);
+          }
         }
       }
     }
