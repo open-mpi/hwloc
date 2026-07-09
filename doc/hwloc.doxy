@@ -1046,6 +1046,8 @@ following environment variables.
   used last after the operating system-based detection.
   This is the default for operating systems with CPU topology query APIs
   and x86 support (Linux, Windows and Solaris).
+  Note that Linux also queries x86 CPUID to enable/disable hardware-specific
+  features such as hybrid CPU detection.
 
   If the variable is set to <tt>first</tt>, x86 is used first before
   adding OS-detected CPU topology.
@@ -1241,7 +1243,8 @@ following environment variables.
 
   A comma-separated list of key-value pairs maybe given, including
   <tt>cppc=0</tt> for disabling the use of ACPI CPPC nominal frequencies,
-  <tt>midr=0</tt> for disabling the use of ARM MIDR registers.
+  <tt>midr=0</tt> for disabling the use of ARM MIDR registers,
+  <tt>x86cpuid=0</tt> for disabling the use of x86 CPUID registers.
 
   Keywords <tt>maxfreq</tt> and <tt>freqadjust</tt>
   may also be given to configure the frequency-based heuristics.
