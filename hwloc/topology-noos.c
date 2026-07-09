@@ -22,8 +22,21 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
 
   struct hwloc_topology *topology = backend->topology;
   int64_t memsize;
+  enum hwloc_x86_mode_e x86_mode = topology->x86_mode;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
+
+  if (x86_mode == HWLOC_X86_MODE_CUSTOM) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER|HWLOC_SHOWMSG_X86))
+      fprintf(stderr, "hwloc/no_os: no custom x86 mode, using default.");
+    x86_mode = HWLOC_X86_MODE_DEFAULT;
+  }
+  if (x86_mode == HWLOC_X86_MODE_DEFAULT)
+    x86_mode = HWLOC_X86_MODE_FIRST;
+  if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+    hwloc_x86_discover_all(topology);
+  if (x86_mode == HWLOC_X86_MODE_ONLY)
+    return 0;
 
   if (!topology->levels[0][0]->cpuset) {
     int nbprocs;
@@ -45,6 +58,10 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
 
   hwloc_add_uname_info(topology, NULL);
   hwloc_fallback_add_pagesize_info(topology);
+
+  if (x86_mode == HWLOC_X86_MODE_LAST)
+    hwloc_x86_discover_all(topology);
+
   return 0;
 }
 

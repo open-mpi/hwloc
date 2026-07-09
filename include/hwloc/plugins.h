@@ -72,7 +72,6 @@ struct hwloc_disc_component {
    *
    * Usual values are
    * 50 for native OS (or platform) components,
-   * 45 for x86,
    * 40 for no-OS fallback,
    * 30 for global components (xml, synthetic),
    * 20 for pci,

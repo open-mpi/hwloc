@@ -1022,21 +1022,46 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
-  <dd>Force the x86 backend to read dumped CPUIDs from the given directory
+  <dd>Force the x86 sub-backend to read dumped CPUIDs from the given directory
   instead of executing actual x86 CPUID instructions.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-cpuid</tt>.
 
-  One should likely also set <tt>HWLOC_COMPONENTS=x86,stop</tt>
-  so that non-x86 backends are disabled
-  (the <tt>-i</tt> option of command-line tools takes care of both).
+  One should likely also set <tt>HWLOC_X86=only</tt>
+  so that non-x86 backends are disabled (see below).
+  The <tt>-i</tt> option of command-line tools takes care of both.
 
   It causes hwloc_topology_is_thissystem() to return 0.
-  For convenience, this backend provides empty binding hooks which just
+  For convenience, the OS backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded CPUID dump is really the underlying system.
   </dd>
+
+<dt>HWLOC_X86=default</dt>
+  <dd>Change the way operating system backends use x86 CPUID to improve
+  their detection of CPUs.
+
+  If the variable is set to <tt>last</tt>, x86 CPUID-based detection is
+  used last after the operating system-based detection.
+  This is the default for operating systems with CPU topology query APIs
+  and x86 support (Linux, Windows and Solaris).
+
+  If the variable is set to <tt>first</tt>, x86 is used first before
+  adding OS-detected CPU topology.
+  This is the default for operating systems that don't provide CPU topology
+  detection (FreeBSD, NetBSD, etc.).
+
+  If the variable is set to <tt>only</tt>, x86 is used first and the OS
+  APIs are disabled, including for NUMA detection for instance.
+
+  If the variable is set to <tt>none</tt>, x86 detection is disabled.
+
+  This is useful for understanding whether a topology issue comes
+  from the native operating system backend or from the x86 detection:
+  Setting to <tt>none</tt> or <tt>only</tt> will test one code without
+  the other.
+</dd>
 
 <dt>HWLOC_ANNOTATE_GLOBAL_COMPONENTS=0</dt>
   <dd>Allow components to annotate the topology even if they are
@@ -1287,11 +1312,6 @@ following environment variables.
   list.
   If <tt>stop</tt> is met, the enabling loop immediately stops, no
   more component is enabled.
-
-  This is useful for understanding whether a topology issue comes
-  from the native operating system backend or from the x86 backend:
-  Setting to <tt>x86,stop</tt> or <tt>linux,stop</tt> will test
-  one backend without the other.
 
   If <tt>xml</tt> or <tt>synthetic</tt> components are selected,
   the corresponding XML filename or synthetic description string
@@ -3379,8 +3399,6 @@ some will be ignored.
 The usual default is to enable the native operating system component,
 (e.g. <tt>linux</tt> or <tt>solaris</tt>) and the
 <tt>pci</tt> one.
-If available, an architecture-specific component (such as <tt>x86</tt>)
-may also improve the topology detection.
 Finally, some hardware-specific components (such as <tt>cuda</tt> or <tt>rsmi</tt>)
 may add information about GPUs, accelerators, etc.
 
@@ -3393,15 +3411,12 @@ will be used instead of all other components.
 The hwloc core contains a list of components sorted by priority.
 Each one is enabled as long as it does not conflict with the
 previously enabled ones.
-This includes native operating system components,
-architecture-specific ones, and if available, I/O components
-such as <tt>pci</tt> or <tt>cuda</tt>.
+This includes native operating system components
+and if available, I/O components such as <tt>pci</tt> or <tt>cuda</tt>.
 
 Usually the native operating system component
 (when it exists, e.g. <tt>linux</tt> or <tt>aix</tt>)
 is enabled first.
-Then hwloc looks for an architecture specific component
-(e.g. <tt>x86</tt>).
 As a fallback, there is also a basic component (<tt>no_os</tt>)
 that just tries to discover the number of PUs in the system.
 It is used for operating systems that do not
@@ -3418,8 +3433,6 @@ Default priorities ensure that clever components are invoked first.
 Native operating system components have higher priorities,
 and are therefore invoked first, because they likely offer
 very detailed topology information.
-If needed, it will be later extended by architecture-specific
-information (e.g. from the <tt>x86</tt> component).
 
 If any configuration function such as hwloc_topology_set_xml()
 is used before loading the topology, the corresponding component
@@ -3456,18 +3469,19 @@ If the variable is set and empty (or set to a single comma separating nothing,
 since some operating systems do not accept empty variables),
 the normal component priority order is used.
 
-If the variable is set to <tt>x86</tt>, it will cause
-the <tt>x86</tt> component to take precedence over any other component,
+If the variable is set to <tt>pci</tt>, it will cause
+the <tt>pci</tt> component to take precedence over any other component,
 including the native operating system component.
 It is therefore loaded first, before hwloc tries to load all remaining
 non-conflicting components.
-In this case, <tt>x86</tt> would take care of discovering everything
-it supports, instead of only completing what the native OS information.
 This may be useful if the native component is buggy on some platforms.
+In this case, during the PCI discovery phase, the <tt>pci</tt> component
+would take care of discovering everything PCI related instead of
+having the <tt>linux</tt> component do it first.
 
 It is possible to prevent some components from being loaded by prefixing their
-name with <tt>-</tt> in the list. For instance <tt>x86,-pci</tt> will load the
-<tt>x86</tt> component, then let hwloc load all the usual components except
+name with <tt>-</tt> in the list. For instance <tt>linux,-pci</tt> will load the
+<tt>linux</tt> component, then let hwloc load all the usual components except
 <tt>pci</tt>.
 A single component phase may also be blacklisted, for instance with <tt>-linux:io</tt>.
 
@@ -3536,12 +3550,6 @@ environment variable (see \ref envvar_verbose).
 <dd>
  Each officially supported operating system has its own native component,
  which is statically built when supported, and which is used by default.
-</dd>
-<dt>x86</dt>
-<dd>
- The x86 architecture (either 32 or 64 bits) has its own component
- that may complete or replace the previously-found CPU information.
- It is statically built when supported.
 </dd>
 <dt>no_os</dt>
 <dd>
@@ -3630,7 +3638,12 @@ environment variable (see \ref envvar_verbose).
 </dd>
 </dl>
 
-
+Before hwloc 3.0, the x86 architecture (either 32 or 64 bits) had its own component
+that could complete or replace the previously-found CPU information.
+It is now called by operating system backend explicitly to complete their detection.
+See <tt>HWLOC_X86</tt> in \ref envvar_source for controlling this behavior.
+hwloc_topology_set_components() may also still be used to disable this "x86"
+CPUID-based detection.
 
 
 \page embed Embedding hwloc in Other Software
@@ -3903,7 +3916,7 @@ hwloc_topology_load(topology);
 <br/>
 Finally it is possible to prevent some hwloc components from being
 loaded and queried.
-If you are sure that the Linux (or x86) component is enough to discover
+If you are sure that the Linux component is enough to discover
 everything you need, you may ask hwloc to disable all other components
 by setting something like <tt>HWLOC_COMPONENTS=linux,stop</tt>
 in the environment.
@@ -4048,9 +4061,9 @@ hwloc currently uses Groups for the following reasons:
 <li>NUMA parents when memory locality does not match any existing object.</li>
 <li>I/O parents when I/O locality does not match any existing object.</li>
 <li>Distance-based groups made of close objects.</li>
-<li>AMD Core Complex (CCX) (<tt>subtype</tt> is <tt>Complex</tt>, in the x86 backend),
+<li>AMD Core Complex (CCX) (<tt>subtype</tt> is <tt>Complex</tt>, in the x86 detection),
  but these objects are usually merged with the L3 caches or Dies.</li>
-<li>AMD Bulldozer dual-core compute units (<tt>subtype</tt> is <tt>ComputeUnit</tt>, in the x86 backend),
+<li>AMD Bulldozer dual-core compute units (<tt>subtype</tt> is <tt>ComputeUnit</tt>, in the x86 detection),
  but these objects are usually merged with the L2 caches.</li>
 <li>Intel Extended Topology Enumeration levels such as Module and Tile
  (in the x86 and Windows backends).</li>
@@ -4507,7 +4520,7 @@ this error (and hide it by setting HWLOC_SHOW_ERRORS=none in your environment).
 
 Some platforms report similar warnings about conflicting Packages and NUMANodes.
 
-On x86 hosts, passing <tt>HWLOC_COMPONENTS=x86</tt> in the environment may
+On x86 hosts, passing <tt>HWLOC_X86=first</tt> in the environment may
 workaround some of these issues by switching to a different way to discover the topology.
 
 Upgrading the BIOS and/or the operating system may help.
@@ -4674,8 +4687,7 @@ hwloc also comes with an example of <b>Microsoft Visual Studio solution</b>
 
 \subsection faq_netbsd_bind How to get useful topology information on NetBSD?
 
-The NetBSD (and FreeBSD) backend uses x86-specific topology discovery
-(through the x86 component).
+The NetBSD (and FreeBSD) backend uses x86-specific topology discovery.
 This implementation requires CPU binding so as to query topology
 information from each individual processor.
 This means that hwloc cannot find any useful topology information
@@ -5142,6 +5154,13 @@ and HWLOC_CPUKINDS_MAXFREQ, see \ref envvar_heuristics.
 
 The HWLOC_CPUKINDS_HOMOGENEOUS environment variable is removed.
 HWLOC_LINUX_CPUKINDS may be used to disable cpukinds if ever needed.
+
+x86 CPUID discovery is not its own component anymore, it is called by
+operating system component internally when needed.
+Hence it shouldn't be controlled with the <tt>HWLOC_COMPONENTS</tt> environment
+variable but rather with <tt>HWLOC_X86</tt>, see \ref envvar_source.
+hwloc_topology_set_components() may still be used to disable this "x86"
+CPUID-based detection.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete

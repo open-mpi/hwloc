@@ -7201,7 +7201,22 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
-    hwloc_linuxfs_look_cpu(topology, data, dstatus);
+    enum hwloc_x86_mode_e x86_mode = topology->x86_mode;
+    if (x86_mode == HWLOC_X86_MODE_CUSTOM) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER|HWLOC_SHOWMSG_X86))
+        fprintf(stderr, "hwloc/linux: no custom x86 mode, using default.");
+      x86_mode = HWLOC_X86_MODE_DEFAULT;
+    }
+    if (x86_mode == HWLOC_X86_MODE_DEFAULT)
+      x86_mode = HWLOC_X86_MODE_LAST;
+    if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+      hwloc_x86_discover_all(topology);
+
+    if (x86_mode != HWLOC_X86_MODE_ONLY)
+      hwloc_linuxfs_look_cpu(topology, data, dstatus);
+
+    if (x86_mode == HWLOC_X86_MODE_LAST)
+      hwloc_x86_discover_all(topology);
   }
 
 #ifdef HWLOC_HAVE_LINUXIO

@@ -54,6 +54,18 @@ struct hwloc_internal_location_s {
   } location;
 };
 
+enum hwloc_x86_mode_e {
+  HWLOC_X86_MODE_DEFAULT = 0, /* default set during init */
+  HWLOC_X86_MODE_NONE = 1, /* disabled entirely */
+  HWLOC_X86_MODE_FIRST = 2, /* run first in the backend */
+  HWLOC_X86_MODE_ONLY = 3, /* run first and stops */
+  HWLOC_X86_MODE_LAST = 4, /* run last */
+  HWLOC_X86_MODE_CUSTOM = 5, /* specific to the backend */
+  HWLOC_X86_MODE_DONE = 6, /* already performed */
+};
+
+struct hwloc_x86_backend_data_s;
+
 /*****************************************************
  * WARNING:
  * changes below in this structure (and its children)
@@ -295,6 +307,11 @@ struct hwloc_topology {
    */
   int want_some_cpu_caches;
 
+  /* how to use the x86 cpuid code in OS backends */
+  enum hwloc_x86_mode_e x86_mode;
+  const char *x86_env;
+  struct hwloc_x86_backend_data_s *x86_data;
+
   /* machine-wide memory.
    * temporarily stored there by OSes that only provide this without NUMA information,
    * and actually used later by the core.
@@ -362,6 +379,19 @@ static __hwloc_inline void hwloc__init_infos_static(struct hwloc_infos_s *infos,
   infos->count = count;
   infos->allocated = 0; /* means we won't free */
 }
+
+/* x86 usage in OS backends */
+#ifdef HWLOC_HAVE_X86_CPUID
+extern void hwloc_x86_init(struct hwloc_topology *);
+extern void hwloc_x86_prepare(struct hwloc_topology *);
+extern int hwloc_x86_discover_all(hwloc_topology_t topology);
+extern void hwloc_x86_exit(struct hwloc_topology *);
+#else
+static __hwloc_inline void hwloc_x86_init(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+static __hwloc_inline void hwloc_x86_prepare(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+static __hwloc_inline int hwloc_x86_discover_all(hwloc_topology_t topology __hwloc_attribute_unused) { return 0; }
+static __hwloc_inline void hwloc_x86_exit(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+#endif
 
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);
