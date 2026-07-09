@@ -5137,10 +5137,7 @@ removed since their non-strict variants are sufficient.
 </ul>
 
 
-\section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
-
-The <tt>XGMIPeers</tt> info attribute was removed from the RSMI OS devices.
-The XGMIHops (or bandwidth) should rather be used to query the list of AMD GPU peers.
+\section upgrade_to_api_3x_envvar Changes to environment variables in 3.0
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete
@@ -5149,6 +5146,12 @@ environment variables are now obsolete
 Error messages from plugins and components are now controlled by
 HWLOC_SHOW_ERRORS as well (while verbose debug messages remain in
 HWLOC_PLUGINS_VERBOSE and HWLOC_COMPONENTS_VERBOSE).
+
+
+\section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+
+The <tt>XGMIPeers</tt> info attribute was removed from the RSMI OS devices.
+The XGMIHops (or bandwidth) should rather be used to query the list of AMD GPU peers.
 
 
 */
