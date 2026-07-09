@@ -1011,6 +1011,9 @@ nextcomp:
     fprintf(stderr, "\n");
   }
 
+  if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL))
+    fprintf(stderr, "hwloc: no backend enabled, cannot discover anything.\n");
+
   free(env);
 }
 
