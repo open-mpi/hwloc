@@ -1991,23 +1991,13 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
 {
   const char *src_cpuiddump_path;
 
-  /* default values */
+  /* non-zero default values (data was calloc'ed) */
   data->vendor = HWLOC_X86_VENDOR_UNKNOWN;
-  data->highest_cpuid = 0;
-  data->highest_ext_cpuid = 0;
-  memset(&data->features, 0, sizeof(data->features));
-  data->is_knl = 0;
-  data->is_hybrid = 0;
+  data->apicid_unique = 1;
+
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set)
     return -1;
-  data->apicid_unique = 1;
-  data->src_cpuiddump_path = NULL;
-  data->found_die_ids = 0;
-  data->found_complex_ids = 0;
-  data->found_unit_ids = 0;
-  data->found_module_ids = 0;
-  data->found_tile_ids = 0;
 
   src_cpuiddump_path = getenv("HWLOC_CPUID_PATH");
   if (src_cpuiddump_path) {
@@ -2048,7 +2038,7 @@ hwloc_x86_prepare(struct hwloc_topology *topology)
       topology->x86_mode = HWLOC_X86_MODE_CUSTOM;
   }
 
-  data = malloc(sizeof(*data));
+  data = calloc(1, sizeof(*data));
   if (!data)
     goto out;
   if (hwloc_x86_setup(data) < 0)
