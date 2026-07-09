@@ -65,6 +65,12 @@ for more details.
       command-line.
   + Cache objects now have a "inclusive" field in the hwloc_cache_attr_s
     structure, instead of an "Inclusive" info attribute.
+* Core changes
+  + x86 CPUID discovery is not its own component anymore, it is called by
+    operating system component internally when needed.
+    It should be controlled with the new environment variable HWLOC_X86,
+    see "Environment variables for changing the source of topology information"
+    in the documentation.
 * Tools
   + lstopo has a new --osf option to tune the displaying of object
     attributes and units.

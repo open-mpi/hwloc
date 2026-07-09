@@ -1855,21 +1855,20 @@ out:
 }
 
 static int
-hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
+hwloc_x86_discover(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data)
 {
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  struct hwloc_topology *topology = backend->topology;
   unsigned long flags = 0;
   int alreadypus = 0;
   int ret;
 
-  assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
+  /* the caller must have allocated root sets */
+  assert(topology->levels[0][0]->cpuset);
 
   if (data->nbprocs > 1 && !data->src_cpuiddump_path && (topology->flags & HWLOC_TOPOLOGY_FLAG_DONT_CHANGE_BINDING)) {
     return 0;
   }
 
-  if (topology->levels[0][0]->cpuset) {
+  if (!hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
     /* somebody else discovered things, reconnect levels so that we can look at them */
     hwloc__reconnect(topology, 0);
     if (topology->nb_levels == 2 && topology->level_nbobjects[1] == data->nbprocs) {
@@ -1883,9 +1882,6 @@ hwloc_x86_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     if (!ret)
       hwloc__add_info(&topology->infos, "Backend", "x86");
     return 0;
-  } else {
-    /* topology is empty, initialize it */
-    hwloc_alloc_root_sets(topology->levels[0][0]);
   }
 
 fulldiscovery:
@@ -2003,8 +1999,6 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
 {
   const char *src_cpuiddump_path;
 
-  /* default values */
-  memset(data, 0, sizeof(*data));
   /* non-zero default values (data was memset'ed) */
   data->vendor = HWLOC_X86_VENDOR_UNKNOWN;
   data->apicid_set = hwloc_bitmap_alloc();
@@ -2057,67 +2051,88 @@ hwloc_x86_setup(struct hwloc_x86_backend_data_s *data)
   return -1;
 }
 
-static void
-hwloc_x86_exit(struct hwloc_x86_backend_data_s *data)
+void
+hwloc_x86_prepare(struct hwloc_topology *topology)
 {
-  hwloc_bitmap_free(data->apicid_set);
-  free(data->src_cpuiddump_path);
-}
-
-static void
-hwloc_x86_backend_disable(struct hwloc_backend *backend)
-{
-  struct hwloc_x86_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
-  hwloc_x86_exit(data);
-}
-
-static struct hwloc_backend *
-hwloc_x86_component_instantiate(struct hwloc_topology *topology,
-				struct hwloc_disc_component *component,
-				unsigned excluded_phases __hwloc_attribute_unused,
-				const void *_data1 __hwloc_attribute_unused,
-				const void *_data2 __hwloc_attribute_unused,
-				const void *_data3 __hwloc_attribute_unused)
-{
-  struct hwloc_backend *backend;
   struct hwloc_x86_backend_data_s *data;
+  const char *env;
 
-  backend = hwloc_backend_alloc(topology, component, sizeof(*data));
-  if (!backend)
+  env = getenv("HWLOC_X86");
+  if (env) {
+    topology->x86_env = env;
+    if (!strcmp(env, "none")) {
+      topology->x86_mode = HWLOC_X86_MODE_NONE;
+      return;
+    }
+    else if (!strcmp(env, "last"))
+      topology->x86_mode = HWLOC_X86_MODE_LAST;
+    else if (!strcmp(env, "first"))
+      topology->x86_mode = HWLOC_X86_MODE_FIRST;
+    else if (!strcmp(env, "only"))
+      topology->x86_mode = HWLOC_X86_MODE_ONLY;
+    else
+      topology->x86_mode = HWLOC_X86_MODE_CUSTOM;
+  }
+
+  data = calloc(1, sizeof(*data));
+  if (!data)
     goto out;
-
-  backend->discover = hwloc_x86_discover;
-  backend->disable = hwloc_x86_backend_disable;
-
-  /* default values */
-  data = HWLOC_BACKEND_PRIVATE_DATA(backend);
   if (hwloc_x86_setup(data) < 0)
-    goto out_with_backend;
+    goto out_with_data;
+  topology->x86_data = data;
+
   if (data->src_cpuiddump_path)
-    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
+    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, 1 /* forced cpuid is always by envvar */);
 
-  return backend;
+  return;
 
- out_with_backend:
-  free(backend);
+ out_with_data:
+  free(data);
  out:
-  return NULL;
+  topology->x86_mode = HWLOC_X86_MODE_NONE;
+  if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_X86|HWLOC_SHOWMSG_CRITICAL))
+    fprintf(stderr, "hwloc/x86: failed to prepare backend data, disabling.\n");
+  return;
 }
 
-static struct hwloc_disc_component hwloc_x86_disc_component = {
-  "x86",
-  HWLOC_DISC_PHASE_CPU,
-  HWLOC_DISC_PHASE_GLOBAL,
-  hwloc_x86_component_instantiate,
-  45, /* between native and no_os */
-  1,
-  NULL
-};
+enum hwloc_x86_mode_e
+hwloc_x86_fixup_mode(struct hwloc_topology *topology,
+                     enum hwloc_x86_mode_e dflt, int maybecustom,
+                     const char *osname)
+{
+  if (topology->x86_mode == HWLOC_X86_MODE_CUSTOM && !maybecustom) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER|HWLOC_SHOWMSG_X86))
+      fprintf(stderr, "hwloc/%s: no custom x86 mode, using default.\n", osname);
+    topology->x86_mode = dflt;
+  } else if (topology->x86_mode == HWLOC_X86_MODE_DEFAULT) {
+    topology->x86_mode = dflt;
+  }
+  return topology->x86_mode;
+}
 
-const struct hwloc_component hwloc_x86_component = {
-  HWLOC_COMPONENT_ABI,
-  NULL, NULL,
-  HWLOC_COMPONENT_TYPE_DISC,
-  0,
-  &hwloc_x86_disc_component
-};
+void
+hwloc_x86_exit(hwloc_topology_t topology)
+{
+  struct hwloc_x86_backend_data_s *data = topology->x86_data;
+  if (data) {
+    hwloc_bitmap_free(data->apicid_set);
+    free(data->src_cpuiddump_path);
+    free(data);
+  }
+  hwloc_x86_init(topology);
+}
+
+int
+hwloc_x86_discover_all(hwloc_topology_t topology)
+{
+  struct hwloc_x86_backend_data_s *data = topology->x86_data;
+
+  assert(data);
+  assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
+  assert(topology->x86_mode != HWLOC_X86_MODE_DONE);
+
+  hwloc_x86_discover(topology, data);
+
+  topology->x86_mode = HWLOC_X86_MODE_DONE;
+  return 0;
+}

@@ -5415,12 +5415,10 @@ hwloc_linuxfs_look_cpu(struct hwloc_topology *topology,
     return -1;
   }
 
-  already_pus = (topology->levels[0][0]->complete_cpuset != NULL
-		 && !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset));
+  already_pus = !hwloc_bitmap_iszero(topology->levels[0][0]->complete_cpuset);
   /* if there are PUs, still look at memory information
    * since x86 misses NUMA node information memory size.
    */
-  hwloc_alloc_root_sets(topology->levels[0][0]);
 
   /**********************
    * /proc/cpuinfo
@@ -7148,6 +7146,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   if (data->need_global_infos) {
     char *env;
 
+    hwloc_x86_fixup_mode(topology, HWLOC_X86_MODE_LAST, 0, "linux");
+
     /* gather some info in data without actually adding them to the topology yet */
     hwloc_gather_system_info(topology, data);
     hwloc_linuxfs_check_kernel_cmdline(data);
@@ -7201,7 +7201,18 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
-    hwloc_linuxfs_look_cpu(topology, data, dstatus);
+    enum hwloc_x86_mode_e x86_mode = topology->x86_mode;
+
+    hwloc_alloc_root_sets(topology->levels[0][0]);
+
+    if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+      hwloc_x86_discover_all(topology);
+
+    if (x86_mode != HWLOC_X86_MODE_ONLY)
+      hwloc_linuxfs_look_cpu(topology, data, dstatus);
+
+    if (x86_mode == HWLOC_X86_MODE_LAST)
+      hwloc_x86_discover_all(topology);
   }
 
 #ifdef HWLOC_HAVE_LINUXIO
