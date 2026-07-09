@@ -1228,12 +1228,6 @@ following environment variables.
   If set to 0, max frequencies are entirely ignored.
   </dd>
 
-<dt>HWLOC_CPUKINDS_HOMOGENEOUS=0</dt>
-  <dd>Uniformize max frequency, base frequency and Linux capacity to
-  force a single homogeneous kind of CPUs.
-  Setting to 1 enables this uniformization.
-  </dd>
-
 <dt>HWLOC_LINUX_CPUKINDS=-1</dt>
   <dd>Try to enable the discovery of CPU kinds on Linux.
   This is enabled by default except on old AMD CPUs known to be homogeneous.
@@ -5138,6 +5132,9 @@ removed since their non-strict variants are sufficient.
 
 
 \section upgrade_to_api_3x_envvar Changes to environment variables in 3.0
+
+The HWLOC_CPUKINDS_HOMOGENEOUS environment variable is removed.
+HWLOC_LINUX_CPUKINDS may be used to disabled cpukinds if ever needed.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete

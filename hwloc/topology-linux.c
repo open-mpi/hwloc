@@ -3954,65 +3954,6 @@ hwloc_linux_cpukinds_adjust_maxfreqs(struct hwloc_linux_cpukinds_arrays *arrays,
   }
 }
 
-static void
-hwloc_linux_cpukinds_force_homogeneous(struct hwloc_topology *topology,
-                                       struct hwloc_linux_cpukinds_arrays *arrays)
-{
-  unsigned nr_pus = arrays->nr_pus;
-  struct hwloc_linux_cpukinds_by_pu *by_pu = arrays->by_pu;
-  unsigned i;
-  unsigned long base_freq = ULONG_MAX;
-  unsigned long max_freq = 0;
-  unsigned long capacity = 0;
-  for(i=0; i<nr_pus; i++) {
-    /* use the lowest base_freq for all cores */
-    if (by_pu[i].base_freq && by_pu[i].base_freq < base_freq)
-      base_freq = by_pu[i].base_freq;
-    /* use the highest max_freq for all cores */
-    if (by_pu[i].max_freq > max_freq)
-      max_freq = by_pu[i].max_freq;
-    /* use the highest capacity for all cores */
-    if (by_pu[i].capacity > capacity)
-      capacity = by_pu[i].capacity;
-  }
-  hwloc_debug("linux/cpukinds: forcing homogeneous max_freq %lu base_freq %lu capacity %lu\n",
-              max_freq, base_freq, capacity);
-
-  if (max_freq) {
-    hwloc_bitmap_t rootset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
-    if (rootset) {
-      char value[64];
-      snprintf(value, sizeof(value), "%lu", max_freq/1000);
-      hwloc_linux_cpukinds_register_one(topology, rootset,
-                                        HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
-                                        (char *) "FrequencyMaxMHz", value);
-      /* the cpuset is given to the callee */
-    }
-  }
-  if (base_freq != ULONG_MAX) {
-    hwloc_bitmap_t rootset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
-    if (rootset) {
-      char value[64];
-      snprintf(value, sizeof(value), "%lu", base_freq/1000);
-      hwloc_linux_cpukinds_register_one(topology, rootset,
-                                        HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
-                                        (char *) "FrequencyBaseMHz", value);
-      /* the cpuset is given to the callee */
-    }
-  }
-  if (capacity) {
-    hwloc_bitmap_t rootset = hwloc_bitmap_dup(topology->levels[0][0]->cpuset);
-    if (rootset) {
-      char value[64];
-      snprintf(value, sizeof(value), "%lu", capacity);
-      hwloc_linux_cpukinds_register_one(topology, rootset,
-                                        HWLOC_CPUKIND_EFFICIENCY_UNKNOWN,
-                                        (char *) "LinuxCapacity", value);
-      /* the cpuset is given to the callee */
-    }
-  }
-}
-
 /* use frequencies and capacities for finding cpukinds */
 static int
 look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
@@ -4022,10 +3963,8 @@ look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
   struct hwloc_linux_cpukinds_by_pu *by_pu;
   struct hwloc_linux_cpukinds_arrays arrays;
   struct hwloc_linux_cpukinds cpufreqs_max, cpufreqs_base, cpu_capacity;
-  char *env;
   int maxfreq_enabled = data->cpukinds_maxfreq_enabled;
   unsigned adjust_max = data->cpukinds_maxfreq_adjust;
-  int force_homogeneous = 0;
   int i;
 
   arrays.use_cppc_nominal_freq = data->cpukinds_use_cppc;
@@ -4047,16 +3986,6 @@ look_sysfscpukinds_by_freq(struct hwloc_topology *topology,
 
   arrays.flags = HWLOC_CPUKIND_FLAG_NEED_FREQS | HWLOC_CPUKIND_FLAG_NEED_CAPACITY;
   hwloc_fill_sysfscpukinds_arrays(topology, data, &arrays);
-
-  /* force homogeneity ? */
-  env = getenv("HWLOC_CPUKINDS_HOMOGENEOUS");
-  if (env)
-    force_homogeneous = atoi(env);
-  if (force_homogeneous) {
-    hwloc_linux_cpukinds_force_homogeneous(topology, &arrays);
-    free(by_pu);
-    return 0;
-  }
 
   if (maxfreq_enabled == -1 && !arrays.max_without_basefreq)
     /* we have basefreq, check maxfreq and ignore/fix it if turboboost 3.0 makes the max different on different cores */
