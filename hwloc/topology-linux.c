@@ -58,7 +58,6 @@ struct hwloc_linux_backend_data_s {
     HWLOC_LINUX_ARCH_UNKNOWN
   } arch;
   char is_amd_with_CU;
-  char is_amd_homogeneous;
   char cpukinds_enabled;
   char cpukinds_use_midr;
   char cpukinds_use_cppc;
@@ -4311,16 +4310,6 @@ static int
 look_sysfscpukinds(struct hwloc_topology *topology,
                    struct hwloc_linux_backend_data_s *data)
 {
-  if (data->cpukinds_enabled == -1 && data->is_amd_homogeneous) {
-    /* If not disabled but on pre-Zen5 AMD, disable since useless.
-     * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
-     */
-    hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
-    data->cpukinds_enabled = 0;
-  }
-  if (!data->cpukinds_enabled)
-    return 0;
-
   if (data->cpukinds_use_midr)
     return look_sysfscpukinds_by_midr_regs(topology, data);
 
@@ -5529,8 +5518,16 @@ hwloc_linuxfs_look_cpu(struct hwloc_topology *topology,
         if (cpufamilynumber && (!strcmp(cpufamilynumber, "21")
                                 || !strcmp(cpufamilynumber, "22")))
           data->is_amd_with_CU = 1;
-        else if (cpufamilynumber && (atoi(cpufamilynumber) < 0x1a))
-          data->is_amd_homogeneous = 1; /* hybrid CPUs started with Zen5 = family 0x1a */
+        else if (cpufamilynumber && (atoi(cpufamilynumber) < 0x1a)) {
+          /* hybrid CPUs started with Zen5 = family 0x1a
+           * If not disabled but on pre-Zen5 AMD, disable since useless.
+           * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
+           */
+          if (data->cpukinds_enabled == -1) {
+            hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
+            data->cpukinds_enabled = 0;
+          }
+        }
       }
   }
 
@@ -7394,7 +7391,6 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->cpukinds_maxfreq_enabled =  -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   data->cpukinds_maxfreq_adjust = 10;
   data->is_amd_with_CU = 0;
-  data->is_amd_homogeneous = 0;
   data->is_fake_numa_uniform = 0;
   data->need_global_infos = 1;
   hwloc__init_infos(&data->global_infos);
