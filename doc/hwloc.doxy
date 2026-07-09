@@ -1228,12 +1228,6 @@ following environment variables.
   If set to 0, max frequencies are entirely ignored.
   </dd>
 
-<dt>HWLOC_CPUKINDS_HOMOGENEOUS=0</dt>
-  <dd>Uniformize max frequency, base frequency and Linux capacity to
-  force a single homogeneous kind of CPUs.
-  Setting to 1 enables this uniformization.
-  </dd>
-
 <dt>HWLOC_LINUX_CPUKINDS=-1</dt>
   <dd>Try to enable the discovery of CPU kinds on Linux.
   This is enabled by default except on old AMD CPUs known to be homogeneous.
@@ -5137,10 +5131,10 @@ removed since their non-strict variants are sufficient.
 </ul>
 
 
-\section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+\section upgrade_to_api_3x_envvar Changes to environment variables in 3.0
 
-The <tt>XGMIPeers</tt> info attribute was removed from the RSMI OS devices.
-The XGMIHops (or bandwidth) should rather be used to query the list of AMD GPU peers.
+The HWLOC_CPUKINDS_HOMOGENEOUS environment variable is removed.
+HWLOC_LINUX_CPUKINDS may be used to disabled cpukinds if ever needed.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete
@@ -5149,6 +5143,12 @@ environment variables are now obsolete
 Error messages from plugins and components are now controlled by
 HWLOC_SHOW_ERRORS as well (while verbose debug messages remain in
 HWLOC_PLUGINS_VERBOSE and HWLOC_COMPONENTS_VERBOSE).
+
+
+\section upgrade_to_api_3x_misc Miscellaneous changes in 3.0
+
+The <tt>XGMIPeers</tt> info attribute was removed from the RSMI OS devices.
+The XGMIHops (or bandwidth) should rather be used to query the list of AMD GPU peers.
 
 
 */
