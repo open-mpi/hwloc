@@ -58,11 +58,11 @@ struct hwloc_linux_backend_data_s {
     HWLOC_LINUX_ARCH_UNKNOWN
   } arch;
   char is_amd_with_CU;
-  char cpukinds_enabled;
+  signed char cpukinds_enabled; /* -1 if not decided yet */
   char cpukinds_use_midr;
-  char cpukinds_use_cppc;
-  char cpukinds_maxfreq_enabled;
-  int cpukinds_maxfreq_adjust;
+  signed char cpukinds_use_cppc; /* -1 means try, 0 no, 1 yes */
+  signed char cpukinds_maxfreq_enabled; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
+  unsigned cpukinds_maxfreq_adjust;
   char use_numa_distances;
   char use_numa_distances_for_cpuless;
   char use_numa_initiators;
@@ -7316,8 +7316,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->cpukinds_enabled = -1; /* not decided yet */
   data->cpukinds_use_midr = 0; /* disabled until files are found */
-  data->cpukinds_use_cppc = -1; /* -1 means try, 0 no, 1 yes */
-  data->cpukinds_maxfreq_enabled =  -1; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
+  data->cpukinds_use_cppc = -1; /* try */
+  data->cpukinds_maxfreq_enabled =  -1; /* adjust */
   data->cpukinds_maxfreq_adjust = 10;
   data->is_amd_with_CU = 0;
   data->is_fake_numa_uniform = 0;
