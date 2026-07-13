@@ -387,6 +387,8 @@ int hwloc_topology_diff_build(hwloc_topology_t topo1,
                 goto roottoocomplex;
               if (imattr1->flags & HWLOC_MEMATTR_FLAG_NEED_INITIATOR) {
                 unsigned k;
+                if (imtg1->nr_initiators != imtg2->nr_initiators)
+                  goto roottoocomplex;
                 for(k=0; k<imtg1->nr_initiators; k++) {
                   struct hwloc_internal_memattr_initiator_s *imi1 = &imtg1->initiators[k], *imi2 = &imtg2->initiators[k];
                   if (imi1->value != imi2->value
