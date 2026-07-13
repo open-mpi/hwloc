@@ -182,6 +182,49 @@ int main(void)
   assert(err == -2 || err == -3);
   hwloc_topology_diff_destroy(diff);
 
+  printf("building two topologies whose memattr target has different initiator counts\n");
+  {
+    hwloc_topology_t ma1, ma2;
+    hwloc_obj_t numa;
+    struct hwloc_location loc;
+    hwloc_bitmap_t set;
+    unsigned i;
+
+    hwloc_topology_init(&ma1);
+    hwloc_topology_set_synthetic(ma1, "node:1 core:4 pu:1");
+    hwloc_topology_load(ma1);
+    hwloc_topology_init(&ma2);
+    hwloc_topology_set_synthetic(ma2, "node:1 core:4 pu:1");
+    hwloc_topology_load(ma2);
+
+    /* ma1's single NUMA target gets two initiators, ma2's gets only one */
+    numa = hwloc_get_obj_by_type(ma1, HWLOC_OBJ_NUMANODE, 0);
+    for(i=0; i<2; i++) {
+      set = hwloc_bitmap_alloc();
+      hwloc_bitmap_set(set, i);
+      loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+      loc.location.cpuset = set;
+      hwloc_memattr_set_value(ma1, HWLOC_MEMATTR_ID_BANDWIDTH, numa, &loc, 0, 1000+i);
+      hwloc_bitmap_free(set);
+    }
+    numa = hwloc_get_obj_by_type(ma2, HWLOC_OBJ_NUMANODE, 0);
+    set = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(set, 0);
+    loc.type = HWLOC_LOCATION_TYPE_CPUSET;
+    loc.location.cpuset = set;
+    hwloc_memattr_set_value(ma2, HWLOC_MEMATTR_ID_BANDWIDTH, numa, &loc, 0, 1000);
+    hwloc_bitmap_free(set);
+
+    printf("check that the initiator-count mismatch is reported as too complex\n");
+    err = hwloc_topology_diff_build(ma1, ma2, 0, &diff);
+    assert(err == 1);
+    assert(diff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX);
+    hwloc_topology_diff_destroy(diff);
+
+    hwloc_topology_destroy(ma2);
+    hwloc_topology_destroy(ma1);
+  }
+
   hwloc_topology_destroy(topo3);
   hwloc_topology_destroy(topo2);
   hwloc_topology_destroy(topo1);
