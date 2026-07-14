@@ -2710,7 +2710,7 @@ hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 #define EXPORT_ARRAY(state, type, nr, values, tagname, format, maxperline) do { \
   unsigned _i = 0; \
   while (_i<(nr)) { \
-    char _tmp[255]; /* enough for (snprintf(format)+space) x maxperline */ \
+    char _tmp[512]; /* enough for (largest %llu + space) x maxperline */ \
     char _tmp2[16]; \
     size_t _len = 0; \
     unsigned _j; \
@@ -2731,7 +2731,7 @@ hwloc__xml_v2export_object (hwloc__xml_export_state_t parentstate, hwloc_topolog
 #define EXPORT_TYPE_GPINDEX_ARRAY(state, nr, objs, tagname, maxperline) do { \
   unsigned _i = 0; \
   while (_i<(nr)) { \
-    char _tmp[255]; /* enough for (snprintf(type+index)+space) x maxperline */ \
+    char _tmp[512]; /* enough for (largest type name + ':' + largest %llu + space) x maxperline */ \
     char _tmp2[16]; \
     size_t _len = 0; \
     unsigned _j; \
