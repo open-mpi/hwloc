@@ -5453,7 +5453,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_topology *topology,
            * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
            */
           if (data->cpukinds_enabled == -1) {
-            hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
+            hwloc_debug("linux/cpukinds: ignoring on pre-Zen5 AMD CPUs\n");
             data->cpukinds_enabled = 0;
           }
         }
@@ -7157,6 +7157,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     /* initialize cpukinds config */
     if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
       data->cpukinds_enabled = 0;
+      hwloc_debug("linux/cpukinds: disabled by topology flags\n");
     } else {
       data->cpukinds_use_midr = 0;
       if (data->arch == HWLOC_LINUX_ARCH_ARM /* was set in hwloc_gather_system_info() */) {
@@ -7168,9 +7169,11 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       if (env) {
         if (!strcmp(env, "none") || !strcmp(env, "0")) {
           data->cpukinds_enabled = 0;
+          hwloc_debug("linux/cpukinds: disabled by HWLOC_LINUX_CPUKINDS envvar\n");
         } else {
           /* if variable is given, assume anything else means enabled */
           data->cpukinds_enabled = 1;
+          hwloc_debug("linux/cpukinds: enabled by HWLOC_LINUX_CPUKINDS envvar\n");
           if (!strncmp(env, "cppc=", 5))
             data->cpukinds_use_cppc = atoi(env+5);
           else if (!strncmp(env, "midr=", 5))
@@ -7188,6 +7191,14 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
             data->cpukinds_maxfreq_adjust = atoi(env+7);
           }
         }
+      }
+      if (data->cpukinds_enabled) {
+        hwloc_debug("linux/cpukinds: enabled to %d with cppc %d midr %d maxfreq %d adjust %d\n",
+                    data->cpukinds_enabled,
+                    data->cpukinds_use_cppc,
+                    data->cpukinds_use_midr,
+                    data->cpukinds_maxfreq_enabled,
+                    data->cpukinds_maxfreq_adjust);
       }
     }
   }
