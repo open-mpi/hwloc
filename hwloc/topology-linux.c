@@ -7165,31 +7165,28 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
         if (!hwloc_access("/sys/devices/system/cpu/cpu0/regs/identification/midr_el1", R_OK, data->root_fd))
           data->cpukinds_use_midr = 1;
       }
-      env = getenv("HWLOC_LINUX_CPUKINDS");
+      env = getenv("HWLOC_CPUKINDS");
       if (env) {
         if (!strcmp(env, "none") || !strcmp(env, "0")) {
           data->cpukinds_enabled = 0;
           hwloc_debug("linux/cpukinds: disabled by HWLOC_LINUX_CPUKINDS envvar\n");
         } else {
+          const char *str;
           /* if variable is given, assume anything else means enabled */
           data->cpukinds_enabled = 1;
           hwloc_debug("linux/cpukinds: enabled by HWLOC_LINUX_CPUKINDS envvar\n");
-          if (!strncmp(env, "cppc=", 5))
-            data->cpukinds_use_cppc = atoi(env+5);
-          else if (!strncmp(env, "midr=", 5))
-            data->cpukinds_use_midr = atoi(env+5);
-        }
-      }
-      if (data->cpukinds_enabled) {
-        env = getenv("HWLOC_CPUKINDS_MAXFREQ");
-        if (env) {
-          if (!strcmp(env, "0")) {
-            data->cpukinds_maxfreq_enabled = 0;
-          } else if (!strcmp(env, "1")) {
-            data->cpukinds_maxfreq_enabled = 1;
-          } else if (!strncmp(env, "adjust=", 7)) {
-            data->cpukinds_maxfreq_adjust = atoi(env+7);
-          }
+          str = strstr(env, "cppc=");
+          if (str)
+            data->cpukinds_use_cppc = atoi(str+5);
+          str = strstr(env, "midr=");
+          if (str)
+            data->cpukinds_use_midr = atoi(str+5);
+          str = strstr(env, "maxfreq=");
+          if (str)
+            data->cpukinds_maxfreq_enabled = atoi(str+8);
+          str = strstr(env, "freqadjust=");
+          if (str)
+            data->cpukinds_maxfreq_adjust = atoi(str+11);
         }
       }
       if (data->cpukinds_enabled) {
