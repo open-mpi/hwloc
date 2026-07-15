@@ -17,7 +17,7 @@ Version 3.0.0
 -------------
 See the section "Upgrading to the hwloc 3.0 API" in the documentation
 for more details.
-* API
+* API functions
   + hwloc_get_type_depth_with_attr() generalizes hwloc_get_type_depth() by
     using object attributes to disambiguate multiple levels with same type.
     - hwloc_type_sscanf_as_depth() is deprecated in favor of
@@ -31,6 +31,8 @@ for more details.
     anymore. They have a dedicated API hwloc_memtiers_get_nr() and
     hwloc_memtiers_get_info() in hwloc/memattrs.h
     - NUMA nodes now have a memory_tier integer attribute.
+  + Add hwloc_get_pci_busid_cpuset() in hwloc/helpers.h.
+* Objects and data structures
   + PCI domains are now always 32bits.
   + The "programming interface" of PCI devices is now exposed
     in PCI object attributes.
@@ -57,7 +59,6 @@ for more details.
       infos as such a structure.
   + Distances structure "MEANS" kinds are renamed to "VALUE", and the new
     "HOPS" kind is used for the XGMIHops matrix instead of "LATENCY.
-  + Add hwloc_get_pci_busid_cpuset() in hwloc/helpers.h.
   + Core objects now have a "cpukind" field in the hwloc_core_attr_s
     structure to report the index of their CPU kind.
     - core[cpukind=1] may now be used to filter core objects on the
