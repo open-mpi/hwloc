@@ -3,5 +3,5 @@
 # disable MIDR so that frequencies/capacity show too many cpukinds
 source:  nvidia-dgx-gb10.tar.bz2
 target:  nvidia-dgx-gb10-nomidr.xml
-env:     HWLOC_LINUX_CPUKINDS=midr=0
-env:     export HWLOC_LINUX_CPUKINDS
+env:     HWLOC_CPUKINDS=midr=0
+env:     export HWLOC_CPUKINDS

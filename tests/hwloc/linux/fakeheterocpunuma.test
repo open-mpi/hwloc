@@ -9,5 +9,5 @@ source:  fakeheterocpunuma.tar.bz2
 target:  fakeheterocpunuma.xml
 env:     HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS=1
 env:     export HWLOC_DEBUG_ALLOW_OVERLAPPING_NODE_CPUSETS
-env:     HWLOC_CPUKINDS_MAXFREQ=1
-env:     export HWLOC_CPUKINDS_MAXFREQ
+env:     HWLOC_CPUKINDS=maxfreq=1
+env:     export HWLOC_CPUKINDS
