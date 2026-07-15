@@ -145,8 +145,21 @@ hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 
   struct hwloc_topology *topology = backend->topology;
   int64_t memsize;
+  enum hwloc_x86_mode_e x86_mode = topology->x86_mode;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
+
+  if (x86_mode == HWLOC_X86_MODE_CUSTOM) {
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER|HWLOC_SHOWMSG_X86))
+      fprintf(stderr, "hwloc/netbsd: no custom x86 mode, using default.");
+    x86_mode = HWLOC_X86_MODE_DEFAULT;
+  }
+  if (x86_mode == HWLOC_X86_MODE_DEFAULT)
+    x86_mode = HWLOC_X86_MODE_FIRST;
+  if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+    hwloc_x86_discover_all(topology);
+  if (x86_mode == HWLOC_X86_MODE_ONLY)
+    return 0;
 
   if (!topology->levels[0][0]->cpuset) {
     /* Nobody (even the x86 backend) created objects yet, setup basic objects */
@@ -166,6 +179,10 @@ hwloc_look_netbsd(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
   /* Add NetBSD specific information */
   hwloc__add_info(&topology->infos, "Backend", "NetBSD");
   hwloc_add_uname_info(topology, NULL);
+
+  if (x86_mode == HWLOC_X86_MODE_LAST)
+    hwloc_x86_discover_all(topology);
+
   return 0;
 }
 

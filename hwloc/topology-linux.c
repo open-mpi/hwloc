@@ -60,6 +60,7 @@ struct hwloc_linux_backend_data_s {
   char is_amd_with_CU;
   signed char cpukinds_enabled; /* -1 if not decided yet */
   char cpukinds_use_midr;
+  char cpukinds_use_x86cpuid;
   signed char cpukinds_use_cppc; /* -1 means try, 0 no, 1 yes */
   signed char cpukinds_maxfreq_enabled; /* -1 means adjust (default), 0 means ignore, 1 means enforce */
   unsigned cpukinds_maxfreq_adjust;
@@ -5453,7 +5454,7 @@ hwloc_linuxfs_look_cpu(struct hwloc_topology *topology,
            * This will avoid looking at AMD CPPC which may be slow on Zen2/3 (see #756)
            */
           if (data->cpukinds_enabled == -1) {
-            hwloc_debug("ignoring linux sysfs CPU kind detection on pre-Zen5 AMD CPUs\n");
+            hwloc_debug("linux/cpukinds: ignoring on pre-Zen5 AMD CPUs\n");
             data->cpukinds_enabled = 0;
           }
         }
@@ -7157,6 +7158,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     /* initialize cpukinds config */
     if (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS) {
       data->cpukinds_enabled = 0;
+      hwloc_debug("linux/cpukinds: disabled by topology flags\n");
     } else {
       data->cpukinds_use_midr = 0;
       if (data->arch == HWLOC_LINUX_ARCH_ARM /* was set in hwloc_gather_system_info() */) {
@@ -7164,36 +7166,69 @@ hwloc_look_linuxfs(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
         if (!hwloc_access("/sys/devices/system/cpu/cpu0/regs/identification/midr_el1", R_OK, data->root_fd))
           data->cpukinds_use_midr = 1;
       }
-      env = getenv("HWLOC_LINUX_CPUKINDS");
+      data->cpukinds_use_x86cpuid = 1;
+      if (topology->x86_mode == HWLOC_X86_MODE_NONE)
+        data->cpukinds_use_x86cpuid = 0;
+      env = getenv("HWLOC_CPUKINDS");
       if (env) {
         if (!strcmp(env, "none") || !strcmp(env, "0")) {
           data->cpukinds_enabled = 0;
+          hwloc_debug("linux/cpukinds: disabled by HWLOC_LINUX_CPUKINDS envvar\n");
         } else {
+          const char *str;
           /* if variable is given, assume anything else means enabled */
           data->cpukinds_enabled = 1;
-          if (!strncmp(env, "cppc=", 5))
-            data->cpukinds_use_cppc = atoi(env+5);
-          else if (!strncmp(env, "midr=", 5))
-            data->cpukinds_use_midr = atoi(env+5);
+          hwloc_debug("linux/cpukinds: enabled by HWLOC_LINUX_CPUKINDS envvar\n");
+          str = strstr(env, "cppc=");
+          if (str)
+            data->cpukinds_use_cppc = atoi(str+5);
+          str = strstr(env, "midr=");
+          if (str)
+            data->cpukinds_use_midr = atoi(str+5);
+          str = strstr(env, "x86cpuid=");
+          if (str)
+            data->cpukinds_use_x86cpuid = atoi(str+9);
+          str = strstr(env, "maxfreq=");
+          if (str)
+            data->cpukinds_maxfreq_enabled = atoi(str+8);
+          str = strstr(env, "freqadjust=");
+          if (str)
+            data->cpukinds_maxfreq_adjust = atoi(str+11);
         }
       }
+      if (data->cpukinds_enabled == -1 && data->cpukinds_use_x86cpuid) {
+        data->cpukinds_enabled = hwloc_x86_maybe_hybrid(topology);
+        hwloc_debug("linux/cpukinds: set to %d from x86 cpuid\n", data->cpukinds_enabled);
+      }
       if (data->cpukinds_enabled) {
-        env = getenv("HWLOC_CPUKINDS_MAXFREQ");
-        if (env) {
-          if (!strcmp(env, "0")) {
-            data->cpukinds_maxfreq_enabled = 0;
-          } else if (!strcmp(env, "1")) {
-            data->cpukinds_maxfreq_enabled = 1;
-          } else if (!strncmp(env, "adjust=", 7)) {
-            data->cpukinds_maxfreq_adjust = atoi(env+7);
-          }
-        }
+        hwloc_debug("linux/cpukinds: enabled to %d with cppc %d midr %d x86cpuid %d maxfreq %d adjust %d\n",
+                    data->cpukinds_enabled,
+                    data->cpukinds_use_cppc,
+                    data->cpukinds_use_midr,
+                    data->cpukinds_use_x86cpuid,
+                    data->cpukinds_maxfreq_enabled,
+                    data->cpukinds_maxfreq_adjust);
       }
     }
   }
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
-    hwloc_linuxfs_look_cpu(topology, data, dstatus);
+    enum hwloc_x86_mode_e x86_mode = topology->x86_mode;
+    if (x86_mode == HWLOC_X86_MODE_CUSTOM) {
+      if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER|HWLOC_SHOWMSG_X86))
+        fprintf(stderr, "hwloc/linux: no custom x86 mode, using default.");
+      x86_mode = HWLOC_X86_MODE_DEFAULT;
+    }
+    if (x86_mode == HWLOC_X86_MODE_DEFAULT)
+      x86_mode = HWLOC_X86_MODE_LAST;
+    if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+      hwloc_x86_discover_all(topology);
+
+    if (x86_mode != HWLOC_X86_MODE_ONLY)
+      hwloc_linuxfs_look_cpu(topology, data, dstatus);
+
+    if (x86_mode == HWLOC_X86_MODE_LAST)
+      hwloc_x86_discover_all(topology);
   }
 
 #ifdef HWLOC_HAVE_LINUXIO
@@ -7316,6 +7351,7 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
   data->arch = HWLOC_LINUX_ARCH_UNKNOWN;
   data->cpukinds_enabled = -1; /* not decided yet */
   data->cpukinds_use_midr = 0; /* disabled until files are found */
+  data->cpukinds_use_x86cpuid = -1; /* use if available */
   data->cpukinds_use_cppc = -1; /* try */
   data->cpukinds_maxfreq_enabled =  -1; /* adjust */
   data->cpukinds_maxfreq_adjust = 10;
@@ -7338,7 +7374,8 @@ hwloc_linux_component_instantiate(struct hwloc_topology *topology,
     if (root < 0)
       goto out_with_data;
 
-    backend->is_thissystem = 0;
+    HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
+
     data->is_real_fsroot = 0;
     data->root_path = strdup(fsroot_path);
 

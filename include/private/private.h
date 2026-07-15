@@ -54,6 +54,18 @@ struct hwloc_internal_location_s {
   } location;
 };
 
+enum hwloc_x86_mode_e {
+  HWLOC_X86_MODE_DEFAULT = 0, /* default set during init */
+  HWLOC_X86_MODE_NONE = 1, /* disabled entirely */
+  HWLOC_X86_MODE_FIRST = 2, /* run first in the backend */
+  HWLOC_X86_MODE_ONLY = 3, /* run first and stops */
+  HWLOC_X86_MODE_LAST = 4, /* run last */
+  HWLOC_X86_MODE_CUSTOM = 5, /* specific to the backend */
+  HWLOC_X86_MODE_DONE = 6, /* already performed */
+};
+
+struct hwloc_x86_backend_data_s;
+
 /*****************************************************
  * WARNING:
  * changes below in this structure (and its children)
@@ -277,11 +289,28 @@ struct hwloc_topology {
    * temporary variables during discovery
    */
 
+  /* according to backends, should we disable the THISSYSTEM flag?
+   * will be merged with set_flags() and envvar later to set the final state.
+   * 1 means that we should disable THISSYSTEM (may be cleared by set_flags() or envvar).
+   * 3 means should and was forced by envvar (only cleared by envvar).
+   */
+  int should_disable_thissystem;
+#define HWLOC_SHOULD_DISABLE_THISSYSTEM 1
+#define HWLOC_SHOULD_DISABLE_THISSYSTEM_ENVVAR 3
+#define HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(_topology, _envvar) do { \
+    (_topology)->should_disable_thissystem |= ((_envvar) ? HWLOC_SHOULD_DISABLE_THISSYSTEM_ENVVAR : HWLOC_SHOULD_DISABLE_THISSYSTEM); \
+} while (0)
+
   /* set to 1 at the beginning of load() if the filter of any cpu cache type (L1 to L3i) is not NONE,
    * may be checked by backends before querying caches
    * (when they don't know the level of caches they are querying).
    */
   int want_some_cpu_caches;
+
+  /* how to use the x86 cpuid code in OS backends */
+  enum hwloc_x86_mode_e x86_mode;
+  const char *x86_env;
+  struct hwloc_x86_backend_data_s *x86_data;
 
   /* machine-wide memory.
    * temporarily stored there by OSes that only provide this without NUMA information,
@@ -350,6 +379,21 @@ static __hwloc_inline void hwloc__init_infos_static(struct hwloc_infos_s *infos,
   infos->count = count;
   infos->allocated = 0; /* means we won't free */
 }
+
+/* x86 usage in OS backends */
+#ifdef HWLOC_HAVE_X86_CPUID
+extern void hwloc_x86_init(struct hwloc_topology *);
+extern void hwloc_x86_prepare(struct hwloc_topology *);
+extern int hwloc_x86_maybe_hybrid(struct hwloc_topology *); /* 1 if hybrid, 0 if not, -1 if unknown (or x86 not supported/disabled) */
+extern int hwloc_x86_discover_all(hwloc_topology_t topology);
+extern void hwloc_x86_exit(struct hwloc_topology *);
+#else
+static __hwloc_inline void hwloc_x86_init(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+static __hwloc_inline void hwloc_x86_prepare(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+static __hwloc_inline int hwloc_x86_maybe_hybrid(hwloc_topology_t topology __hwloc_attribute_unused) { return -1; /* unknown */ }
+static __hwloc_inline int hwloc_x86_discover_all(hwloc_topology_t topology __hwloc_attribute_unused) { return 0; }
+static __hwloc_inline void hwloc_x86_exit(hwloc_topology_t topology __hwloc_attribute_unused) { return; }
+#endif
 
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);

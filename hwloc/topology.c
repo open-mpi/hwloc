@@ -3585,7 +3585,7 @@ hwloc_discover(struct hwloc_topology *topology,
     memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
     hwloc__insert_object_by_cpuset(topology, NULL, node, "core:defaultnumanode");
   } else {
-    /* if we're sure we found all NUMA nodes without their sizes (x86 backend?),
+    /* if we're sure we found all NUMA nodes without their sizes,
      * we could split topology->total_memory in all of them.
      */
     memset(&topology->machine_memory, 0, sizeof(topology->machine_memory));
@@ -3811,6 +3811,7 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   hwloc_components_init(); /* uses malloc without tma, but won't need it since dup() caller already took a reference */
   hwloc_topology_components_init(topology);
   hwloc_pci_init(topology); /* make sure both dup() and load() get sane variables */
+  hwloc_x86_init(topology);
 
   /* Setup topology context */
   topology->state = HWLOC_TOPOLOGY_STATE_IS_INIT | HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
@@ -3846,6 +3847,8 @@ hwloc__topology_init (struct hwloc_topology **topologyp,
   topology->userdata_export_cb = NULL;
   topology->userdata_import_cb = NULL;
   topology->userdata_not_decoded = 0;
+
+  topology->should_disable_thissystem = 0;
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
@@ -4131,6 +4134,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_topology_components_fini(topology);
   hwloc_components_fini();
   hwloc_pci_exit(topology);
+  hwloc_x86_exit(topology);
 
   hwloc_topology_clear(topology);
 
@@ -4144,6 +4148,33 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   free(topology->support.membind);
   free(topology->support.misc);
   free(topology);
+}
+
+static void
+hwloc_decide_is_thissystem(struct hwloc_topology *topology)
+{
+  const char *local_env;
+
+  /*
+   * If the application changed the backend with set_foo(),
+   * it may use set_flags() update the is_thissystem flag here.
+   * If it changes the backend with environment variables below,
+   * it may use HWLOC_THISSYSTEM envvar below as well.
+   */
+
+  /* override set_foo() with flags */
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+    topology->should_disable_thissystem &= ~HWLOC_SHOULD_DISABLE_THISSYSTEM;
+
+  /* override with envvar-given flag */
+  local_env = getenv("HWLOC_THISSYSTEM");
+  if (local_env && atoi(local_env))
+    topology->should_disable_thissystem &= ~HWLOC_SHOULD_DISABLE_THISSYSTEM_ENVVAR;
+
+  if (topology->should_disable_thissystem)
+    topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
+  else
+    topology->state |= HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
 }
 
 int
@@ -4166,6 +4197,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
     hwloc_internal_distances_prepare(topology);
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
     hwloc_internal_memattrs_prepare(topology);
+
+  /* check how to use x86 */
+  hwloc_x86_prepare(topology);
 
   /* check if any cpu cache filter is not NONE */
   topology->want_some_cpu_caches = 0;
@@ -4232,7 +4266,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* instantiate all possible other backends now */
   hwloc_disc_components_enable_others(topology);
   /* now that backends are enabled, update the thissystem flag and some callbacks */
-  hwloc_backends_is_thissystem(topology);
+  hwloc_decide_is_thissystem(topology);
   hwloc_backends_find_callbacks(topology);
   /*
    * Now set binding hooks according to HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM in topology->state
@@ -4311,6 +4345,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
  out:
   hwloc_pci_exit(topology);
+  hwloc_x86_exit(topology);
   hwloc_topology_clear(topology);
   hwloc_topology_setup_defaults(topology);
   hwloc_backends_disable_all(topology);

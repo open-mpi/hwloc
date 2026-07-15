@@ -251,6 +251,11 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
       fprintf(stderr, "Cannot force linux component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
       putenv((char *) "HWLOC_COMPONENTS=linux,pci,stop");
+    env = getenv("HWLOC_X86");
+    if (env)
+      fprintf(stderr, "Cannot disable x86 because HWLOC_X86 environment variable is already set to %s.\n", env);
+    else
+      putenv((char *) "HWLOC_X86=none");
     /* normally-set flags are overriden by envvar-forced backends */
     if (flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
       putenv((char *) "HWLOC_THISSYSTEM=1");
@@ -273,9 +278,14 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     }
     env = getenv("HWLOC_COMPONENTS");
     if (env)
-      fprintf(stderr, "Cannot force x86 component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
+      fprintf(stderr, "Cannot force no_os component first because HWLOC_COMPONENTS environment variable is already set to %s.\n", env);
     else
-      putenv((char *) "HWLOC_COMPONENTS=x86,stop");
+      putenv((char *) "HWLOC_COMPONENTS=no_os,stop");
+    env = getenv("HWLOC_X86");
+    if (env)
+      fprintf(stderr, "Cannot force x86-only mode because HWLOC_X86 environment variable is already set to %s.\n", env);
+    else
+      putenv((char *) "HWLOC_X86=only");
     /* normally-set flags are overriden by envvar-forced backends */
     if (flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
       putenv((char *) "HWLOC_THISSYSTEM=1");
