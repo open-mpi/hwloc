@@ -1209,31 +1209,35 @@ following environment variables.
   <tt>default</tt>, or <tt>none</tt>.
   </dd>
 
-<dt>HWLOC_CPUKINDS_MAXFREQ=adjust=10</dt>
-  <dd>Change the use of the max frequency in the Linux backend.
+<dt>HWLOC_CPUKINDS=-1</dt>
+  <dd>Try to enable the discovery of CPU kinds on Linux.
+  This is enabled by default except on old AMD CPUs known to be homogeneous.
+  Setting to <tt>0</tt> always disables it while any other value enables it.
+
+  A comma-separated list of key-value pairs maybe given, including
+  <tt>cppc=0</tt> for disabling the use of ACPI CPPC nominal frequencies,
+  <tt>midr=0</tt> for disabling the use of ARM MIDR registers.
+
+  Keywords <tt>maxfreq</tt> and <tt>freqadjust</tt>
+  may also be given to configure the frequency-based heuristics.
   hwloc tries to read the base and max frequencies of each core on Linux.
   Some hardware features such as Intel Turbo Boost Max 3.0 make some cores
   report slightly higher max frequencies than others in the same CPU package.
   Despite having slightly different frequencies, these cores are considered
   identical instead of exposing an hybrid CPU.
-  Hence, by default (<tt>adjust=10</tt>), hwloc uniformizes the max frequencies of cores
+  Hence, by default, hwloc uniformizes the max frequencies of cores
   that have the same base frequency (higher values are downgraded by up
-  to 10%).
+  to 10% by default).
   When available, the CPU capacity value is also adjusted accordingly.
 
-  If this environment variable is set to <tt>adjust=X</tt>,
-  the 10% threshold is replaced with X.
-  If set to 1, max frequencies are not adjusted anymore,
+  If the HWLOC_CPUKINDS environment variable contains <tt>freqadjust=X</tt>,
+  the default 10% threshold is replaced with X%.
+  If <tt>maxfreq=1</tt>, max frequencies are not adjusted anymore,
   some homogeneous processors may appear hybrid because of this.
-  If set to 0, max frequencies are entirely ignored.
-  </dd>
+  If <tt>maxfreq=0</tt>, max frequencies are entirely ignored.
 
-<dt>HWLOC_LINUX_CPUKINDS=-1</dt>
-  <dd>Try to enable the discovery of CPU kinds on Linux.
-  This is enabled by default except on old AMD CPUs known to be homogeneous.
-  Setting to <tt>1</tt> always enables it, while <tt>0</tt> always disables it.
-  Setting to <tt>cppc=0</tt> enables it without using ACPI CPPC nominal frequency.
-  Setting to <tt>midr=0</tt> enables it without using the ARM MIDR register.
+  This environment variable replaces the former HWLOC_LINUX_CPUKINDS
+  and HWLOC_CPUKINDS_MAXFREQ in hwloc 2.0.
   </dd>
 
 
@@ -5125,8 +5129,11 @@ removed since their non-strict variants are sufficient.
 
 \section upgrade_to_api_3x_envvar Changes to environment variables in 3.0
 
+The HWLOC_CPUKINDS environment variable replaces HWLOC_LINUX_CPUKINDS
+and HWLOC_CPUKINDS_MAXFREQ, see \ref envvar_heuristics.
+
 The HWLOC_CPUKINDS_HOMOGENEOUS environment variable is removed.
-HWLOC_LINUX_CPUKINDS may be used to disabled cpukinds if ever needed.
+HWLOC_LINUX_CPUKINDS may be used to disable cpukinds if ever needed.
 
 The HWLOC_HIDE_ERRORS, HWLOC_XML_VERBOSE and HWLOC_SYNTHETIC_VERBOSE
 environment variables are now obsolete
