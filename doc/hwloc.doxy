@@ -1328,13 +1328,6 @@ following environment variables.
   when HWLOC_PLUGINS_VERBOSE=1.
   </dd>
 
-<dt>HWLOC_RSMI_BACKEND=amd</dt>
-  <dd>Use the new AMD SMI library for querying RSMI OS devices.
-  If set to <tt>rocm</tt> instead, the old ROCm SMI library will
-  be used.
-  The default is AMD SMI is available, otherwise ROCm SMI.
-  </dd>
-
 </dl>
 
 
@@ -4561,9 +4554,8 @@ in <i>Probe / display I/O devices</i> at the end of the configure script output.
 Passing <tt>\--enable-rsmi</tt> will also cause configure to fail
 if RSMI could not be found and enabled in hwloc.
 
-Both the new AMD SMI and the old ROCm SMI libraries may be used
-(the former is used by default unless <tt>HWLOC_RSMI_BACKEND=rocm</tt> is set in the environment).
-Both are compiled in unless <tt>\--disable-rsmi-amd</tt> or <tt>\--disable-rsmi-rocm</tt>
+Either the new AMD SMI and the old ROCm SMI libraries may be used.
+AMD SMI is used by default when available unless <tt>\--disable-rsmi-amd</tt>
 is passed to configure.
 
 

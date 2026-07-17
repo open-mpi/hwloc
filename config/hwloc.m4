@@ -1275,42 +1275,6 @@ return 0;
         HWLOC_RSMI_LDFLAGS="$HWLOC_RSMI_LDFLAGS -L$amdgpu_dir/lib/"
       fi
 
-      hwloc_rsmi_rocm_happy=no
-      if test "x$enable_rsmi_rocm" != "xno"; then
-        hwloc_rsmi_rocm_happy=yes
-        CPPFLAGS_save="$CPPFLAGS"
-        CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
-        AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
-          LDFLAGS_save="$LDFLAGS"
-          LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
-          LIBS_save="$LIBS"
-          AC_CHECK_LIB([rocm_smi64],
-                     [rsmi_init],
-                     [AC_MSG_CHECKING([whether a program linked with -lrocm_smi64 can run])
-                      HWLOC_ROCM_SMI_LIBS="-lrocm_smi64"
-                      LIBS="$LIBS $HWLOC_ROCM_SMI_LIBS"
-                      AC_RUN_IFELSE([
-                        AC_LANG_PROGRAM([[
-#include <stdio.h>
-char rsmi_init(int);
-]], [[
-rsmi_init(0); /* may fail if driver fails to find some GPUs */
-return 0;
-]]
-                        )],
-                        [AC_MSG_RESULT([yes])
-                         hwloc_rsmi_warning=no],
-                        [AC_MSG_RESULT([no])
-                         hwloc_rsmi_warning=yes],
-                        [AC_MSG_RESULT([don't know (cross-compiling)])])
-		      AC_CHECK_DECLS([rsmi_dev_partition_id_get],,[:],[[#include <rocm_smi/rocm_smi.h>]])
-		     ], [hwloc_rsmi_rocm_happy=no])
-          LDFLAGS="$LDFLAGS_save"
-          LIBS="$LIBS_save"
-        ], [hwloc_rsmi_rocm_happy=no])
-        CPPFLAGS="$CPPFLAGS_save"
-      fi
-
       hwloc_rsmi_amd_happy=no
       if test "x$enable_rsmi_amd" != "xno"; then
         hwloc_rsmi_amd_happy=yes
@@ -1347,13 +1311,46 @@ return 0;
         CPPFLAGS="$CPPFLAGS_save"
       fi
 
+      # only try ROCm SMI if AMD SMI missing or disabled
+      hwloc_rsmi_rocm_happy=no
+      if test  "x$hwloc_rsmi_amd_happy" != "xyes" -a "x$enable_rsmi_rocm" != "xno"; then
+        hwloc_rsmi_rocm_happy=yes
+        CPPFLAGS_save="$CPPFLAGS"
+        CPPFLAGS="$CPPFLAGS $HWLOC_RSMI_CPPFLAGS"
+        AC_CHECK_HEADERS([rocm_smi/rocm_smi.h], [
+          LDFLAGS_save="$LDFLAGS"
+          LDFLAGS="$LDFLAGS $HWLOC_RSMI_LDFLAGS"
+          LIBS_save="$LIBS"
+          AC_CHECK_LIB([rocm_smi64],
+                     [rsmi_init],
+                     [AC_MSG_CHECKING([whether a program linked with -lrocm_smi64 can run])
+                      HWLOC_ROCM_SMI_LIBS="-lrocm_smi64"
+                      LIBS="$LIBS $HWLOC_ROCM_SMI_LIBS"
+                      AC_RUN_IFELSE([
+                        AC_LANG_PROGRAM([[
+#include <stdio.h>
+char rsmi_init(int);
+]], [[
+rsmi_init(0); /* may fail if driver fails to find some GPUs */
+return 0;
+]]
+                        )],
+                        [AC_MSG_RESULT([yes])
+                         hwloc_rsmi_warning=no],
+                        [AC_MSG_RESULT([no])
+                         hwloc_rsmi_warning=yes],
+                        [AC_MSG_RESULT([don't know (cross-compiling)])])
+		      AC_CHECK_DECLS([rsmi_dev_partition_id_get],,[:],[[#include <rocm_smi/rocm_smi.h>]])
+		     ], [hwloc_rsmi_rocm_happy=no])
+          LDFLAGS="$LDFLAGS_save"
+          LIBS="$LIBS_save"
+        ], [hwloc_rsmi_rocm_happy=no])
+        CPPFLAGS="$CPPFLAGS_save"
+      fi
+
       # merge the result of AMDSMI and ROCm SMI lib checks
       if test "x$hwloc_rsmi_rocm_happy$hwloc_rsmi_amd_happy" = xyesyes; then
-        AC_DEFINE([HWLOC_RSMI_USE_ROCM_SMI], [1], [Define to 1 to enable ROCm SMI API in the rsmi backend])
-        AC_DEFINE([HWLOC_RSMI_USE_AMD_SMI], [1], [Define to 1 to enable AMD SMI API in the rsmi backend])
-	HWLOC_RSMI_LIBS="$HWLOC_ROCM_SMI_LIBS $HWLOC_AMD_SMI_LIBS"
-	AC_MSG_NOTICE([Using both AMD SMI and ROCm SMI for RSMI backend])
-	hwloc_rsmi_happy=yes
+	AC_MSG_ERROR([Cannot use both AMD SMI and ROCm SMI for RSMI backend])
       else if test "x$hwloc_rsmi_rocm_happy$hwloc_rsmi_amd_happy" = xyesno; then
         AC_DEFINE([HWLOC_RSMI_USE_ROCM_SMI], [1], [Define to 1 to enable ROCm SMI API in the rsmi backend])
 	HWLOC_RSMI_LIBS="$HWLOC_ROCM_SMI_LIBS"
