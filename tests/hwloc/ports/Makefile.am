@@ -23,7 +23,8 @@ check_LTLIBRARIES = \
         libhwloc-port-opencl.la \
         libhwloc-port-cuda.la \
         libhwloc-port-nvml.la \
-        libhwloc-port-rsmi.la \
+        libhwloc-port-rsmi-amd.la \
+        libhwloc-port-rsmi-rocm.la \
         libhwloc-port-levelzero.la \
         libhwloc-port-gl.la
 check_LIBRARIES = \
@@ -176,13 +177,19 @@ libhwloc_port_nvml_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/nvml \
         -DHAVE_DECL_NVMLDEVICEGETMAXPCIELINKGENERATION=1
 
-nodist_libhwloc_port_rsmi_la_SOURCES = topology-rsmi.c
-libhwloc_port_rsmi_la_SOURCES = \
-        include/rsmi/amd_smi/amdsmi.h \
-        include/rsmi/rocm_smi/rocm_smi.h
-libhwloc_port_rsmi_la_CPPFLAGS = $(common_CPPFLAGS) \
+nodist_libhwloc_port_rsmi_amd_la_SOURCES = topology-rsmi.c
+libhwloc_port_rsmi_amd_la_SOURCES = \
+        include/rsmi/amd_smi/amdsmi.h
+libhwloc_port_rsmi_amd_la_CPPFLAGS = $(common_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/rsmi \
-        -DHWLOC_RSMI_USE_AMD_SMI -DHWLOC_RSMI_USE_ROCM_SMI
+        -DHWLOC_RSMI_USE_AMD_SMI -UHWLOC_RSMI_USE_ROCM_SMI
+
+nodist_libhwloc_port_rsmi_rocm_la_SOURCES = topology-rsmi.c
+libhwloc_port_rsmi_rocm_la_SOURCES = \
+        include/rsmi/rocm_smi/rocm_smi.h
+libhwloc_port_rsmi_rocm_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -I$(HWLOC_top_srcdir)/tests/hwloc/ports/include/rsmi \
+        -DHWLOC_RSMI_USE_ROCM_SMI -UHWLOC_RSMI_USE_AMD_SMI
 
 nodist_libhwloc_port_levelzero_la_SOURCES = topology-levelzero.c
 libhwloc_port_levelzero_la_SOURCES = \

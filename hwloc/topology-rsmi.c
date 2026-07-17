@@ -769,10 +769,8 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
    */
 
   int ret = 0;
-  const char *env = getenv("HWLOC_RSMI_BACKEND");
   struct hwloc_topology *topology = backend->topology;
   enum hwloc_type_filter_e filter;
-  enum { HWLOC_RSMI_BACKEND_FIRST, HWLOC_RSMI_BACKEND_AMD, HWLOC_RSMI_BACKEND_ROCM, HWLOC_RSMI_BACKEND_BOTH } try = HWLOC_RSMI_BACKEND_FIRST;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_IO);
 
@@ -780,54 +778,14 @@ hwloc_rsmi_discover(struct hwloc_backend *backend, struct hwloc_disc_status *dst
   if (filter == HWLOC_TYPE_FILTER_KEEP_NONE)
     return 0;
 
-  if (env) {
-    if (!strcmp(env, "amd"))
-      try = HWLOC_RSMI_BACKEND_AMD;
-    else if (!strcmp(env, "rocm"))
-      try = HWLOC_RSMI_BACKEND_ROCM;
-    else if (!strcmp(env, "both"))
-      try = HWLOC_RSMI_BACKEND_BOTH;
-  }
-
-  switch (try) {
-  case HWLOC_RSMI_BACKEND_FIRST:
-    /* use AMD first if available, ROCm otherwise */
+  /* use AMD first if available, ROCm otherwise */
 #if (defined HWLOC_RSMI_USE_AMD_SMI)
-    ret = hwloc_amd_smi_discover(topology);
+  ret = hwloc_amd_smi_discover(topology);
 #elif (defined HWLOC_RSMI_USE_ROCM_SMI)
-    ret = hwloc_rocm_smi_discover(topology);
+  ret = hwloc_rocm_smi_discover(topology);
 #else
-    assert(0); /* not possible at configure */
+#error Cannot enable RSMI backend without either AMD or ROCM SMI
 #endif
-    break;
-  case HWLOC_RSMI_BACKEND_AMD:
-    /* only use AMD */
-#ifdef HWLOC_RSMI_USE_AMD_SMI
-    ret = hwloc_amd_smi_discover(topology);
-#else
-    if (HWLOC_SHOW_ALL_ERRORS())
-      fprintf(stderr, "hwloc/rsmi: cannot enable AMD SMI in RSMI backend, not available\n");
-#endif
-    break;
-  case HWLOC_RSMI_BACKEND_ROCM:
-    /* only use ROCm */
-#ifdef HWLOC_RSMI_USE_ROCM_SMI
-    ret = hwloc_rocm_smi_discover(topology);
-#else
-    if (HWLOC_SHOW_ALL_ERRORS())
-      fprintf(stderr, "hwloc/rsmi: cannot enable ROCm SMI in RSMI backend, not available\n");
-#endif
-    break;
-  case HWLOC_RSMI_BACKEND_BOTH:
-    /* use both for debuggin/comparing the outputs */
-#ifdef HWLOC_RSMI_USE_AMD_SMI
-    ret = hwloc_amd_smi_discover(topology);
-#endif /* HWLOC_RSMI_USE_AMD_SMI */
-#ifdef HWLOC_RSMI_USE_ROCM_SMI
-    ret = hwloc_rocm_smi_discover(topology);
-#endif /* HWLOC_RSMI_USE_ROCM_SMI */
-    break;
-  }
   return ret;
 }
 
