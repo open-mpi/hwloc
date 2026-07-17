@@ -52,7 +52,6 @@
 #include "hwloc/nvml.h"
 #endif
 #if HWLOC_TEST_RENAME_RSMI
-#include "hwloc/rsmi.h"
 #include "hwloc/amdsmi.h"
 #endif
 #if HWLOC_TEST_RENAME_LEVELZERO

@@ -84,6 +84,8 @@ for more details.
     - hwloc_obj_type_sscanf()
     - hwloc_cpuset_to_nodeset_strict()
     - hwloc_cpuset_from_nodeset_strict()
+  + The RSMI backend does not use ROCm SMI anymore,
+    only AMD SMI is supported now.
 * Misc
   + The HWLOC_CPUKINDS_HOMOGENEOUS environment variable is removed.
     HWLOC_LINUX_CPUKINDS may be used instead if ever needed.

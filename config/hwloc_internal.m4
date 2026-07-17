@@ -120,12 +120,6 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([rsmi],
                   AS_HELP_STRING([--disable-rsmi],
                                  [Disable the AMD/ROCm SMI device discovery]))
-    AC_ARG_ENABLE([rsmi-rocm],
-                  AS_HELP_STRING([--disable-rsmi-rocm],
-                                 [Disable the ROCm SMI implementation of the RSMI backend]))
-    AC_ARG_ENABLE([rsmi-amd],
-                  AS_HELP_STRING([--disable-rsmi-amd],
-                                 [Disable the AMD SMI implementation of the RSMI backend]))
     # ROCm version (for selecting /opt/rocm-x.y/)
     AC_ARG_WITH([rocm-version],
                 AS_HELP_STRING([--with-rocm-version=<version>],

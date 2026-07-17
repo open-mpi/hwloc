@@ -25,7 +25,6 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/cudart.h \
 		@top_srcdir@/include/hwloc/nvml.h \
 		@top_srcdir@/include/hwloc/amdsmi.h \
-		@top_srcdir@/include/hwloc/rsmi.h \
 		@top_srcdir@/include/hwloc/levelzero.h \
 		@top_srcdir@/include/hwloc/gl.h \
 		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
