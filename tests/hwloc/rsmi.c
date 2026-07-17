@@ -198,13 +198,13 @@ int main(void)
   hwloc_topology_set_io_types_filter(topology, HWLOC_TYPE_FILTER_KEEP_IMPORTANT);
   hwloc_topology_load(topology);
 
-#ifdef HWLOC_RSMI_USE_ROCM_SMI
+#if (defined HWLOC_RSMI_USE_ROCM_SMI)
   check_rsmi(topology);
-#endif /* HWLOC_RSMI_USE_ROCM_SMI */
-  printf("\n");
-#ifdef HWLOC_RSMI_USE_AMD_SMI
+#elif (defined HWLOC_RSMI_USE_AMD_SMI)
   check_amdsmi(topology);
-#endif /* HWLOC_RSMI_USE_AMD_SMI */
+#else
+#error Cannot enable RSMI backend without either AMD or ROCM SMI
+#endif
 
   hwloc_topology_destroy(topology);
   return 0;
