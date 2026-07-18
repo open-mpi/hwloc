@@ -260,7 +260,11 @@ struct lstopo_obj_userdata {
   unsigned internal_xoffset;
 
   /* text lines within object */
-#define LSTOPO_OBJ_TEXT_MAX 4 /* current max number of lines is osdev name + 3 cuda attributes */
+#define LSTOPO_OBJ_TEXT_MAX 8 /* current max number of lines is osdev name
+			       * + 3 coproc attributes (CUDA or LevelZero)
+			       * + 1 storage/memory Size
+			       * + 2 memory CXL sizes
+			       */
   struct lstopo_text_line {
     char text[128];
     unsigned width;
