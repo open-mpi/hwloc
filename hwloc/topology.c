@@ -770,9 +770,10 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
  failed:
   assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
   for(j=0; j<=i; j++) {
-    free(newa[i].name);
-    free(newa[i].value);
+    free(newa[j].name);
+    free(newa[j].value);
   }
+  free(newa);
   hwloc__init_infos(newi);
   return -1;
 }
