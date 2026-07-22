@@ -582,8 +582,8 @@ int hwloc__tma_dup_infos(struct hwloc_tma *tma,
  failed:
   assert(!tma || !tma->dontfree); /* this tma cannot fail to allocate */
   for(j=0; j<=i; j++) {
-    free(newi[i].name);
-    free(newi[i].value);
+    free(newi[j].name);
+    free(newi[j].value);
   }
   free(newi);
   *newip = NULL;
