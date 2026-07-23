@@ -627,7 +627,7 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
                 infos->power_efficiency_ranking = (ebx >> 16) & 0xff;
               /* if rankings aren't available, keep everything to 0 and only use hybridcoretype */
             }
-            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E */
+            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E, 2 = LP */
             infos->hybridnativemodel = (ebx >> 24) & 0xf; /* always 0 for Zen4 or Zen5 hybrid so far */
           }
           break;
@@ -1445,6 +1445,8 @@ static void
 look_cpukinds_amd(struct hwloc_topology *topology,
                   unsigned nbprocs, struct procinfo *infos)
 {
+  hwloc_bitmap_t lpset = hwloc_bitmap_alloc();
+  unsigned lpeff = 0;
   hwloc_bitmap_t eset = hwloc_bitmap_alloc();
   unsigned eeff = 0;
   hwloc_bitmap_t pset = hwloc_bitmap_alloc();
@@ -1466,17 +1468,34 @@ look_cpukinds_amd(struct hwloc_topology *topology,
       hwloc_bitmap_set(eset, i);
       eeff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
       break;
+    case 2: /* LP-core */
+      hwloc_bitmap_set(lpset, i);
+      lpeff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
+      break;
     default:
       if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_X86))
         fprintf(stderr, "hwloc/x86: Unexpected AMD core type %x\n", infos[i].hybridcoretype);
     }
   }
-  if (!eeff && !peff) {
-    /* either not available, and report 0 for both kinds (e.g. StrixPoint) */
-    eeff = 0;
-    peff = 1;
+  if (!lpeff && !eeff && !peff) {
+    /* either not available, or report 0 for all kinds (e.g. StrixPoint E and P report 0) */
+    lpeff = 0;
+    eeff = 1;
+    peff = 2;
   }
 
+  /* register AMD LowPower set if any */
+  if (!hwloc_bitmap_iszero(lpset)) {
+    struct hwloc_infos_s _infos;
+    struct hwloc_info_s infoattr;
+    infoattr.name = (char *) "CoreType";
+    infoattr.value = (char *) "AMDLowPower";
+    hwloc__init_infos_static(&_infos, 1, &infoattr);
+    hwloc_internal_cpukinds_register(topology, lpset, lpeff, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    /* the cpuset is given to the callee */
+  } else {
+    hwloc_bitmap_free(lpset);
+  }
   /* register AMD E-Core set if any */
   if (!hwloc_bitmap_iszero(eset)) {
     struct hwloc_infos_s _infos;
