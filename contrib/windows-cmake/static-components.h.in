@@ -16,8 +16,8 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_libxml_component;
 #if !defined(HWLOC_HAVE_PLUGINS) && defined(HWLOC_HAVE_OPENCL)
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_opencl_component;
 #endif
-#if !defined(HWLOC_HAVE_PLUGINS) && defined(HWLOC_HAVE_CUDART)
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_cuda_component;
+#ifdef HWLOC_HAVE_VULKAN
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_vulkan_component;
 #endif
 
 static const struct hwloc_component * hwloc_static_components[] = {
@@ -32,6 +32,10 @@ static const struct hwloc_component * hwloc_static_components[] = {
 #if !defined(HWLOC_HAVE_PLUGINS) && defined(HWLOC_HAVE_OPENCL)
   &hwloc_opencl_component,
 #endif
+#ifdef HWLOC_HAVE_VULKAN
+  &hwloc_vulkan_component,
+#endif
+
 #if !defined(HWLOC_HAVE_PLUGINS) && defined(HWLOC_HAVE_CUDART)
   &hwloc_cuda_component,
 #endif

@@ -418,6 +418,7 @@ HWLOC_DECLSPEC unsigned long hwloc_show_errors_mask(void);
 #define HWLOC_SHOWMSG_L0         (1UL<<9) /* L0 */
 #define HWLOC_SHOWMSG_OPENCL     (1UL<<10) /* OpenCL */
 #define HWLOC_SHOWMSG_GL         (1UL<<11) /* GL */
+#define HWLOC_SHOWMSG_VULKAN     (1UL<<17) /* Vulkan */
 #define HWLOC_SHOWMSG_OS         (1UL<<12) /* Operating system */
 #define HWLOC_SHOWMSG_PCI        (1UL<<13) /* PCI */
 #define HWLOC_SHOWMSG_X86        (1UL<<14) /* x86 */

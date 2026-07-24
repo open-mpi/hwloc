@@ -972,7 +972,7 @@ return 0;
            AC_MSG_ERROR([Cannot continue])])
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
-    if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xno; then
+    if test "x$enable_io" != xno && test "x$enable_opencl" != xno -o "x$enable_cuda" != xno -o "x$enable_nvml" != xno -o "x$enable_vulkan" != xno; then
       echo
       echo "**** NVIDIA-common configuration"
 
@@ -1515,6 +1515,58 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # Vulkan support
+    hwloc_vulkan_happy=no
+    if test "x$enable_io" != xno && test "x$enable_vulkan" != "xno"; then
+      echo
+      echo "**** Vulkan configuration"
+
+      hwloc_vulkan_happy=yes
+
+      if test "x$with_vulkan" != x -a "x$with_vulkan" != xyes; then
+        vulkan_dir=$with_vulkan
+        AC_MSG_NOTICE([using custom Vulkan install path $vulkan_dir ...])
+      else
+        AC_MSG_NOTICE([assuming Vulkan is installed in standard directories ...])
+      fi
+      if test "x$vulkan_dir" != x; then
+        HWLOC_VULKAN_CPPFLAGS="-I$vulkan_dir/include/"
+        HWLOC_VULKAN_LDFLAGS="-L$vulkan_dir/lib/"
+      fi
+
+      HWLOC_VULKAN_CPPFLAGS="$HWLOC_VULKAN_CPPFLAGS $HWLOC_CUDA_COMMON_CPPFLAGS"
+      HWLOC_VULKAN_LDFLAGS="$HWLOC_VULKAN_LDFLAGS $HWLOC_CUDA_COMMON_LDFLAGS"
+
+      tmp_save_CPPFLAGS="$CPPFLAGS"
+      CPPFLAGS="$CPPFLAGS $HWLOC_VULKAN_CPPFLAGS"
+      tmp_save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS $HWLOC_VULKAN_LDFLAGS"
+      AC_CHECK_HEADERS([vulkan/vulkan.h], [
+        AC_CHECK_LIB([vulkan], [vkEnumeratePhysicalDevices], [HWLOC_VULKAN_LIBS="-lvulkan"], [hwloc_vulkan_happy=no])
+      ], [hwloc_vulkan_happy=no])
+      CPPFLAGS="$tmp_save_CPPFLAGS"
+      LDFLAGS="$tmp_save_LDFLAGS"
+
+      echo "**** end of Vulkan configuration"
+    fi
+    AC_SUBST(HWLOC_VULKAN_CPPFLAGS)
+    AC_SUBST(HWLOC_VULKAN_LIBS)
+    AC_SUBST(HWLOC_VULKAN_LDFLAGS)
+    # If we asked for vulkan support but couldn't deliver, fail
+    AS_IF([test "$enable_vulkan" = "yes" -a "$hwloc_vulkan_happy" = "no"],
+          [AC_MSG_WARN([Specified --enable-vulkan switch, but could not])
+           AC_MSG_WARN([find appropriate support])
+           AC_MSG_ERROR([Cannot continue])])
+    if test "x$hwloc_vulkan_happy" = "xyes"; then
+      AC_DEFINE([HWLOC_HAVE_VULKAN], [1], [Define to 1 if you have the `Vulkan' library.])
+      AC_SUBST([HWLOC_HAVE_VULKAN], [1])
+      hwloc_components="$hwloc_components vulkan"
+      hwloc_vulkan_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_VULKAN], [0])
+    fi
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
+
     # GL Support
     hwloc_gl_happy=no
     if test "x$enable_io" != xno && test "x$enable_gl" != "xno"; then
@@ -1785,6 +1837,11 @@ return clGetDeviceIDs(0, 0, 0, NULL, NULL);
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LEVELZERO_CPPFLAGS $HWLOC_LEVELZERO_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_LEVELZERO_REQUIRES $HWLOC_REQUIRES"
            AC_DEFINE([HWLOC_LEVELZERO_COMPONENT_BUILTIN], 1, [Define if the LevelZero component is built statically inside libhwloc])])
+    AS_IF([test "$hwloc_vulkan_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_VULKAN_LIBS"
+           HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_VULKAN_LDFLAGS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_VULKAN_CPPFLAGS"
+           AC_DEFINE([HWLOC_VULKAN_COMPONENT_BUILTIN], 1, [Define if the Vulkan component is built statically inside libhwloc])])
     AS_IF([test "$hwloc_gl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_GL_LIBS"
            HWLOC_LDFLAGS="$HWLOC_LDFLAGS $HWLOC_GL_LDFLAGS"
@@ -1886,6 +1943,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_RSMI], [test "$hwloc_rsmi_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_LEVELZERO], [test "$hwloc_levelzero_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_VULKAN], [test "$hwloc_vulkan_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
         AM_CONDITIONAL([HWLOC_HAVE_USER32], [test "x$hwloc_have_user32" = "xyes"])
 
@@ -1917,6 +1975,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_RSMI_BUILD_STATIC], [test "x$hwloc_rsmi_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_LEVELZERO_BUILD_STATIC], [test "x$hwloc_levelzero_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_VULKAN_BUILD_STATIC], [test "x$hwloc_vulkan_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_GL_BUILD_STATIC], [test "x$hwloc_gl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
