@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
 	usage (callname, stderr);
 	exit(EXIT_FAILURE);
       }
-      if(strncmp(argv[1], "nodeset=", 7))
+      if(strncmp(argv[1], "nodeset=", 8))
         restrictstring = strdup(argv[1]);
       else {
         restrictstring = strdup(argv[1]+8);
