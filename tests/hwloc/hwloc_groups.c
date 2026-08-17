@@ -162,6 +162,26 @@ int main(void)
   res = hwloc_topology_insert_group_object(topology, group);
   assert(res == group);
   assert(hwloc_topology_get_depth(topology) == 5);
+  /* insert a group identical to the existing (mergeable) group of packages 1+2,
+   * but with dont_merge set. the existing object must be kept in the tree while
+   * the new object's contents are moved into it, and the insert must return that
+   * in-tree object, not the moved-from (now emptied) new object. */
+  group = hwloc_topology_alloc_group_object(topology);
+  assert(group);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 1);
+  assert(obj);
+  group->cpuset = hwloc_bitmap_dup(obj->cpuset);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PACKAGE, 2);
+  assert(obj);
+  hwloc_bitmap_or(group->cpuset, group->cpuset, obj->cpuset);
+  group->attr->group.dont_merge = 1;
+  res = hwloc_topology_insert_group_object(topology, group);
+  assert(res);
+  assert(res != group); /* the moved-from new object must not be returned */
+  assert(res->type == HWLOC_OBJ_GROUP);
+  assert(res->cpuset); /* must be a valid in-tree object, not an emptied one */
+  assert(res->attr->group.dont_merge == 1);
+  assert(hwloc_topology_get_depth(topology) == 5);
 
   hwloc_topology_destroy(topology);
 

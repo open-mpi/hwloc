@@ -1415,7 +1415,7 @@ hwloc__insert_try_merge_group(hwloc_topology_t topology, hwloc_obj_t old, hwloc_
       /* keep the new one, it doesn't want to be merged */
       hwloc_replace_linked_object(old, new);
       topology->modified = 1;
-      return new;
+      return old;
 
     } else {
       if (old->attr->group.dont_merge)
