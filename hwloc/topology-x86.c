@@ -627,7 +627,7 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
                 infos->power_efficiency_ranking = (ebx >> 16) & 0xff;
               /* if rankings aren't available, keep everything to 0 and only use hybridcoretype */
             }
-            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E */
+            infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E, 2 = LP */
             infos->hybridnativemodel = (ebx >> 24) & 0xf; /* always 0 for Zen4 or Zen5 hybrid so far */
           }
           break;
@@ -1372,6 +1372,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
   hwloc_bitmap_t lpset = hwloc_bitmap_alloc();
   hwloc_bitmap_t atomset = hwloc_bitmap_alloc();
   hwloc_bitmap_t coreset = hwloc_bitmap_alloc();
+  int has_lp = 0, has_atom = 0, has_core = 0;
   unsigned max_cache_levels = 0;
   unsigned i;
   int efficiency;
@@ -1385,12 +1386,16 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     switch (infos[i].hybridcoretype) {
     case 0x20: /* Atom */
       /* On Family 6 hybrids, Atom cores without an L3 cache are low-power cores */
-      if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels)
+      if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels) {
+        has_lp = 1;
         hwloc_bitmap_set(lpset, i);
-      else
+      } else {
+        has_atom = 1;
         hwloc_bitmap_set(atomset, i);
+      }
       break;
     case 0x40: /* Core */
+      has_core = 1;
       hwloc_bitmap_set(coreset, i);
       break;
     default:
@@ -1404,7 +1409,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
    */
   efficiency = 0;
   /* register IntelLowPower set if any */
-  if (!hwloc_bitmap_iszero(lpset)) {
+  if (has_lp) {
     struct hwloc_infos_s _infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
@@ -1416,7 +1421,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     hwloc_bitmap_free(lpset);
   }
   /* register IntelAtom set if any */
-  if (!hwloc_bitmap_iszero(atomset)) {
+  if (has_atom) {
     struct hwloc_infos_s _infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
@@ -1428,7 +1433,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     hwloc_bitmap_free(atomset);
   }
   /* register IntelCore set if any */
-  if (!hwloc_bitmap_iszero(coreset)) {
+  if (has_core) {
     struct hwloc_infos_s _infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
@@ -1445,40 +1450,69 @@ static void
 look_cpukinds_amd(struct hwloc_topology *topology,
                   unsigned nbprocs, struct procinfo *infos)
 {
+  hwloc_bitmap_t lpset = hwloc_bitmap_alloc();
   hwloc_bitmap_t eset = hwloc_bitmap_alloc();
-  unsigned eeff = 0;
   hwloc_bitmap_t pset = hwloc_bitmap_alloc();
-  unsigned peff = 0;
+  int has_lp = 0, has_e = 0, has_p = 0;
+  unsigned lpeff = 0, eeff = 0, peff = 0;
   unsigned i;
 
-  /* TODO Build a bitmap of efficiency rankings for each kind.
+  /* TODO: Build a bitmap of efficiency rankings for each kind.
    * They should not intersect.
-   * If there's more than one ranking per kind, split them below (like IntelLowPower).
+   * If there's more than one ranking per kind, split them below.
+   *
+   * However most models seem to just report 0 for all kinds
+   * (e.g. StrixPoint, and some newer ones)
    */
 
   for(i=0; i<nbprocs; i++) {
     switch (infos[i].hybridcoretype) {
     case 0: /* P-core */
+      has_p = 1;
       hwloc_bitmap_set(pset, i);
       peff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
       break;
     case 1: /* E-core */
+      has_e = 1;
       hwloc_bitmap_set(eset, i);
       eeff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
+      break;
+    case 2: /* LP-core */
+      has_lp = 1;
+      hwloc_bitmap_set(lpset, i);
+      lpeff = infos[i].power_efficiency_ranking; /* assume all cores of the same type have the same efficiency ranking */
       break;
     default:
       if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_X86))
         fprintf(stderr, "hwloc/x86: Unexpected AMD core type %x\n", infos[i].hybridcoretype);
     }
   }
-  if (!eeff && !peff) {
-    /* either not available, and report 0 for both kinds (e.g. StrixPoint) */
-    eeff = 0;
-    peff = 1;
+
+  if (!lpeff && !eeff && !peff) {
+    /* either not available, or report 0 for all kinds */
+    unsigned next = 0;
+    if (has_lp)
+      lpeff = next++;
+    if (has_e)
+      eeff = next++;
+    if (has_p)
+      peff = next++;
   }
 
+  /* register AMD LowPower set if any */
+  if (has_lp) {
+    struct hwloc_infos_s _infos;
+    struct hwloc_info_s infoattr;
+    infoattr.name = (char *) "CoreType";
+    infoattr.value = (char *) "AMDLowPower";
+    hwloc__init_infos_static(&_infos, 1, &infoattr);
+    hwloc_internal_cpukinds_register(topology, lpset, lpeff, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    /* the cpuset is given to the callee */
+  } else {
+    hwloc_bitmap_free(lpset);
+  }
   /* register AMD E-Core set if any */
-  if (!hwloc_bitmap_iszero(eset)) {
+  if (has_e) {
     struct hwloc_infos_s _infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
@@ -1490,7 +1524,7 @@ look_cpukinds_amd(struct hwloc_topology *topology,
     hwloc_bitmap_free(eset);
   }
   /* register AMD P-Core set if any */
-  if (!hwloc_bitmap_iszero(pset)) {
+  if (has_p) {
     struct hwloc_infos_s _infos;
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
