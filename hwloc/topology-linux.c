@@ -4146,7 +4146,7 @@ look_sysfscpukinds_by_midr_regs(struct hwloc_topology *topology,
   /* set non-common info in each kinds */
   for(j=0; j<midr_kinds.nr_sets; j++) {
     struct hwloc_infos_s infos;
-    struct hwloc_info_s infoarray[5];
+    struct hwloc_info_s infoarray[6]; /* LinuxCapacity + up to 5 MIDR fields */
     char implementer[10], variant[10], part[10], revision[10], capacitys[25];
     unsigned long capacity;
     unsigned k;
