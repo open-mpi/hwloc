@@ -2099,22 +2099,13 @@ hwloc_x86_component_instantiate(struct hwloc_topology *topology,
   backend->disable = hwloc_x86_backend_disable;
 
   /* default values */
+  memset(data, 0, sizeof(*data));
+  /* non-zero default values (data was memset'ed) */
   data->vendor = HWLOC_X86_VENDOR_UNKNOWN;
-  data->highest_cpuid = 0;
-  data->highest_ext_cpuid = 0;
-  memset(&data->features, 0, sizeof(data->features));
-  data->is_knl = 0;
-  data->is_hybrid = 0;
   data->apicid_set = hwloc_bitmap_alloc();
   if (!data->apicid_set)
     goto out_with_backend;
   data->apicid_unique = 1;
-  data->src_cpuiddump_path = NULL;
-  data->found_die_ids = 0;
-  data->found_complex_ids = 0;
-  data->found_unit_ids = 0;
-  data->found_module_ids = 0;
-  data->found_tile_ids = 0;
 
   src_cpuiddump_path = getenv("HWLOC_CPUID_PATH");
   if (src_cpuiddump_path) {
