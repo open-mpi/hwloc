@@ -1007,22 +1007,35 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
    */
 
   struct hwloc_topology *topology = backend->topology;
+  enum hwloc_x86_mode_e x86_mode;
   int alreadypus = 0;
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
 
-  if (topology->levels[0][0]->cpuset)
+  hwloc_alloc_root_sets(topology->levels[0][0]);
+  /* FIXME: this isn't enough for solaris, the cpuset must be setup so that x86 can save/restore binding */
+
+  x86_mode = hwloc_x86_fixup_mode(topology, HWLOC_X86_MODE_LAST, 0, "solaris");
+
+  if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+    hwloc_x86_discover_all(topology);
+  if (x86_mode == HWLOC_X86_MODE_ONLY)
+    return 0;
+
+  if (!hwloc_bitmap_iszero(topology->levels[0][0]->cpuset))
     /* somebody discovered things */
     alreadypus = 1;
 
   if (!alreadypus) {
-    hwloc_alloc_root_sets(topology->levels[0][0]);
 #ifdef HAVE_LIBKSTAT
     /* look_kstat() could still add Solaris-specific groups but it's not easy to implement */
     if (hwloc_look_kstat(topology) > 0)
       alreadypus = 1;
 #endif /* HAVE_LIBKSTAT */
   }
+
+  if (x86_mode == HWLOC_X86_MODE_LAST)
+    hwloc_x86_discover_all(topology);
 
   if (!alreadypus) {
     int nbprocs = hwloc_fallback_nbprocessors(0);

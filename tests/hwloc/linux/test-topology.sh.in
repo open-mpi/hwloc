@@ -109,6 +109,7 @@ test_topology ()
     # we don't want the pci backend to annotate PCI vendor/device when supported.
     # We'll set HWLOC_FSROOT and HWLOC_DUMPED_HWDATA_DIR manually below.
     export HWLOC_COMPONENTS=linux,stop
+    export HWLOC_X86=none
     export HWLOC_FSROOT="$sysfsdir"
     export HWLOC_DUMPED_HWDATA_DIR=/var/run/hwloc
 

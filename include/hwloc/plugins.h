@@ -72,7 +72,6 @@ struct hwloc_disc_component {
    *
    * Usual values are
    * 50 for native OS (or platform) components,
-   * 45 for x86,
    * 40 for no-OS fallback,
    * 30 for global components (xml, synthetic),
    * 20 for pci,
@@ -198,14 +197,6 @@ struct hwloc_backend {
 
   /** \brief Backend flags, currently always 0. */
   unsigned long flags;
-
-  /** \brief Backend-specific 'is_thissystem' property.
-   * Set to 0 if the backend disables the thissystem flag for this topology
-   * (e.g. loading from xml or synthetic string,
-   *  or using a different fsroot on Linux, or a x86 CPUID dump).
-   * Set to -1 if the backend doesn't care (default).
-   */
-  int is_thissystem;
 
   /** \brief Callback for freeing things stored inside the private data.
    * May be NULL.

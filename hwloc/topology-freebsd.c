@@ -567,16 +567,30 @@ hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   struct hwloc_freebsd_backend_data_s *data = HWLOC_BACKEND_PRIVATE_DATA(backend);
 
   if (dstatus->phase == HWLOC_DISC_PHASE_CPU) {
-    if (!topology->levels[0][0]->cpuset) {
+    enum hwloc_x86_mode_e x86_mode;
+
+    hwloc_alloc_root_sets(topology->levels[0][0]);
+
+    x86_mode = hwloc_x86_fixup_mode(topology, HWLOC_X86_MODE_FIRST, 0, "freebsd");
+
+    if (x86_mode == HWLOC_X86_MODE_FIRST || x86_mode == HWLOC_X86_MODE_ONLY)
+      hwloc_x86_discover_all(topology);
+    if (x86_mode == HWLOC_X86_MODE_ONLY)
+      return 0;
+
+    if (hwloc_bitmap_iszero(topology->levels[0][0]->cpuset)) {
       /* Nobody (even the x86 backend) created objects yet, setup basic objects */
       int nbprocs = hwloc_fallback_nbprocessors(0);
       if (nbprocs >= 1)
         topology->support.discovery->pu = 1;
       else
         nbprocs = 1;
-      hwloc_alloc_root_sets(topology->levels[0][0]);
       hwloc_setup_pu_level(topology, nbprocs);
     }
+
+    if (x86_mode == HWLOC_X86_MODE_LAST)
+      hwloc_x86_discover_all(topology);
+
   } else if (dstatus->phase == HWLOC_DISC_PHASE_MEMORY) {
       int64_t memsize;
 #ifdef CPU_WHICH_DOMAIN

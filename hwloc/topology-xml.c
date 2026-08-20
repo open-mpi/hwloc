@@ -3466,7 +3466,8 @@ hwloc_xml_component_instantiate(struct hwloc_topology *topology,
 
   backend->discover = hwloc_look_xml;
   backend->disable = hwloc_xml_backend_disable;
-  backend->is_thissystem = 0;
+
+  HWLOC_MARK_SHOULD_DISABLE_THISSYSTEM(topology, backend->envvar_forced);
 
   if (xmlpath) {
     local_basename = strrchr(xmlpath, '/');

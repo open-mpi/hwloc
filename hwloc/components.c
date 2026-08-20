@@ -787,6 +787,12 @@ hwloc_topology_set_components(struct hwloc_topology *topology,
     return 0;
   }
 
+  /* backward compat with x86 component in 2.x */
+  if (!strcmp(name, "x86")) {
+    topology->x86_mode = HWLOC_X86_MODE_NONE;
+    return 0;
+  }
+
   return hwloc_disc_component_blacklist_one(topology, name);
 }
 
@@ -882,6 +888,17 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   _env = getenv("HWLOC_COMPONENTS");
   env = _env ? strdup(_env) : NULL;
 
+  if (env && !strcmp(env, "x86,stop")) {
+    /* backward compat with x86 component in 2.x */
+    if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER))
+      fprintf(stderr, "hwloc: HWLOC_COMPONENTS=x86,stop deprecated, replacing with no_os,stop and HWLOC_X86=only\n");
+    topology->x86_mode = HWLOC_X86_MODE_ONLY;
+    comp = hwloc_disc_component_find("no_os", NULL);
+    assert(comp);
+    hwloc_disc_component_try_enable(topology, comp, 1 /* envvar forced */, 0);
+    goto done;
+  }
+
   /* blacklist disabled components */
   if (env) {
     char *curenv = env;
@@ -899,8 +916,15 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	c = curenv[s];
 	curenv[s] = '\0';
 
-	/* blacklist it, and just ignore failures to allocate */
-	hwloc_disc_component_blacklist_one(topology, curenv+1);
+        if (!strcmp(curenv+1, "x86")) {
+          /* backward compat with x86 component in 2.x */
+          if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER))
+            fprintf(stderr, "hwloc: HWLOC_COMPONENTS=-x86 deprecated, replacing with HWLOC_X86=none\n");
+          topology->x86_mode = HWLOC_X86_MODE_NONE;
+        } else {
+          /* blacklist it, and just ignore failures to allocate */
+          hwloc_disc_component_blacklist_one(topology, curenv+1);
+        }
 
 	/* remove that blacklisted name from the string */
 	for(i=0; i<s; i++)
@@ -955,7 +979,17 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	    }
 	  if (comp->phases & ~blacklisted_phases)
 	    hwloc_disc_component_try_enable(topology, comp, 1 /* envvar forced */, blacklisted_phases);
-	} else {
+	} else if (!strcmp(name, "x86")) {
+          /* backward compat with x86 component in 2.x */
+          if (curenv == env) {
+            if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER))
+              fprintf(stderr, "hwloc: HWLOC_COMPONENTS starting with x86 is deprecated, replacing with HWLOC_X86=first\n");
+            topology->x86_mode = HWLOC_X86_MODE_FIRST;
+          } else {
+            if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_USER|HWLOC_SHOWMSG_CRITICAL))
+              fprintf(stderr, "hwloc: HWLOC_COMPONENTS with x86 is deprecated, falling back to default x86 configuration, use HWLOC_X86 to change it.\n");
+          }
+        } else {
           if (hwloc_show_component_errors || HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_USER))
             fprintf(stderr, "hwloc: Cannot find discovery component `%s'\n", name);
 	}
@@ -1008,6 +1042,7 @@ nextcomp:
     }
   }
 
+ done:
   if (hwloc_components_verbose) {
     /* print a summary */
     int first = 1;
@@ -1078,7 +1113,6 @@ hwloc_backend_alloc(struct hwloc_topology *topology,
   backend->discover = NULL;
   backend->get_pci_busid_cpuset = NULL;
   backend->disable = NULL;
-  backend->is_thissystem = -1;
   backend->next = NULL;
   backend->envvar_forced = 0;
   return backend;
@@ -1134,57 +1168,6 @@ hwloc_backend_enable(struct hwloc_backend *backend)
   topology->backend_phases |= backend->component->phases;
   topology->backend_excluded_phases |= backend->component->excluded_phases;
   return 0;
-}
-
-void
-hwloc_backends_is_thissystem(struct hwloc_topology *topology)
-{
-  struct hwloc_backend *backend;
-  const char *local_env;
-  int is_thissystem;
-
-  /*
-   * If the application changed the backend with set_foo(),
-   * it may use set_flags() update the is_thissystem flag here.
-   * If it changes the backend with environment variables below,
-   * it may use HWLOC_THISSYSTEM envvar below as well.
-   */
-
-  is_thissystem = 1;
-
-  /* apply thissystem from normally-given backends (envvar_forced=0, either set_foo() or defaults) */
-  backend = topology->backends;
-  while (backend != NULL) {
-    if (backend->envvar_forced == 0 && backend->is_thissystem != -1) {
-      assert(backend->is_thissystem == 0);
-      is_thissystem = 0;
-    }
-    backend = backend->next;
-  }
-
-  /* override set_foo() with flags */
-  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
-    is_thissystem = 1;
-
-  /* now apply envvar-forced backend (envvar_forced=1) */
-  backend = topology->backends;
-  while (backend != NULL) {
-    if (backend->envvar_forced == 1 && backend->is_thissystem != -1) {
-      assert(backend->is_thissystem == 0);
-      is_thissystem = 0;
-    }
-    backend = backend->next;
-  }
-
-  /* override with envvar-given flag */
-  local_env = getenv("HWLOC_THISSYSTEM");
-  if (local_env)
-    is_thissystem = atoi(local_env);
-
-  if (is_thissystem)
-    topology->state |= HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
-  else
-    topology->state &= ~HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM;
 }
 
 void

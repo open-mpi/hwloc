@@ -22,7 +22,6 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_netbsd_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_noos_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_solaris_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_windows_component;
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_x86_component;
 
 /* I/O discovery */
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_cuda_component;
