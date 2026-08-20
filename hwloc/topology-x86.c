@@ -1829,7 +1829,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, struct hwloc_x86_backend_dat
 		   get_cpubind, set_cpubind, restrict_set);
   if (!ret)
     /* success, we're done */
-    goto out;
+    goto out_with_infos;
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
