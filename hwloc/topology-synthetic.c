@@ -523,7 +523,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     if (*pos == '[') {
       /* attached */
       struct hwloc_synthetic_attached_s *attached, **pprev;
-      char *attr;
+      const char *attr;
 
       pos++;
 
