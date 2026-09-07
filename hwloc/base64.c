@@ -196,7 +196,7 @@ hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 {
 	unsigned int tarindex, state;
 	int ch;
-	char *pos;
+	const char *pos;
 
 	state = 0;
 	tarindex = 0;
