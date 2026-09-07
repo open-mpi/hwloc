@@ -1826,11 +1826,11 @@ hwloc__force_memory_tiers(hwloc_topology_t topology __hwloc_attribute_unused,
     char *equal;
     hwloc_memory_tier_kinds_t kinds;
 
-    end = strchr(tmp, ';');
+    end = (char *) strchr(tmp, ';');
     if (end)
       *end = '\0';
 
-    equal = strchr(tmp, '=');
+    equal = (char *) strchr(tmp, '=');
     if (!equal) {
       fprintf(stderr, "[hwloc/memtiers] missing `=' before end of forced tier description at `%s'\n", tmp);
       goto out_with_tiers;

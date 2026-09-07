@@ -331,7 +331,8 @@ hwloc_calc_parse_range(const char *_string,
 {
   char string[65];
   size_t len;
-  char *dot, *end, *end2;
+  const char *dot;
+  char *end, *end2;
   long first, last, amount;
   int wrap;
 

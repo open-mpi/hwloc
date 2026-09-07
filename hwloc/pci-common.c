@@ -369,7 +369,7 @@ hwloc_pci_forced_locality_parse_one(struct hwloc_topology *topology,
   unsigned domain, bus_first, bus_last, dummy;
   hwloc_bitmap_t set;
   hwloc_obj_t parent;
-  char *tmp;
+  const char *tmp;
 
   if (sscanf(string, "%x:%x-%x %x", &domain, &bus_first, &bus_last, &dummy) == 4) {
     /* fine */
