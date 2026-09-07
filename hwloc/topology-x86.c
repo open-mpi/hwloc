@@ -107,6 +107,8 @@ struct hwloc_x86_backend_data_s {
     unsigned hybridcoretype;
     unsigned hybridnativemodel;
     unsigned power_efficiency_ranking;
+    unsigned basefreq;
+    unsigned maxfreq;
 
     unsigned numcaches;
     struct cacheinfo {
@@ -790,13 +792,20 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
   }
 
   if (highest_cpuid >= 0x1a && has_hybrid()) {
+    data->is_hybrid = 1;
     /* Get hybrid cpu information from cpuid 0x1a on Intel */
     eax = 0x1a;
     ecx = 0;
     cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
     infos->hybridcoretype = eax >> 24;
     infos->hybridnativemodel = eax & 0xffffff;
-    data->is_hybrid = 1;
+    /* Get base and max freq from cpuid 0x16 on Intel */
+    eax = 0x16;
+    ecx = 0;
+    cpuid_or_from_dump(&eax, &ebx, &ecx, &edx, src_cpuiddump);
+    infos->basefreq = eax & 0xffff;
+    infos->maxfreq = ebx & 0xffff;
+printf("base %u max %u\n", infos->basefreq, infos->maxfreq);
   }
 
   /*********************************************************************************
