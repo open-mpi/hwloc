@@ -253,7 +253,7 @@ hwloc_calc_parse_level_filter(hwloc_topology_t topology __hwloc_attribute_unused
     char *endp;
     int err;
 
-    endp = strchr(current, ']');
+    endp = (char *) strchr(current, ']');
     if (!endp) {
       fprintf(stderr, "invalid OS device type specification %s\n", filter);
       return -1;
@@ -357,7 +357,8 @@ hwloc_calc_parse_range(const char *_string,
 {
   char string[65];
   size_t len;
-  char *dot, *end, *end2;
+  const char *dot;
+  char *end, *end2;
   long first, last, amount;
   int wrap;
 

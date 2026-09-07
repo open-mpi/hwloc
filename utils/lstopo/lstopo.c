@@ -1446,7 +1446,7 @@ main (int argc, char *argv[])
 	} else if (*end == '=') {
 	  const char *tmp = end+1;
 	  while (tmp) {
-	    char *sep = strchr(tmp, ',');
+	    char *sep = (char *) strchr(tmp, ',');
 	    hwloc_obj_type_t type;
 	    if (sep)
 	      *sep = '\0';
@@ -1604,7 +1604,7 @@ main (int argc, char *argv[])
       output_format = LSTOPO_OUTPUT_CONSOLE;
       filename = "-"; /* to simplify things later */
     } else {
-      char *dot = strrchr(filename, '.');
+      const char *dot = strrchr(filename, '.');
       if (dot) {
         output_format = parse_output_format(dot+1, callname);
         if (dot == filename+1 && filename[0] == '-' && output_format != LSTOPO_OUTPUT_ERROR)
