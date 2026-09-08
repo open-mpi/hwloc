@@ -703,6 +703,242 @@ extern "C" {
 
 #define hwloc_distances_add HWLOC_NAME(distances_add)
 
+/* private/debug.h */
+
+#define hwloc_debug_enabled HWLOC_NAME(debug_enabled)
+#define hwloc_debug HWLOC_NAME(debug)
+
+/* private/misc.h */
+
+#ifndef HWLOC_HAVE_CORRECT_SNPRINTF
+#define hwloc_snprintf HWLOC_NAME(snprintf)
+#endif
+
+#define hwloc_memory_size_snprintf HWLOC_NAME(memory_size_snprintf)
+
+#define hwloc_ffsl_manual HWLOC_NAME(ffsl_manual)
+#define hwloc_ffs32 HWLOC_NAME(ffs32)
+#define hwloc_ffsl_from_ffs32 HWLOC_NAME(ffsl_from_ffs32)
+#define hwloc_flsl_manual HWLOC_NAME(flsl_manual)
+#define hwloc_fls32 HWLOC_NAME(fls32)
+#define hwloc_flsl_from_fls32 HWLOC_NAME(flsl_from_fls32)
+#define hwloc_weight_long HWLOC_NAME(weight_long)
+#define hwloc_strncasecmp HWLOC_NAME(strncasecmp)
+
+#define hwloc_bitmap_compare_inclusion HWLOC_NAME(bitmap_compare_inclusion)
+
+#define hwloc_pci_class_string HWLOC_NAME(pci_class_string)
+#define hwloc_linux_pci_link_speed_from_string HWLOC_NAME(linux_pci_link_speed_from_string)
+
+#define hwloc_cache_type_by_depth_type HWLOC_NAME(cache_type_by_depth_type)
+#define hwloc__obj_type_is_normal HWLOC_NAME(_obj_type_is_normal)
+#define hwloc__obj_type_is_memory HWLOC_NAME(_obj_type_is_memory)
+#define hwloc__obj_type_is_io HWLOC_NAME(_obj_type_is_io)
+#define hwloc__obj_type_is_special HWLOC_NAME(_obj_type_is_special)
+
+#define hwloc__obj_type_is_cache HWLOC_NAME(_obj_type_is_cache)
+#define hwloc__obj_type_is_dcache HWLOC_NAME(_obj_type_is_dcache)
+#define hwloc__obj_type_is_icache HWLOC_NAME(_obj_type_is_icache)
+
+#define hwloc__pci_link_speed HWLOC_NAME(_pci_link_speed)
+
+/* private/cpuid-x86.h */
+
+#define hwloc_have_x86_cpuid HWLOC_NAME(have_x86_cpuid)
+#define hwloc_x86_cpuid HWLOC_NAME(x86_cpuid)
+
+/* private/xml.h */
+
+#define hwloc__xml_import_state_s HWLOC_NAME(_xml_import_state_s)
+#define hwloc__xml_import_state_t HWLOC_NAME(_xml_import_state_t)
+#define hwloc__xml_import_diff HWLOC_NAME(_xml_import_diff)
+#define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
+#define hwloc__xml_export_state_s HWLOC_NAME(_xml_export_state_s)
+#define hwloc__xml_export_state_t HWLOC_NAME(_xml_export_state_t)
+#define hwloc__xml_export_data_s HWLOC_NAME(_xml_export_data_s)
+#define hwloc__xml_export_topology HWLOC_NAME(_xml_export_topology)
+#define hwloc__xml_export_diff HWLOC_NAME(_xml_export_diff)
+
+#define hwloc_xml_callbacks HWLOC_NAME(xml_callbacks)
+#define hwloc_xml_component HWLOC_NAME(xml_component)
+#define hwloc_xml_callbacks_register HWLOC_NAME(xml_callbacks_register)
+#define hwloc_xml_callbacks_reset HWLOC_NAME(xml_callbacks_reset)
+
+/* private/components.h */
+
+#define hwloc_disc_component_force_enable HWLOC_NAME(disc_component_force_enable)
+#define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_enable_others)
+
+#define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
+#define hwloc_backends_find_callbacks HWLOC_NAME(backends_find_callbacks)
+
+#define hwloc_topology_components_init HWLOC_NAME(topology_components_init)
+#define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
+#define hwloc_topology_components_fini HWLOC_NAME(topology_components_fini)
+
+#define hwloc_components_init HWLOC_NAME(components_init)
+#define hwloc_components_fini HWLOC_NAME(components_fini)
+
+/* private/internal-private.h */
+
+#define hwloc_xml_component HWLOC_NAME(xml_component)
+#define hwloc_synthetic_component HWLOC_NAME(synthetic_component)
+
+#define hwloc_aix_component HWLOC_NAME(aix_component)
+#define hwloc_darwin_component HWLOC_NAME(darwin_component)
+#define hwloc_freebsd_component HWLOC_NAME(freebsd_component)
+#define hwloc_linux_component HWLOC_NAME(linux_component)
+#define hwloc_netbsd_component HWLOC_NAME(netbsd_component)
+#define hwloc_noos_component HWLOC_NAME(noos_component)
+#define hwloc_solaris_component HWLOC_NAME(solaris_component)
+#define hwloc_windows_component HWLOC_NAME(windows_component)
+#define hwloc_x86_component HWLOC_NAME(x86_component)
+
+#define hwloc_cuda_component HWLOC_NAME(cuda_component)
+#define hwloc_gl_component HWLOC_NAME(gl_component)
+#define hwloc_levelzero_component HWLOC_NAME(levelzero_component)
+#define hwloc_nvml_component HWLOC_NAME(nvml_component)
+#define hwloc_rsmi_component HWLOC_NAME(rsmi_component)
+#define hwloc_vulkan_component HWLOC_NAME(vulkan_component)
+#define hwloc_opencl_component HWLOC_NAME(opencl_component)
+#define hwloc_pci_component HWLOC_NAME(pci_component)
+
+#define hwloc_xml_libxml_component HWLOC_NAME(xml_libxml_component)
+#define hwloc_xml_nolibxml_component HWLOC_NAME(xml_nolibxml_component)
+
+/* private/private.h */
+
+#define hwloc_internal_location_s HWLOC_NAME(internal_location_s)
+
+#define hwloc_topology_state_e HWLOC_NAME(topology_state_e)
+#define HWLOC_TOPOLOGY_STATE_IS_THISSYSTEM HWLOC_NAME_CAPS(TOPOLOGY_STATE_IS_THISSYSTEM)
+#define HWLOC_TOPOLOGY_STATE_IS_LOADED HWLOC_NAME_CAPS(TOPOLOGY_STATE_IS_LOADED)
+#define HWLOC_TOPOLOGY_STATE_IS_LOADING HWLOC_NAME_CAPS(TOPOLOGY_STATE_IS_LOADING)
+#define HWLOC_TOPOLOGY_STATE_IS_INIT HWLOC_NAME_CAPS(TOPOLOGY_STATE_IS_INIT)
+
+#define hwloc_special_level_s HWLOC_NAME(special_level_s)
+
+#define hwloc_pci_locality_s HWLOC_NAME(pci_locality_s)
+
+#define hwloc_topology_forced_component_s HWLOC_NAME(topology_forced_component_s)
+
+#define hwloc_alloc_root_sets HWLOC_NAME(alloc_root_sets)
+#define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
+#define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
+#define hwloc_get_sysctl HWLOC_NAME(get_sysctl)
+#define hwloc_fallback_nbprocessors HWLOC_NAME(fallback_nbprocessors)
+#define hwloc_fallback_memsize HWLOC_NAME(fallback_memsize)
+
+#define hwloc__object_cpusets_compare_first HWLOC_NAME(_object_cpusets_compare_first)
+#define hwloc__reorder_children HWLOC_NAME(_reorder_children)
+
+#define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
+#define hwloc_topology_clear HWLOC_NAME(topology_clear)
+
+#define hwloc__reconnect HWLOC_NAME(_reconnect)
+
+#define hwloc__attach_memory_object HWLOC_NAME(_attach_memory_object)
+
+#define hwloc_get_obj_by_type_and_gp_index HWLOC_NAME(get_obj_by_type_and_gp_index)
+
+#define hwloc_pci_init HWLOC_NAME(pci_init)
+#define hwloc_pci_prepare HWLOC_NAME(pci_prepare)
+#define hwloc_pci_refresh HWLOC_NAME(pci_refresh)
+#define hwloc_pci_dup HWLOC_NAME(pci_dup)
+#define hwloc_pci_exit HWLOC_NAME(pci_exit)
+
+#define hwloc_pci_xml_import_locality HWLOC_NAME(pci_xml_import_locality)
+#define hwloc_pci_xml_import_refresh_localities HWLOC_NAME(pci_xml_import_refresh_localities)
+
+#define hwloc__add_info HWLOC_NAME(_add_info)
+#define hwloc__replace_infos HWLOC_NAME(_replace_infos)
+#define hwloc__remove_infos HWLOC_NAME(_remove_infos)
+#define hwloc__move_infos HWLOC_NAME(_move_infos)
+#define hwloc__free_infos HWLOC_NAME(_free_infos)
+#define hwloc__tma_dup_infos HWLOC_NAME(_tma_dup_infos)
+#define hwloc__init_infos HWLOC_NAME(_init_infos)
+#define hwloc__init_infos_static HWLOC_NAME(_init_infos_static)
+
+#define hwloc_binding_hooks HWLOC_NAME(binding_hooks)
+#define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)
+#define hwloc_set_binding_hooks HWLOC_NAME(set_binding_hooks)
+
+#define hwloc_set_linuxfs_hooks HWLOC_NAME(set_linuxfs_hooks)
+#define hwloc_set_solaris_hooks HWLOC_NAME(set_solaris_hooks)
+#define hwloc_set_aix_hooks HWLOC_NAME(set_aix_hooks)
+#define hwloc_set_windows_hooks HWLOC_NAME(set_windows_hooks)
+#define hwloc_set_darwin_hooks HWLOC_NAME(set_darwin_hooks)
+#define hwloc_set_freebsd_hooks HWLOC_NAME(set_freebsd_hooks)
+#define hwloc_set_netbsd_hooks HWLOC_NAME(set_netbsd_hooks)
+
+#define hwloc_look_hardwired_fujitsu_k HWLOC_NAME(look_hardwired_fujitsu_k)
+#define hwloc_look_hardwired_fujitsu_fx10 HWLOC_NAME(look_hardwired_fujitsu_fx10)
+#define hwloc_look_hardwired_fujitsu_fx100 HWLOC_NAME(look_hardwired_fujitsu_fx100)
+
+#define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
+#define hwloc_fallback_add_pagesize_info HWLOC_NAME(fallback_add_pagesize_info)
+#define hwloc_pagesize_arrayelt_t HWLOC_NAME(pagesize_arrayelt_t)
+#define hwloc__add_pagesize_info_from_array HWLOC_NAME(_add_pagesize_info_from_array)
+
+#define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
+#define hwloc_free_object_and_children HWLOC_NAME(free_object_and_children)
+#define hwloc_free_object_siblings_and_children HWLOC_NAME(free_object_siblings_and_children)
+
+#define hwloc_alloc_heap HWLOC_NAME(alloc_heap)
+#define hwloc_alloc_mmap HWLOC_NAME(alloc_mmap)
+#define hwloc_free_heap HWLOC_NAME(free_heap)
+#define hwloc_free_mmap HWLOC_NAME(free_mmap)
+#define hwloc_alloc_or_fail HWLOC_NAME(alloc_or_fail)
+
+#define hwloc_internal_distances_s HWLOC_NAME(internal_distances_s)
+#define hwloc_internal_distances_init HWLOC_NAME(internal_distances_init)
+#define hwloc_internal_distances_prepare HWLOC_NAME(internal_distances_prepare)
+#define hwloc_internal_distances_dup HWLOC_NAME(internal_distances_dup)
+#define hwloc_internal_distances_refresh HWLOC_NAME(internal_distances_refresh)
+#define hwloc_internal_distances_destroy HWLOC_NAME(internal_distances_destroy)
+#define hwloc_internal_distances_add HWLOC_NAME(internal_distances_add)
+#define hwloc_internal_distances_add_by_index HWLOC_NAME(internal_distances_add_by_index)
+#define hwloc_internal_distances_invalidate_cached_objs HWLOC_NAME(internal_distances_invalidate_cached_objs)
+
+#define hwloc_internal_memattr_set_value HWLOC_NAME(internal_memattr_set_value)
+#define hwloc_internal_memattr_s HWLOC_NAME(internal_memattr_s)
+#define hwloc_internal_memattr_target_s HWLOC_NAME(internal_memattr_target_s)
+#define hwloc_internal_memattr_initiator_s HWLOC_NAME(internal_memattr_initiator_s)
+#define hwloc_internal_memattrs_init HWLOC_NAME(internal_memattrs_init)
+#define hwloc_internal_memattrs_prepare HWLOC_NAME(internal_memattrs_prepare)
+#define hwloc_internal_memattrs_dup HWLOC_NAME(internal_memattrs_dup)
+#define hwloc_internal_memattrs_destroy HWLOC_NAME(internal_memattrs_destroy)
+#define hwloc_internal_memattrs_need_refresh HWLOC_NAME(internal_memattrs_need_refresh)
+#define hwloc_internal_memattrs_refresh HWLOC_NAME(internal_memattrs_refresh)
+#define hwloc_internal_memattrs_guess_memory_tiers HWLOC_NAME(internal_memattrs_guess_memory_tiers)
+
+#define hwloc_internal_cpukind_s HWLOC_NAME(internal_cpukind_s)
+#define hwloc_internal_cpukinds_init HWLOC_NAME(internal_cpukinds_init)
+#define hwloc_internal_cpukinds_destroy HWLOC_NAME(internal_cpukinds_destroy)
+#define hwloc_internal_cpukinds_dup HWLOC_NAME(internal_cpukinds_dup)
+#define hwloc_internal_cpukinds_register HWLOC_NAME(internal_cpukinds_register)
+#define hwloc_internal_cpukinds_rank HWLOC_NAME(internal_cpukinds_rank)
+#define hwloc_internal_cpukinds_restrict HWLOC_NAME(internal_cpukinds_restrict)
+
+#define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
+#define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
+
+#define hwloc_progname HWLOC_NAME(progname)
+
+#define hwloc__topology_disadopt HWLOC_NAME(_topology_disadopt)
+#define hwloc__topology_dup HWLOC_NAME(_topology_dup)
+
+#define hwloc_tma HWLOC_NAME(tma)
+#define hwloc_tma_malloc HWLOC_NAME(tma_malloc)
+#define hwloc_tma_calloc HWLOC_NAME(tma_calloc)
+#define hwloc_tma_strdup HWLOC_NAME(tma_strdup)
+#define hwloc_bitmap_tma_dup HWLOC_NAME(bitmap_tma_dup)
+
+/* private/solaris-chiptype.h */
+
+#define hwloc_solaris_chip_info_s HWLOC_NAME(solaris_chip_info_s)
+#define hwloc_solaris_get_chip_info HWLOC_NAME(solaris_get_chip_info)
+
 #endif /* HWLOC_SYM_TRANSFORM */
 
 
