@@ -4199,9 +4199,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_MEMATTRS))
     hwloc_internal_memattrs_prepare(topology);
 
-  /* check how to use x86 */
-  hwloc_x86_prepare(topology);
-
   /* check if any cpu cache filter is not NONE */
   topology->want_some_cpu_caches = 0;
   for(i=HWLOC_OBJ_L1CACHE; i<=HWLOC_OBJ_L3ICACHE; i++)
@@ -4274,6 +4271,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
    * and what the native OS backend offers.
    */
   hwloc_set_binding_hooks(topology);
+
+  /* check how to use x86, after enabling components since HWLOC_COMPONENTS may change the x86 mode for backward compat */
+  hwloc_x86_prepare(topology);
 
   /* actual topology discovery */
   err = hwloc_discover(topology, &dstatus);
