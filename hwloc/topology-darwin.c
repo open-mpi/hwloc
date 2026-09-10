@@ -26,12 +26,14 @@
 #define MAX_KINDS 8 /* only 2 needed as of 2022/01 */
 struct hwloc_darwin_cpukinds {
   unsigned nr;
+  unsigned nperflevels; /* sysctl hw.nperflevels, used to invert perflevel into hwloc efficiency */
   struct hwloc_darwin_cpukind {
     char cluster_type;
     hwloc_bitmap_t cpuset;
 #define HWLOC_DARWIN_COMPATIBLE_MAX 128
     char *compatible;
-    int perflevel; /* -1 if unknown */
+    int perflevel; /* matched sysctl hw.perflevel<N> index, -1 if none */
+    char *perflevel_name; /* sysctl hw.perflevel<N>.name if matched, NULL otherwise */
   } kinds[MAX_KINDS]; /* sorted by computing performance first, as sysctl hw.perflevels */
 };
 
@@ -42,6 +44,7 @@ hwloc__darwin_cpukinds_clear(struct hwloc_darwin_cpukinds *kinds)
   for(i=0; i<kinds->nr; i++) {
     hwloc_bitmap_free(kinds->kinds[i].cpuset);
     free(kinds->kinds[i].compatible);
+    free(kinds->kinds[i].perflevel_name);
   }
   kinds->nr = 0;
 }
@@ -59,6 +62,7 @@ hwloc__darwin_cpukinds_add(struct hwloc_darwin_cpukinds *kinds,
   kinds->kinds[kinds->nr].cluster_type = cluster_type;
   kinds->kinds[kinds->nr].compatible = compatible ? strdup(compatible) : NULL;
   kinds->kinds[kinds->nr].perflevel = -1;
+  kinds->kinds[kinds->nr].perflevel_name = NULL;
   kinds->kinds[kinds->nr].cpuset = hwloc_bitmap_alloc();
   if (!kinds->kinds[kinds->nr].cpuset) {
     /* cancel this new kind, cpu won't be in any kind */
@@ -110,6 +114,7 @@ static void hwloc__darwin_cpukinds_add_cpu(struct hwloc_darwin_cpukinds *kinds,
 #endif
 
 static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds,
+                                             unsigned nperflevels,
                                              int *matched_perflevels)
 {
   io_registry_entry_t cpus_root;
@@ -287,25 +292,66 @@ static int hwloc__darwin_look_iokit_cpukinds(struct hwloc_darwin_cpukinds *kinds
   IOObjectRelease(cpus_iter);
   IOObjectRelease(cpus_root);
 
-  /* try to match sysctl hw.perflevel,
-   * perflevel0 always refers to the highest performance core type in the system.
-   * if we only have E and P, E=perflevel1, P=perflevel0, otherwise we don't know.
+  /* Pair discovered kinds with sysctl perflevels by ordering kinds by
+   * min(cpuset) and zipping with perflevel index. perflevel0 is the
+   * highest-performance cluster; the sysctl-only fallback in hwloc_look_darwin
+   * relies on the same ordering. Cpu count must agree per pair, otherwise
+   * matched_perflevels is cleared and the caller may fall back to sysctl-only.
+   * Extra kinds beyond nperflevels register with efficiency=UNKNOWN.
    */
-  *matched_perflevels = 1;
-  for(i=0; i<kinds->nr; i++) {
-    /*
-     * cluster types: https://developer.apple.com/news/?id=vk3m204o
-     * E=Efficiency, P=Performance
-     */
-    if (kinds->kinds[i].cluster_type == 'E') {
-      kinds->kinds[i].perflevel = 1;
-    } else if (kinds->kinds[1].cluster_type == 'P') {
-      kinds->kinds[i].perflevel = 0;
-    } else {
-      *matched_perflevels = 0;
+  *matched_perflevels = (nperflevels > 0 && nperflevels <= kinds->nr) ? 1 : 0;
+  {
+    unsigned sorted[MAX_KINDS];
+    unsigned n, j;
+
+    for(i=0; i<kinds->nr; i++)
+      sorted[i] = i;
+    /* selection sort by min(cpuset); MAX_KINDS is tiny */
+    for(i=0; i+1<kinds->nr; i++) {
+      for(j=i+1; j<kinds->nr; j++) {
+        if (hwloc_bitmap_first(kinds->kinds[sorted[i]].cpuset)
+            > hwloc_bitmap_first(kinds->kinds[sorted[j]].cpuset)) {
+          unsigned t = sorted[i]; sorted[i] = sorted[j]; sorted[j] = t;
+        }
+      }
+    }
+
+    for(n=0; n<nperflevels && n<kinds->nr; n++) {
+      char key[64];
+      int64_t ncpus;
+      char name_val[64];
+      size_t name_size = sizeof(name_val);
+      unsigned k = sorted[n];
+
+      snprintf(key, sizeof(key), "hw.perflevel%u.logicalcpu", n);
+      if (hwloc_get_sysctlbyname(key, &ncpus)) {
+        *matched_perflevels = 0;
+        continue;
+      }
+
+      if (hwloc_bitmap_weight(kinds->kinds[k].cpuset) != (int) ncpus) {
+        *matched_perflevels = 0;
+        if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
+          fprintf(stderr, "hwloc/darwin/cpukinds: cluster type %c (cpu count %d, lowest cpu %d) does not match sysctl hw.perflevel%u.logicalcpu=%lld\n",
+                  kinds->kinds[k].cluster_type,
+                  hwloc_bitmap_weight(kinds->kinds[k].cpuset),
+                  hwloc_bitmap_first(kinds->kinds[k].cpuset),
+                  n, (long long) ncpus);
+        continue;
+      }
+
+      kinds->kinds[k].perflevel = (int) n;
+
+      snprintf(key, sizeof(key), "hw.perflevel%u.name", n);
+      if (!sysctlbyname(key, name_val, &name_size, NULL, 0) && name_val[0])
+        kinds->kinds[k].perflevel_name = strdup(name_val);
+    }
+
+    for(n=nperflevels; n<kinds->nr; n++) {
+      unsigned k = sorted[n];
       if (HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_OS))
-        fprintf(stderr, "hwloc/darwin/cpukinds: unrecognized cluster type %c compatible %s, cannot match perflevels\n",
-                kinds->kinds[i].cluster_type, kinds->kinds[i].compatible);
+        fprintf(stderr, "hwloc/darwin/cpukinds: cluster type %c compatible %s has no matching sysctl perflevel, efficiency unknown\n",
+                kinds->kinds[k].cluster_type, kinds->kinds[k].compatible);
     }
   }
 
@@ -322,27 +368,35 @@ static int hwloc__darwin_cpukinds_register(struct hwloc_topology *topology,
 
   for(i=0; i<kinds->nr; i++) {
     struct hwloc_infos_s infos;
-    struct hwloc_info_s infoattr;
+    struct hwloc_info_s infoattr[2];
+    unsigned n_infos = 0;
     int efficiency;
-    hwloc_debug_2args_bitmap("building cpukind with perflevel %u compatible `%s' and cpuset %s\n",
+    hwloc_debug_2args_bitmap("building cpukind with perflevel %d compatible `%s' and cpuset %s\n",
                              kinds->kinds[i].perflevel,
                              kinds->kinds[i].compatible,
                              kinds->kinds[i].cpuset);
     infos.count = 0;
     if (kinds->kinds[i].compatible) {
-      infoattr.name = (char *) "DarwinCompatible";
-      infoattr.value = kinds->kinds[i].compatible;
-      hwloc__init_infos_static(&infos, 1, &infoattr);
+      infoattr[n_infos].name = (char *) "DarwinCompatible";
+      infoattr[n_infos].value = kinds->kinds[i].compatible;
+      n_infos++;
     }
+    if (kinds->kinds[i].perflevel_name) {
+      infoattr[n_infos].name = (char *) "DarwinPerflevelName";
+      infoattr[n_infos].value = kinds->kinds[i].perflevel_name;
+      n_infos++;
+    }
+    if (n_infos)
+      hwloc__init_infos_static(&infos, n_infos, infoattr);
     if (kinds->kinds[i].perflevel >= 0) {
-      /* perflevel0 always refers to the highest performance core type in the system. */
-      efficiency = kinds->nr - 1 - kinds->kinds[i].perflevel;
+      efficiency = (int)(kinds->nperflevels - 1 - kinds->kinds[i].perflevel);
     } else {
       efficiency = HWLOC_CPUKIND_EFFICIENCY_UNKNOWN;
       got_efficiency = 0;
     }
     hwloc_internal_cpukinds_register(topology, kinds->kinds[i].cpuset, efficiency, &infos, 0);
     free(kinds->kinds[i].compatible);
+    free(kinds->kinds[i].perflevel_name);
     /* the cpuset is given to the callee */
   }
 
@@ -579,6 +633,7 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
     hwloc_debug("\n%d sysctl perflevels\n", (int) nperflevels);
 
   kinds.nr = 0;
+  kinds.nperflevels = (unsigned) nperflevels;
   cpukinds_from_sysctl = -1; /* try IOKit, then sysctl */
   env = getenv("HWLOC_DARWIN_CPUKINDS_FROM_SYSCTL");
   if (env)
@@ -593,13 +648,14 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
 #if (defined HWLOC_HAVE_DARWIN_FOUNDATION) && (defined HWLOC_HAVE_DARWIN_IOKIT)
   if (cpukinds_from_sysctl != 1) {
     int matched_perflevels = 0;
-    hwloc__darwin_look_iokit_cpukinds(&kinds, &matched_perflevels);
+    hwloc__darwin_look_iokit_cpukinds(&kinds, (unsigned) nperflevels, &matched_perflevels);
     hwloc_debug("Found %u kinds with matched=%u in IOKit for %ld sysctl perflevels\n",
                 kinds.nr, matched_perflevels, (long) nperflevels);
-    if (nperflevels > 0 && cpukinds_from_sysctl == -1 && (!matched_perflevels || nperflevels != kinds.nr)) {
-      /* sysctl has perflevel info, but we couldn't rank iokit kinds accordingly,
-       * it means we won't be able to find out which perflevel caches correspond to which cpukind.
-       * remove iokit cpukinds and fallback to sysctl cpukinds.
+    if (nperflevels > 0 && cpukinds_from_sysctl == -1 && !matched_perflevels) {
+      /* At least one sysctl perflevel has no matching cluster, so we can't
+       * reliably map per-perflevel cache info onto cpukinds. Discard and
+       * fall back to sysctl-only cpukinds. (Extra kinds that have no sysctl
+       * perflevel are fine - they stay with efficiency=UNKNOWN.)
        */
       hwloc_debug("Clearing IOKit cpukinds to read them from sysctl\n");
       hwloc__darwin_cpukinds_clear(&kinds);
@@ -617,11 +673,16 @@ hwloc_look_darwin(struct hwloc_backend *backend, struct hwloc_disc_status *dstat
       snprintf(name, sizeof(name), "hw.perflevel%u.logicalcpu", i);
       if (!hwloc_get_sysctlbyname(name, &ncpus)) {
         struct hwloc_darwin_cpukind *kind;
+        char name_val[64];
+        size_t name_size = sizeof(name_val);
         hwloc_debug("found %d cpus in perflevel %u\n", (int)ncpus, i);
         kind = hwloc__darwin_cpukinds_add(&kinds, '?', NULL);
         if (kind) {
           hwloc_bitmap_set_range(kind->cpuset, totalcpus, totalcpus+ncpus-1);
           kind->perflevel = i;
+          snprintf(name, sizeof(name), "hw.perflevel%u.name", i);
+          if (!sysctlbyname(name, name_val, &name_size, NULL, 0) && name_val[0])
+            kind->perflevel_name = strdup(name_val);
           totalcpus += ncpus;
         }
       }
