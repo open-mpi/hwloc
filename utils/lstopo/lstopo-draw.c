@@ -1955,14 +1955,14 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_GROUP:
     case HWLOC_OBJ_OS_DEVICE:
     case HWLOC_OBJ_MISC: return normal_draw;
-    case HWLOC_OBJ_L1CACHE: return cache_draw;
-    case HWLOC_OBJ_L2CACHE: return cache_draw;
-    case HWLOC_OBJ_L3CACHE: return cache_draw;
-    case HWLOC_OBJ_L4CACHE: return cache_draw;
-    case HWLOC_OBJ_L5CACHE: return cache_draw;
-    case HWLOC_OBJ_L1ICACHE: return cache_draw;
-    case HWLOC_OBJ_L2ICACHE: return cache_draw;
-    case HWLOC_OBJ_L3ICACHE: return cache_draw;
+    case HWLOC_OBJ_L1CACHE:
+    case HWLOC_OBJ_L2CACHE:
+    case HWLOC_OBJ_L3CACHE:
+    case HWLOC_OBJ_L4CACHE:
+    case HWLOC_OBJ_L5CACHE:
+    case HWLOC_OBJ_L1ICACHE:
+    case HWLOC_OBJ_L2ICACHE:
+    case HWLOC_OBJ_L3ICACHE:
     case HWLOC_OBJ_MEMCACHE: return cache_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
