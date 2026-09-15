@@ -1630,6 +1630,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned linespacing = loutput->linespacing;
 
   if (loutput->factorize_enabled
       && lud->factorized == 1
@@ -1645,7 +1646,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lud->height = gridsize;
     if (lud->ntext > 0) {
       lud->width += lud->textwidth + gridsize;
-      lud->height += fontsize + gridsize;
+      lud->height += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
     }
     place_children(loutput, level,
 		   0, lud->height /* the callee with add vertical space if needed */);
@@ -1665,7 +1666,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
      */
     myheight = gridsize;
     if (lud->ntext > 0)
-      myheight += fontsize + gridsize;
+      myheight += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
 
     if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */
