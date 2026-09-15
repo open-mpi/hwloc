@@ -335,7 +335,7 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
     goto out_with_handle;
   }
   sprintf(componentsymbolname, "%s_component", basename);
-  component = hwloc_dlsym(handle, componentsymbolname);
+  component = (struct hwloc_component *) hwloc_dlsym(handle, componentsymbolname);
   if (!component) {
     if (hwloc_plugins_verbose)
       fprintf(stderr, "hwloc: Failed to find component symbol `%s'\n",

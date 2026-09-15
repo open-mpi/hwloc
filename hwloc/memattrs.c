@@ -1234,7 +1234,8 @@ hwloc_get_local_numanode_objs(hwloc_topology_t topology,
 
 static int compare_nodes_by_os_index(const void *_a, const void *_b)
 {
-  const hwloc_obj_t * a = _a, * b = _b;
+  /* MSVC warning C4090 "different 'const' qualifiers" has been wrong for a while */
+  const hwloc_obj_t * a = (const hwloc_obj_t *) _a, * b = (const hwloc_obj_t *) _b;
   return (*a)->os_index - (*b)->os_index;
 }
 

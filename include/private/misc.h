@@ -16,6 +16,9 @@
 #include "private/autogen/config.h"
 #include "hwloc.h"
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h> /* for sysconf() and getpagesize(), but not enough to avoid a missing prototype warning on MinGW? */
+#endif
 #ifdef HWLOC_HAVE_DECL_STRNCASECMP
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
