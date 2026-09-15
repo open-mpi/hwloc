@@ -1411,6 +1411,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned overlaidoffset = 0;
+  unsigned linespacing = loutput->linespacing;
 
   if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
     /* additional depths and height for overlaid boxes */
@@ -1431,7 +1432,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lud->height = gridsize + overlaidoffset;
     if (lud->ntext > 0) {
       lud->width += lud->textwidth + gridsize;
-      lud->height += fontsize + gridsize;
+      lud->height += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
     }
     place_children(loutput, level,
 		   gridsize, lud->height);
