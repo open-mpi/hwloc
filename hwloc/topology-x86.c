@@ -105,7 +105,16 @@ struct hwloc_x86_backend_data_s {
     unsigned cpufamilynumber;
 
     unsigned hybridcoretype;
-    unsigned hybridnativemodel;
+    unsigned hybridnativemodel; /* not documented on Intel but:
+     * 0x0 = E-cores on Lakefield (Tremont)
+     * 0x1 = E-cores on AlderLake (Gracemont)
+     * 0x2 = E-cores and LP-E-cores on MeteorLake and ArrowLake (Crestmont)
+     * 0x3 = E-cores and LP-E-cores on LunarLake (Skymont)
+     * on ArrowLake-H, E-cores = 0x3 while LP-E = 0x2 (used in Linux PMU detection code)
+     * 0x4 = PantherLake (Darkmont) ?
+     *
+     * Always 0 on AMD for now.
+     */
     unsigned power_efficiency_ranking;
 
     unsigned numcaches;
@@ -1432,6 +1441,14 @@ look_cpukinds_intel(struct hwloc_topology *topology,
   for(i=0; i<nbprocs; i++) {
     switch (infos[i].hybridcoretype) {
     case 0x20: /* Atom */
+      /* TODO:
+       * On ARL-H, we could also use hybridnativemodel = 0x2 for LPE-cores (Crestmont) vs 0x3 for E-cores (Skymont),
+       * that's how Linux distinguishes cores with different PMUs.
+       * That's the only case where hybridnativemodel is different between E and LPE as of Linux 7.2.
+       * Other CPUs with LPE-cores have same id for E and LPE (see hybridnativemodel definition above).
+       * This isn't needed as long as the L3-quirk below works, and Intel plans to keep with no L3 in the LP island.
+       * Otherwise we would build an array of sets per hybridnativemodel and assume lower ones are LP?
+       */
       /* On Family 6 hybrids, Atom cores without an L3 cache are low-power cores */
       if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels) {
         has_lp = 1;

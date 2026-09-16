@@ -1449,6 +1449,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
   unsigned overlaidoffset = 0;
+  unsigned linespacing = loutput->linespacing;
 
   if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
     /* additional depths and height for overlaid boxes */
@@ -1469,7 +1470,7 @@ pci_device_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth
     lud->height = gridsize + overlaidoffset;
     if (lud->ntext > 0) {
       lud->width += lud->textwidth + gridsize;
-      lud->height += fontsize + gridsize;
+      lud->height += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
     }
     place_children(loutput, level,
 		   gridsize, lud->height);
@@ -1630,6 +1631,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
   struct lstopo_obj_userdata *lud = level->userdata;
   unsigned gridsize = loutput->gridsize;
   unsigned fontsize = loutput->fontsize;
+  unsigned linespacing = loutput->linespacing;
 
   if (loutput->factorize_enabled
       && lud->factorized == 1
@@ -1645,7 +1647,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
     lud->height = gridsize;
     if (lud->ntext > 0) {
       lud->width += lud->textwidth + gridsize;
-      lud->height += fontsize + gridsize;
+      lud->height += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
     }
     place_children(loutput, level,
 		   0, lud->height /* the callee with add vertical space if needed */);
@@ -1665,7 +1667,7 @@ cache_draw(struct lstopo_output *loutput, hwloc_obj_t level, unsigned depth, uns
      */
     myheight = gridsize;
     if (lud->ntext > 0)
-      myheight += fontsize + gridsize;
+      myheight += fontsize + (fontsize + linespacing) * (lud->ntext - 1) + gridsize;
 
     if (lud->above_children.kinds) {
       /* display above_children even above the cache itself */
@@ -1955,14 +1957,14 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_GROUP:
     case HWLOC_OBJ_OS_DEVICE:
     case HWLOC_OBJ_MISC: return normal_draw;
-    case HWLOC_OBJ_L1CACHE: return cache_draw;
-    case HWLOC_OBJ_L2CACHE: return cache_draw;
-    case HWLOC_OBJ_L3CACHE: return cache_draw;
-    case HWLOC_OBJ_L4CACHE: return cache_draw;
-    case HWLOC_OBJ_L5CACHE: return cache_draw;
-    case HWLOC_OBJ_L1ICACHE: return cache_draw;
-    case HWLOC_OBJ_L2ICACHE: return cache_draw;
-    case HWLOC_OBJ_L3ICACHE: return cache_draw;
+    case HWLOC_OBJ_L1CACHE:
+    case HWLOC_OBJ_L2CACHE:
+    case HWLOC_OBJ_L3CACHE:
+    case HWLOC_OBJ_L4CACHE:
+    case HWLOC_OBJ_L5CACHE:
+    case HWLOC_OBJ_L1ICACHE:
+    case HWLOC_OBJ_L2ICACHE:
+    case HWLOC_OBJ_L3ICACHE:
     case HWLOC_OBJ_MEMCACHE: return cache_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
