@@ -1447,6 +1447,8 @@ look_procs(struct hwloc_backend *backend, struct procinfo *infos, unsigned long 
             max_cache_levels = infos[i].numcaches;
         }
         for(i=0; i<nbprocs; i++) {
+          if (!infos[i].present)
+            continue;
           if (infos[i].hybridcoretype == 0x20) {
             /* On Family 6 hybrids, Atom cores without an L3 cache are low-power cores */
             if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels)
