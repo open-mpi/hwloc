@@ -3748,7 +3748,7 @@ hwloc_fill_sysfscpukinds_arrays(struct hwloc_topology *topology,
     if (arrays->flags & HWLOC_CPUKIND_FLAG_NEED_CAPACITY) {
       /* capacity */
       unsigned capacity = 0;
-      sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", i);
+      sprintf(str, "/sys/devices/system/cpu/cpu%d/cpu_capacity", pu);
       if (hwloc_read_path_as_uint(str, &capacity, data->root_fd) >= 0)
         by_pu[i].capacity = capacity;
     }
