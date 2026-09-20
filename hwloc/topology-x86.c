@@ -1439,6 +1439,8 @@ look_cpukinds_intel(struct hwloc_topology *topology,
   }
 
   for(i=0; i<nbprocs; i++) {
+    if (!infos[i].present)
+      continue;
     switch (infos[i].hybridcoretype) {
     case 0x20: /* Atom */
       /* TODO:
@@ -1530,6 +1532,8 @@ look_cpukinds_amd(struct hwloc_topology *topology,
    */
 
   for(i=0; i<nbprocs; i++) {
+    if (!infos[i].present)
+      continue;
     switch (infos[i].hybridcoretype) {
     case 0: /* P-core */
       has_p = 1;
