@@ -1261,8 +1261,13 @@ static void summarize(struct hwloc_topology *topology, struct hwloc_x86_backend_
        obj->cpuset = hwloc_bitmap_alloc();
        hwloc_bitmap_only(obj->cpuset, i);
        hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", i, obj->cpuset);
-       hwloc__insert_object_by_cpuset(topology, NULL, obj, "x86:pu");
+       obj = hwloc__insert_object_by_cpuset(topology, NULL, obj, "x86:pu");
+       /* the PU might get merged in case another backend already added PUs,
+        * use the resulting PU obj to add attributes
+        */
+       obj->attr->pu.hw_id = infos[i].apicid;
      }
+    topology->support.discovery->pu_hw_id = 1;
   }
 
   /* Look for caches */
