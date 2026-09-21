@@ -151,6 +151,15 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     obj->subtype = strdup(value);
   }
 
+  else if (!strcmp(name, "hw_id")) {
+    unsigned long long lvalue = strtoull(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_PU)
+      obj->attr->pu.hw_id = lvalue;
+    else if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring hw_id attribute for non-PU object type\n",
+	      state->global->msgprefix);
+  }
+
   /* no need to import core_cpukind, we'll recompute it in hwloc_internal_cpukinds_rank() */
 
   else if (!strcmp(name, "cache_size")) {
@@ -1143,7 +1152,7 @@ hwloc__xml_import_support(hwloc_topology_t topology,
   if (name) {
 #ifdef HWLOC_DEBUG
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
+    HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 7);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 16);
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -1158,6 +1167,7 @@ hwloc__xml_import_support(hwloc_topology_t topology,
     else DO(discovery,disallowed_pu);
     else DO(discovery,disallowed_numa);
     else DO(discovery,cpukind_efficiency);
+    else DO(discovery,pu_hw_id);
 
     else if (topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
       DO(cpubind,set_thisproc_cpubind);
@@ -2522,6 +2532,13 @@ hwloc__xml_export_object_contents (hwloc__xml_export_state_t state, hwloc_topolo
   switch (obj->type) {
     /* no need to export CORE cpukind, we'll recompute it in hwloc_internal_cpukinds_rank() */
 
+  case HWLOC_OBJ_PU:
+    if (topology->support.discovery->pu_hw_id) {
+      sprintf(tmp, "%llu", (unsigned long long) obj->attr->pu.hw_id);
+      state->new_prop(state, "hw_id", tmp);
+    }
+    break;
+
   case HWLOC_OBJ_NUMANODE:
     if (obj->attr->numanode.local_memory) {
       sprintf(tmp, "%llu", (unsigned long long) obj->attr->numanode.local_memory);
@@ -2822,7 +2839,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
 
 #ifdef HWLOC_DEBUG
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 7);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 16);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -2846,6 +2863,7 @@ hwloc__xml_v2export_support(hwloc__xml_export_state_t parentstate, hwloc_topolog
   DO(discovery,disallowed_pu);
   DO(discovery,disallowed_numa);
   DO(discovery,cpukind_efficiency);
+  DO(discovery,pu_hw_id);
   DO(cpubind,set_thisproc_cpubind);
   DO(cpubind,get_thisproc_cpubind);
   DO(cpubind,set_proc_cpubind);

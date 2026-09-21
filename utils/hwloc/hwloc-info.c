@@ -145,6 +145,7 @@ hwloc_info_show_attr(const char *prefix, const char *name, const char *value)
 static void
 hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type, const char *prefix, int verbose)
 {
+  const struct hwloc_topology_support *support = hwloc_topology_get_support(topology);
   char name[512], value[512];
   unsigned i;
   if (verbose < 0)
@@ -220,6 +221,12 @@ hwloc_info_show_obj(hwloc_topology_t topology, hwloc_obj_t obj, const char *type
   }
 
   switch (obj->type) {
+  case HWLOC_OBJ_PU:
+    if (support->discovery->pu_hw_id) {
+      snprintf(value, sizeof(value), "%lld", (unsigned long long) obj->attr->pu.hw_id);
+      hwloc_info_show_attr(prefix, "hw id", value);
+    }
+    break;
   case HWLOC_OBJ_L1CACHE:
   case HWLOC_OBJ_L2CACHE:
   case HWLOC_OBJ_L3CACHE:
@@ -802,7 +809,7 @@ hwloc_info_show_support(hwloc_topology_t topology)
 
 #ifdef HWLOC_DEBUG
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
-  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
+  HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 7);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_cpubind_support) == 11);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_membind_support) == 16);
   HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_misc_support) == 1);
@@ -815,6 +822,7 @@ hwloc_info_show_support(hwloc_topology_t topology)
   DO(discovery, numa_memory);
   DO(discovery, disallowed_numa);
   DO(discovery, cpukind_efficiency);
+  DO(discovery, pu_hw_id);
 
   DO(cpubind, set_thisproc_cpubind);
   DO(cpubind, get_thisproc_cpubind);

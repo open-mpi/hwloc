@@ -169,7 +169,7 @@ int main(void)
     size = sizeof(struct hwloc_topology_support);
     assert(size == 32);
     size = sizeof(struct hwloc_topology_discovery_support);
-    assert(size == 6);
+    assert(size == 7);
     size = sizeof(struct hwloc_topology_cpubind_support);
     assert(size == 11);
     size = sizeof(struct hwloc_topology_membind_support);
