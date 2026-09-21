@@ -1010,6 +1010,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   struct hwloc_win_efficiency_classes eclasses;
   char *env = getenv("HWLOC_WINDOWS_PROCESSOR_GROUP_OBJS");
   int already_cpus = 0;
+  int x86_has_pu_hw_id;
   int keep_pgroup_objs = (env && atoi(env));
 
   assert(dstatus->phase == HWLOC_DISC_PHASE_CPU);
@@ -1273,6 +1274,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
   topology->support.discovery->numa = gotnuma;
   topology->support.discovery->numa_memory = gotnumamemory;
 
+  x86_has_pu_hw_id = hwloc_x86_has_pu_hw_ids(topology);
   if (groups_pu_set) {
     /* the system supports multiple Groups.
      * PU indexes may be discontiguous, especially if Groups contain less than 64 procs.
@@ -1285,7 +1287,12 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       hwloc_bitmap_only(obj->cpuset, idx);
       hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
 			      idx, obj->cpuset);
-      hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:ProcessorGroup:pu");
+      obj = hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:ProcessorGroup:pu");
+      /* use the resulting PU obj to add attributes in case the new PU got merged
+       * with an existing one
+       */
+      if (x86_has_pu_hw_id)
+        hwloc_x86_set_pu_hw_id(topology, obj);
     } hwloc_bitmap_foreach_end();
     hwloc_bitmap_free(groups_pu_set);
   } else {
@@ -1299,9 +1306,16 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	hwloc_bitmap_only(obj->cpuset, idx);
 	hwloc_debug_1arg_bitmap("cpu %u has cpuset %s\n",
 				idx, obj->cpuset);
-	hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:pu");
+	obj = hwloc__insert_object_by_cpuset(topology, NULL, obj, "windows:pu");
+        /* use the resulting PU obj to add attributes in case the new PU got merged
+         * with an existing one
+         */
+        if (x86_has_pu_hw_id)
+          hwloc_x86_set_pu_hw_id(topology, obj);
       }
   }
+  if (x86_has_pu_hw_id)
+    topology->support.discovery->pu_hw_id = 1;
 
   if (has_efficiencyclass) {
     topology->support.discovery->cpukind_efficiency = 1;

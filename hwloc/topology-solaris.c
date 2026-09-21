@@ -968,6 +968,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (Lproc_num) {
     struct hwloc_obj *obj;
     unsigned j,k;
+    int x86_has_pu_hw_id = hwloc_x86_has_pu_hw_ids(topology);
     hwloc_debug("%u PUs\n", Lproc_num);
     for (j = 0; j < Lproc_num; j++) {
       obj = hwloc_alloc_setup_object(topology, HWLOC_OBJ_PU, Lproc[j].Pproc);
@@ -976,13 +977,20 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	if (Pproc[k].Lproc == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", j, obj->cpuset);
-      hwloc__insert_object_by_cpuset(topology, NULL, obj, "solaris:kstat:pu");
+      obj = hwloc__insert_object_by_cpuset(topology, NULL, obj, "solaris:kstat:pu");
+      /* use the resulting PU obj to add attributes in case the new PU got merged
+       * with an existing one (not supposed to happen here).
+       */
+      if (x86_has_pu_hw_id)
+        hwloc_x86_set_pu_hw_id(topology, obj);
     }
     hwloc_debug("%s", "\n");
     topology->support.discovery->pu = 1;
 #ifdef HAVE_LIBLGRP
     topology->support.discovery->disallowed_pu = 1;
 #endif
+    if (x86_has_pu_hw_id)
+      topology->support.discovery->pu_hw_id = 1;
   }
 
   kstat_close(kc);
@@ -1079,6 +1087,7 @@ hwloc_look_solaris(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
     else
       nbprocs = 1;
     hwloc_setup_pu_level(topology, nbprocs);
+    /* x86 failed or disabled above, don't try to set pu->hw_id */
   }
 
 #ifdef HAVE_LIBLGRP
