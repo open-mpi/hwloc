@@ -68,5 +68,10 @@
     <indexes length="7">0 2 16 </indexes>
     <u64values length="27">10 17 17 17 17 10 14 14 14 </u64values>
   </distances2>
+  <support name="discovery.pu"/>
+  <support name="discovery.numa"/>
+  <support name="discovery.numa_memory"/>
+  <support name="discovery.disallowed_pu"/>
+  <support name="discovery.disallowed_numa"/>
   <support name="custom.exported_support"/>
 </topology>

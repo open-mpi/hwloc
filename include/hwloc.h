@@ -2149,7 +2149,7 @@ enum hwloc_topology_flags_e {
    */
   HWLOC_TOPOLOGY_FLAG_THISSYSTEM_ALLOWED_RESOURCES = (1UL<<2),
 
-  /** \brief Import support from the imported topology.
+  /** \brief Import all support bits from the imported topology.
    *
    * When importing a XML topology from a remote machine, binding is
    * disabled by default (see ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM).
@@ -2157,10 +2157,13 @@ enum hwloc_topology_flags_e {
    * supported feature bits reported by hwloc_topology_get_support().
    *
    * The flag ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT actually imports
-   * support bits from the remote machine. It also sets the flag
+   * binding support bits from the remote machine. It also sets the flag
    * \p imported_support in the struct hwloc_topology_misc_support array.
    * If the imported XML did not contain any support information
    * (exporter hwloc is too old), this flag is not set.
+   *
+   * Note that non-binding support bits, e.g. the ability to discover
+   * NUMA nodes, are always imported.
    *
    * Note that these supported features are only relevant for the hwloc
    * installation that actually exported the XML topology
@@ -2385,7 +2388,7 @@ struct hwloc_topology_membind_support {
 /** \brief Flags describing miscellaneous features.
  */
 struct hwloc_topology_misc_support {
-  /** Support was imported when importing another topology, see ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT. */
+  /** All support bits were imported when importing another topology, see ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT. */
   unsigned char imported_support;
 };
 
@@ -2419,8 +2422,9 @@ struct hwloc_topology_support {
  * in this case (see ::HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM).
  *
  * Topology flag ::HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT may be used
- * to report the supported features of the original remote machine
- * instead. If it was successfully imported, \p imported_support
+ * to report all supported features of the original remote machine
+ * instead, including binding.
+ * If they were successfully imported, \p imported_support
  * will be set in the struct hwloc_topology_misc_support array.
  *
  * \return A pointer to a support structure.
