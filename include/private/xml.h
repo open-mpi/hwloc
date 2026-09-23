@@ -45,6 +45,7 @@ struct hwloc_xml_backend_data_s {
   char * msgprefix;
   void *data; /* libxml2 doc, or nolibxml buffer */
   unsigned version_major, version_minor;
+  int got_support;
   unsigned char need_cuda_backend_info, need_nvml_backend_info, need_rsmi_backend_info, need_levelzero_backend_info, need_opencl_backend_info, need_gl_backend_info;
   /* array of pagetype sizes import from v2 */
   void *v2_pagesizes; /* actually a hwloc_pagesize_arrayelt_t* but we don't want/need to insert private/private.h which is not available in plugins */
