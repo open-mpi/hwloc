@@ -692,6 +692,18 @@ typedef struct hwloc_obj * hwloc_obj_t;
 
 /** \brief Object type-specific Attributes */
 union hwloc_obj_attr_u {
+  /** \brief PU-specific Object Attributes */
+  struct hwloc_pu_attr_s {
+    hwloc_uint64_t hw_id; /**< \brief A hardware thread/PU ID.
+                           * On x86, this is the APIC ID.
+                           * If missing for this specific PU, it is set to \c -1 instead.
+                           *
+                           * This ID should not be used unless \p pu_hw_id is set in discovery support,
+                           * see hwloc_topology_get_support()
+                           * (otherwise \p hw_id remains set to \c 0 for all PUs).
+                           */
+  } pu;
+
   /** \brief Core-specific Object Attributes */
   struct hwloc_core_attr_s {
     int cpukind; /**< \brief The index of the CPU kind of this core.
@@ -2483,6 +2495,8 @@ struct hwloc_topology_discovery_support {
   unsigned char disallowed_numa;
   /** \brief Detecting the efficiency of CPU kinds is supported, see \ref hwlocality_cpukinds. */
   unsigned char cpukind_efficiency;
+  /** \brief Detecting the \p hw_id of PU objects is supported, see hwloc_obj_attr_u::hwloc_pu_attr_s::hw_id */
+  unsigned char pu_hw_id;
 };
 
 /** \brief Flags describing actual PU binding support for this topology.

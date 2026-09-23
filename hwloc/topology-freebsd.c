@@ -586,6 +586,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
       else
         nbprocs = 1;
       hwloc_setup_pu_level(topology, nbprocs);
+      /* pu->hw_id set by hwloc_x86_discover_all() above or below, don't bother doing it here */
     }
 
     if (x86_mode == HWLOC_X86_MODE_LAST)

@@ -748,6 +748,12 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size,
   /* printf type-specific attributes */
   res = 0;
   switch (obj->type) {
+  case HWLOC_OBJ_PU:
+    if (verbose && (!topology || topology->support.discovery->pu_hw_id)) {
+      res = hwloc_snprintf(tmp, tmplen, "%shw_id=%lld",
+                           prefix, (long long) obj->attr->pu.hw_id);
+    }
+    break;
   case HWLOC_OBJ_CORE:
     if (verbose && (!topology || topology->nr_cpukinds > 1)) {
       /* only show cpukind when there are multiple of them */

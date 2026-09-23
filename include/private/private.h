@@ -397,6 +397,8 @@ extern void hwloc_x86_prepare(struct hwloc_topology *topology);
 extern enum hwloc_x86_mode_e hwloc_x86_fixup_mode(struct hwloc_topology *, enum hwloc_x86_mode_e dflt, int maybecustom, const char *osname);
 extern int hwloc_x86_maybe_hybrid(struct hwloc_topology *); /* 1 if hybrid, 0 if not, -1 if unknown (or x86 not supported/disabled) */
 extern int hwloc_x86_discover_all(hwloc_topology_t topology);
+extern int hwloc_x86_has_pu_hw_ids(hwloc_topology_t);
+extern int hwloc_x86_set_pu_hw_id(hwloc_topology_t, hwloc_obj_t);
 extern void hwloc_x86_exit(struct hwloc_topology *);
 #else
 static __hwloc_inline void hwloc_x86_prepare(hwloc_topology_t topology)
@@ -407,6 +409,8 @@ static __hwloc_inline void hwloc_x86_prepare(hwloc_topology_t topology)
 static __hwloc_inline enum hwloc_x86_mode_e hwloc_x86_fixup_mode(struct hwloc_topology * topology  __hwloc_attribute_unused, enum hwloc_x86_mode_e dflt __hwloc_attribute_unused, int maybecustom  __hwloc_attribute_unused, const char *osname __hwloc_attribute_unused) { return HWLOC_X86_MODE_NONE; }
 static __hwloc_inline int hwloc_x86_maybe_hybrid(hwloc_topology_t topology __hwloc_attribute_unused) { return -1; /* unknown */ }
 static __hwloc_inline int hwloc_x86_discover_all(hwloc_topology_t topology __hwloc_attribute_unused) { return -1; }
+static __hwloc_inline int hwloc_x86_has_pu_hw_ids(hwloc_topology_t topology __hwloc_attribute_unused) { return 0; }
+static __hwloc_inline int hwloc_x86_set_pu_hw_id(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t _hwloc_reconnect_flag_keepstructure) { return -1; }
 static __hwloc_inline void hwloc_x86_exit(hwloc_topology_t topology) {
   hwloc_x86_init(topology);
 }

@@ -1261,8 +1261,13 @@ static void summarize(struct hwloc_topology *topology, struct hwloc_x86_backend_
        obj->cpuset = hwloc_bitmap_alloc();
        hwloc_bitmap_only(obj->cpuset, i);
        hwloc_debug_1arg_bitmap("PU %u has cpuset %s\n", i, obj->cpuset);
-       hwloc__insert_object_by_cpuset(topology, NULL, obj, "x86:pu");
+       obj = hwloc__insert_object_by_cpuset(topology, NULL, obj, "x86:pu");
+       /* the PU might get merged in case another backend already added PUs,
+        * use the resulting PU obj to add attributes
+        */
+       obj->attr->pu.hw_id = infos[i].apicid;
      }
+    topology->support.discovery->pu_hw_id = 1;
   }
 
   /* Look for caches */
@@ -2231,4 +2236,38 @@ hwloc_x86_maybe_hybrid(hwloc_topology_t topology)
     hwloc__x86_do_until(topology, data, HWLOC_X86_STATE_FEATURES|HWLOC_X86_STATE_QUERIED);
 
   return data->is_hybrid;
+}
+
+int hwloc_x86_has_pu_hw_ids(hwloc_topology_t topology)
+{
+  struct hwloc_x86_backend_data_s *data = topology->x86_data;
+
+  if (!data)
+    return 0;
+  assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
+
+  if (topology->x86_mode != HWLOC_X86_MODE_DONE)
+    hwloc__x86_do_until(topology, data, HWLOC_X86_STATE_FEATURES|HWLOC_X86_STATE_QUERIED);
+
+  if (data->state & HWLOC_X86_STATE_QUERIED)
+    return 1;
+  else
+    return 0;
+}
+
+int hwloc_x86_set_pu_hw_id(hwloc_topology_t topology, hwloc_obj_t pu)
+{
+  struct hwloc_x86_backend_data_s *data = topology->x86_data;
+
+  /* must have called hwloc_x86_has_pu_hw_ids() earlier */
+  assert(data);
+  assert(topology->x86_mode != HWLOC_X86_MODE_NONE);
+
+  assert(pu->type == HWLOC_OBJ_PU);
+
+  if (data->procinfos[pu->os_index].present)
+    pu->attr->pu.hw_id = data->procinfos[pu->os_index].apicid;
+  else
+    pu->attr->pu.hw_id = (hwloc_uint64_t) -1;
+  return 0;
 }

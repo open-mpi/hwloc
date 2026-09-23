@@ -4293,6 +4293,7 @@ look_sysfscpu(struct hwloc_topology *topology,
   int i,j;
   int threadwithcoreid = data->is_amd_with_CU ? -1 : 0; /* -1 means we don't know yet if threads have their own coreids within thread_siblings */
   int dont_merge_cluster_groups;
+  int x86_has_pu_hw_id;
   const char *env;
 
   hwloc_debug("\n\n * Topology extraction from /sys/devices/system/cpu/ *\n\n");
@@ -4365,6 +4366,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 
   env = getenv("HWLOC_DONT_MERGE_CLUSTER_GROUPS");
   dont_merge_cluster_groups = env && atoi(env);
+
+  x86_has_pu_hw_id = hwloc_x86_has_pu_hw_ids(topology);
 
   hwloc_bitmap_foreach_begin(i, cpuset) {
     int tmpint;
@@ -4627,7 +4630,12 @@ look_sysfscpu(struct hwloc_topology *topology,
       thread->cpuset = threadset;
       hwloc_debug_1arg_bitmap("thread %d has cpuset %s\n",
 		 i, threadset);
-      hwloc__insert_object_by_cpuset(topology, NULL, thread, "linux:sysfs:pu");
+      thread = hwloc__insert_object_by_cpuset(topology, NULL, thread, "linux:sysfs:pu");
+      /* use the resulting PU obj to add attributes in case the new PU got merged
+       * with an existing one (not supposed to happen here)
+       */
+      if (x86_has_pu_hw_id)
+        hwloc_x86_set_pu_hw_id(topology, thread);
     }
 
     /* look at the caches */
@@ -4742,6 +4750,9 @@ look_sysfscpu(struct hwloc_topology *topology,
     }
 
   } hwloc_bitmap_foreach_end();
+
+  if (x86_has_pu_hw_id)
+    topology->support.discovery->pu_hw_id = 1;
 
   hwloc_bitmap_free(cpuset);
   hwloc_bitmap_free(online_set);
@@ -5079,6 +5090,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       parse_cpuinfo_func(prefix, value,
 			 curproc >= 0 ? &Lprocs[curproc].infos : global_infos,
 			 curproc < 0);
+      /* TODO add a apicid field in Lprocs in case x86 isn't available? */
     }
 
     if (noend) {

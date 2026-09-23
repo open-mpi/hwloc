@@ -17,6 +17,7 @@
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object id CDATA "-1" >
 <!ATTLIST object gp_index CDATA "-1" >
+<!ATTLIST object hw_id CDATA "0" >
 <!ATTLIST object name CDATA "" >
 <!ATTLIST object local_memory CDATA "0" >
 <!ATTLIST object cache_size CDATA "0" >

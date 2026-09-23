@@ -45,6 +45,7 @@ hwloc_look_noos(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus
     else
       nbprocs = 1;
     hwloc_setup_pu_level(topology, nbprocs);
+    /* pu->hw_id set by hwloc_x86_discover_all() above or below, don't bother doing it here */
     hwloc__add_info(&topology->infos, "Backend", "noOS");
   }
 
