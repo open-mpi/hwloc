@@ -3405,7 +3405,6 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned *indexes;
   uint64_t * distances;
   hwloc_bitmap_t nodes_cpuset;
-  unsigned failednodes = 0;
   unsigned i;
   DIR *dir;
   char *env;
@@ -3468,8 +3467,7 @@ look_sysfsnode(struct hwloc_topology *topology,
     sprintf(nodepath, "/sys/devices/system/node/node%u/cpumap", osnode);
     cpuset = hwloc__alloc_read_path_as_cpumask(nodepath, data->root_fd);
     if (!cpuset) {
-      /* This NUMA object won't be inserted, we'll ignore distances */
-      failednodes++;
+      /* This NUMA object won't be inserted, we'll fixup distances */
       continue;
     }
     if (hwloc_bitmap_intersects(nodes_cpuset, cpuset)) {
@@ -3479,7 +3477,6 @@ look_sysfsnode(struct hwloc_topology *topology,
       if (!allow_overlapping_node_cpusets) {
 	hwloc_debug_1arg_bitmap("node P#%u cpuset %s intersects with previous nodes, ignoring that node.\n", osnode, cpuset);
 	hwloc_bitmap_free(cpuset);
-	failednodes++;
 	continue;
       }
       if (allow_overlapping_node_cpusets < 2 && HWLOC_SHOW_ERRORS(HWLOC_SHOWMSG_CRITICAL|HWLOC_SHOWMSG_OS))
@@ -3647,7 +3644,6 @@ look_sysfsnode(struct hwloc_topology *topology,
 	    for(j=0; j<nbnodes; j++)
 	      if (nodes[j] == cur_obj)
 		nodes[j] = res_obj;
-	    failednodes++;
 	  }
 	}
       }
