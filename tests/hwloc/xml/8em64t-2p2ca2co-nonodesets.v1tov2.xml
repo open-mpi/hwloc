@@ -152,5 +152,7 @@
       </object>
     </object>
   </object>
+  <support name="discovery.pu"/>
+  <support name="discovery.disallowed_pu"/>
   <support name="custom.exported_support"/>
 </topology>

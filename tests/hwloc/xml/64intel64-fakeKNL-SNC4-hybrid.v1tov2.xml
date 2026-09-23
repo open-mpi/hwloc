@@ -248,5 +248,10 @@
       </object>
     </object>
   </object>
+  <support name="discovery.pu"/>
+  <support name="discovery.numa"/>
+  <support name="discovery.numa_memory"/>
+  <support name="discovery.disallowed_pu"/>
+  <support name="discovery.disallowed_numa"/>
   <support name="custom.exported_support"/>
 </topology>

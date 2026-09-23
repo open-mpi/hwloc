@@ -1358,6 +1358,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
 static int
 hwloc__xml_v2import_support(hwloc_topology_t topology,
+                            struct hwloc_xml_backend_data_s *data,
                             hwloc__xml_import_state_t state)
 {
   char *name = NULL;
@@ -1377,7 +1378,7 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
     }
   }
 
-  if (name && topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
+  if (name) {
 #ifdef HWLOC_DEBUG
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_support) == 4*sizeof(void*));
     HWLOC_BUILD_ASSERT(sizeof(struct hwloc_topology_discovery_support) == 6);
@@ -1387,46 +1388,53 @@ hwloc__xml_v2import_support(hwloc_topology_t topology,
 #endif
 
 #define DO(_cat,_name) if (!strcmp(#_cat "." #_name, name)) topology->support._cat->_name = value
+
+    /* always import discovery bits */
     DO(discovery,pu);
     else DO(discovery,numa);
     else DO(discovery,numa_memory);
     else DO(discovery,disallowed_pu);
     else DO(discovery,disallowed_numa);
     else DO(discovery,cpukind_efficiency);
-    else DO(cpubind,set_thisproc_cpubind);
-    else DO(cpubind,get_thisproc_cpubind);
-    else DO(cpubind,set_proc_cpubind);
-    else DO(cpubind,get_proc_cpubind);
-    else DO(cpubind,set_thisthread_cpubind);
-    else DO(cpubind,get_thisthread_cpubind);
-    else DO(cpubind,set_thread_cpubind);
-    else DO(cpubind,get_thread_cpubind);
-    else DO(cpubind,get_thisproc_last_cpu_location);
-    else DO(cpubind,get_proc_last_cpu_location);
-    else DO(cpubind,get_thisthread_last_cpu_location);
-    else DO(membind,set_thisproc_membind);
-    else DO(membind,get_thisproc_membind);
-    else DO(membind,set_proc_membind);
-    else DO(membind,get_proc_membind);
-    else DO(membind,set_thisthread_membind);
-    else DO(membind,get_thisthread_membind);
-    else DO(membind,set_area_membind);
-    else DO(membind,get_area_membind);
-    else DO(membind,alloc_membind);
-    else DO(membind,firsttouch_membind);
-    else DO(membind,bind_membind);
-    else DO(membind,interleave_membind);
-    else DO(membind,weighted_interleave_membind);
-    else DO(membind,nexttouch_membind);
-    else DO(membind,migrate_membind);
-    else DO(membind,get_area_memlocation);
 
-    else if (!strcmp("custom.exported_support", name))
-      /* support was exported in a custom/fake field, mark it as imported here */
-      topology->support.misc->imported_support = 1;
+    else if (topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT) {
+      DO(cpubind,set_thisproc_cpubind);
+      else DO(cpubind,get_thisproc_cpubind);
+      else DO(cpubind,set_proc_cpubind);
+      else DO(cpubind,get_proc_cpubind);
+      else DO(cpubind,set_thisthread_cpubind);
+      else DO(cpubind,get_thisthread_cpubind);
+      else DO(cpubind,set_thread_cpubind);
+      else DO(cpubind,get_thread_cpubind);
+      else DO(cpubind,get_thisproc_last_cpu_location);
+      else DO(cpubind,get_proc_last_cpu_location);
+      else DO(cpubind,get_thisthread_last_cpu_location);
+      else DO(membind,set_thisproc_membind);
+      else DO(membind,get_thisproc_membind);
+      else DO(membind,set_proc_membind);
+      else DO(membind,get_proc_membind);
+      else DO(membind,set_thisthread_membind);
+      else DO(membind,get_thisthread_membind);
+      else DO(membind,set_area_membind);
+      else DO(membind,get_area_membind);
+      else DO(membind,alloc_membind);
+      else DO(membind,firsttouch_membind);
+      else DO(membind,bind_membind);
+      else DO(membind,interleave_membind);
+      else DO(membind,weighted_interleave_membind);
+      else DO(membind,nexttouch_membind);
+      else DO(membind,migrate_membind);
+      else DO(membind,get_area_memlocation);
+
+      else if (!strcmp("custom.exported_support", name))
+        /* support was exported in a custom/fake field, mark it as imported here */
+        topology->support.misc->imported_support = 1;
 
 #undef DO
+    }
   }
+
+  data->got_support = 1;
 
   return 0;
 }
@@ -2286,6 +2294,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
   data->first_numanode = data->last_numanode = NULL;
   data->first_v1dist = data->last_v1dist = NULL;
   data->v3memtiers_nr = 0;
+  data->got_support = 0;
 
   ret = data->look_init(data, &state);
   if (ret < 0)
@@ -2330,7 +2339,7 @@ hwloc_look_xml(struct hwloc_backend *backend, struct hwloc_disc_status *dstatus)
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "support")) {
-	ret = hwloc__xml_v2import_support(topology, &childstate);
+	ret = hwloc__xml_v2import_support(topology, data, &childstate);
 	if (ret < 0)
 	  goto failed;
       } else if (!strcmp(tag, "memattr")) {
@@ -2509,7 +2518,8 @@ done:
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_IMPORT_SUPPORT)) {
+  if (!data->got_support) {
+    /* if there was no support to import, put some likely default values */
     topology->support.discovery->pu = 1;
     topology->support.discovery->disallowed_pu = 1;
     if (data->nbnumanodes) {
