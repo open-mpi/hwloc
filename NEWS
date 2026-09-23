@@ -25,6 +25,7 @@ Version 2.15.0
   + The environment variable HWLOC_RSMI_BACKEND=rocm is removed.
 * Fix missing architecture-specific Linux features on Android platforms,
   e.g. ARM MIDR-based CPU kind detection.
+* Fix cpukind CPU capacity when some PU are offline on Linux.
 * Many small fixes by Javid Khan, again, thanks.
 
 
