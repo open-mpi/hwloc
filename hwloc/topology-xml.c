@@ -169,6 +169,10 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology,
     obj->subtype = strdup(value);
   }
 
+  else if (!strcmp(name, "hw_id")) {
+    /* ignored to avoid a warning for 3.0 forward compat */
+  }
+
   else if (!strcmp(name, "cache_size")) {
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (hwloc__obj_type_is_cache(obj->type) || obj->type == _HWLOC_OBJ_CACHE_OLD || obj->type == HWLOC_OBJ_MEMCACHE)
