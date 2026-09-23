@@ -2625,6 +2625,12 @@ in the IO registry on Darwin / Mac OS X.
 For instance <tt>apple,icestorm;ARM,v8</tt> for energy-efficient cores
 and <tt>apple,firestorm;ARM,v8</tt> on performance cores on Apple M1 CPU.
 </dd>
+<dt>DarwinPerflevelName=Performance (Darwin / Mac OS X)</dt>
+<dd>The name of the matching sysctl performance level
+(<tt>hw.perflevel&lt;N&gt;.name</tt>) on Darwin / Mac OS X.
+For instance <tt>Efficiency</tt>, <tt>Performance</tt>,
+or <tt>Super</tt>.
+</dd>
 </dl>
 
 The hwloc-calc tool may be used to query the number of cpukinds
