@@ -2265,7 +2265,11 @@ int hwloc_x86_set_pu_hw_id(hwloc_topology_t topology, hwloc_obj_t pu)
 
   assert(pu->type == HWLOC_OBJ_PU);
 
-  if (data->procinfos[pu->os_index].present)
+  /* the OS backend may report a PU whose os_index is beyond what the x86
+   * backend enumerated (sparse/offline CPUs in sysfs, or a cpuid dump that
+   * covers fewer PUs than the OS), so bound the index against procinfos.
+   */
+  if (pu->os_index < data->nbprocs && data->procinfos[pu->os_index].present)
     pu->attr->pu.hw_id = data->procinfos[pu->os_index].apicid;
   else
     pu->attr->pu.hw_id = (hwloc_uint64_t) -1;
