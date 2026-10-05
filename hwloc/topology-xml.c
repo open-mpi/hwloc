@@ -647,6 +647,13 @@ hwloc__xml_v1import_distances(struct hwloc_xml_backend_data_s *data,
     float *matrix;
     struct hwloc__xml_imported_v1distances_s *v1dist;
 
+    if (nbobjs > ULONG_MAX / nbobjs / sizeof(float)) {
+      if (hwloc__xml_verbose())
+        fprintf(stderr, "%s: v1distance matrix with too many objects (%lu)\n",
+                state->global->msgprefix, nbobjs);
+      return -1;
+    }
+
     matrix = malloc(nbobjs*nbobjs*sizeof(float));
     v1dist = malloc(sizeof(*v1dist));
     if (!matrix || !v1dist) {
