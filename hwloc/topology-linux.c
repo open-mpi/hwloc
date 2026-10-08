@@ -2602,27 +2602,45 @@ hwloc_admin_disable_set_from_cgroup(int root_fd,
 {
 #define CPUSET_FILENAME_LEN 256
   char cpuset_filename[CPUSET_FILENAME_LEN];
-  int err;
+  const char *prefix = cgtype == HWLOC_LINUX_CPUSET ? "" : "cpuset.";
+  /* Keep using the configured masks for cgroup1; the core removes offline CPUs. */
+  const char *suffix = cgtype == HWLOC_LINUX_CGROUP2 ? ".effective" : "";
+  size_t cgrouplen = strlen(cpuset_name);
+  int err = -1;
 
-  switch (cgtype) {
-  case HWLOC_LINUX_CGROUP2:
-    /* try to read the cpuset from cgroup2. use the last "effective" mask to get a AND of parent masks */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s.effective", mntpnt, cpuset_name, attr_name);
-    hwloc_debug("Trying to read cgroup2 file <%s>\n", cpuset_filename);
-    break;
-  case HWLOC_LINUX_CGROUP1:
-    /* try to read the cpuset from cgroup1. no need to use "effective_cpus/mems" since we'll remove offline CPUs in the core */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", mntpnt, cpuset_name, attr_name);
-    hwloc_debug("Trying to read cgroup1 file <%s>\n", cpuset_filename);
-    break;
-  case HWLOC_LINUX_CPUSET:
-    /* try to read the cpuset directly */
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", mntpnt, cpuset_name, attr_name);
+  /* A /../ path refers to a task outside our cgroup namespace. */
+  if (cgrouplen > INT_MAX
+      || (cgtype == HWLOC_LINUX_CGROUP2
+          && (cpuset_name[0] != '/' || strstr(cpuset_name, "/../")
+              || (cgrouplen >= 3 && !strcmp(cpuset_name + cgrouplen - 3, "/..")))))
+    goto out;
+
+  for (;;) {
+    if (cgtype == HWLOC_LINUX_CGROUP2)
+      while (cgrouplen && cpuset_name[cgrouplen-1] == '/')
+        cgrouplen--;
+
+    err = snprintf(cpuset_filename, sizeof(cpuset_filename), "%s%.*s/%s%s%s",
+                   mntpnt, (int) cgrouplen, cpuset_name, prefix, attr_name, suffix);
+    if (err < 0 || (cgtype == HWLOC_LINUX_CGROUP2
+                   && (size_t) err >= sizeof(cpuset_filename))) {
+      err = -1;
+      break;
+    }
     hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-    break;
+    errno = 0;
+    err = hwloc__read_path_as_cpulist(cpuset_filename, admin_enabled_set, root_fd);
+    if (err >= 0 || cgtype != HWLOC_LINUX_CGROUP2 || errno != ENOENT || !cgrouplen)
+      break;
+
+    /* A cgroup without cpuset enabled inherits its ancestor's effective
+     * masks, but has no cpuset files of its own. Stop at the mount point.
+     */
+    while (cgrouplen && cpuset_name[cgrouplen-1] != '/')
+      cgrouplen--;
   }
 
-  err = hwloc__read_path_as_cpulist(cpuset_filename, admin_enabled_set, root_fd);
+ out:
   if (err < 0) {
     hwloc_debug("failed to read cpuset '%s' attribute '%s'\n", cpuset_name, attr_name);
     hwloc_bitmap_fill(admin_enabled_set);
