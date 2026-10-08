@@ -13,6 +13,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.16.0
+--------------
+* Improve cpukinds detection on Mac OS X to support 3 or more kinds.
+  Thanks to Apple for the patches.
+
+
 Version 2.15.0
 --------------
 * The Windows backend now adds NUMA nodes when CPU discovery was
