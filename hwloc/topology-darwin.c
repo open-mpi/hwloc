@@ -509,7 +509,7 @@ static void hwloc__darwin_build_perflevel_cache_level(struct hwloc_topology *top
                                                     hwloc_obj_type_t type,
                                                     unsigned depth, uint64_t size, int64_t linesize)
 {
-  unsigned j,k;
+  unsigned j __hwloc_attribute_unused, k;
   int next = -1;
   hwloc_debug_2args_bitmap("looking at perflevel cache depth %u width %u inside cpuset %s\n", depth, width, cpuset);
   for (j = 0;; j++) {
