@@ -87,7 +87,9 @@ typedef struct _GROUP_AFFINITY {
 typedef struct HWLOC_PROCESSOR_RELATIONSHIP {
   BYTE Flags;
   BYTE EfficiencyClass; /* for RelationProcessorCore, higher means greater performance but less efficiency */
-  BYTE Reserved[20];
+  WORD RelativePerformance; /* for RelationProcessorCore, higher means greater performance, 0 if not reported */
+  WORD RelativeEfficiency;
+  BYTE Reserved[16];
   WORD GroupCount;
   GROUP_AFFINITY GroupMask[ANYSIZE_ARRAY];
 } HWLOC_PROCESSOR_RELATIONSHIP;
@@ -891,6 +893,8 @@ struct hwloc_win_efficiency_classes {
     unsigned value;
     hwloc_bitmap_t cpuset;
   } *classes;
+#define HWLOC_WIN_EFFICIENCY_CLASSES_FLAG_RELATIVE_PERFORMANCE (1<<0) /* values are RelativePerformance instead of EfficiencyClass */
+  unsigned flags;
 };
 
 static void
@@ -899,14 +903,27 @@ hwloc_win_efficiency_classes_init(struct hwloc_win_efficiency_classes *classes)
   classes->classes = NULL;
   classes->nr_classes_allocated = 0;
   classes->nr_classes = 0;
+  classes->flags = 0;
 }
 
 static int
 hwloc_win_efficiency_classes_add(struct hwloc_win_efficiency_classes *classes,
                                  hwloc_const_bitmap_t cpuset,
-                                 unsigned value)
+                                 unsigned efficiency_class,
+                                 unsigned relative_performance)
 {
+  unsigned value;
   unsigned i;
+
+  /* use RelativePerformance when reported (for all cores or for none), EfficiencyClass otherwise */
+  if (relative_performance) {
+    assert(!classes->nr_classes || (classes->flags & HWLOC_WIN_EFFICIENCY_CLASSES_FLAG_RELATIVE_PERFORMANCE));
+    classes->flags |= HWLOC_WIN_EFFICIENCY_CLASSES_FLAG_RELATIVE_PERFORMANCE;
+    value = relative_performance;
+  } else {
+    assert(!(classes->flags & HWLOC_WIN_EFFICIENCY_CLASSES_FLAG_RELATIVE_PERFORMANCE));
+    value = efficiency_class;
+  }
 
   /* look for existing class with that efficiency value */
   for(i=0; i<classes->nr_classes; i++) {
@@ -945,9 +962,24 @@ static void
 hwloc_win_efficiency_classes_register(hwloc_topology_t topology,
                                       struct hwloc_win_efficiency_classes *classes)
 {
+  char relative_performance[16] = {0};
+  struct hwloc_infos_s infos;
+  struct hwloc_info_s infoattr;
   unsigned i;
+
+  infoattr.name = (char *) "WindowsRelativePerformance";
+  infoattr.value = relative_performance;
+  infos.array = &infoattr;
+  if (classes->flags & HWLOC_WIN_EFFICIENCY_CLASSES_FLAG_RELATIVE_PERFORMANCE)
+    infos.count = 1;
+  else
+    infos.count = 0;
+
   for(i=0; i<classes->nr_classes; i++) {
-    hwloc_internal_cpukinds_register(topology, classes->classes[i].cpuset, classes->classes[i].value, NULL, 0);
+    if (infos.count)
+      snprintf(relative_performance, sizeof(relative_performance), "%u", classes->classes[i].value);
+
+    hwloc_internal_cpukinds_register(topology, classes->classes[i].cpuset, classes->classes[i].value, &infos, 0);
     classes->classes[i].cpuset = NULL; /* given to cpukinds */
   }
 }
@@ -1077,6 +1109,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	   procInfo = (void*) ((uintptr_t) procInfo + procInfo->Size)) {
         unsigned num, i;
         unsigned efficiency_class = 0;
+        unsigned relative_performance = 0;
         GROUP_AFFINITY *GroupMask;
 
 	if (procInfo->Relationship == RelationCache) {
@@ -1141,6 +1174,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
             num = procInfo->Processor.GroupCount;
             GroupMask = procInfo->Processor.GroupMask;
             efficiency_class = procInfo->Processor.EfficiencyClass;
+            relative_performance = procInfo->Processor.RelativePerformance;
 	    break;
 	  case RelationGroup:
 	    /* So strange an interface... */
@@ -1206,7 +1240,7 @@ hwloc_look_windows(struct hwloc_backend *backend, struct hwloc_disc_status *dsta
 	switch (type) {
         case HWLOC_OBJ_CORE: {
           if (has_efficiencyclass)
-            hwloc_win_efficiency_classes_add(&eclasses, obj->cpuset, efficiency_class);
+            hwloc_win_efficiency_classes_add(&eclasses, obj->cpuset, efficiency_class, relative_performance);
           break;
         }
 	  case HWLOC_OBJ_NUMANODE:
