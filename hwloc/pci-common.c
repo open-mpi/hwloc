@@ -295,8 +295,9 @@ hwloc_pci_discovery_prepare(struct hwloc_topology *topology)
     struct hwloc_obj *lastpu;
     hwloc_debug("Enabling for PCI locality fake quirk (attaching the entire domain 0000 to last PU)\n");
     last = hwloc_bitmap_last(hwloc_topology_get_topology_cpuset(topology));
-    lastpu = topology->levels[0][last];
-    hwloc__pci_add_locality_before(topology, 0, 0, 255, lastpu, NULL);
+    lastpu = hwloc_get_pu_obj_by_os_index(topology, last);
+    if (lastpu)
+      hwloc__pci_add_locality_before(topology, 0, 0, 255, lastpu, NULL);
     return;
   }
 }
