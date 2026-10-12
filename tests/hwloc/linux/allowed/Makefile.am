@@ -7,13 +7,16 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 allowed_tests = \
-	test1.test
+	test1.test \
+	cgroup2-ancestors.test
 
 allowed_outputs = \
-	test1.xml
+	test1.xml \
+	cgroup2-ancestors.xml
 
 allowed_fsroots = \
-	test1.fsroot.tar.bz2
+	test1.fsroot.tar.bz2 \
+	cgroup2-ancestors.fsroot.tar.bz2
 
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
