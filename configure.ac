@@ -229,6 +229,14 @@ fi
 test "x$hwloc_rsmi_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list RSMI"
 test "x$hwloc_levelzero_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list LevelZero"
 test "x$hwloc_gl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list GL"
+test "x$hwloc_vulkan_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list Vulkan"
+
+# Add explicit status for Vulkan (similar pattern to CUDA)
+hwloc_vulkan_status=
+if test "x$hwloc_vulkan_happy" = "xyes"; then
+    hwloc_vulkan_status=yes
+fi
+
 # if nothing, say "no"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
 
@@ -323,6 +331,11 @@ cat <<EOF
 Graphical output:            $hwloc_graphical_lstopo_status
 XML input / output:          $hwloc_xml_status
 EOF
+if test "x$hwloc_vulkan_status" != x; then
+  cat <<EOF
+Vulkan status:              $hwloc_vulkan_status
+EOF
+fi
 
 # Plugin support
 hwloc_plugin_summary=$hwloc_have_plugins

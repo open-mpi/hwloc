@@ -128,6 +128,10 @@ hwloc_levelzero_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LEVELZERO_LIBS)
 endif
 endif HWLOC_HAVE_LEVELZERO
 
+if HWLOC_HAVE_VULKAN
+sources += topology-vulkan.c
+endif HWLOC_HAVE_VULKAN
+
 if HWLOC_HAVE_GL
 if HWLOC_GL_BUILD_STATIC
 sources += topology-gl.c
