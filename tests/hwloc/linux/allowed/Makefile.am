@@ -7,13 +7,16 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 tests_outputs = \
-	test1.output
+	test1.output \
+	cgroup2-ancestors.output
 
 tests_synthetics = \
-	test1.synthetic
+	test1.synthetic \
+	cgroup2-ancestors.synthetic
 
 tests_fsroots = \
-	test1.fsroot.tar.bz2
+	test1.fsroot.tar.bz2 \
+	cgroup2-ancestors.fsroot.tar.bz2
 
 tests_options = \
 	test1.options
