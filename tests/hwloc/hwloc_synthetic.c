@@ -174,5 +174,20 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
+
+  /* the fake PCI locality quirk used to look up the last PU as levels[0][last],
+   * reading past the single-object root level whenever the last PU os_index was
+   * non-zero. Load a multi-PU topology with the quirk enabled to exercise it.
+   */
+  putenv((char *) "HWLOC_PCI_LOCALITY_QUIRK_FAKE=1");
+  hwloc_topology_init(&topology);
+  err = hwloc_topology_set_synthetic(topology, "pack:2 core:2 pu:2");
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(!err);
+  assert(hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU) == 8);
+  hwloc_topology_destroy(topology);
+  putenv((char *) "HWLOC_PCI_LOCALITY_QUIRK_FAKE=0");
+
   return 0;
 }
