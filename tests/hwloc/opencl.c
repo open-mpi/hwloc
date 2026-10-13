@@ -34,7 +34,7 @@ int main(void)
   hwloc_topology_t topology;
   cl_int clret;
   cl_platform_id *platform_ids;
-  unsigned nrp, nrd, count, i, j;
+  unsigned nrp, nrd, count __hwloc_attribute_unused, i, j;
   int has_opencl_backend;
   int err;
 
