@@ -721,19 +721,20 @@ static void look_proc(hwloc_topology_t topology, struct hwloc_x86_backend_data_s
   legacy_log_proc_id = infos->apicid % legacy_max_log_proc;
   hwloc_debug("phys %u legacy thread %u\n", infos->ids[PKG], legacy_log_proc_id);
 
-  /* Get cpu model/family/stepping numbers from same cpuid */
+  /* Get cpu model/family/stepping numbers from same cpuid.
+   * Note that Cyrix CPUs (very old) would need specific quirks
+   * (see arch/x86/kernel/cpu/cyrix.c in Linux).
+   */
   _model          = (eax>>4) & 0xf;
   _extendedmodel  = (eax>>16) & 0xf;
   _family         = (eax>>8) & 0xf;
   _extendedfamily = (eax>>20) & 0xff;
-  if ((on_intel() || on_amd() || on_hygon()) && _family == 0xf) {
+  if (_family >= 0xf) {
     infos->cpufamilynumber = _family + _extendedfamily;
   } else {
     infos->cpufamilynumber = _family;
   }
-  if ((on_intel() && (_family == 0x6 || _family == 0xf))
-      || ((on_amd() || on_hygon()) && _family == 0xf)
-      || (on_zhaoxin() && (_family == 0x6 || _family == 0x7))) {
+  if (_family >= 0x6) {
     infos->cpumodelnumber = _model + (_extendedmodel << 4);
   } else {
     infos->cpumodelnumber = _model;
