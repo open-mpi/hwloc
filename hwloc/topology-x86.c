@@ -1459,8 +1459,8 @@ look_cpukinds_intel(struct hwloc_topology *topology,
        * This isn't needed as long as the L3-quirk below works, and Intel plans to keep with no L3 in the LP island.
        * Otherwise we would build an array of sets per hybridnativemodel and assume lower ones are LP?
        */
-      /* On Family 6 hybrids, Atom cores without an L3 cache are low-power cores */
-      if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels) {
+      /* On Family 6 and 18 hybrids, Atom cores without an L3 cache are low-power cores */
+      if ((infos[i].cpufamilynumber == 6 || infos[i].cpufamilynumber == 18) && infos[i].numcaches < max_cache_levels) {
         has_lp = 1;
         hwloc_bitmap_set(lpset, i);
       } else {
