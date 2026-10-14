@@ -143,10 +143,10 @@
   <cpukind cpuset="0x00003000" forced_efficiency="0">
     <info name="CoreType" value="IntelLowPower"/>
   </cpukind>
-  <cpukind cpuset="0x00000ff0" forced_efficiency="1">
+  <cpukind cpuset="0x00000ff0" forced_efficiency="0">
     <info name="CoreType" value="IntelAtom"/>
   </cpukind>
-  <cpukind cpuset="0x0000000f" forced_efficiency="2">
+  <cpukind cpuset="0x0000000f" forced_efficiency="0">
     <info name="CoreType" value="IntelCore"/>
   </cpukind>
 </topology>
