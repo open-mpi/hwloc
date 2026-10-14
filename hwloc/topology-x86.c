@@ -1437,7 +1437,6 @@ look_cpukinds_intel(struct hwloc_topology *topology,
   int has_lp = 0, has_atom = 0, has_core = 0;
   unsigned max_cache_levels = 0;
   unsigned i;
-  int efficiency;
 
   for(i=0; i<nbprocs; i++) {
     if (infos[i].numcaches > max_cache_levels)
@@ -1476,10 +1475,6 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     }
   }
 
-  /* Lower values indicate less efficient cores. This counter is incremented each time a new
-   * CPU kind is registered, so registration must be done in least-to-most efficient order.
-   */
-  efficiency = 0;
   /* register IntelLowPower set if any */
   if (has_lp) {
     struct hwloc_infos_s _infos;
@@ -1487,7 +1482,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "IntelLowPower";
     hwloc__init_infos_static(&_infos, 1, &infoattr);
-    hwloc_internal_cpukinds_register(topology, lpset, efficiency++, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc_internal_cpukinds_register(topology, lpset, 0, &_infos, 0);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(lpset);
@@ -1499,7 +1494,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "IntelAtom";
     hwloc__init_infos_static(&_infos, 1, &infoattr);
-    hwloc_internal_cpukinds_register(topology, atomset, efficiency++, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc_internal_cpukinds_register(topology, atomset, 0, &_infos, 0);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(atomset);
@@ -1511,7 +1506,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "IntelCore";
     hwloc__init_infos_static(&_infos, 1, &infoattr);
-    hwloc_internal_cpukinds_register(topology, coreset, efficiency++, &_infos, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc_internal_cpukinds_register(topology, coreset, 0, &_infos, 0);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(coreset);
