@@ -304,9 +304,11 @@ hwloc__cpukinds_try_rank_by_forced_efficiency(struct hwloc_topology *topology)
 struct hwloc_cpukinds_info_summary {
   int have_max_freq;
   int have_base_freq;
-  int have_intel_core_type;
+  int have_core_type;
   struct hwloc_cpukind_info_summary {
-    unsigned intel_core_type; /* 1 for lowpower, 2 for atom (default), 3 for core */
+    unsigned core_type; /* on Intel: 1 for lowpower, 2 for atom (default), 3 for core
+                         * on AMD: 1 for lowpower, 2 for efficiency, 3 for performance
+                         */
     unsigned max_freq, base_freq; /* MHz, hence < 100000 */
   } * summaries;
 };
@@ -319,7 +321,7 @@ hwloc__cpukinds_summarize_info(struct hwloc_topology *topology,
 
   summary->have_max_freq = 1;
   summary->have_base_freq = 1;
-  summary->have_intel_core_type = 2; /* atom by default */
+  summary->have_core_type = 1;
 
   for(i=0; i<topology->nr_cpukinds; i++) {
     struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
@@ -330,23 +332,23 @@ hwloc__cpukinds_summarize_info(struct hwloc_topology *topology,
       } else if (!strcmp(info->name, "FrequencyBaseMHz")) {
         summary->summaries[i].base_freq = atoi(info->value);
       } else if (!strcmp(info->name, "CoreType")) {
-        if (!strcmp(info->value, "IntelAtom"))
-          summary->summaries[i].intel_core_type = 2;
-        else if (!strcmp(info->value, "IntelCore"))
-          summary->summaries[i].intel_core_type = 3;
-        else if (!strcmp(info->value, "IntelLowPower"))
-          summary->summaries[i].intel_core_type = 1;
+        if (!strcmp(info->value, "IntelAtom") || !strcmp(info->value, "AMDEfficiency"))
+          summary->summaries[i].core_type = 2;
+        else if (!strcmp(info->value, "IntelCore") || !strcmp(info->value, "AMDPerformance"))
+          summary->summaries[i].core_type = 3;
+        else if (!strcmp(info->value, "IntelLowPower") || !strcmp(info->value, "AMDLowPower"))
+          summary->summaries[i].core_type = 1;
       }
     }
-    hwloc_debug("cpukind #%u has intel_core_type %u max_freq %u base_freq %u\n",
-                i, summary->summaries[i].intel_core_type,
+    hwloc_debug("cpukind #%u has core_type %u max_freq %u base_freq %u\n",
+                i, summary->summaries[i].core_type,
                 summary->summaries[i].max_freq, summary->summaries[i].base_freq);
     if (!summary->summaries[i].base_freq)
       summary->have_base_freq = 0;
     if (!summary->summaries[i].max_freq)
       summary->have_max_freq = 0;
-    if (!summary->summaries[i].intel_core_type)
-      summary->have_intel_core_type = 0;
+    if (!summary->summaries[i].core_type)
+      summary->have_core_type = 0;
   }
 }
 
@@ -372,43 +374,43 @@ hwloc__cpukinds_try_rank_by_info(struct hwloc_topology *topology,
 
   if (HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY_STRICT == heuristics) {
     hwloc_debug("Trying to rank cpukinds by coretype+frequency_strict...\n");
-    /* we need intel_core_type AND (base or max freq) for all kinds */
-    if (!summary->have_intel_core_type
+    /* we need core_type AND (base or max freq) for all kinds */
+    if (!summary->have_core_type
         || (!summary->have_max_freq && !summary->have_base_freq))
       return -1;
-    /* rank first by coretype (Core>>Atom) then by frequency, base if available, max otherwise */
+    /* rank first by core_type then by frequency, base if available, max otherwise */
     for(i=0; i<topology->nr_cpukinds; i++) {
       struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
       if (summary->have_base_freq)
-        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].base_freq;
+        kind->ranking_value = (summary->summaries[i].core_type << 20) + summary->summaries[i].base_freq;
       else
-        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].max_freq;
+        kind->ranking_value = (summary->summaries[i].core_type << 20) + summary->summaries[i].max_freq;
     }
 
   } else if (HWLOC_CPUKINDS_RANKING_CORETYPE_FREQUENCY == heuristics) {
     hwloc_debug("Trying to rank cpukinds by coretype+frequency...\n");
-    /* we need intel_core_type OR (base or max freq) for all kinds */
-    if (!summary->have_intel_core_type
+    /* we need core_type OR (base or max freq) for all kinds */
+    if (!summary->have_core_type
         && (!summary->have_max_freq && !summary->have_base_freq))
       return -1;
-    /* rank first by coretype (Core>>Atom) then by frequency, base if available, max otherwise */
+    /* rank first by core_type then by frequency, base if available, max otherwise */
     for(i=0; i<topology->nr_cpukinds; i++) {
       struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
       if (summary->have_base_freq)
-        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].base_freq;
+        kind->ranking_value = (summary->summaries[i].core_type << 20) + summary->summaries[i].base_freq;
       else
-        kind->ranking_value = (summary->summaries[i].intel_core_type << 20) + summary->summaries[i].max_freq;
+        kind->ranking_value = (summary->summaries[i].core_type << 20) + summary->summaries[i].max_freq;
     }
 
   } else if (HWLOC_CPUKINDS_RANKING_CORETYPE == heuristics) {
     hwloc_debug("Trying to rank cpukinds by coretype...\n");
-    /* we need intel_core_type */
-    if (!summary->have_intel_core_type)
+    /* we need core_type */
+    if (!summary->have_core_type)
       return -1;
-    /* rank by coretype (Core>>Atom) */
+    /* rank by core_type */
     for(i=0; i<topology->nr_cpukinds; i++) {
       struct hwloc_internal_cpukind_s *kind = &topology->cpukinds[i];
-      kind->ranking_value = (summary->summaries[i].intel_core_type << 20);
+      kind->ranking_value = (summary->summaries[i].core_type << 20);
     }
 
   } else if (HWLOC_CPUKINDS_RANKING_FREQUENCY == heuristics) {

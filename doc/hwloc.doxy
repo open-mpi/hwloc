@@ -1228,6 +1228,7 @@ following environment variables.
 
   By default, if available, the OS-provided efficiency is used for ranking.
   Otherwise, the frequency and/or core types are used when available.
+  Core types are currently available on Intel and AMD CPUs.
 
   This environment variable may be set to
   <tt>coretype+frequency</tt>, <tt>coretype+frequency_strict</tt>, <tt>coretype</tt>,
