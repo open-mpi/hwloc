@@ -1449,8 +1449,16 @@ look_cpukinds_intel(struct hwloc_topology *topology,
       continue;
     switch (infos[i].hybridcoretype) {
     case 0x20: /* Atom */
-      /* On Family 6 hybrids, Atom cores without an L3 cache are low-power cores */
-      if (infos[i].cpufamilynumber == 6 && infos[i].numcaches < max_cache_levels) {
+      /* TODO:
+       * On ARL-H, we could also use hybridnativemodel = 0x2 for LPE-cores (Crestmont) vs 0x3 for E-cores (Skymont),
+       * that's how Linux distinguishes cores with different PMUs.
+       * That's the only case where hybridnativemodel is different between E and LPE as of Linux 7.2.
+       * Other CPUs with LPE-cores have same id for E and LPE (see hybridnativemodel definition above).
+       * This isn't needed as long as the L3-quirk below works, and Intel plans to keep with no L3 in the LP island.
+       * Otherwise we would build an array of sets per hybridnativemodel and assume lower ones are LP?
+       */
+      /* On Family 6 and 18 hybrids, Atom cores without an L3 cache are low-power cores */
+      if ((infos[i].cpufamilynumber == 6 || infos[i].cpufamilynumber == 18) && infos[i].numcaches < max_cache_levels) {
         has_lp = 1;
         hwloc_bitmap_set(lpset, i);
       } else {
