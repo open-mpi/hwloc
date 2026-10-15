@@ -1,0 +1,4 @@
+synthetic: numa:2 pu:2
+fsroot:    cgroup2-ancestors.fsroot.tar.bz2
+target:    cgroup2-ancestors.xml
+options:   --disallowed -v -.xml
