@@ -65,6 +65,7 @@ struct hwloc_x86_backend_data_s {
 
   int is_knl;
   int is_hybrid;
+  int has_power_efficiency_ranking;
 
   int found_die_ids;
   int found_complex_ids;
@@ -634,8 +635,10 @@ static void read_extended_topo(struct hwloc_x86_backend_data_s *data, struct pro
              */
             if (eax & 0x40000000) {
               data->is_hybrid = 1;
-              if (eax & 0x20000000)
+              if (eax & 0x20000000) {
+                data->has_power_efficiency_ranking = 1;
                 infos->power_efficiency_ranking = (ebx >> 16) & 0xff;
+              }
               /* if rankings aren't available, keep everything to 0 and only use hybridcoretype */
             }
             infos->hybridcoretype = (ebx >> 28) & 0xf; /* 0 = P, 1 = E, 2 = LP */
@@ -1498,7 +1501,7 @@ look_cpukinds_intel(struct hwloc_topology *topology,
 }
 
 static void
-look_cpukinds_amd(struct hwloc_topology *topology,
+look_cpukinds_amd(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *data,
                   unsigned nbprocs, struct procinfo *infos)
 {
   hwloc_bitmap_t lpset = hwloc_bitmap_alloc();
@@ -1506,15 +1509,8 @@ look_cpukinds_amd(struct hwloc_topology *topology,
   hwloc_bitmap_t pset = hwloc_bitmap_alloc();
   int has_lp = 0, has_e = 0, has_p = 0;
   unsigned lpeff = 0, eeff = 0, peff = 0;
+  unsigned long register_flags = 0;
   unsigned i;
-
-  /* TODO: Build a bitmap of efficiency rankings for each kind.
-   * They should not intersect.
-   * If there's more than one ranking per kind, split them below.
-   *
-   * However most models seem to just report 0 for all kinds
-   * (e.g. StrixPoint, and some newer ones)
-   */
 
   for(i=0; i<nbprocs; i++) {
     if (!infos[i].present)
@@ -1541,23 +1537,27 @@ look_cpukinds_amd(struct hwloc_topology *topology,
     }
   }
 
-  if (!lpeff && !eeff && !peff) {
-    /* either not available, or report 0 for all kinds */
-    unsigned next = 0;
-    if (has_lp)
-      lpeff = next++;
-    if (has_e)
-      eeff = next++;
-    if (has_p)
-      peff = next++;
-  }
+  if (data->has_power_efficiency_ranking) {
+    /* TODO: Build a bitmap of efficiency rankings for each kind.
+     * They should not intersect.
+     * If there's more than one ranking per kind, split them below.
+     *
+     * However most models seem to just report no ranking or 0 for all kinds
+     * (e.g. StrixPoint, and some newer ones)
+     */
+    if (peff || eeff || lpeff)
+      register_flags = HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY;
+    else
+      hwloc_debug("hwloc/x86: Ignoring AMD power efficiency rankings, they are all 0\n");
+  } else
+    hwloc_debug("hwloc/x86: AMD power efficiency ranking not supported, only setting core types\n");
 
   /* register AMD LowPower set if any */
   if (has_lp) {
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "AMDLowPower";
-    hwloc_internal_cpukinds_register(topology, lpset, lpeff, &infoattr, 1, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc_internal_cpukinds_register(topology, lpset, lpeff, &infoattr, 1, register_flags);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(lpset);
@@ -1567,7 +1567,7 @@ look_cpukinds_amd(struct hwloc_topology *topology,
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "AMDEfficiency";
-    hwloc_internal_cpukinds_register(topology, eset, eeff, &infoattr, 1, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc_internal_cpukinds_register(topology, eset, eeff, &infoattr, 1, register_flags);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(eset);
@@ -1577,7 +1577,7 @@ look_cpukinds_amd(struct hwloc_topology *topology,
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
     infoattr.value = (char *) "AMDPerformance";
-    hwloc_internal_cpukinds_register(topology, pset, peff, &infoattr, 1, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
+    hwloc_internal_cpukinds_register(topology, pset, peff, &infoattr, 1, register_flags);
     /* the cpuset is given to the callee */
   } else {
     hwloc_bitmap_free(pset);
@@ -1675,7 +1675,7 @@ look_procs(struct hwloc_topology *topology, struct hwloc_x86_backend_data_s *dat
       if (on_intel())
         look_cpukinds_intel(topology, nbprocs, infos);
       else if (on_amd())
-        look_cpukinds_amd(topology, nbprocs, infos);
+        look_cpukinds_amd(topology, data, nbprocs, infos);
     }
   } else {
     hwloc_debug("x86 APIC IDs aren't unique, x86 discovery ignored.\n");
