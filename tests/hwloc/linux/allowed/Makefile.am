@@ -19,7 +19,8 @@ tests_fsroots = \
 	cgroup2-ancestors.fsroot.tar.bz2
 
 tests_options = \
-	test1.options
+	test1.options \
+	cgroup2-ancestors.options
 
 tests_envs =
 
