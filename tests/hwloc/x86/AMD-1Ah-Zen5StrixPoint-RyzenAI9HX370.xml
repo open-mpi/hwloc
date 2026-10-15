@@ -138,7 +138,7 @@
   <cpukind cpuset="0x00ff0ff0" forced_efficiency="0">
     <info name="CoreType" value="AMDEfficiency"/>
   </cpukind>
-  <cpukind cpuset="0x0000f00f" forced_efficiency="1">
+  <cpukind cpuset="0x0000f00f" forced_efficiency="0">
     <info name="CoreType" value="AMDPerformance"/>
   </cpukind>
   <info name="Backend" value="x86"/>
