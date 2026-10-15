@@ -13,6 +13,13 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9.
 
 
+Version 2.15.1
+--------------
+* Fix support for nested Linux Cgroup v2, thanks Guixiong Wei.
+* Fix "AMDEfficiency" core type in the x86 backend.
+* Some fixes from Javid Khan and Krzysztof Pawlinski.
+
+
 Version 2.15.0
 --------------
 * The Windows backend now adds NUMA nodes when CPU discovery was
