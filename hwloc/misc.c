@@ -166,7 +166,7 @@ int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology,
    */
   qsort(sizes, nr, sizeof(*sizes), hwloc_pagesize_arrayelt_compar);
 
-  buflen = 22*nr; /* 21 digits + comma or ending 0 */
+  buflen = (size_t) nr * 22; /* 21 digits + comma or ending 0 */
   buffer = malloc(buflen);
   if (!buffer)
     return -1;
@@ -174,7 +174,7 @@ int hwloc__add_pagesize_info_from_array(struct hwloc_topology *topology,
   current = buffer;
   for(i=0; i<nr; i++) {
     err = snprintf(current, buflen, "%s%llu", current != buffer ? "," : "", (unsigned long long) sizes[i]);
-    if (err < 0)
+    if (err < 0 || (size_t) err >= buflen)
       break;
     current += err;
     buflen -= err;
