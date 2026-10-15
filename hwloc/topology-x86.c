@@ -1566,7 +1566,7 @@ look_cpukinds_amd(struct hwloc_topology *topology,
   if (has_e) {
     struct hwloc_info_s infoattr;
     infoattr.name = (char *) "CoreType";
-    infoattr.value = (char *) "AMDEfficieny";
+    infoattr.value = (char *) "AMDEfficiency";
     hwloc_internal_cpukinds_register(topology, eset, eeff, &infoattr, 1, HWLOC_CPUKINDS_REGISTER_FLAG_OVERWRITE_FORCED_EFFICIENCY);
     /* the cpuset is given to the callee */
   } else {
