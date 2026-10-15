@@ -32,11 +32,9 @@ def doMSVC = (!isExtendedJob && env.NO_MSVC != 'true')
 println('MSVC is '+(doMSVC ? 'enabled.' : 'disabled.'))
 def doWinCMake = (!isExtendedJob && env.NO_WINCMAKE != 'true')
 println('WinCMake is '+(doWinCMake ? 'enabled.' : 'disabled.'))
-// basic job doesn't run Coverity/Sonarqube/Embedded/MinGW/Cygwin/Android
+// basic job doesn't run Coverity/Embedded/MinGW/Cygwin/Android
 def doCoverity = (!isBasicJob && env.NO_COVERITY != 'true')
 println('Coverity is '+(doCoverity ? 'enabled.' : 'disabled.'))
-def doSonarQube = (!isBasicJob && env.NO_SONARQUBE != 'true')
-println('SonarQube is '+(doSonarQube ? 'enabled.' : 'disabled.'))
 def doEmbedded = (!isBasicJob && env.NO_EMBEDDED != 'true')
 println('Embedded is '+(doEmbedded ? 'enabled.' : 'disabled.'))
 def doMinGW = (!isBasicJob && env.NO_MINGW != 'true')
@@ -101,9 +99,6 @@ pipeline {
 							if (doCoverity) {
 								stash includes: "job-3-coverity.sh", name: 'script-coverity'
 							}
-							if (doSonarQube) {
-								stash includes: "job-3-sonarscanner.sh", name: 'script-sonarscanner'
-							}
 						}
 					}
 					archiveArtifacts artifacts: tarballgz+","+tarballbz2+",doc/doxygen-doc/hwloc-a4.pdf", fingerprint: true, onlyIfSuccessful: true
@@ -136,9 +131,6 @@ pipeline {
 					}
 					if (doCoverity) {
 						listOfNodeNames.push('Coverity')
-					}
-					if (doSonarQube) {
-						listOfNodeNames.push('SonarQube Scanner')
 					}
 					if (doEmbedded) {
 						listOfNodeNames.push('Embedded')
@@ -205,16 +197,6 @@ pipeline {
 									unstash 'tarballgz'
 									unstash 'script-coverity'
 									sh 'chmod 755 job-3-coverity.sh && ./job-3-coverity.sh '+gitRepoURL+' '+gitBranch+' '+tarballgz
-									if (env.KEEP_WORKING_DIRECTORY != 'true')
-										deleteDir()
-								}
-							}
-						} else if (it == 'SonarQube Scanner') {
-							node('sonarscanner') {
-								dir('check-sonarscanner') {
-									unstash 'tarballgz'
-									unstash 'script-sonarscanner'
-									sh 'chmod 755 job-3-sonarscanner.sh && ./job-3-sonarscanner.sh '+gitRepoURL+' '+gitBranch+' '+tarballgz
 									if (env.KEEP_WORKING_DIRECTORY != 'true')
 										deleteDir()
 								}
