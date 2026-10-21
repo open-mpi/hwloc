@@ -2632,6 +2632,11 @@ and <tt>apple,firestorm;ARM,v8</tt> on performance cores on Apple M1 CPU.
 For instance <tt>Efficiency</tt>, <tt>Performance</tt>,
 or <tt>Super</tt>.
 </dd>
+<dt>WindowsRelativePerformance=100</dt>
+<dd>The Windows-specific CPU relative performance,
+as reported on recent platforms.
+Higher values mean that higher performance, rather than energy efficiency.
+</dd>
 </dl>
 
 The hwloc-calc tool may be used to query the number of cpukinds
