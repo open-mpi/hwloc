@@ -17,6 +17,8 @@ Version 2.16.0
 --------------
 * Improve cpukinds detection on Mac OS X to support 3 or more kinds.
   Thanks to Apple for the patches.
+* Improve cpukinds detection on Windows and for upcoming Intel CPUs.
+  Thanks to Dmitri N Mokhov for the patches.
 
 
 Version 2.15.0
