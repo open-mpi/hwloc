@@ -386,6 +386,34 @@ int main(void)
   assert(err == -1);
   assert(errno == ENOENT);
 
+  /* registering again after a restrict dropped some kinds must not reuse
+   * the freed cpuset/infos left in the now-vacated array slots.
+   */
+  info.name = (char *) "CoreType";
+  info.value = (char *) "BigCore";
+  infos.array = &info;
+  infos.count = 1;
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set(cpuset, 3); /* included in the remaining 3-4 BigCore kind */
+  err = hwloc_cpukinds_register(topology, cpuset, -1, &infos, 0);
+  assert(!err);
+  /* the 3-4 kind got split into 3 and 4, so one more kind now */
+  err = hwloc_cpukinds_get_nr(topology, 0);
+  assert(err == 4);
+  /* the split-off PU 3 kind still carries the original info and nothing stale */
+  hwloc_bitmap_zero(cpuset);
+  err = hwloc_cpukinds_get_by_cpuset(topology, cpuset, 0);
+  assert(err == -1);
+  hwloc_bitmap_set(cpuset, 3);
+  err = hwloc_cpukinds_get_by_cpuset(topology, cpuset, 0);
+  assert(err >= 0);
+  hwloc_bitmap_zero(cpuset);
+  err = hwloc_cpukinds_get_info(topology, err, cpuset, &efficiency, &infosp, 0);
+  assert(!err);
+  assert(infosp->count == 1);
+  assert(!strcmp(infosp->array[0].name, "CoreType"));
+  assert(!strcmp(infosp->array[0].value, "BigCore"));
+
   hwloc_bitmap_free(cpuset);
   hwloc_topology_destroy(topology);
   return 0;
