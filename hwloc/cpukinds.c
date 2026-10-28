@@ -91,6 +91,11 @@ hwloc_internal_cpukinds_restrict(hwloc_topology_t topology)
       memmove(kind, kind+1, (topology->nr_cpukinds - i - 1)*sizeof(*kind));
       i--;
       topology->nr_cpukinds--;
+      /* clear the vacated slot so that a later register() doesn't reuse
+       * stale (possibly freed) cpuset/infos pointers, since the allocated
+       * array isn't shrunk and register() only zeroes slots when it grows.
+       */
+      memset(&topology->cpukinds[topology->nr_cpukinds], 0, sizeof(*kind));
       removed = 1;
     }
   }
