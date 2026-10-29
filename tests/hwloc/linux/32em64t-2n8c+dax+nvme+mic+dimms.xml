@@ -522,6 +522,17 @@
       <info name="Size" value="4194304KiB"/>
       <info name="Rank" value="2"/>
     </object>
+    <object type="Misc" os_index="24" subtype="MemoryModule">
+      <info name="DeviceLocation" value="DIMM_C1 "/>
+      <info name="Vendor" value="00AD04B300AD"/>
+      <info name="SerialNumber" value="48AAE639"/>
+      <info name="AssetTag" value="0111&#10;021"/>
+      <info name="PartNumber" value="HMT351R7CFR8C-PB  "/>
+      <info name="FormFactor" value="DIMM"/>
+      <info name="Type" value="DDR3"/>
+      <info name="Size" value="4194304KiB"/>
+      <info name="Rank" value="2"/>
+    </object>
   </object>
   <distances2 type="NUMANode" nbobjs="2" kind="5" name="NUMALatency" indexing="os">
     <indexes length="4">0 1 </indexes>
