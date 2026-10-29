@@ -312,7 +312,7 @@ hwloc__type_match(const char *string,
       else
 	return s;
     }
-    if (*s != *t && *s != *t + 'A' - 'a') {
+    if (*s != *t && !(*t >= 'a' && *t <= 'z' && *s == *t + 'A' - 'a')) {
       /* string is different */
       if ((*s >= 'a' && *s <= 'z') || (*s >= 'A' && *s <= 'Z') || *s == '-')
 	/* valid character that doesn't match */

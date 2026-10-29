@@ -247,6 +247,15 @@ int main(void)
   err = hwloc_type_sscanf("GRa", &type, &attr, sizeof(attr));
   assert(err == -1);
 
+  /* only letters may match case-insensitively, the end of the type name must not match 0xe0 */
+  err = hwloc_type_sscanf("PU\xe0\xe0", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_PU);
+  err = hwloc_type_sscanf("osdev[co\rprocessor]", &type, &attr, sizeof(attr));
+  assert(!err);
+  assert(type == HWLOC_OBJ_OS_DEVICE);
+  assert(attr.osdev.types == 0);
+
   printf("testing the local topology ...\n");
   check_topo();
 
