@@ -381,11 +381,12 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
   int ulongcount;
   int infinite = 0;
 
-  /* count how many substrings there are */
+  /* count how many substrings there are, the first and last ones may be empty */
   count++;
-  if (*current)
-    while ((current = strchr(current+1, ',')) != NULL)
-      count++;
+  while ((current = strchr(current, ',')) != NULL) {
+    current++;
+    count++;
+  }
 
   current = string;
   if (!strncmp("0xf...f", current, 7)) {
@@ -415,12 +416,11 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
   }
 #endif
 
-  while (*current != '\0') {
+  while (count > 0) {
     unsigned long val;
     char *next;
     val = strtoul(current, &next, 16);
 
-    assert(count > 0);
     count--;
 
     accum |= (val << ((count * HWLOC_BITMAP_SUBSTRING_SIZE) % HWLOC_BITS_PER_LONG));
