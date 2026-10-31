@@ -54,6 +54,20 @@ static void check_cpuset(hwloc_bitmap_t set, const char *expected1, const char *
   hwloc_bitmap_free(set2);
 }
 
+/* parse into a bitmap that already contains a bit, it must not survive */
+static void check_sscanf(const char *string, int first, int weight)
+{
+  hwloc_bitmap_t set = hwloc_bitmap_alloc();
+  int err;
+
+  hwloc_bitmap_only(set, 5);
+  err = hwloc_bitmap_sscanf(set, string);
+  assert(!err);
+  assert(hwloc_bitmap_first(set) == first);
+  assert(hwloc_bitmap_weight(set) == weight);
+  hwloc_bitmap_free(set);
+}
+
 int main(void)
 {
   hwloc_topology_t topology;
@@ -62,6 +76,18 @@ int main(void)
   int stringlen, len;
   hwloc_obj_t obj;
   hwloc_bitmap_t set;
+
+  /* check that empty first and last substrings are parsed as zero */
+  check_sscanf("", -1, 0);
+  check_sscanf(",", -1, 0);
+  check_sscanf(",0x2", 1, 1);
+  check_sscanf(",,0x2", 1, 1);
+  check_sscanf(",0x2,0x4", 2, 2);
+  check_sscanf("0x2,", 33, 1);
+  check_sscanf("0x1,0x2,", 33, 2);
+  check_sscanf("0xf...f,", 32, -1);
+  check_sscanf("0xf...f,,0x1", 0, -1);
+  printf("empty first and last substrings parsed as zero, ok\n");
 
   /* check an empty cpuset */
   set = hwloc_bitmap_alloc();
