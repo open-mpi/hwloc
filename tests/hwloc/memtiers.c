@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "hwloc.h"
@@ -102,6 +103,39 @@ check_subtypes(hwloc_topology_t topo,
   assert(pack2n2tier == get_tier(pack2n2));
 }
 
+/* non-regression test: a failed XML import that already imported a <memtier>
+ * used to leave topology->memtiers pointing at freed memory (and nr_memtiers
+ * non-zero) after hwloc_topology_clear(), so the final destroy walked the
+ * freed array. Loading must fail cleanly and destroy must not touch freed memory.
+ */
+static void
+check_failed_import_after_memtier(void)
+{
+  static const char *xml =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topology SYSTEM \"hwloc2.dtd\">\n"
+    "<topology version=\"3.0\">\n"
+    "  <object type=\"Machine\" os_index=\"0\" cpuset=\"0x3\" complete_cpuset=\"0x3\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"1\">\n"
+    "    <object type=\"NUMANode\" os_index=\"0\" cpuset=\"0x3\" complete_cpuset=\"0x3\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"2\"/>\n"
+    "    <object type=\"PU\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"3\"/>\n"
+    "    <object type=\"PU\" os_index=\"1\" cpuset=\"0x2\" complete_cpuset=\"0x2\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"4\"/>\n"
+    "  </object>\n"
+    "  <memtier nodeset=\"0x1\" kinds=\"1\"/>\n"
+    "  <cpukind/>\n" /* no cpuset, makes the load fail after the memtier was imported */
+    "</topology>\n";
+  hwloc_topology_t topology;
+  int err;
+
+  printf("checking that a failed import after a memtier destroys cleanly\n");
+  err = hwloc_topology_init(&topology);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(topology, xml, (int)strlen(xml)+1);
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(err < 0); /* the <cpukind> without cpuset makes the load fail */
+  hwloc_topology_destroy(topology);
+}
+
 int
 main(void)
 {
@@ -113,6 +147,8 @@ main(void)
   int buflen;
   int err;
   int nr;
+
+  check_failed_import_after_memtier();
 
   printf("creating topology...\n");
   err = hwloc_topology_init(&topology);

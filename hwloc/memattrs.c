@@ -2153,6 +2153,8 @@ hwloc_internal_memtiers_destroy(struct hwloc_topology *topology)
     hwloc__free_infos(&topology->memtiers[i].infos);
   }
   free(topology->memtiers);
+  topology->memtiers = NULL;
+  topology->nr_memtiers = 0;
 }
 
 int hwloc_memtiers_get_nr(struct hwloc_topology *topology,
