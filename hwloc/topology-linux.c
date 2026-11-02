@@ -6774,6 +6774,7 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
   const char *retbuf;
   unsigned foff; /* offset in raw file */
   unsigned boff; /* offset in buffer read from raw file */
+  size_t len; /* bytes read in buffer */
   unsigned i;
   struct hwloc_infos_s infos;
   hwloc_obj_t misc;
@@ -6788,18 +6789,21 @@ hwloc__get_firmware_dmi_memory_info_one(struct hwloc_topology *topology,
     /* read one buffer */
     if (fseek(fd, foff, SEEK_SET) < 0)
       break;
-    if (!fgets(buffer, sizeof(buffer), fd))
+    /* strings are binary data that may contain '\n', don't use fgets() */
+    len = fread(buffer, 1, sizeof(buffer)-1, fd);
+    if (!len)
       break;
+    buffer[len] = '\0';
     /* read string at the beginning of the buffer */
     boff = 0;
     while (1) {
-      /* stop on empty string */
-      if (!buffer[boff])
-        goto done;
       /* stop if this string goes to the end of the buffer */
       slen = strlen(buffer+boff);
-      if (boff + slen+1 == sizeof(buffer))
+      if (boff + slen == len)
         break;
+      /* stop on empty string */
+      if (!slen)
+        goto done;
       /* string didn't get truncated, should be OK */
       if (i == header->manuf_str_num) {
 	if (check_dmi_entry(buffer+boff)) {
