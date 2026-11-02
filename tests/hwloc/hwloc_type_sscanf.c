@@ -168,7 +168,7 @@ int main(void)
   err = hwloc_type_sscanf("osdev[co\rprocessor]", &type, &attr, sizeof(attr));
   assert(!err);
   assert(type == HWLOC_OBJ_OS_DEVICE);
-  assert(attr.osdev.types == 0);
+  assert(attr.osdev.type == (hwloc_obj_osdev_type_t) -1);
 
   printf("testing the local topology ...\n");
   check_topo();
