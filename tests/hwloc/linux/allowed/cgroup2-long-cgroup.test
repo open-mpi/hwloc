@@ -1,0 +1,6 @@
+# 400-byte cgroup path; verify both masks and the full LinuxCgroup info.
+# No proc/self/cpuset; skip a long unrelated cgroup entry first.
+synthetic: numa:2 pu:2
+fsroot:    cgroup2-long-cgroup.fsroot.tar.bz2
+target:    cgroup2-long-cgroup.xml
+options:   --disallowed -v -.xml

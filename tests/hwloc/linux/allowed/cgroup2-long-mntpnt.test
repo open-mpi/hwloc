@@ -1,0 +1,6 @@
+# cgroup2 mounted at a 306-byte path found through /proc/mounts;
+# verify both masks and the LinuxCgroup info.
+synthetic: numa:2 pu:2
+fsroot:    cgroup2-long-mntpnt.fsroot.tar.bz2
+target:    cgroup2-long-mntpnt.xml
+options:   --disallowed -v -.xml
