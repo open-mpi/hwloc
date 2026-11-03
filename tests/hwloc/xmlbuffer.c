@@ -104,6 +104,66 @@ static void invalid_root_test(void)
   hwloc_topology_destroy(topology);
 }
 
+/* print the type and attributes of obj and all its children, whatever kind */
+static void print_all(hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+  char buf[256];
+  hwloc_obj_type_snprintf(buf, sizeof(buf), obj, 1);
+  hwloc_obj_attr_snprintf(buf, sizeof(buf), obj, " ", 1);
+  for(child = obj->first_child; child; child = child->next_sibling)
+    print_all(topology, child);
+  for(child = obj->memory_first_child; child; child = child->next_sibling)
+    print_all(topology, child);
+  for(child = obj->io_first_child; child; child = child->next_sibling)
+    print_all(topology, child);
+  for(child = obj->misc_first_child; child; child = child->next_sibling)
+    print_all(topology, child);
+}
+
+/* a bridge may only have a PCI downstream (and a HOST or PCI upstream).
+ * a crafted bridge with another downstream type used to be imported as-is
+ * and then abort on an assertion (or read uninitialised stack in a NDEBUG
+ * build) as soon as its type/attributes were printed. it must be ignored
+ * at import instead, so the loaded topology holds no such bridge.
+ */
+static void invalid_bridge_test(void)
+{
+  static const char xml[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topology SYSTEM \"hwloc2.dtd\">\n"
+    "<topology version=\"3.0\">\n"
+    "  <object type=\"Machine\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" allowed_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" allowed_nodeset=\"0x1\" gp_index=\"1\">\n"
+    "    <object type=\"NUMANode\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"2\" local_memory=\"1048576\"/>\n"
+    "    <object type=\"PU\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"3\"/>\n"
+    "    <object type=\"Bridge\" gp_index=\"4\">\n"
+    "      <object type=\"PCIDev\" gp_index=\"5\" pci_busid=\"0000:01:00.0\" pci_type=\"0200 [8086:1521] [8086:0001] 01\"/>\n"
+    "    </object>\n"
+    "  </object>\n"
+    "</topology>\n";
+  hwloc_topology_t topology;
+  int err;
+
+  hwloc_topology_init(&topology);
+  /* keep bridges so that the invalid one would reach the printers if not ignored */
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_BRIDGE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  hwloc_topology_set_type_filter(topology, HWLOC_OBJ_PCI_DEVICE, HWLOC_TYPE_FILTER_KEEP_ALL);
+  err = hwloc_topology_set_xmlbuffer(topology, xml, sizeof(xml));
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(!err);
+
+  /* the invalid bridge must have been dropped at import */
+  assert(hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_BRIDGE) == 0);
+
+  /* exercise the attribute/type printers on every object, this is where
+   * an invalid bridge used to abort or overread.
+   */
+  print_all(topology, hwloc_get_root_obj(topology));
+
+  hwloc_topology_destroy(topology);
+}
+
 int main(int argc, char *argv[])
 {
   int err;
@@ -138,6 +198,8 @@ int main(int argc, char *argv[])
     return err;
 
   invalid_root_test();
+
+  invalid_bridge_test();
 
   return 0;
 }
