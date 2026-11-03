@@ -780,6 +780,14 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  if (ignored && !parent) {
+    /* the root is already inserted in the topology, it cannot be ignored and freed below */
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: cannot ignore invalid root object %s\n",
+              state->global->msgprefix, hwloc_obj_type_string(obj->type));
+    goto error_with_object;
+  }
+
   /* process non-object subnodes to get info attrs (as well as page_types, etc) */
   while (1) {
     int ret;

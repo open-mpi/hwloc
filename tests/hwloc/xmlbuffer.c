@@ -83,6 +83,27 @@ static int one_test(void)
   return err;
 }
 
+/* an invalid pci_busid makes the importer ignore the object,
+ * the root cannot be ignored and freed, the load must fail instead */
+static void invalid_root_test(void)
+{
+  static const char xml[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topology SYSTEM \"hwloc2.dtd\">\n"
+    "<topology version=\"3.0\">\n"
+    "  <object type=\"PCIDev\" pci_busid=\"x\"/>\n"
+    "</topology>\n";
+  hwloc_topology_t topology;
+  int err;
+
+  hwloc_topology_init(&topology);
+  err = hwloc_topology_set_xmlbuffer(topology, xml, sizeof(xml));
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(err < 0);
+  hwloc_topology_destroy(topology);
+}
+
 int main(int argc, char *argv[])
 {
   int err;
@@ -115,6 +136,8 @@ int main(int argc, char *argv[])
   err = one_test();
   if (err < 0)
     return err;
+
+  invalid_root_test();
 
   return 0;
 }
