@@ -2460,11 +2460,13 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
 
     if (!strcmp(mntent.mnt_type, "cgroup2")) {
       char ctrls[1024]; /* there are about ten controllers with 10-char names */
-      char ctrlpath[256];
+      char *ctrlpath;
       hwloc_debug("Found cgroup2 mount point on %s\n", mntent.mnt_dir);
       /* read controllers */
-      snprintf(ctrlpath, sizeof(ctrlpath), "%s/cgroup.controllers", mntent.mnt_dir);
+      if (asprintf(&ctrlpath, "%s/cgroup.controllers", mntent.mnt_dir) < 0)
+	continue;
       err = hwloc_read_path_by_length(ctrlpath, ctrls, sizeof(ctrls), fsroot_fd);
+      free(ctrlpath);
       if (err > 0) {
 	/* look for cpuset separated by spaces */
 	char *ctrl, *_ctrls = ctrls;
@@ -2487,7 +2489,7 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
 	  break;
 	}
       } else {
-	hwloc_debug("Failed to read cgroup2 controllers from `%s'\n", ctrlpath);
+	hwloc_debug("Failed to read cgroup2 controllers from `%s/cgroup.controllers'\n", mntent.mnt_dir);
       }
 
     } else if (!strcmp(mntent.mnt_type, "cpuset")) {
@@ -2528,6 +2530,31 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
   free(buf);
 }
 
+/* Read the whole /proc/<pid>/<name> file (or /proc/self/<name> if pid is 0)
+ * into a newly allocated, NUL-terminated buffer.
+ */
+static char *
+hwloc_read_linux_proc_pid_file(int fsroot_fd, hwloc_pid_t pid, const char *name)
+{
+  char path[64];
+  size_t filesize = hwloc_getpagesize(); /* hwloc__read_fd() grows the buffer if needed */
+  char *buffer;
+  int fd, err;
+
+  if (!pid)
+    snprintf(path, sizeof(path), "/proc/self/%s", name);
+  else
+    snprintf(path, sizeof(path), "/proc/%d/%s", pid, name);
+  fd = hwloc_open(path, fsroot_fd);
+  if (fd < 0)
+    return NULL;
+  err = hwloc__read_fd(fd, &buffer, &filesize);
+  close(fd);
+  if (err < 0)
+    return NULL;
+  return buffer;
+}
+
 /*
  * Linux cpusets may be managed directly or through cgroup.
  * If cgroup is used, tasks get a /proc/pid/cgroup which may contain a
@@ -2537,43 +2564,34 @@ hwloc_find_linux_cgroup_mntpnt(enum hwloc_linux_cgroup_type_e *cgtype, char **mn
 static char *
 hwloc_read_linux_cgroup_name(int fsroot_fd, hwloc_pid_t pid)
 {
-#define CPUSET_NAME_LEN 128
-  char cpuset_name[CPUSET_NAME_LEN];
-  FILE *file;
-  int err;
-  char *tmp;
+  char *buffer, *line, *next;
 
   /* try to read from /proc/XXXX/cpuset */
-  if (!pid)
-    err = hwloc_read_path_by_length("/proc/self/cpuset", cpuset_name, sizeof(cpuset_name), fsroot_fd);
-  else {
-    char path[] = "/proc/XXXXXXXXXXX/cpuset";
-    snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
-    err = hwloc_read_path_by_length(path, cpuset_name, sizeof(cpuset_name), fsroot_fd);
-  }
-  if (err > 0) {
-    /* found a cpuset, return the name */
-    tmp = strchr(cpuset_name, '\n');
-    if (tmp)
-      *tmp = '\0';
-    hwloc_debug("Found cgroup name `%s'\n", cpuset_name);
-    return strdup(cpuset_name);
+  buffer = hwloc_read_linux_proc_pid_file(fsroot_fd, pid, "cpuset");
+  if (buffer) {
+    if (*buffer) {
+      /* found a cpuset, return the name */
+      line = strchr(buffer, '\n');
+      if (line)
+	*line = '\0';
+      hwloc_debug("Found cgroup name `%s'\n", buffer);
+      return buffer;
+    }
+    free(buffer);
   }
 
   /* try to read from /proc/XXXX/cgroup */
-  if (!pid)
-    file = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
-  else {
-    char path[] = "/proc/XXXXXXXXXXX/cgroup";
-    snprintf(path, sizeof(path), "/proc/%d/cgroup", pid);
-    file = hwloc_fopen(path, "r", fsroot_fd);
-  }
-  if (file) {
+  buffer = hwloc_read_linux_proc_pid_file(fsroot_fd, pid, "cgroup");
+  if (buffer) {
     /* find a cpuset line */
-#define CGROUP_LINE_LEN 256
-    char line[CGROUP_LINE_LEN];
-    while (fgets(line, sizeof(line), file)) {
-      char *end, *path, *colon;
+    for (line = buffer; *line; line = next) {
+      char *path, *colon;
+      next = strchr(line, '\n');
+      if (next)
+	*next++ = '\0';
+      else
+	next = line + strlen(line);
+
       colon = strchr(line, ':');
       if (!colon)
 	continue;
@@ -2584,15 +2602,12 @@ hwloc_read_linux_cgroup_name(int fsroot_fd, hwloc_pid_t pid)
       else
 	continue;
 
-      /* found a cgroup with cpusets, return the name */
-      fclose(file);
-      end = strchr(path, '\n');
-      if (end)
-	*end = '\0';
+      /* found a cgroup with cpusets, return the name in the buffer we own */
       hwloc_debug("Found cgroup-cpuset %s\n", path);
-      return strdup(path);
+      memmove(buffer, path, strlen(path) + 1);
+      return buffer;
     }
-    fclose(file);
+    free(buffer);
   }
 
   /* found nothing */
@@ -2608,26 +2623,29 @@ hwloc_admin_disable_set_from_cgroup(int root_fd,
 				    const char *attr_name,
 				    hwloc_bitmap_t admin_enabled_set)
 {
-#define CPUSET_FILENAME_LEN 256
-  char cpuset_filename[CPUSET_FILENAME_LEN];
+  char *cpuset_filename;
+  size_t filename_size;
   const char *prefix = cgtype == HWLOC_LINUX_CPUSET ? "" : "cpuset.";
   /* Keep using the configured masks for cgroup1; the core removes offline CPUs. */
   const char *suffix = cgtype == HWLOC_LINUX_CGROUP2 ? ".effective" : "";
   size_t cgrouplen = strlen(cpuset_name);
   int err;
 
+  /* The cgroup path only gets shorter below, so this fits every filename we try. */
+  filename_size = strlen(mntpnt) + cgrouplen + 1 + strlen(prefix) + strlen(attr_name) + strlen(suffix) + 1;
+  cpuset_filename = malloc(filename_size);
+  if (!cpuset_filename) {
+    hwloc_bitmap_fill(admin_enabled_set);
+    return;
+  }
+
   for (;;) {
     if (cgtype == HWLOC_LINUX_CGROUP2)
       while (cgrouplen && cpuset_name[cgrouplen-1] == '/')
         cgrouplen--;
 
-    err = snprintf(cpuset_filename, sizeof(cpuset_filename), "%s%.*s/%s%s%s",
-                   mntpnt, (int) cgrouplen, cpuset_name, prefix, attr_name, suffix);
-    if (err < 0 || (cgtype == HWLOC_LINUX_CGROUP2
-                   && (size_t) err >= sizeof(cpuset_filename))) {
-      err = -1;
-      break;
-    }
+    snprintf(cpuset_filename, filename_size, "%s%.*s/%s%s%s",
+             mntpnt, (int) cgrouplen, cpuset_name, prefix, attr_name, suffix);
     hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
     errno = 0;
     err = hwloc__read_path_as_cpulist(cpuset_filename, admin_enabled_set, root_fd);
@@ -2641,6 +2659,7 @@ hwloc_admin_disable_set_from_cgroup(int root_fd,
     while (cgrouplen && cpuset_name[cgrouplen-1] != '/')
       cgrouplen--;
   }
+  free(cpuset_filename);
 
   if (err < 0) {
     hwloc_debug("failed to read cpuset '%s' attribute '%s'\n", cpuset_name, attr_name);

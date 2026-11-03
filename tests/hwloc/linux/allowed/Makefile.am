@@ -8,19 +8,43 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 tests_outputs = \
 	test1.output \
-	cgroup2-ancestors.output
+	cgroup2-ancestors.output \
+	cgroup2-long-cpuset.output \
+	cgroup2-long-cgroup.output \
+	cgroup2-long-ancestors.output \
+	cgroup2-long-mntpnt.output \
+	cgroup1-long-cgroup.output \
+	cpuset-long-cpuset.output
 
 tests_synthetics = \
 	test1.synthetic \
-	cgroup2-ancestors.synthetic
+	cgroup2-ancestors.synthetic \
+	cgroup2-long-cpuset.synthetic \
+	cgroup2-long-cgroup.synthetic \
+	cgroup2-long-ancestors.synthetic \
+	cgroup2-long-mntpnt.synthetic \
+	cgroup1-long-cgroup.synthetic \
+	cpuset-long-cpuset.synthetic
 
 tests_fsroots = \
 	test1.fsroot.tar.bz2 \
-	cgroup2-ancestors.fsroot.tar.bz2
+	cgroup2-ancestors.fsroot.tar.bz2 \
+	cgroup2-long-cpuset.fsroot.tar.bz2 \
+	cgroup2-long-cgroup.fsroot.tar.bz2 \
+	cgroup2-long-ancestors.fsroot.tar.bz2 \
+	cgroup2-long-mntpnt.fsroot.tar.bz2 \
+	cgroup1-long-cgroup.fsroot.tar.bz2 \
+	cpuset-long-cpuset.fsroot.tar.bz2
 
 tests_options = \
 	test1.options \
-	cgroup2-ancestors.options
+	cgroup2-ancestors.options \
+	cgroup2-long-cpuset.options \
+	cgroup2-long-cgroup.options \
+	cgroup2-long-ancestors.options \
+	cgroup2-long-mntpnt.options \
+	cgroup1-long-cgroup.options \
+	cpuset-long-cpuset.options
 
 tests_envs =
 
