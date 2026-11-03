@@ -780,6 +780,23 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  /* A bridge always goes from a HOST or PCI upstream to a PCI downstream.
+   * The rest of the code (type/attr printing, PCI locality, lstopo) assumes
+   * this, so an imported bridge with another upstream/downstream type would
+   * later abort on an assertion or read uninitialised stack in the printers.
+   * Reject such a bridge here instead, the same way an invalid bridge_pci is.
+   */
+  if (obj->type == HWLOC_OBJ_BRIDGE
+      && (obj->attr->bridge.downstream_type != HWLOC_OBJ_BRIDGE_PCI
+	  || (obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST
+	      && obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI))) {
+    if (state->global->show_errors)
+      fprintf(stderr, "%s: ignoring invalid Bridge object with upstream type %d and downstream type %d\n",
+	      state->global->msgprefix,
+	      (int) obj->attr->bridge.upstream_type, (int) obj->attr->bridge.downstream_type);
+    ignored = 1;
+  }
+
   if (ignored && !parent) {
     /* the root is already inserted in the topology, it cannot be ignored and freed below */
     if (state->global->show_errors)
