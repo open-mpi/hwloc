@@ -82,7 +82,7 @@ if HWLOC_HAVE_LINUX
 TESTS += test-lstopo-shmem.sh
 endif HWLOC_HAVE_LINUX
 
-if HWLOC_HAVE_CAIRO
+if LSTOPO_HAVE_X11
 # only installed when lstopo is built with Cairo/X11 support
 # so that no terminal is required
 APPLICATIONSdir = @datarootdir@/applications
