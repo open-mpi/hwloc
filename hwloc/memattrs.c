@@ -181,8 +181,11 @@ hwloc_internal_memattrs_dup(struct hwloc_topology *new, struct hwloc_topology *o
     nimattr->iflags &= ~HWLOC_IMATTR_FLAG_STATIC_NAME;
     nimattr->iflags &= ~HWLOC_IMATTR_FLAG_CACHE_VALID; /* cache will need refresh */
 
-    if (!oimattr->nr_targets)
+    if (!oimattr->nr_targets) {
+      /* don't share an empty but still allocated array */
+      nimattr->targets = NULL;
       continue;
+    }
 
     nimattr->targets = hwloc_tma_malloc(tma, oimattr->nr_targets * sizeof(*nimattr->targets));
     if (!nimattr->targets) {
@@ -199,8 +202,11 @@ hwloc_internal_memattrs_dup(struct hwloc_topology *new, struct hwloc_topology *o
 
       nimtg->obj = NULL; /* cache will need refresh */
 
-      if (!oimtg->nr_initiators)
+      if (!oimtg->nr_initiators) {
+        /* don't share an empty but still allocated array */
+        nimtg->initiators = NULL;
         continue;
+      }
 
       nimtg->initiators = hwloc_tma_malloc(tma, oimtg->nr_initiators * sizeof(*nimtg->initiators));
       if (!nimtg->initiators) {
