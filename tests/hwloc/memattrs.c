@@ -34,7 +34,7 @@ check_memattr(hwloc_topology_t topology, const char *name, hwloc_memattr_id_t id
 int
 main(void)
 {
-  hwloc_topology_t topology;
+  hwloc_topology_t topology, dup;
   const char *gotname;
   hwloc_memattr_id_t id, id2, gotid;
   struct hwloc_location loc, locs[2];
@@ -548,6 +548,30 @@ main(void)
   assert(targets[0] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 2)); /* CPUless node:0 became node:2 */
   assert(targets[1] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 1)); /* 0 and 1 should be reversed, but the core doesn't current reordered those, see FIXME in restrict_object_by_nodeset() */
   assert(targets[2] == hwloc_get_obj_by_type(topology, HWLOC_OBJ_NUMANODE, 0));
+
+  /***************************************************
+   * restrict away the last initiator of id, then dup
+   */
+  bitmap = hwloc_bitmap_alloc();
+  hwloc_bitmap_set_range(bitmap, 4, 6);
+  err = hwloc_topology_restrict(topology, bitmap, 0);
+  assert(!err);
+  hwloc_bitmap_free(bitmap);
+
+  /* no target left for id */
+  nrtgs = 4;
+  err = hwloc_memattr_get_targets(topology, id, NULL, 0, &nrtgs, targets, NULL);
+  assert(!err);
+  assert(nrtgs == 0);
+
+  /* the duplicate must not share the emptied targets array */
+  err = hwloc_topology_dup(&dup, topology);
+  assert(!err);
+  nrtgs = 4;
+  err = hwloc_memattr_get_targets(dup, id, NULL, 0, &nrtgs, targets, NULL);
+  assert(!err);
+  assert(nrtgs == 0);
+  hwloc_topology_destroy(dup);
 
   hwloc_topology_destroy(topology);
   return 0;
