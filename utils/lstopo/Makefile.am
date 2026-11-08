@@ -39,6 +39,7 @@ lstopo_no_graphics_SOURCES += lstopo-shmem.c
 endif
 
 lstopo_no_graphics_CFLAGS = $(AM_CFLAGS)
+lstopo_no_graphics_CPPFLAGS = $(AM_CPPFLAGS) -DHWLOC_LSTOPO_NO_JNI
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 
 lstopo_SOURCES = $(lstopo_no_graphics_SOURCES)
