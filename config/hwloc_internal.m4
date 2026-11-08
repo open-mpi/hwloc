@@ -78,7 +78,7 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # I/O?
     AC_ARG_ENABLE([io],
                   AS_HELP_STRING([--disable-io],
-                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, RSMI, LevelZero, GL) instead of only disabling it at runtime by default]))
+                                 [Disable I/O discovery build entirely (PCI, LinuxIO, CUDA, OpenCL, NVML, RSMI, LevelZero, GL, Vulkan) instead of only disabling it at runtime by default]))
 
     # PCI?
     AC_ARG_ENABLE([pci],
@@ -164,6 +164,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([levelzero],
                   AS_HELP_STRING([--disable-levelzero],
                                  [Disable the oneAPI Level Zero device discovery]))
+
+    # Vulkan
+    AC_ARG_ENABLE([vulkan],
+                  AS_HELP_STRING([--disable-vulkan],
+                                 [Disable the Vulkan device discovery]))
 
     # GL/Display
     AC_ARG_ENABLE([gl],
