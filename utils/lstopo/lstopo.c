@@ -60,7 +60,7 @@
 # endif
 #endif
 
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(HWLOC_LSTOPO_NO_JNI)
 extern void setJNIEnv();
 #endif
 
@@ -1681,7 +1681,7 @@ main (int argc, char *argv[])
       may_show_more_attributes = 1;
     }
 #endif
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(HWLOC_LSTOPO_NO_JNI)
     setJNIEnv();
     output_func = output_android;
     output_format = LSTOPO_OUTPUT_WINDOW;
