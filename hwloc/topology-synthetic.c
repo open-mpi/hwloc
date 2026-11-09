@@ -148,6 +148,11 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
       cur_loop = 0;
       while (tmp) {
 	char *tmp2, *tmp3;
+	/* stop at the end of the indexes attribute, strtol() would otherwise
+	 * skip the separating space and keep parsing loops from the following
+	 * description text, overflowing the loops[] array sized above */
+	if (tmp >= attr+length)
+	  break;
 	step = (unsigned) strtol(tmp, &tmp2, 0);
 	if (tmp2 == tmp || *tmp2 != '*') {
 	  if (show_errors)

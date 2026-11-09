@@ -175,6 +175,21 @@ int main(void)
   hwloc_topology_destroy(topology);
 
 
+  /* the numeric index interleaving parser used to ignore the end of the
+   * indexes attribute, so a truncated loop like "2*" let strtol() skip the
+   * separating space and keep reading loops from the following description
+   * text, overflowing its loops[] array. Load such a description to exercise
+   * it; the topology must still load with a sane PU count.
+   */
+  hwloc_topology_init(&topology);
+  err = hwloc_topology_set_synthetic(topology, "pack:2 pu:2(indexes=2* 2:1*2:1*2:1*2)");
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(!err);
+  assert(hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU) == 4);
+  hwloc_topology_destroy(topology);
+
+
   /* the fake PCI locality quirk used to look up the last PU as levels[0][last],
    * reading past the single-object root level whenever the last PU os_index was
    * non-zero. Load a multi-PU topology with the quirk enabled to exercise it.
