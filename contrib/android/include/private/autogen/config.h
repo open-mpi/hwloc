@@ -720,7 +720,7 @@
 /* Define this to the thread ID type */
 #define hwloc_thread_t pthread_t
 
-#define ANDROID 1
+#define HWLOC_ANDROID_APK 1
 
 #define RUNSTATEDIR ""
 

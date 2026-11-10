@@ -60,7 +60,7 @@
 # endif
 #endif
 
-#ifdef ANDROID
+#ifdef HWLOC_ANDROID_APK
 extern void setJNIEnv();
 #endif
 
@@ -1663,7 +1663,7 @@ main (int argc, char *argv[])
       output_format = LSTOPO_OUTPUT_CONSOLE;
     }
 #endif
-#ifdef ANDROID
+#ifdef HWLOC_ANDROID_APK
     setJNIEnv();
     output_func = output_android;
     output_format = LSTOPO_OUTPUT_WINDOW;

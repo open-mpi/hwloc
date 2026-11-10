@@ -229,5 +229,3 @@ typedef uint64_t hwloc_uint64_t;
 #define HWLOC_SYM_PREFIX_CAPS HWLOC_
 
 #endif /* HWLOC_CONFIG_H */
-
-#define ANDROID 1

@@ -2349,7 +2349,7 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
   hooks->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
   hooks->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
   hooks->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
-#ifndef ANDROID /* get_mempolicy crashes on some Android */
+#if !(defined HWLOC_ANDROID_APK) && !(defined ANDROID) /* get_mempolicy crashes on some Android */
   hooks->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
   hooks->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
   hooks->get_area_membind = hwloc_linux_get_area_membind;

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #endif
 
-#ifdef ANDROID
+#ifdef HWLOC_ANDROID_APK
 extern void JNIDebug(char *text);
 #endif
 
@@ -49,12 +49,12 @@ static __hwloc_inline void hwloc_debug(const char *s __hwloc_attribute_unused, .
 {
 #ifdef HWLOC_DEBUG
   if (hwloc_debug_enabled()) {
-#ifdef ANDROID
+#ifdef HWLOC_ANDROID_APK
     char buffer[256];
 #endif
     va_list ap;
     va_start(ap, s);
-#ifdef ANDROID
+#ifdef HWLOC_ANDROID_APK
     vsprintf(buffer, s, ap);
     JNIDebug(buffer);
 #else
