@@ -151,8 +151,10 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	/* stop at the end of the indexes attribute, strtol() would otherwise
 	 * skip the separating space and keep parsing loops from the following
 	 * description text, overflowing the loops[] array sized above */
-	if (tmp >= attr+length)
+	if (tmp >= attr+length) {
+          nr_loops = cur_loop;
 	  break;
+        }
 	step = (unsigned) strtol(tmp, &tmp2, 0);
 	if (tmp2 == tmp || *tmp2 != '*') {
 	  if (verbose)
@@ -186,8 +188,10 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	  minstep = step;
 	nbs *= nb;
 	cur_loop++;
-	if (*tmp3 == ')' || *tmp3 == ' ')
+	if (*tmp3 == ')' || *tmp3 == ' ') {
+          nr_loops = cur_loop;
 	  break;
+        }
 	tmp = (const char*) (tmp3+1);
       }
 
@@ -236,8 +240,10 @@ hwloc_synthetic_process_indexes(struct hwloc_synthetic_backend_data_s *data,
 	  goto out_with_array;
 	}
 	tmp = strchr(tmp, ':');
-	if (!tmp || tmp > attr+length)
+	if (!tmp || tmp > attr+length) {
+          nr_loops = cur_loop+1;
 	  break;
+        }
 	tmp++;
 	cur_loop++;
       }
