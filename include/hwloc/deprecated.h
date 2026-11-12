@@ -36,7 +36,8 @@ extern "C" {
  * Superseded by hwloc_type_sscanf()+hwloc_get_type_depth_with_attr() in v3.0.
  */
 HWLOC_DECLSPEC int hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type_t *typep,
-                                              hwloc_topology_t topology, int *depthp) __hwloc_attribute_deprecated;
+                                              hwloc_topology_t topology, int *depthp)
+  __hwloc_attribute_deprecated("since v3.0. Use the sequence hwloc_type_sscanf + hwloc_get_type_depth_with_attr instead");
 
 /** \brief Add a distances structure.
  *
@@ -45,7 +46,8 @@ HWLOC_DECLSPEC int hwloc_type_sscanf_as_depth(const char *string, hwloc_obj_type
  */
 HWLOC_DECLSPEC int hwloc_distances_add(hwloc_topology_t topology,
 				       unsigned nbobjs, hwloc_obj_t *objs, hwloc_uint64_t *values,
-				       unsigned long kind, unsigned long flags) __hwloc_attribute_deprecated;
+				       unsigned long kind, unsigned long flags)
+  __hwloc_attribute_deprecated("since v2.5. Use the sequence hwloc_distances_add_{create + values + commit} instead");
 
 #ifdef __cplusplus
 } /* extern "C" */
