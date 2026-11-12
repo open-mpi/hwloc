@@ -973,7 +973,10 @@ hwloc_win_efficiency_classes_register(hwloc_topology_t topology,
     if (nr_infos)
       snprintf(relative_performance, sizeof(relative_performance), "%u", classes->classes[i].value);
 
-    hwloc_internal_cpukinds_register(topology, classes->classes[i].cpuset, classes->classes[i].value, &infoattr, nr_infos, 0);
+    hwloc_internal_cpukinds_register(topology, classes->classes[i].cpuset, classes->classes[i].value,
+                                     nr_infos > 0 ? &infoattr : NULL,
+                                     nr_infos,
+                                     0);
     classes->classes[i].cpuset = NULL; /* given to cpukinds */
   }
 }
