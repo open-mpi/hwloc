@@ -228,6 +228,7 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
     hwloc_cv___attribute__cold=0
     hwloc_cv___attribute__const=0
     hwloc_cv___attribute__deprecated=0
+    hwloc_cv___attribute__deprecated_with_message=0
     hwloc_cv___attribute__constructor=0
     hwloc_cv___attribute__format=0
     hwloc_cv___attribute__hot=0
@@ -274,10 +275,17 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
         [],
         [])
 
-
     _HWLOC_CHECK_SPECIFIC_ATTRIBUTE([deprecated],
         [
          int foo(int arg1, int arg2) __attribute__ ((__deprecated__));
+         int foo(int arg1, int arg2) { return arg1 * arg2 + arg1; }
+        ],
+        [],
+        [])
+
+    _HWLOC_CHECK_SPECIFIC_ATTRIBUTE([deprecated_with_message],
+        [
+         int foo(int arg1, int arg2) __attribute__ ((__deprecated__("deprecated")));
          int foo(int arg1, int arg2) { return arg1 * arg2 + arg1; }
         ],
         [],
@@ -524,6 +532,8 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
                      [Whether your compiler has __attribute__ const or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_DEPRECATED, [$hwloc_cv___attribute__deprecated],
                      [Whether your compiler has __attribute__ deprecated or not])
+  AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE, [$hwloc_cv___attribute__deprecated_with_message],
+                     [Whether your compiler has __attribute__ deprecated(message) or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_CONSTRUCTOR, [$hwloc_cv___attribute__constructor],
                      [Whether your compiler has __attribute__ constructor or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_FORMAT, [$hwloc_cv___attribute__format],

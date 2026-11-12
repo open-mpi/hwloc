@@ -82,6 +82,13 @@
 #define GCC_ABOVE_3_4 0
 #endif
 
+#if !defined(__cplusplus) &&                                    \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#define GCC_ABOVE_4_5 1
+#else
+#define GCC_ABOVE_4_5 0
+#endif
+
 /* Maybe before gcc 2.95 too */
 #ifdef HWLOC_HAVE_ATTRIBUTE_UNUSED
 #define __HWLOC_HAVE_ATTRIBUTE_UNUSED HWLOC_HAVE_ATTRIBUTE_UNUSED 
@@ -137,17 +144,28 @@
 
 #ifndef __hwloc_attribute_deprecated /* allow the user to disable these warnings by defining this macro to nothing */
 #ifdef HWLOC_HAVE_ATTRIBUTE_DEPRECATED
-#define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED HWLOC_HAVE_ATTRIBUTE_DEPRECATED 
+#define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED HWLOC_HAVE_ATTRIBUTE_DEPRECATED
 #elif defined(__GNUC__)
 # define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED (GXX_ABOVE_3_4 || GCC_ABOVE_3_3)
 #else
 # define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED 0
 #endif
-#if __HWLOC_HAVE_ATTRIBUTE_DEPRECATED
-# define __hwloc_attribute_deprecated __attribute__((__deprecated__))
-#else
-# define __hwloc_attribute_deprecated
 #endif
+#ifndef __hwloc_attribute_deprecated_with_message /* allow the user to disable these warnings by defining this macro to nothing */
+#ifdef HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE
+#define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE
+#elif defined(__GNUC__)
+# define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE (GCC_ABOVE_4_5)
+#else
+# define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE 0
+#endif
+#endif
+#if __HWLOC_HAVE_ATTRIBUTE_DEPRECATED && __HWLOC_HAVE_ATTRIBUTE_DEPRECATED_WITH_MESSAGE
+# define __hwloc_attribute_deprecated(msg) __attribute__((__deprecated__(msg)))
+#elif __HWLOC_HAVE_ATTRIBUTE_DEPRECATED
+# define __hwloc_attribute_deprecated(msg) __attribute__((__deprecated__))
+#else
+# define __hwloc_attribute_deprecated(msg)
 #endif
 
 #ifdef HWLOC_HAVE_ATTRIBUTE_MAY_ALIAS

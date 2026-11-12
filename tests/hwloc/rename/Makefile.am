@@ -72,9 +72,11 @@ cpp.out: include/hwloc/autogen/config.h
 
 # hwloc_uint64_t is ignored because it's always a typedef.
 # we have to manually concat a##b because some cpp let gcc do it (at least cpp 4.2.1 on OpenBSD 5.2).
+# ignore the deprecated message since function names aren't renamed inside the string (and we use shortened names).
 needed: cpp.out
 	@echo "# Finding needed renaming"
 	@if cat cpp.out \
+		| sed -e 's/__hwloc_attribute_deprecated\(.*\)//' \
 		| sed -e 's/foobar_ ##   hwloc_ ## /foobar_hwloc_/g' \
 		| sed -e 's/FOOBAR_ ##   hwloc_ ## /FOOBAR_hwloc_/g' \
 		| sed -e 's/hwloc_uint64_t/uint64_t/g' \

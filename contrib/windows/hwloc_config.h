@@ -25,7 +25,7 @@
 #define __hwloc_attribute_malloc
 #define __hwloc_attribute_const
 #define __hwloc_attribute_pure
-#define __hwloc_attribute_deprecated
+#define __hwloc_attribute_deprecated(msg) 
 #define __hwloc_attribute_may_alias
 #define __hwloc_attribute_warn_unused_result
 
