@@ -1,4 +1,8 @@
 /*
+ * Hardcoded version for Windows.
+ */
+
+/*
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright © 2009 CNRS
  * Copyright © 2009-2026 Inria.  All rights reserved.
