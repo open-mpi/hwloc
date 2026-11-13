@@ -1,0 +1,6 @@
+# 400-byte cgroup1 path from /proc/self/cgroup; verify both masks and the
+# full LinuxCgroup info. A sibling at the old 127-byte truncation has disjoint masks.
+synthetic: numa:2 pu:2
+fsroot:    cgroup1-long-cgroup.fsroot.tar.bz2
+target:    cgroup1-long-cgroup.xml
+options:   --disallowed -v -.xml

@@ -1,0 +1,6 @@
+# 400-byte cgroup2 path whose leaf has no cpuset files; verify both masks
+# come from the nearest long ancestor and the full LinuxCgroup info.
+synthetic: numa:2 pu:2
+fsroot:    cgroup2-long-ancestors.fsroot.tar.bz2
+target:    cgroup2-long-ancestors.xml
+options:   --disallowed -v -.xml

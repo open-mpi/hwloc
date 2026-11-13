@@ -1,0 +1,6 @@
+# 400-byte legacy /dev/cpuset path; verify both masks and the full LinuxCgroup
+# info. A sibling at the old 127-byte truncation has disjoint masks.
+synthetic: numa:2 pu:2
+fsroot:    cpuset-long-cpuset.fsroot.tar.bz2
+target:    cpuset-long-cpuset.xml
+options:   --disallowed -v -.xml
