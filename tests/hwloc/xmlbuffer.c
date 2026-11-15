@@ -226,6 +226,54 @@ static void diff_without_root_test(void)
   free(refname);
 }
 
+/* userdata buffers are only valid for length bytes, the exporter must not
+ * read past them. the nolibxml exporter used to print the whole string,
+ * writing more content than the length attribute and failing the reload.
+ */
+static void userdata_export_cb(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  int err = hwloc_export_obj_userdata(reserved, topology, obj, "Prefix", "abcdEXTRA", 4);
+  assert(!err);
+}
+
+static int userdata_imported = 0;
+
+static void userdata_import_cb(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj __hwloc_attribute_unused,
+                               const char *name, const void *buffer, size_t length)
+{
+  assert(!strcmp(name, "Prefix"));
+  assert(length == 4);
+  assert(!memcmp(buffer, "abcd", 4));
+  userdata_imported++;
+}
+
+static void userdata_length_test(void)
+{
+  hwloc_topology_t topology, reimport;
+  char *buf;
+  int size, err;
+
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "pu:2");
+  hwloc_topology_load(topology);
+  hwloc_get_root_obj(topology)->userdata = (void *) 1;
+  hwloc_topology_set_userdata_export_callback(topology, userdata_export_cb);
+  err = hwloc_topology_export_xmlbuffer(topology, &buf, &size, 0);
+  assert(!err);
+
+  hwloc_topology_init(&reimport);
+  hwloc_topology_set_userdata_import_callback(reimport, userdata_import_cb);
+  err = hwloc_topology_set_xmlbuffer(reimport, buf, size);
+  assert(!err);
+  err = hwloc_topology_load(reimport);
+  assert(!err);
+  assert(userdata_imported == 1);
+  hwloc_topology_destroy(reimport);
+
+  hwloc_free_xmlbuffer(topology, buf);
+  hwloc_topology_destroy(topology);
+}
+
 int main(int argc, char *argv[])
 {
   int err;
@@ -266,6 +314,8 @@ int main(int argc, char *argv[])
   duplicate_memtiers_nr_test();
 
   diff_without_root_test();
+
+  userdata_length_test();
 
   return 0;
 }
