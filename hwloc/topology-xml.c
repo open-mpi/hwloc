@@ -485,11 +485,13 @@ hwloc__xml_import_obj_info(hwloc_topology_t topology,
             hwloc__add_info(&topology->infos, infoname, infovalue);
             return 0;
           } else if (!strcmp(infoname, "MemoryTiersNr")) {
-            /* preallocate tier structures */
+            /* preallocate tier structures, only once */
             unsigned nr = atoi(infovalue);
-            data->v2_memtiers = calloc(nr, sizeof(*data->v2_memtiers));
-            if (data->v2_memtiers)
-              data->v2_memtiers_nr = nr;
+            if (!data->v2_memtiers) {
+              data->v2_memtiers = calloc(nr, sizeof(*data->v2_memtiers));
+              if (data->v2_memtiers)
+                data->v2_memtiers_nr = nr;
+            }
             return 0;
           }
         } else if (obj->type == HWLOC_OBJ_NUMANODE) {
