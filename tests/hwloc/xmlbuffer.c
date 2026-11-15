@@ -164,6 +164,36 @@ static void invalid_bridge_test(void)
   hwloc_topology_destroy(topology);
 }
 
+/* a v2 root may only preallocate memory tiers once. a second MemoryTiersNr
+ * whose allocation failed used to leave the tier array NULL while keeping
+ * the first count, which was then used to index that NULL array.
+ */
+static void duplicate_memtiers_nr_test(void)
+{
+  static const char xml[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topology SYSTEM \"hwloc2.dtd\">\n"
+    "<topology version=\"2.0\">\n"
+    "  <object type=\"Machine\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"1\">\n"
+    "    <info name=\"MemoryTiersNr\" value=\"1\"/>\n"
+    "    <info name=\"MemoryTiersNr\" value=\"-1\"/>\n" /* too large to allocate */
+    "    <object type=\"NUMANode\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"2\">\n"
+    "      <info name=\"MemoryTier\" value=\"0\"/>\n"
+    "    </object>\n"
+    "    <object type=\"PU\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"3\"/>\n"
+    "  </object>\n"
+    "</topology>\n";
+  hwloc_topology_t topology;
+  int err;
+
+  hwloc_topology_init(&topology);
+  err = hwloc_topology_set_xmlbuffer(topology, xml, sizeof(xml));
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(!err);
+  hwloc_topology_destroy(topology);
+}
+
 int main(int argc, char *argv[])
 {
   int err;
@@ -200,6 +230,8 @@ int main(int argc, char *argv[])
   invalid_root_test();
 
   invalid_bridge_test();
+
+  duplicate_memtiers_nr_test();
 
   return 0;
 }
