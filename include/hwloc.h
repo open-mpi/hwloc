@@ -567,23 +567,27 @@ struct hwloc_obj {
                                           */
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of processors of this object,
                                           *
-                                          * This may include not only the same as the cpuset field, but also some CPUs for
-                                          * which topology information is unknown or incomplete, some offlines CPUs, and
-                                          * the CPUs that are ignored when the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED flag
-                                          * is not set.
-                                          * Thus no corresponding PU object may be found in the topology, because the
-                                          * precise position is undefined. It is however known that it would be somewhere
-                                          * under this object.
+                                          * This set includes the main \p cpuset field but may also contain additional CPUs
+                                          * that do not appear as PU objects in the topology, either because they are unusable
+                                          * (offline or disallowed) or because their precise position is undefined
+                                          * (it is only known that they would be somewhere under the current object).
+                                          *
+                                          * Disallowed CPUs always appear in the \p complete_cpuset field, while they only
+                                          * appear in the main \p cpuset field if the flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
+                                          * is set.
+                                          *
+                                          * See also ::hwlocality_helper_topology_sets for details about complete and
+                                          * allowed CPU sets.
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup() must be used instead.
                                           */
 
   hwloc_nodeset_t nodeset;              /**< \brief NUMA nodes covered by this object or containing this object
                                           *
-                                          * This is the set of NUMA nodes for which there are NUMA node objects in the
+                                          * This is the set of memory nodes for which there are NUMANode object in the
                                           * topology under or above this object, i.e. which are known to be physically
                                           * contained in this object or containing it and known how (the children path
-                                          * between this object and the NUMA node objects).
+                                          * between this object and the NUMANode objects).
                                           *
                                           * In the end, these nodes are those that are close to the current object.
                                           * Function hwloc_get_local_numanode_objs() may be used to list those NUMA
@@ -602,13 +606,17 @@ struct hwloc_obj {
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
                                           *
-                                          * This may include not only the same as the nodeset field, but also some NUMA
-                                          * nodes for which topology information is unknown or incomplete, some offlines
-                                          * nodes, and the nodes that are ignored when the ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
-                                          * flag is not set.
-                                          * Thus no corresponding NUMA node object may be found in the topology, because the
-                                          * precise position is undefined. It is however known that it would be
-                                          * somewhere under this object.
+                                          * This set includes the \p nodeset field but may also contain additional nodes that
+                                          * do not appear as NUMANode objects in the topology, either because they are unusable
+                                          * (offline, memory-less or disallowed) or because they precise position is undefined
+                                          * (it is only known that they would be somewhere under the current object).
+                                          *
+                                          * Disallowed nodes always appear in the \p complete_nodeset field, while they only
+                                          * appear in the main \p nodeset field if the flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED
+                                          * is set.
+                                          *
+                                          * See also ::hwlocality_helper_topology_sets for details about complete and
+                                          * allowed node sets.
                                           *
                                           * If there are no NUMA nodes in the machine, all the memory is close to this
                                           * object, so only the first bit is set in \p complete_nodeset.

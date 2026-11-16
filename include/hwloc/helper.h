@@ -1025,52 +1025,74 @@ hwloc_distrib(hwloc_topology_t topology,
 
 /** \defgroup hwlocality_helper_topology_sets CPU and node sets of entire topologies
  * @{
+ *
+ * There are three different kinds of CPU sets and node sets.
+ * "topology" sets correspond exactly to PU and NUMANode objects in the topology.
+ * "complete" sets may be larger if some resources are missing in the topology
+ * because they are offline, disallowed, etc.
+ * "allowed" sets are equal to "topology" sets by default, but they may be
+ * smaller if some disallowed resources are exposed in the topology
+ * (if the topology flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED is set).
  */
 
-/** \brief Get complete CPU set
- *
- * \return the complete CPU set of processors of the system.
- *
- * \note This function cannot return \c NULL.
- *
- * \note The returned cpuset is not newly allocated and should thus not be
- * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
- *
- * \note This is equivalent to retrieving the root object complete CPU-set.
- */
-HWLOC_DECLSPEC hwloc_const_cpuset_t
-hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-
-/** \brief Get topology CPU set
+/** \brief Get the topology CPU set
  *
  * \return the CPU set of processors of the system for which hwloc
- * provides topology information. This is equivalent to the cpuset of the
- * system object.
+ * provides topology information.
+ *
+ * \note Only CPUs that have a corresponding PU object in the topology are
+ * listed in this set. As explained in hwloc_obj::cpuset, it may be smaller than
+ * the complete cpuset returned by hwloc_topology_get_complete_cpuset() since it
+ * does not include offline CPUs, etc.
+ * It may also be larger than the set returned by hwloc_topology_get_allowed_cpuset()
+ * if disallowed resources are enabled in the topology.
+ *
+ * \note This is equivalent to retrieving the machine root object CPU-set.
  *
  * \note This function cannot return \c NULL.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
- *
- * \note This is equivalent to retrieving the root object CPU-set.
  */
 HWLOC_DECLSPEC hwloc_const_cpuset_t
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
-/** \brief Get allowed CPU set
+/** \brief Get the complete CPU set
  *
- * \return the CPU set of allowed processors of the system.
+ * \return the complete CPU set of processors of the system.
+ *
+ * \note As explained in hwloc_obj::complete_cpuset, this set may be larger than
+ * the main cpuset returned by hwloc_topology_get_topology_cpuset() since it may
+ * also contain additional CPUs not exposed as PU objects in the topology
+ * (offline CPUs, etc).
+ *
+ * \note This is equivalent to retrieving the machine root object complete CPU-set.
  *
  * \note This function cannot return \c NULL.
  *
- * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was not set,
- * this is identical to hwloc_topology_get_topology_cpuset(), which means
- * all PUs are allowed.
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
+ */
+HWLOC_DECLSPEC hwloc_const_cpuset_t
+hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+
+/** \brief Get the allowed CPU set
  *
- * \note If ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was set, applying
- * hwloc_bitmap_intersects() on the result of this function and on an object
+ * \return the CPU set of allowed processors of the system.
+ *
+ * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was not set,
+ * this is identical to hwloc_topology_get_topology_cpuset() since disallowed CPUs
+ * are not listed in the topology by default.
+ *
+ * \note If ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was set, this allowed set may
+ * be smaller than hwloc_topology_get_topology_cpuset() since disallowed CPU are
+ * present in the topology and filtered out of this allowed cpuset.
+ *
+ * \note Applying hwloc_bitmap_intersects() on the result of this function and on an object
  * cpuset checks whether there are allowed PUs inside that object.
  * Applying hwloc_bitmap_and() returns the list of these allowed PUs.
+ *
+ * \note This function cannot return \c NULL.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
@@ -1078,53 +1100,68 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_
 HWLOC_DECLSPEC hwloc_const_cpuset_t
 hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
-/** \brief Get complete node set
+/** \brief Get the topology memory node set
  *
- * \return the complete node set of memory of the system.
+ * \return the node set of memory in the system for which hwloc
+ * provides topology information.
  *
- * \note This function cannot return \c NULL.
+ * \note Only memory nodes that have a corresponding NUMA node object in the topology are
+ * listed in this set. As explained in hwloc_obj::nodeset, it may be smaller than
+ * the complete nodeset returned by hwloc_topology_get_complete_nodeset() since it
+ * does not include offline or empty memory nodes, etc.
+ * It may also be larger than the set returned by hwloc_topology_get_allowed_nodeset()
+ * if disallowed resources are enabled in the topology.
  *
- * \note The returned nodeset is not newly allocated and should thus not be
- * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
- *
- * \note This is equivalent to retrieving the root object complete nodeset.
- */
-HWLOC_DECLSPEC hwloc_const_nodeset_t
-hwloc_topology_get_complete_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
-
-/** \brief Get topology node set
- *
- * \return the node set of memory of the system for which hwloc
- * provides topology information. This is equivalent to the nodeset of the
- * system object.
+ * \note This is equivalent to retrieving the machine root object nodeset.
  *
  * \note This function cannot return \c NULL.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
- *
- * \note This is equivalent to retrieving the root object nodeset.
  */
 HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_topology_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
-/** \brief Get allowed node set
+/** \brief Get the complete node set
  *
- * \return the node set of allowed memory of the system.
+ * \return the complete node set of memory in the system.
+ *
+ * \note As explained in hwloc_obj::complete_nodeset, this set may be larger than
+ * the main nodeset returned by hwloc_topology_get_topology_nodeset() since it may
+ * also contain additional nodes not exposed as NUMA node objects in the topology
+ * (empty or offline NUMA nodes, etc).
+ *
+ * \note This is equivalent to retrieving the machine root object complete node set.
  *
  * \note This function cannot return \c NULL.
  *
- * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was not set,
- * this is identical to hwloc_topology_get_topology_nodeset(), which means
- * all NUMA nodes are allowed.
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
+ */
+HWLOC_DECLSPEC hwloc_const_nodeset_t
+hwloc_topology_get_complete_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
+
+/** \brief Get the allowed node set
  *
- * \note If ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was set, applying
- * hwloc_bitmap_intersects() on the result of this function and on an object
- * nodeset checks whether there are allowed NUMA nodes inside that object.
+ * \return the nodeset set of allowed memory of the system.
+ *
+ * \note If the topology flag ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was not set,
+ * this is identical to hwloc_topology_get_topology_nodeset() since disallowed NUMA nodes
+ * are not listed in the topology by default.
+ *
+ * \note If ::HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED was set, this allowed set may
+ * be smaller than hwloc_topology_get_topology_nodeset() since disallowed NUMA nodes are
+ * present in the topology and filtered out of this allowed nodeset.
+ *
+ * \note Applying hwloc_bitmap_intersects() on the result of this function and on an object
+ * nodeset checks whether there are allowed NUMA nodes near that object.
  * Applying hwloc_bitmap_and() returns the list of these allowed NUMA nodes.
+ *
+ * \note This function cannot return \c NULL.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
+ * \note This function cannot return \c NULL.
  */
 HWLOC_DECLSPEC hwloc_const_nodeset_t
 hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
