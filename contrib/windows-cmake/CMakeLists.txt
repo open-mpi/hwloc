@@ -80,9 +80,13 @@ check_c_source_compiles("int main(void) {int cpuinfo[4]; __cpuidex(cpuinfo,0,0);
 HWLOC_HAVE_MSVC_CPUIDEX
 )
 
+# use snprintf() when declared (VS2015+, MinGW) like configure does, otherwise private/misc.h
+# falls back to _snprintf() which doesn't 0-terminate truncated output.
+# snprintf() returned broken values in the past (see 7a4ee26510c06b55fc04aaccbfa18d0ca3b87198),
+# that's still handled by hwloc_snprintf() since HWLOC_HAVE_CORRECT_SNPRINTF isn't defined here.
+check_symbol_exists(snprintf "stdio.h" HAVE_DECL_SNPRINTF)
+
 # the following lines are disabled until we are sure they are safe with old build environmentx
-# - snprintf() returned broken values in the past, hwloc detects it during configure (see 7a4ee26510c06b55fc04aaccbfa18d0ca3b87198)
-#   set(HAVE_DECL_SNPRINTF 1)
 # - strtoull() had some issues in the past (see 9559bd08b79ef63dce45df87fb7f875b73ecb512)
 #   set(HAVE_DECL_STRTOULL 1)
 

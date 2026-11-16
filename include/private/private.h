@@ -453,7 +453,7 @@ extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsi
 #ifdef HWLOC_HAVE_CORRECT_SNPRINTF
 #define hwloc_snprintf snprintf
 #else
-extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
+HWLOC_DECLSPEC extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 #endif
 
 /* Return the name of the currently running program, if supported.

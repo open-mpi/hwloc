@@ -90,7 +90,12 @@
 
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+/* snprintf() is C99-compliant since VS2015, _snprintf() doesn't 0-terminate truncated output */
+#define HAVE_DECL_SNPRINTF 1
+#else
 #define HAVE_DECL_SNPRINTF 0
+#endif
 
 /* Define to 1 if you have the declaration of `_strdup', and to 0 if you
    don't. */

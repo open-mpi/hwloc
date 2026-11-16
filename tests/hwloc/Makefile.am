@@ -66,6 +66,7 @@ check_PROGRAMS = \
         hwloc_topology_abi \
         hwloc_obj_infos \
         hwloc_iodevs \
+        hwloc_snprintf \
         cpuset_nodeset \
         memattrs \
         memtiers \
