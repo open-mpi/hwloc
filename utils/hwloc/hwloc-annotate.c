@@ -245,6 +245,11 @@ add_distances(hwloc_topology_t topology, int topodepth)
 		fprintf(stderr, "Invalid distances with nbobjs == %u\n", nbobjs);
 		goto out;
 	}
+	if (nbobjs > UINT_MAX / nbobjs
+	    || (size_t) nbobjs * nbobjs > SIZE_MAX / sizeof(*values)) {
+		fprintf(stderr, "Invalid distances with too many objects (%u)\n", nbobjs);
+		goto out;
+	}
 
 	objs = malloc(nbobjs * sizeof(*objs));
 	values = malloc(nbobjs*nbobjs * sizeof(*values));

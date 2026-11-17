@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "hwloc.h"
@@ -226,6 +227,45 @@ static void diff_without_root_test(void)
   free(refname);
 }
 
+/* a distances2 matrix of 23171*23171 uint64_t does not fit in a 32-bit size_t,
+ * its allocation size used to wrap to 194632 bytes (24329 values) while up to
+ * nbobjs*nbobjs values were still parsed into it. the load must fail instead
+ * (there are not enough values anyway).
+ */
+static void huge_distances_test(void)
+{
+  static const char head[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topology SYSTEM \"hwloc2.dtd\">\n"
+    "<topology version=\"3.0\">\n"
+    "  <object type=\"Machine\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" allowed_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" allowed_nodeset=\"0x1\" gp_index=\"1\">\n"
+    "    <object type=\"NUMANode\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"2\" local_memory=\"1048576\"/>\n"
+    "    <object type=\"PU\" os_index=\"0\" cpuset=\"0x1\" complete_cpuset=\"0x1\" nodeset=\"0x1\" complete_nodeset=\"0x1\" gp_index=\"3\"/>\n"
+    "  </object>\n";
+  const unsigned nbobjs = 23171;
+  const unsigned nbvalues = 30000;
+  hwloc_topology_t topology;
+  char *xml, *tmp;
+  unsigned i;
+  int err;
+
+  xml = malloc(sizeof(head) + 256 + 2*nbvalues);
+  assert(xml);
+  tmp = xml + sprintf(xml, "%s  <distances2 type=\"PU\" nbobjs=\"%u\" kind=\"5\" indexing=\"os\">\n"
+                      "    <u64values length=\"%u\">", head, nbobjs, 2*nbvalues-1);
+  for(i=0; i<nbvalues; i++)
+    tmp += sprintf(tmp, i ? " 1" : "1");
+  strcpy(tmp, "</u64values>\n  </distances2>\n</topology>\n");
+
+  hwloc_topology_init(&topology);
+  err = hwloc_topology_set_xmlbuffer(topology, xml, (int) strlen(xml)+1);
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(err < 0);
+  hwloc_topology_destroy(topology);
+  free(xml);
+}
+
 int main(int argc, char *argv[])
 {
   int err;
@@ -266,6 +306,8 @@ int main(int argc, char *argv[])
   duplicate_memtiers_nr_test();
 
   diff_without_root_test();
+
+  huge_distances_test();
 
   return 0;
 }
