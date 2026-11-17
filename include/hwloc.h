@@ -670,6 +670,7 @@ union hwloc_obj_attr_u {
     					    *  -1 if fully associative, 0 if unknown */
     hwloc_obj_cache_type_t type;          /**< \brief Cache type */
   } cache;
+
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object.
@@ -678,6 +679,7 @@ union hwloc_obj_attr_u {
     unsigned subkind;			  /**< \brief Internally-used subkind to distinguish different levels of groups with same kind */
     unsigned char dont_merge;		  /**< \brief Flag preventing groups from being automatically merged with identical parent or children. */
   } group;
+
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_s {
 #ifndef HWLOC_HAVE_32BITS_PCI_DOMAIN
@@ -703,6 +705,7 @@ union hwloc_obj_attr_u {
                       *   slow their PCI links down when idle.
                       */
   } pcidev;
+
   /** \brief Bridge specific Object Attributes */
   struct hwloc_bridge_attr_s {
     union {
@@ -725,6 +728,7 @@ union hwloc_obj_attr_u {
     hwloc_obj_bridge_type_t downstream_type; /**< \brief Downstream Bridge type. */
     unsigned depth;
   } bridge;
+
   /** \brief OS Device specific Object Attributes */
   struct hwloc_osdev_attr_s {
     hwloc_obj_osdev_type_t type;
