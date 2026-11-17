@@ -36,6 +36,10 @@ extern "C" {
 #endif
 
 
+/* \cond 0
+ * Don't document these internal structures.
+ */
+
 /* OpenCL extensions aren't always shipped with default headers, and
  * they don't always reflect what the installed implementations support.
  * Try everything and let the implementation return errors when non supported.
@@ -63,6 +67,11 @@ typedef union {
 #define HWLOC_CL_DEVICE_PCI_BUS_ID_NV 0x4008
 #define HWLOC_CL_DEVICE_PCI_SLOT_ID_NV 0x4009
 #define HWLOC_CL_DEVICE_PCI_DOMAIN_ID_NV 0x400A
+
+/* End of Don't document these internal structures.
+ * \endcond
+ */
+
 
 
 /** \defgroup hwlocality_opencl Interoperability with OpenCL
