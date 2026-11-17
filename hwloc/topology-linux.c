@@ -3462,9 +3462,11 @@ look_sysfsnode(struct hwloc_topology *topology,
   if (!indexes)
     return 0;
 
-  if (nbnodes > UINT_MAX / nbnodes) {
+  if (nbnodes > UINT_MAX / nbnodes
+      || (size_t) nbnodes * nbnodes > SIZE_MAX / sizeof(*distances)) {
     /* the distance matrix below is nbnodes*nbnodes uint64_t, computed in
-     * unsigned int; reject sizes whose square would wrap before reaching malloc */
+     * unsigned int; reject sizes whose square would wrap before reaching malloc,
+     * or whose size in bytes would wrap size_t (on 32-bit) */
     free(indexes);
     return 0;
   }
