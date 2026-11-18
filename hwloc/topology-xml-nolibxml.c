@@ -502,7 +502,7 @@ hwloc_nolibxml_import_diff(struct hwloc__xml_import_state_s *state,
 
   /* find root */
   ret = hwloc__nolibxml_import_find_child(state, &childstate, &tag);
-  if (ret < 0)
+  if (ret <= 0)
     goto out_with_buffer;
   if (!tag || strcmp(tag, "topologydiff"))
     goto out_with_buffer;
