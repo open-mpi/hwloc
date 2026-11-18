@@ -164,6 +164,38 @@ static void invalid_bridge_test(void)
   hwloc_topology_destroy(topology);
 }
 
+/* a diff buffer starting with a closing tag has no root element.
+ * the minimalistic importer used to compare the uninitialized root tag
+ * name in this case, and to parse the root attributes from an
+ * uninitialized state, which could still point to a previous diff buffer.
+ */
+static void diff_without_root_test(void)
+{
+  static const char valid[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topologydiff SYSTEM \"hwloc2-diff.dtd\">\n"
+    "<topologydiff refname=\"foo\">\n"
+    "  <diff type=\"0\" obj_depth=\"0\" obj_index=\"0\" obj_attr_type=\"2\" obj_attr_name=\"Foo\" obj_attr_oldvalue=\"Bar\" obj_attr_newvalue=\"Baz\"/>\n"
+    "</topologydiff>\n";
+  static const char noroot[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE topologydiff SYSTEM \"hwloc2-diff.dtd\">\n"
+    "</topologydiff>\n";
+  hwloc_topology_diff_t diff, diff2 = NULL;
+  char *refname, *refname2 = NULL;
+  int err;
+
+  err = hwloc_topology_diff_load_xmlbuffer(valid, sizeof(valid), &diff, &refname);
+  assert(!err);
+  assert(diff);
+  err = hwloc_topology_diff_load_xmlbuffer(noroot, sizeof(noroot), &diff2, &refname2);
+  assert(err < 0);
+  assert(!diff2);
+  assert(!refname2);
+  hwloc_topology_diff_destroy(diff);
+  free(refname);
+}
+
 int main(int argc, char *argv[])
 {
   int err;
@@ -200,6 +232,8 @@ int main(int argc, char *argv[])
   invalid_root_test();
 
   invalid_bridge_test();
+
+  diff_without_root_test();
 
   return 0;
 }
