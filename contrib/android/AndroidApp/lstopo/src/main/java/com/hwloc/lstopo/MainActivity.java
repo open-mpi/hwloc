@@ -516,7 +516,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 checkTimeOut.interrupt();
@@ -531,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     return;
                 }
 
-                JsonObjectRequest jsonObjectRequestRetry = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+                JsonObjectRequest jsonObjectRequestRetry = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         setJsonList(response, linearLayout);
