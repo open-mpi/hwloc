@@ -1279,13 +1279,13 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
     lstopo_obj_snprintf(loutput, _text, sizeof(_text), obj);
     lstopo_busid_snprintf(loutput, busid, sizeof(busid), obj, lud->pci_collapsed, loutput->need_pci_domain);
     if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
-      n = snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%d x { %s %s }", lud->pci_collapsed, _text, busid);
+      snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%d x { %s %s }", lud->pci_collapsed, _text, busid);
     } else {
-      n = snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%s %s", _text, busid);
+      snprintf(lud->text[0].text, sizeof(lud->text[0].text), "%s %s", _text, busid);
     }
   } else {
     /* normal object text */
-    n = lstopo_obj_snprintf(loutput, lud->text[0].text, sizeof(lud->text[0].text), obj);
+    lstopo_obj_snprintf(loutput, lud->text[0].text, sizeof(lud->text[0].text), obj);
   }
   lud->ntext = 1;
 
@@ -1416,8 +1416,8 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   lud->textwidth = 0;
   for(i=0; i<lud->ntext; i++) {
     unsigned textwidth;
-    if (i) /* already computed above for n=0 */
-      n = (unsigned)strlen(lud->text[i].text);
+    /* lines may have been truncated, don't use snprintf() return values here */
+    n = (unsigned)strlen(lud->text[i].text);
     textwidth = get_textwidth(loutput, lud->text[i].text, n, fontsize);
     lud->text[i].width = textwidth;
     lud->text[i].xoffset = 0; /* only used for PU in output_compute_pu_min_textwidth() */
