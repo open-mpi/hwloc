@@ -66,13 +66,13 @@ public class Filters extends Activity {
         final String url2 = "https://hwloc-xmls.herokuapp.com/json";
 
         // Get all topologies
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
             try {
                 final JSONArray xmls = response.getJSONArray("xml");
                 // Get a list of all filters available for each Spinner
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url2, new Response.Listener<JSONObject>() {
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url2, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject tags) {
                     String option_info;
