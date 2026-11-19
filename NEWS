@@ -112,6 +112,18 @@ for more details.
   + The tool hwloc-dump-hwdata is removed.
 
 
+Version 2.16.0
+--------------
+* Improve cpukinds detection on Mac OS X to support 3 or more kinds,
+  e.g. on M6 chips. Thanks to Apple for the patches.
+* Improve cpukinds detection on Windows and for upcoming Intel CPUs.
+  Thanks to Dmitri N Mokhov for the patches.
+* Fix support for Linux Cgroups with long names, thanks Charlie Getze.
+* Fix support for nested Linux Cgroup v2, thanks Guixiong Wei.
+* Fix "AMDEfficiency" core type in the x86 backend.
+* Many small fixes from Javid Khan and Krzysztof Pawlinski.
+
+
 Version 2.15.0
 --------------
 * The Windows backend now adds NUMA nodes when CPU discovery was
