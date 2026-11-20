@@ -127,6 +127,8 @@ echo "**** Import from synthetic so that we can check some exact outputs in $fil
   $ls -i "node:4 pu:4" -.xml --export-xml-flags v1
   echo "** Topology flag disallowed..."
   $ls -i "node:4 pu:4" - --allow 0xf --flags disallowed -v
+  echo "** Native SVG escaping of XML special characters in text..."
+  $ls -i "node:1 pu:1" --no-default-legend --append-legend "a<b & c>d" --of nativesvg - | grep anon_text
 ) > "$file"
 @DIFF@ @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ $srcdir/test-lstopo.output "$file"
 
