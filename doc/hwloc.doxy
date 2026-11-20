@@ -1010,6 +1010,9 @@ following environment variables.
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
   See also \ref xml.
+
+  If the program loads a XML or a synthetic topology through the API
+  (e.g. hwloc_topology_set_xml()), this variable is ignored.
   </dd>
 
 <dt>HWLOC_SYNTHETIC=pack:3 [numa] L2:2 core:4 pu:2</dt>
@@ -1018,6 +1021,9 @@ following environment variables.
   For convenience, this backend provides empty binding hooks which just
   return success.
   See also \ref synthetic.
+
+  If the program loads a XML or a synthetic topology through the API
+  (e.g. hwloc_topology_set_xml()), this variable is ignored.
   </dd>
 
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
@@ -1036,7 +1042,10 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
-  </dd>
+
+  If the program loads a XML or a synthetic topology through the API
+  (e.g. hwloc_topology_set_xml()), this variable is ignored.
+</dd>
 
 <dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
   <dd>Force the x86 backend to read dumped CPUIDs from the given directory
@@ -1053,6 +1062,9 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded CPUID dump is really the underlying system.
+
+  If the program loads a XML or a synthetic topology through the API
+  (e.g. hwloc_topology_set_xml()), this variable is ignored.
   </dd>
 
 <dt>HWLOC_DUMPED_HWDATA_DIR=/path/to/dumped/files/</dt>
@@ -1354,6 +1366,10 @@ following environment variables.
   in priority order.
 
   See \ref plugins_select for details.
+
+  If the program loads a XML or a synthetic topology through the API
+  (e.g. hwloc_topology_set_xml()), this variable is queried afterwards,
+  hence it cannot be used to switch to another discovery backend.
   </dd>
 
 <dt>HWLOC_GL=0</dt>
