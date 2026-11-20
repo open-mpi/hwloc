@@ -99,21 +99,66 @@ int main(void)
   else
     xmlfileok = 1;
 
-
   /* init+config+destroy without loading */
-  printf("init...\n");
-  hwloc_topology_init(&topology2);
   if (xmlfileok) {
-    printf("switching to xml...\n");
+    hwloc_topology_init(&topology2);
+    printf("switching to xml without loading...\n");
     assert(!hwloc_topology_set_xml(topology2, xmlfile));
+    hwloc_topology_destroy(topology2);
   }
   if (xmlbufok) {
-    printf("switching to xmlbuffer...\n");
+    hwloc_topology_init(&topology2);
+    printf("switching to xmlbuffer without loading...\n");
     assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
+    hwloc_topology_destroy(topology2);
   }
-  printf("switching to synthetic...\n");
-  hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4");
+  hwloc_topology_init(&topology2);
+  printf("switching to synthetic without loading...\n");
+  assert(!hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4"));
   hwloc_topology_destroy(topology2);
+
+  /* init+synthetic+configfail */
+  hwloc_topology_init(&topology2);
+  assert(!hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4"));
+  if (xmlfileok) {
+    printf("failing to switch to xml after synthetic...\n");
+    assert(hwloc_topology_set_xml(topology2, xmlfile) == -1);
+  }
+  if (xmlbufok) {
+    printf("failing to switch to xmlbuf after synthetic...\n");
+    assert(hwloc_topology_set_xml(topology2, xmlfile) == -1);
+  }
+  printf("failing to switch to synthetic twice...\n");
+  assert(hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4") == -1);
+  hwloc_topology_destroy(topology2);
+  /* init+xml+configfail */
+  if (xmlfileok) {
+    hwloc_topology_init(&topology2);
+    assert(!hwloc_topology_set_xml(topology2, xmlfile));
+    printf("failing to switch to synthetic after xml...\n");
+    assert(hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4") == -1);
+    if (xmlbufok) {
+      printf("failing to switch to xmlbuf after xml...\n");
+      assert(hwloc_topology_set_xml(topology2, xmlfile) == -1);
+    }
+    printf("failing to switch to xml twice...\n");
+    assert(hwloc_topology_set_xml(topology2, xmlfile) == -1);
+    hwloc_topology_destroy(topology2);
+  }
+  /* init+xmlbuf+configfail */
+  if (xmlbufok) {
+    hwloc_topology_init(&topology2);
+    assert(!hwloc_topology_set_xml(topology2, xmlfile));
+    printf("failing to switch to synthetic after xmlbuf...\n");
+    assert(hwloc_topology_set_synthetic(topology2, "pack:2 node:3 l1:2 pu:4") == -1);
+    if (xmlfileok) {
+      printf("failing to switch to xml after xmlbuf...\n");
+      assert(hwloc_topology_set_xml(topology2, xmlfile) == -1);
+    }
+    printf("failing to switch to xmlbuf twice...\n");
+    assert(hwloc_topology_set_xml(topology2, xmlfile) == -1);
+    hwloc_topology_destroy(topology2);
+  }
 
   /* init+xml+load+destroy */
   if (xmlfileok) {

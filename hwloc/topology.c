@@ -3893,6 +3893,11 @@ hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *descri
     return -1;
   }
 
+  if (topology->backends) {
+    errno = EBUSY;
+    return -1;
+  }
+
   return hwloc_disc_component_force_enable(topology,
 					   0 /* api */,
 					   "synthetic",
@@ -3904,6 +3909,11 @@ hwloc_topology_set_xml(struct hwloc_topology *topology,
 		       const char *xmlpath)
 {
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
+    errno = EBUSY;
+    return -1;
+  }
+
+  if (topology->backends) {
     errno = EBUSY;
     return -1;
   }
@@ -3920,6 +3930,11 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology,
                              int size)
 {
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_INIT)) {
+    errno = EBUSY;
+    return -1;
+  }
+
+  if (topology->backends) {
     errno = EBUSY;
     return -1;
   }
