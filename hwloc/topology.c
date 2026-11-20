@@ -4243,14 +4243,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					  NULL /* backend will getenv again */, NULL, NULL);
     }
     if (!topology->backends) {
-      const char *cpuid_path_env = getenv("HWLOC_CPUID_PATH");
-      if (cpuid_path_env)
-	hwloc_disc_component_force_enable(topology,
-					  1 /* env force */,
-					  "x86",
-					  NULL /* backend will getenv again */, NULL, NULL);
-    }
-    if (!topology->backends) {
       const char *synthetic_env = getenv("HWLOC_SYNTHETIC");
       if (synthetic_env)
 	hwloc_disc_component_force_enable(topology,
@@ -4266,6 +4258,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 					  "xml",
 					  xmlpath_env, NULL, NULL);
     }
+    /* HWLOC_CPUID_PATH only read if the native OS backend calls x86 */
   }
 
   dstatus.excluded_phases = 0;

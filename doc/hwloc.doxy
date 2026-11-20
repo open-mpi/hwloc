@@ -1031,8 +1031,8 @@ following environment variables.
 </dd>
 
 <dt>HWLOC_CPUID_PATH=/path/to/cpuid/</dt>
-  <dd>Force the x86 sub-backend to read dumped CPUIDs from the given directory
-  instead of executing actual x86 CPUID instructions.
+  <dd>If the x86 sub-backend in used, it will read dumped CPUIDs from the
+  given directory instead of executing actual x86 CPUID instructions.
   This directory may have been saved previously from another machine
   with <tt>hwloc-gather-cpuid</tt>.
 
@@ -1045,9 +1045,6 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded CPUID dump is really the underlying system.
-
-  If the program loads a XML or a synthetic topology through the API
-  (e.g. hwloc_topology_set_xml()), this variable is ignored.
   </dd>
 
 <dt>HWLOC_X86=default</dt>
