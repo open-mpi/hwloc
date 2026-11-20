@@ -224,4 +224,4 @@ Special depth -3:  4 NUMANode (type #14)
 Topology infos: Backend=Synthetic SyntheticDescription="node:4 pu:4"
 Topology not from this system
 ** Native SVG escaping of XML special characters in text...
-	<text id='anon_text' font-family='Monospace' x='7' y='117' fill='rgb(0,0,0)' font-size='10px'>a&lt;b &amp; c&gt;d</text>
+	<text id='anon_text' font-family='Monospace' x='7' y='117' fill='rgb(0,0,0)' font-size='10px'>a&lt;&gt;b &amp;&lt; c&gt;&amp;d</text>
