@@ -108,10 +108,27 @@ native_svg_text(struct lstopo_output *loutput, const struct lstopo_color *lcolor
   if (cpukind_style % 2)
     fontweight = " font-weight='bold'";
 
-  fprintf(file,"\t<text%s%s font-family='Monospace'%s x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>%s</text>\n",
+  fprintf(file,"\t<text%s%s font-family='Monospace'%s x='%u' y='%u' fill='rgb(%d,%d,%d)' font-size='%dpx'>",
 	  id, class,
           fontweight,
-          x, y+size, r, g, b, size, text);
+          x, y+size, r, g, b, size);
+  /* names, subtypes and info values may come from an imported XML file
+   * or from process names, escape them so that they cannot break the SVG markup */
+  while (*text) {
+    size_t chunksize = strcspn(text, "<>&");
+    fprintf(file, "%.*s", (int) chunksize, text);
+    text += chunksize;
+    if (*text == '<')
+      fprintf(file, "&lt;");
+    else if (*text == '>')
+      fprintf(file, "&gt;");
+    else if (*text == '&')
+      fprintf(file, "&amp;");
+    else
+      break;
+    text++;
+  }
+  fprintf(file, "</text>\n");
 }
 
 static struct draw_methods native_svg_draw_methods = {
