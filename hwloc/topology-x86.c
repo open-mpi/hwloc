@@ -162,7 +162,7 @@ cpuiddump_read(struct cpuiddump *cpuiddump, const char *dirpath, unsigned idx)
   char *filename;
   FILE *file;
   char line[128];
-  unsigned nr;
+  unsigned nr, maxnr;
 
   filenamelen = strlen(dirpath) + 15;
   filename = malloc(filenamelen);
@@ -188,8 +188,10 @@ cpuiddump_read(struct cpuiddump *cpuiddump, const char *dirpath, unsigned idx)
 
   fseek(file, 0, SEEK_SET);
   cur = &cpuiddump->entries[0];
+  /* don't store more entries than counted above if the file grew meanwhile */
+  maxnr = nr;
   nr = 0;
-  while (fgets(line, sizeof(line), file)) {
+  while (nr < maxnr && fgets(line, sizeof(line), file)) {
     if (*line == '#')
       continue;
     if (sscanf(line, "%x %x %x %x %x => %x %x %x %x",
