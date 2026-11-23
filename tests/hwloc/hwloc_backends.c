@@ -24,16 +24,18 @@
 #define mktemp _mktemp
 #endif
 
-#ifndef HAVE_MKSTEMP
+#if !(defined HAVE_MKSTEMP) || defined(__MINGW32__)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "private/misc.h" /* for S_IRWXU */
-static inline int mkstemp(char *name)
+static inline int hwloc_mkstemp(char *name)
 {
   mktemp(name);
   return open(name, O_RDWR|O_CREAT, S_IRWXU);
 }
+#else
+#define hwloc_mkstemp mkstemp
 #endif
 
 /* mostly useful with valgrind, to check if backend cleanup properly */
@@ -94,7 +96,7 @@ int main(void)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
   else
     xmlbufok = 1;
-  xmlfilefd = mkstemp(xmlfile);
+  xmlfilefd = hwloc_mkstemp(xmlfile);
   if (xmlfilefd < 0 || hwloc_topology_export_xml(topology1, xmlfile, 0) < 0)
     printf("XML file export failed (%s), ignoring\n", strerror(errno));
   else
