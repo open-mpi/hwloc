@@ -1275,7 +1275,7 @@ prepare_text(struct lstopo_output *loutput, hwloc_obj_t obj)
   if (obj->type == HWLOC_OBJ_PCI_DEVICE && loutput->show_attrs_enabled && loutput->show_attrs[HWLOC_OBJ_PCI_DEVICE]) {
     /* PCI text collapsing */
     char busid[32];
-    char _text[64];
+    char _text[320];
     lstopo_obj_snprintf(loutput, _text, sizeof(_text), obj);
     lstopo_busid_snprintf(loutput, busid, sizeof(busid), obj, lud->pci_collapsed, loutput->need_pci_domain);
     if (loutput->pci_collapse_enabled && lud->pci_collapsed > 1) {
