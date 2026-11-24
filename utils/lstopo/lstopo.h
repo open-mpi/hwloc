@@ -266,7 +266,7 @@ struct lstopo_obj_userdata {
 			       * + 2 memory CXL sizes
 			       */
   struct lstopo_text_line {
-    char text[128];
+    char text[512];
     unsigned width;
     unsigned xoffset;
   } text[LSTOPO_OBJ_TEXT_MAX];
