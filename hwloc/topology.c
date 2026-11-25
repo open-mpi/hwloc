@@ -505,6 +505,10 @@ struct hwloc_infos_s * hwloc_topology_get_infos(hwloc_topology_t topology)
 int hwloc_obj_set_subtype(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, const char *subtype)
 {
   char *new = NULL;
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return -1;
+  }
   if (subtype) {
     new = strdup(subtype);
     if (!new)
@@ -2161,6 +2165,10 @@ hwloc__reconnect(struct hwloc_topology *topology, unsigned long flags)
 int
 hwloc_topology_reconnect(struct hwloc_topology *topology, unsigned long flags)
 {
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return -1;
+  }
   if (flags) {
     errno = EINVAL;
     return -1;
@@ -4643,6 +4651,11 @@ hwloc_topology_allow(struct hwloc_topology *topology,
   if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED))
     goto einval;
 
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    goto error;
+  }
+
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_INCLUDE_DISALLOWED))
     goto einval;
 
@@ -4702,6 +4715,15 @@ hwloc_topology_allow(struct hwloc_topology *topology,
 int
 hwloc_topology_refresh(struct hwloc_topology *topology)
 {
+  if (!(topology->state & HWLOC_TOPOLOGY_STATE_IS_LOADED)) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (topology->adopted_shmem_addr) {
+    errno = EPERM;
+    return -1;
+  }
+
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_CPUKINDS))
     hwloc_internal_cpukinds_rank(topology);
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_DISTANCES))
