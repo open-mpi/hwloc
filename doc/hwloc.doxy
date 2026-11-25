@@ -1923,9 +1923,9 @@ Misc(MemoryModule) (P#1 DeviceLocation="Bottom-Slot 2(right)" BankLocation="BANK
 \endcode
 </li>
 <li>
-Displaying process binding in <tt>lstopo \--top</tt>.
-These objects have a <tt>subtype</tt> field of value <tt>Process</tt>
-and a name attribute made of their PID and program name.
+Displaying process and thread binding in <tt>lstopo \--top</tt>.
+These objects have a subtype field of value <tt>Process</tt> (or <tt>Thread</tt>)
+and a name attribute made of their PID and program name (or thread ID and name).
 They are attached below the object they are bound to.
 The textual <tt>lstopo</tt> displays them as:
 \code
