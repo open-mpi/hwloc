@@ -97,6 +97,10 @@ else
   opts="--of console $opts"
 fi
 
+if test "$target" = `basename $target .v2.xml`".v2.xml"; then
+  is_v2xml_target=1
+fi
+
 . "$tmp/env"
 
 do_run()
@@ -117,7 +121,8 @@ do_run()
 
   if [ -n "@XMLLINT@" -a $is_xml_target -eq 1 ]
   then
-    cp -f "$HWLOC_top_srcdir"/hwloc/hwloc*.dtd "$tmp/"
+    # only provide the DTD for non-v2 export
+    [ $is_v2xml_target ] || cp -f "$HWLOC_top_srcdir"/hwloc/hwloc*.dtd "$tmp/"
     ( cd $tmp ; @XMLLINT@ --valid $output ) > /dev/null
   fi
 
