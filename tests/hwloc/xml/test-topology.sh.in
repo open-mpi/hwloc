@@ -121,9 +121,13 @@ do_run()
 
   if [ -n "@XMLLINT@" -a $is_xml_target -eq 1 ]
   then
-    # only provide the DTD for non-v2 export
-    [ $is_v2xml_target ] || cp -f "$HWLOC_top_srcdir"/hwloc/hwloc*.dtd "$tmp/"
-    ( cd $tmp ; @XMLLINT@ --valid $output ) > /dev/null
+    if [ $is_v2xml_target ]; then
+      # if exporting to v2, only validate syntax, don't validate against the DTD
+      ( cd $tmp ; xmllint $output ) > /dev/null
+    else
+      cp -f "$HWLOC_top_srcdir"/hwloc/hwloc*.dtd "$tmp/"
+      ( cd $tmp ; xmllint --valid $output ) > /dev/null
+    fi
   fi
 
   rm "$output"
