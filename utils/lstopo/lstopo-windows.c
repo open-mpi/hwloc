@@ -61,92 +61,94 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     case WM_CHAR:  {
       switch (wparam) {
       case '+':
-	the_scale *= 1.2f;
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        the_scale *= 1.2f;
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case '-':
-	the_scale /= 1.2f;
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        the_scale /= 1.2f;
+        if (the_scale < 1.0f)
+          the_scale = 1.0f;
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 'F': {
-	/* fit drawing to window, don't resize the window */
-	float wscale, hscale;
-	wscale = win_width / (float)the_width;
-	hscale = win_height / (float)the_height;
-	the_scale *= wscale > hscale ? hscale : wscale;
-	redraw = 1;
-	break;
+        /* fit drawing to window, don't resize the window */
+        float wscale, hscale;
+        wscale = win_width / (float)the_width;
+        hscale = win_height / (float)the_height;
+        the_scale *= wscale > hscale ? hscale : wscale;
+        redraw = 1;
+        break;
       }
       case '1':
-	the_scale = 1.0;
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        the_scale = 1.0;
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 'r':
-	needs_resize = 1; /* forced */
-	break;
+        needs_resize = 1; /* forced */
+        break;
       case 'R':
-	auto_resize ^= 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	printf("%s window autoresizing\n", auto_resize ? "enabled" : "disabled");
-	break;
+        auto_resize ^= 1;
+        if (auto_resize)
+          needs_resize = 1;
+        printf("%s window autoresizing\n", auto_resize ? "enabled" : "disabled");
+        break;
       case 'a':
-	loutput->show_attrs_enabled ^= 1;
-	printf("%s object attributes\n", loutput->show_attrs_enabled ? "enabled" : "disabled");
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        loutput->show_attrs_enabled ^= 1;
+        printf("%s object attributes\n", loutput->show_attrs_enabled ? "enabled" : "disabled");
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 't':
-	loutput->show_text_enabled ^= 1;
-	printf("%s object text\n", loutput->show_text_enabled ? "enabled" : "disabled");
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        loutput->show_text_enabled ^= 1;
+        printf("%s object text\n", loutput->show_text_enabled ? "enabled" : "disabled");
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 'i':
-	if (loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
-	  loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
-	  printf("switched to physical indexes\n");
-	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL) {
-	  loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
-	  printf("switched to logical indexes\n");
-	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
-	  loutput->index_type = LSTOPO_INDEX_TYPE_NONE;
-	  printf("switched to no indexes\n");
-	} else if (loutput->index_type == LSTOPO_INDEX_TYPE_NONE) {
-	  loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
-	  printf("switched to default indexes\n");
-	} else {
-	  abort();
-	}
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        if (loutput->index_type == LSTOPO_INDEX_TYPE_DEFAULT) {
+          loutput->index_type = LSTOPO_INDEX_TYPE_PHYSICAL;
+          printf("switched to physical indexes\n");
+        } else if (loutput->index_type == LSTOPO_INDEX_TYPE_PHYSICAL) {
+          loutput->index_type = LSTOPO_INDEX_TYPE_LOGICAL;
+          printf("switched to logical indexes\n");
+        } else if (loutput->index_type == LSTOPO_INDEX_TYPE_LOGICAL) {
+          loutput->index_type = LSTOPO_INDEX_TYPE_NONE;
+          printf("switched to no indexes\n");
+        } else if (loutput->index_type == LSTOPO_INDEX_TYPE_NONE) {
+          loutput->index_type = LSTOPO_INDEX_TYPE_DEFAULT;
+          printf("switched to default indexes\n");
+        } else {
+          abort();
+        }
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 'k':
-	loutput->show_cpukinds ^= 1;
-	printf("%s displaying of CPU kinds\n", loutput->show_cpukinds ? "enabled" : "disabled");
-	redraw = 1;
-	break;
+        loutput->show_cpukinds ^= 1;
+        printf("%s displaying of CPU kinds\n", loutput->show_cpukinds ? "enabled" : "disabled");
+        redraw = 1;
+        break;
       case 'd':
-	loutput->show_disallowed ^= 1;
-	printf("%s coloring of disallowed resources\n", loutput->show_disallowed ? "enabled" : "disabled");
-	redraw = 1;
-	break;
+        loutput->show_disallowed ^= 1;
+        printf("%s coloring of disallowed resources\n", loutput->show_disallowed ? "enabled" : "disabled");
+        redraw = 1;
+        break;
       case 'b':
-	loutput->show_binding ^= 1;
-	printf("%s coloring of binding resources\n", loutput->show_binding ? "enabled" : "disabled");
-	redraw = 1;
-	break;
+        loutput->show_binding ^= 1;
+        printf("%s coloring of binding resources\n", loutput->show_binding ? "enabled" : "disabled");
+        redraw = 1;
+        break;
       case 'l':
-	if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
+        if (loutput->show_legend == LSTOPO_SHOW_LEGEND_ALL) {
           loutput->show_legend = LSTOPO_SHOW_LEGEND_NONE;
           printf("switched to no legend lines\n");
         } else if (loutput->show_legend == LSTOPO_SHOW_LEGEND_NONE) {
@@ -158,40 +160,40 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
         } else {
           abort();
         }
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 'f':
-	/* alternate between factorize+collapse, collapse only, and none */
-	if (loutput->factorize_enabled && loutput->pci_collapse_enabled) {
-	  loutput->factorize_enabled = 0;
-	  printf("factorizing disabled, PCI collapsing still enabled\n");
-	} else if (!loutput->factorize_enabled && loutput->pci_collapse_enabled) {
-	  loutput->pci_collapse_enabled = 0;
-	  printf("factorizing and PCI collapsing disabled\n");
-	} else {
-	  loutput->factorize_enabled = 1;
-	  loutput->pci_collapse_enabled = 1;
-	  printf("factorizing and PCI collapsing enabled\n");
-	}
-	redraw = 1;
-	if (auto_resize)
-	  needs_resize = 1;
-	break;
+        /* alternate between factorize+collapse, collapse only, and none */
+        if (loutput->factorize_enabled && loutput->pci_collapse_enabled) {
+          loutput->factorize_enabled = 0;
+          printf("factorizing disabled, PCI collapsing still enabled\n");
+        } else if (!loutput->factorize_enabled && loutput->pci_collapse_enabled) {
+          loutput->pci_collapse_enabled = 0;
+          printf("factorizing and PCI collapsing disabled\n");
+        } else {
+          loutput->factorize_enabled = 1;
+          loutput->pci_collapse_enabled = 1;
+          printf("factorizing and PCI collapsing enabled\n");
+        }
+        redraw = 1;
+        if (auto_resize)
+          needs_resize = 1;
+        break;
       case 'E':
-	lstopo_show_interactive_cli_options(loutput);
-	fflush(stdout);
-	break;
+        lstopo_show_interactive_cli_options(loutput);
+        fflush(stdout);
+        break;
       case 'h':
       case 'H':
       case '?':
-	lstopo_show_interactive_help();
-	break;
+        lstopo_show_interactive_help();
+        break;
       case 'q':
       case 'Q':
-	finish = 1;
-	break;
+        finish = 1;
+        break;
       }
       break;
     }
@@ -225,21 +227,21 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
       /* now that we computed the new drawing size, resize the window if needed */
       if (needs_resize) {
-	RECT rect;
-	x_delta = 0;
-	y_delta = 0;
-	rect.top = 0;
-	rect.left = 0;
-	rect.right = the_width;
-	rect.bottom = the_height;
-	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+        RECT rect;
+        x_delta = 0;
+        y_delta = 0;
+        rect.top = 0;
+        rect.left = 0;
+        rect.right = the_width;
+        rect.bottom = the_height;
+        AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	/* SetWindowPos() generates a WM_SIZE event, we don't want to scale the drawing there */
-	ignore_wm_size = 1;
-	SetWindowPos(hwnd, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
-	ignore_wm_size = 0;
+        /* SetWindowPos() generates a WM_SIZE event, we don't want to scale the drawing there */
+        ignore_wm_size = 1;
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+        ignore_wm_size = 0;
 
-	needs_resize = 0;
+        needs_resize = 0;
       }
 
       loutput->drawing = LSTOPO_DRAWING_DRAW;
@@ -349,13 +351,13 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       win_width = LOWORD(lparam);
       win_height = HIWORD(lparam);
       if (!ignore_wm_size) {
-	float wscale, hscale;
-	wscale = win_width / (float)the_width;
-	hscale = win_height / (float)the_height;
-	the_scale *= wscale > hscale ? hscale : wscale;
-	if (the_scale < 1.0f)
-	  the_scale = 1.0f;
-	redraw = 1;
+        float wscale, hscale;
+        wscale = win_width / (float)the_width;
+        hscale = win_height / (float)the_height;
+        the_scale *= wscale > hscale ? hscale : wscale;
+        if (the_scale < 1.0f)
+          the_scale = 1.0f;
+        redraw = 1;
       }
       break;
     }
@@ -492,7 +494,8 @@ output_windows (struct lstopo_output *loutput, const char *dummy __hwloc_attribu
 
     RegisterClass(&wndclass);
 
-    toplevel = CreateWindow("lstopo", loutput->title, WS_OVERLAPPEDWINDOW,
+    toplevel = CreateWindow("lstopo", loutput->title,
+                            WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
                             CW_USEDEFAULT, CW_USEDEFAULT,
                             10, 10, NULL, NULL, NULL, NULL);
     assert(!loutput->refreshing);
