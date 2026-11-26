@@ -670,7 +670,7 @@ hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *n
 }
 
 static void
-hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length __hwloc_attribute_unused)
+hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length)
 {
   hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   int res;
@@ -682,7 +682,8 @@ hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *
   }
   ndata->has_content = 1;
 
-  res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%s", buffer);
+  /* buffer may not be 0-terminated, only print length bytes */
+  res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%.*s", (int) length, buffer);
   hwloc__nolibxml_export_update_buffer(ndata, res);
 }
 
